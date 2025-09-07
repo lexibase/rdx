@@ -70,4 +70,16 @@ export const nextJsConfig = [
       "react/react-in-jsx-scope": "off",
     },
   },
+  {
+    settings: {
+      'import/resolver': {
+        typescript: {
+          project: [
+            '../../apps/web/tsconfig.json',
+            '../../packages/ui/tsconfig.json',
+          ],
+        },
+      },
+    },
+  },
 ];
