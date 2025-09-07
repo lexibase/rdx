@@ -6,6 +6,7 @@ import pluginReact from "eslint-plugin-react";
 import globals from "globals";
 import pluginNext from "@next/eslint-plugin-next";
 import { config as baseConfig } from "./base.js";
+import eslintPluginImport from 'eslint-plugin-import'
 
 /**
  * A custom ESLint configuration for libraries that use Next.js.
@@ -16,6 +17,8 @@ export const nextJsConfig = [
   ...baseConfig,
   js.configs.recommended,
   eslintConfigPrettier,
+  eslintPluginImport.flatConfigs.recommended,
+  eslintPluginImport.flatConfigs.typescript,
   ...tseslint.configs.recommended,
   {
     ...pluginReact.configs.flat.recommended,
@@ -33,6 +36,25 @@ export const nextJsConfig = [
     rules: {
       ...pluginNext.configs.recommended.rules,
       ...pluginNext.configs["core-web-vitals"].rules,
+      'react/jsx-curly-brace-presence': [
+        'warn',
+        { props: 'never', children: 'never' },
+      ],
+      'react/self-closing-comp': 'warn',
+      'import/order': [
+        'warn',
+        {
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            'parent',
+            'sibling',
+            'index',
+          ],
+          'newlines-between': 'always',
+        },
+      ],
     },
   },
   {

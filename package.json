@@ -1,5 +1,5 @@
 {
-  "name": "mdxRenderDocs",
+  "name": "mdxrenderdocs",
   "private": true,
   "scripts": {
     "build": "turbo run build",
