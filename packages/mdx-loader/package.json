@@ -1,0 +1,22 @@
+{
+  "name": "@mdxrenderdocs/mdx-loader",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "next-mdx-remote": "^5.0.0"
+  },
+  "peerDependencies": {
+    "react": "^19.1.1"
+  },
+  "devDependencies": {
+    "@mdxrenderdocs/eslint-config": "workspace:*",
+    "@mdxrenderdocs/typescript-config": "workspace:*",
+    "@types/node": "^22.15.3",
+    "@types/react": "19.1.0"
+  }
+}
