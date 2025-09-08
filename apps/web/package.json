@@ -4,16 +4,19 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack --port 3000",
-    "build": "next build",
+    "dev": "npm run generate:versions && next dev --turbopack --port 3000",
+    "build": "npm run generate:versions && next build",
     "start": "next start",
     "lint": "next lint",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "generate:versions": "tsx scripts/generate-versions.ts"
   },
   "dependencies": {
     "@mdxrenderdocs/ui": "workspace:*",
+    "gray-matter": "^4.0.3",
     "lucide-react": "^0.542.0",
     "next": "^15.5.0",
+    "next-mdx-remote": "^5.0.0",
     "next-themes": "^0.4.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
@@ -25,6 +28,7 @@
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1",
     "eslint": "^9.34.0",
+    "tsx": "^4.20.5",
     "typescript": "5.9.2"
   }
 }
