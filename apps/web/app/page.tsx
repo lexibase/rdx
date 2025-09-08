@@ -1,14 +1,10 @@
-import { Button } from '@mdxrenderdocs/ui/components/button'
-import { Separator } from '@mdxrenderdocs/ui/components/separator'
+import { Logo } from '@mdxrenderdocs/ui/components/logo'
 
 export default function Home() {
   return (
-    <div className="bg-black text-white h-screen p-2">
-      <Button variant="destructive" size="lg">
-        Senta aqui no colinho vai
-      </Button>
-      <Separator className="my-4" />
-      <Separator orientation="vertical" className="mx-4" />
-    </div>
+    <section className="w-full h-full flex flex-col items-center justify-center">
+      <Logo className="size-52 hover:scale-105 hover:rotate-1 transition-[scale, rotation] duration-1000" />
+      <span className="text-3xl font-mono uppercase">mdxRenderDocs</span>
+    </section>
   )
 }

@@ -16,6 +16,7 @@
     "lib": "@/lib",
     "contexts": "@/contexts",
     "utils": "@mdxrenderdocs/ui/lib/utils",
-    "ui": "@mdxrenderdocs/ui/components"
+    "ui": "@mdxrenderdocs/ui/components",
+    "providers": "@mdxrenderdocs/ui/providers"
   }
 }

@@ -16,7 +16,8 @@
     "hooks": "@mdxrenderdocs/ui/hooks",
     "contexts": "@mdxrenderdocs/ui/contexts",
     "lib": "@mdxrenderdocs/ui/lib",
-    "ui": "@mdxrenderdocs/ui/components"
+    "ui": "@mdxrenderdocs/ui/components",
+    "providers": "@mdxrenderdocs/ui/providers"
   },
   "iconLibrary": "lucide"
 }
