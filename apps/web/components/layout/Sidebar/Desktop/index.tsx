@@ -22,7 +22,7 @@ export function DesktopSidebar({
             <Button
               key={link.href}
               asChild
-              active={pathname.startsWith(link.href)}
+              // active={pathname.startsWith(link.href)}
               className="justify-start"
               size="sm"
               variant="ghost"

@@ -1,7 +1,9 @@
 'use client'
 
-import { Button } from '@mdxrenderdocs/ui/components/button'
+import { useEffect, useState, type JSX } from 'react'
 import { Archive, Bird, PackageOpen, Spline } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Button } from '@mdxrenderdocs/ui/components/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,8 +14,6 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@mdxrenderdocs/ui/components/dropdown-menu'
-import { useEffect, useState, type JSX } from 'react'
-import { useRouter } from 'next/navigation'
 
 import staticVersions from '../../versions.json'
 
@@ -76,7 +76,7 @@ export function DropdownVersion() {
     const match = pathname.match(/^\/docs\/([^\/]+)\/([^\/]+)$/)
     const currentFilename = match?.[2] || 'intro'
 
-    // setVersion(targetVersion)
+    setVersion(targetVersion)
     router.push(`/docs/${targetVersion}/${currentFilename}`)
   }
 
@@ -143,7 +143,6 @@ export function DropdownVersion() {
           </DropdownMenuShortcut>
         </Button>
       </DropdownMenuTrigger>
-
       <DropdownMenuContent className="w-56" align="start">
         <DropdownMenuGroup>
           <DropdownMenuItem
