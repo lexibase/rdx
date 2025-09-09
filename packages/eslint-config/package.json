@@ -1,5 +1,5 @@
 {
-  "name": "@mdxrenderdocs/eslint-config",
+  "name": "@rdx/eslint-config",
   "version": "1.0.0",
   "type": "module",
   "private": true,

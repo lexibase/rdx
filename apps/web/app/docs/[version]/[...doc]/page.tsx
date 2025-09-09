@@ -1,7 +1,7 @@
-import { Button } from '@mdxrenderdocs/ui/components/button'
+import { Button } from '@rdx/ui/components/button'
 import Link from 'next/link'
-import { mdxComponents } from '@mdxrenderdocs/ui/components/mdx-components'
-import { mdxLoader } from '@mdxrenderdocs/mdx-loader'
+import { mdxComponents } from '@rdx/ui/components/mdx-components'
+import { mdxLoader } from '@rdx/mdx-loader'
 import { notFound } from 'next/navigation'
 
 import { Main } from '@/components/Page/Main'
@@ -111,7 +111,7 @@ export default async function DocPage({
       </footer>
       <footer className="flex items-center justify-center w-full py-5">
         <p className="text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} <strong>mdxRenderDocs</strong>.
+          &copy; {new Date().getFullYear()} <strong>RenderDocX</strong>.
           Desenvolvido por{' '}
           <Button variant="link" size="link" asChild>
             <Link href="https://github.com/duhnunes">DuHNunes</Link>

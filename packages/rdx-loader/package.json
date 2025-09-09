@@ -1,5 +1,5 @@
 {
-  "name": "@mdxrenderdocs/mdx-loader",
+  "name": "@rdx/mdx-loader",
   "version": "1.0.0",
   "main": "./src/index.ts",
   "type": "module",
@@ -14,8 +14,9 @@
     "react": "^19.1.1"
   },
   "devDependencies": {
-    "@mdxrenderdocs/eslint-config": "workspace:*",
-    "@mdxrenderdocs/typescript-config": "workspace:*",
+    "@rdx/eslint-config": "workspace:*",
+    "@rdx/typescript-config": "workspace:*",
+    "@rdx/types": "workspace:*",
     "@types/node": "^22.15.3",
     "@types/react": "19.1.0"
   }

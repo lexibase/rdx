@@ -2,9 +2,9 @@
 
 import { Github } from 'lucide-react'
 import Link from 'next/link'
-import { Logo } from '@mdxrenderdocs/ui/components/logo'
-import { Button } from '@mdxrenderdocs/ui/components/button'
-import { Separator } from '@mdxrenderdocs/ui/components/separator'
+import { Logo } from '@rdx/ui/components/logo'
+import { Button } from '@rdx/ui/components/button'
+import { Separator } from '@rdx/ui/components/separator'
 
 import { DropdownVersion } from '@/components/Dropdown'
 

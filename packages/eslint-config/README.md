@@ -1,3 +1,3 @@
-# `@mdxrenderdocs/eslint-config`
+# `@rdx/eslint-config`
 
 Collection of internal eslint configurations.

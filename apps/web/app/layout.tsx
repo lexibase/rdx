@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Bebas_Neue, Space_Mono } from 'next/font/google'
-import '@mdxrenderdocs/ui/globals.css'
+import '@rdx/ui/globals.css'
 import { ThemeProvider } from 'next-themes'
 
 import { Header } from '@/components/layout/Header'
@@ -24,13 +24,13 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico',
   },
-  title: 'mdxRenderDocs',
+  title: 'RenderDocX',
   description:
     'Uma ferramenta pra ajudar a criar documentações com MDX e NextJS de forma simples e rápida.',
   authors: [{ name: 'DuH Nunes', url: 'https://github.com/duhnunes' }],
   keywords: [
     'duhnunes',
-    'mdxRenderDocs',
+    'RenderDocX',
     'documentation',
     'documento',
     'padrão',
@@ -41,22 +41,22 @@ export const metadata: Metadata = {
   ],
   robots: 'index, follow',
   openGraph: {
-    title: 'mdxRenderDocs',
+    title: 'RenderDocX',
     description:
       'Uma ferramenta pra ajudar a criar documentações com MDX e NextJS de forma simples e rápida.',
-    url: 'https://mdxrenderdocs.vercel.app',
+    url: 'https://RenderDocX.vercel.app',
     images: [
       {
         url: '/icons/favicon-96x96.png',
         width: 1200,
         height: 630,
-        alt: 'mdxRenderDocs Open Graph Image TEMPORARY',
+        alt: 'RenderDocX Open Graph Image TEMPORARY',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'mdxRenderDocs',
+    title: 'RenderDocX',
     description:
       'Uma ferramenta pra ajudar a criar documentações com MDX e NextJS de forma simples e rápida.',
     images: ['/icons/favicon-96x96.png'],

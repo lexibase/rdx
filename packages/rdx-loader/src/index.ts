@@ -1,8 +1,8 @@
-// packages/mdx-loader/src/index.ts
-
 import fs from 'fs'
 import path from 'node:path'
 import { compileMDX } from 'next-mdx-remote/rsc'
+
+import type { MDXLoader } from '@rdx/types'
 
 export async function mdxLoader({
   filename,
@@ -10,13 +10,7 @@ export async function mdxLoader({
   staticVersions,
   mdxComponents,
   docsRoot = 'app/docs',
-}: {
-  filename: string
-  version?: string
-  staticVersions: string[]
-  mdxComponents: Record<string, React.ComponentType<any>>
-  docsRoot?: string
-}) {
+}: MDXLoader) {
   const defaultVersion = staticVersions[0]
   if (!defaultVersion) {
     throw new Error('No static versions provided')

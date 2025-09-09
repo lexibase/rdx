@@ -1,10 +1,10 @@
 {
-  "extends": "@mdxrenderdocs/typescript-config/nextjs.json",
+  "extends": "@rdx/typescript-config/nextjs.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "@mdxrenderdocs/ui/*": ["../../packages/ui/src/*"]
+      "@rdx/ui/*": ["../../packages/ui/src/*"]
     },
     "plugins": [
       {

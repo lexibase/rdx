@@ -1,1 +1,1 @@
-export { default } from '@mdxrenderdocs/ui/postcss.config'
+export { default } from '@rdx/ui/postcss.config'
