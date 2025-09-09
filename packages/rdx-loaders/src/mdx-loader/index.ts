@@ -1,7 +1,6 @@
 import fs from 'fs'
 import path from 'node:path'
 import { compileMDX } from 'next-mdx-remote/rsc'
-
 import type { MDXLoader } from '@rdx/types'
 
 export async function mdxLoader({

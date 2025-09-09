@@ -1,12 +1,12 @@
 {
-  "name": "@rdx/mdx-loader",
+  "name": "@rdx/rdx-loaders",
   "version": "1.0.0",
   "main": "./src/index.ts",
-  "type": "module",
   "exports": {
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@rdx/types": "workspace:*",
     "gray-matter": "^4.0.3",
     "next-mdx-remote": "^5.0.0"
   },
@@ -16,7 +16,6 @@
   "devDependencies": {
     "@rdx/eslint-config": "workspace:*",
     "@rdx/typescript-config": "workspace:*",
-    "@rdx/types": "workspace:*",
     "@types/node": "^22.15.3",
     "@types/react": "19.1.0"
   }

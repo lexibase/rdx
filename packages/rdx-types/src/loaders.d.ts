@@ -1,5 +1,3 @@
-import React from 'react'
-
 export interface MDXLoader {
   filename: string
   version?: string
