@@ -1,1 +1,1 @@
-export { MDXLoader } from './loaders'
+export { MDXLoader, DocLink, DocCategory } from './loaders'

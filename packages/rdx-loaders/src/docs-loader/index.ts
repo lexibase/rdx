@@ -2,17 +2,7 @@ import fs from 'fs'
 import path from 'node:path'
 
 import matter from 'gray-matter'
-
-export type DocLink = {
-  href: string
-  label: string
-  description?: string
-}
-
-export type DocCategory = {
-  title: string
-  links: DocLink[]
-}
+import type { DocCategory, DocLink } from '@rdx/types'
 
 export function docsIndexer(version?: string): DocCategory[] {
   const resolvedVersion = version || 'canary'
