@@ -14,7 +14,7 @@ export type DocCategory = {
   links: DocLink[]
 }
 
-export function getAllDocs(version?: string): DocCategory[] {
+export function docsIndexer(version?: string): DocCategory[] {
   const resolvedVersion = version || 'canary'
 
   const basePath =
