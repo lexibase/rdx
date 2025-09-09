@@ -3,7 +3,7 @@
 import { useEffect, useState, type JSX } from 'react'
 import { Archive, Bird, PackageOpen, Spline } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@mdxrenderdocs/ui/components/button'
+import { Button } from '@rdx/ui/components/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from '@mdxrenderdocs/ui/components/dropdown-menu'
+} from '@rdx/ui/components/dropdown-menu'
 
 import staticVersions from '../../versions.json'
 

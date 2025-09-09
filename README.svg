@@ -26,8 +26,8 @@
           font-size:3.5rem;
         }
         .header svg {
-          width:3.5rem;
-          height:3.5rem;
+          width:4.5rem;
+          height:4.5rem;
           margin-top:2rem;
         }
 
@@ -85,7 +85,7 @@
           77 11 71 -101 74 1233 l2 1195 -24 24 c-32 32 -76 32 -112 1z"/>
           </g>
         </svg>
-          <h1>mdxRenderDocs</h1>
+          <h1>RenderDocX</h1>
         </div>
       </div>
     </div>

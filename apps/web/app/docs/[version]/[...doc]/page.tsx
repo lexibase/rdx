@@ -1,12 +1,13 @@
-import { Button } from '@mdxrenderdocs/ui/components/button'
+import { Button } from '@rdx/ui/components/button'
 import Link from 'next/link'
+import { mdxComponents } from '@rdx/ui/components/mdx-components'
+import { mdxLoader } from '@rdx/mdx-loader'
+import { notFound } from 'next/navigation'
 
 import { Main } from '@/components/Page/Main'
+import { getAllDocs } from '@/lib/docs'
 
 import staticVersions from '../../../../versions.json'
-
-import { getAllDocs } from '@/lib/docs'
-import { getDocContent } from '@/lib/mdx'
 
 export default async function DocPage({
   params,
@@ -15,12 +16,22 @@ export default async function DocPage({
 }) {
   const { version, doc } = await params
   const filename = doc.at(-1)
-  if (!filename) {
-    throw new Error('Filename is undefined')
-  }
+  if (!filename) return notFound()
+
   const slug = `/docs/${version}/${filename}`
 
-  const { content } = await getDocContent(filename, version)
+  let content
+  try {
+    const result = await mdxLoader({
+      filename,
+      version,
+      staticVersions,
+      mdxComponents,
+    })
+    content = result.content
+  } catch {
+    return notFound()
+  }
 
   const sidebarLinks = getAllDocs(version)
   const flatLinks = sidebarLinks.flatMap((category) => category.links)
@@ -54,7 +65,6 @@ export default async function DocPage({
               </Link>
             </div>
           )}
-          1
           {isCanary && (
             <div className="bg-amber-100 border border-amber-700 text-amber-800 px-4 py-2 rounded-sm text-sm flex items-center gap-2 absolute -top-6 right-0">
               Esta é uma versão ainda não lançada da documentação.
@@ -101,7 +111,7 @@ export default async function DocPage({
       </footer>
       <footer className="flex items-center justify-center w-full py-5">
         <p className="text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} <strong>mdxRenderDocs</strong>.
+          &copy; {new Date().getFullYear()} <strong>RenderDocX</strong>.
           Desenvolvido por{' '}
           <Button variant="link" size="link" asChild>
             <Link href="https://github.com/duhnunes">DuHNunes</Link>

@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@mdxrenderdocs/ui'],
+  transpilePackages: ['@rdx/ui'],
 }
 
 export default nextConfig

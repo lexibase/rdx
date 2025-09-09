@@ -1,0 +1,14 @@
+{
+  "extends": "@rdx/typescript-config/base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@rdx/mdx-loader/*": ["./src/*"],
+    }
+  },
+  "include": ["."],
+  "exclude": ["node_modules", "dist"]
+}

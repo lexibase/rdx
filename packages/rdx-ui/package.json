@@ -1,5 +1,5 @@
 {
-  "name": "@mdxrenderdocs/ui",
+  "name": "@rdx/ui",
   "version": "1.0.0",
   "type": "module",
   "private": true,
@@ -22,8 +22,8 @@
     "tw-animate-css": "^1.3.8"
   },
   "devDependencies": {
-    "@mdxrenderdocs/eslint-config": "workspace:*",
-    "@mdxrenderdocs/typescript-config": "workspace:*",
+    "@rdx/eslint-config": "workspace:*",
+    "@rdx/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.1.13",
     "@types/node": "^22.15.3",
     "@types/react": "19.1.0",

@@ -1,4 +1,4 @@
-import { Separator } from '@mdxrenderdocs/ui/components/separator'
+import { Separator } from '@rdx/ui/components/separator'
 
 export const mdxComponents: Record<string, React.ComponentType<any>> = {
   h1: (props) => <h1 className="text-4xl font-bold my-6" {...props} />,

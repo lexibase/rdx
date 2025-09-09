@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { SidebarOpen } from 'lucide-react'
-import { Button } from '@mdxrenderdocs/ui/components/button'
+import { Button } from '@rdx/ui/components/button'
 import { usePathname } from 'next/navigation'
 
 import { DesktopSidebar } from './Desktop'

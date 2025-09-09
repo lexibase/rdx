@@ -1,12 +1,12 @@
 {
-  "extends": "@mdxrenderdocs/typescript-config/react-library.json",
+  "extends": "@rdx/typescript-config/react-library.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
 
     "baseUrl": ".",
     "paths": {
-      "@mdxrenderdocs/ui/*": ["./src/*"]
+      "@rdx/ui/*": ["./src/*"]
     }
   },
   "include": ["."],
