@@ -1,3 +1,3 @@
-# `@rdx/rdx-loader`
+# `@rdx/rdx-loaders`
 
 Content loaders for RenderDocX packages.
