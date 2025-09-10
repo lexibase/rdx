@@ -3,7 +3,7 @@
 ## 2.1.0
 
 - Extract DocLink and DocCategory to shared types package
-- Extract docs-loader into standalone package
+- Extract docs-indexer into standalone package
 - Extract mdx-loader into standalone package
 
 ## 2.0.0
