@@ -24,13 +24,13 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico',
   },
-  title: 'RenderDocX',
+  title: 'RDX',
   description:
     'Uma ferramenta pra ajudar a criar documentações com MDX e NextJS de forma simples e rápida.',
   authors: [{ name: 'DuH Nunes', url: 'https://github.com/duhnunes' }],
   keywords: [
     'duhnunes',
-    'RenderDocX',
+    'RDX',
     'documentation',
     'documento',
     'padrão',
@@ -41,22 +41,22 @@ export const metadata: Metadata = {
   ],
   robots: 'index, follow',
   openGraph: {
-    title: 'RenderDocX',
+    title: 'RDX',
     description:
       'Uma ferramenta pra ajudar a criar documentações com MDX e NextJS de forma simples e rápida.',
-    url: 'https://RenderDocX.vercel.app',
+    url: 'https://rdx-tool.vercel.app',
     images: [
       {
         url: '/icons/favicon-96x96.png',
         width: 1200,
         height: 630,
-        alt: 'RenderDocX Open Graph Image TEMPORARY',
+        alt: 'RDX Open Graph Image TEMPORARY',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RenderDocX',
+    title: 'RDX',
     description:
       'Uma ferramenta pra ajudar a criar documentações com MDX e NextJS de forma simples e rápida.',
     images: ['/icons/favicon-96x96.png'],
@@ -80,7 +80,7 @@ export default function RootLayout({
         />
         <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml" />
         <link href="/favicon.ico" rel="shortcut icon" />
-        <meta content="mdxRenderDocs" name="apple-mobile-web-app-title" />
+        <meta content="RDX" name="apple-mobile-web-app-title" />
         <link href="/site.webmanifest" rel="manifest" />
 
         {/* MOBILE BAR COLOR */}

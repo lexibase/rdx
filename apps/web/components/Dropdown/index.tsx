@@ -1,7 +1,14 @@
 'use client'
 
 import { useEffect, useState, type JSX } from 'react'
-import { Archive, Bird, PackageOpen, Spline } from 'lucide-react'
+import {
+  Archive,
+  Bird,
+  ExternalLink,
+  Github,
+  PackageOpen,
+  Spline,
+} from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@rdx/ui/components/button'
 import {
@@ -14,10 +21,11 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@rdx/ui/components/dropdown-menu'
-
-import staticVersions from '../../versions.json'
+import Link from 'next/link'
 
 import { useVersion } from '@/hooks/use-version'
+
+import staticVersions from '../../versions.json'
 
 const iconMap = {
   bird: Bird,
@@ -175,7 +183,7 @@ export function DropdownVersion() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuLabel className="text-center py-px">
+          <DropdownMenuLabel className="text-center py-px cursor-default">
             Archived
           </DropdownMenuLabel>
           {versions.archived.map(({ label }) => (
@@ -190,6 +198,26 @@ export function DropdownVersion() {
               </DropdownMenuShortcut>
             </DropdownMenuItem>
           ))}
+
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="bg-red-900/20 text-primary/60 border-1 border-red-800/40 capitalize hover:!bg-red-900/30"
+            asChild
+          >
+            <Link
+              href="https://github.com/duhnunes/mdxRenderDocs"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Version 1.1.1
+              <DropdownMenuShortcut>
+                <div className="flex items-center gap-2">
+                  <Github className="size-4" />
+                  <ExternalLink className="size-4" />
+                </div>
+              </DropdownMenuShortcut>
+            </Link>
+          </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

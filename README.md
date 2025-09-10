@@ -16,6 +16,6 @@ Crafted with **Next.js**, **TailwindCSS**, and **shadcn/ui**, it delivers a slee
 
 ## License
 
-mdxRenderDocs is [MIT licensed](./LICENSE)
+RDX is [MIT licensed](./LICENSE)
 
 All content inside the `/docs` folder or `.mdx` files is covered under [Creative Commons licenses](./LICENSE-docs)
