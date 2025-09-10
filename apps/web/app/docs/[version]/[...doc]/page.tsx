@@ -1,8 +1,8 @@
 import { Button } from '@rdx/ui/components/button'
 import Link from 'next/link'
 import { mdxComponents } from '@rdx/ui/components/mdx-components'
-import { docsIndexer, mdxLoader } from '@rdx/rdx-loaders'
 import { notFound } from 'next/navigation'
+import { docsIndexer, mdxLoader } from '@rdx/rdx-loaders'
 
 import { Main } from '@/components/Page/Main'
 

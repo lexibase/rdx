@@ -36,7 +36,13 @@ export function docsIndexer(version?: string): DocCategory[] {
   const entries = fs.readdirSync(basePath, { withFileTypes: true })
 
   entries.forEach((entry) => {
-    if (!entry.isDirectory()) return
+    if (!entry.isDirectory()) {
+      if (entry.name.endsWith('.mdx')) {
+        throw new Error(
+          `File '${entry.name}' detected inside "${basePath}".\nPlease move it into a folder`
+        )
+      }
+    }
 
     const categoryPath = path.join(basePath, entry.name)
     const hasMdxFile = fs
