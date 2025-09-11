@@ -16,4 +16,3 @@ export type DocCategory = {
   title: string
   links: DocLink[]
 }
-
