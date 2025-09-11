@@ -5,8 +5,7 @@ import { notFound } from 'next/navigation'
 import { docsIndexer, mdxLoader } from '@rdx/rdx-loaders'
 
 import { Main } from '@/components/Page/Main'
-
-import staticVersions from '../../../../versions.json'
+import staticVersions from '@/versions.json'
 
 export default async function DocPage({
   params,

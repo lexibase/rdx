@@ -89,6 +89,7 @@ export function docsIndexer(version?: string): DocCategory[] {
         }
       })
       .sort((a, b) => a.position - b.position)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       .map(({ position: _position, ...link }) => link)
 
     categories.push({
@@ -98,7 +99,10 @@ export function docsIndexer(version?: string): DocCategory[] {
     })
   })
 
-  return categories
-    .sort((a, b) => a.position - b.position)
-    .map(({ position: _position, ...category }) => category)
+  return (
+    categories
+      .sort((a, b) => a.position - b.position)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .map(({ position: _position, ...category }) => category)
+  )
 }

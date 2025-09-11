@@ -24,8 +24,7 @@ import {
 import Link from 'next/link'
 
 import { useVersion } from '@/hooks/use-version'
-
-import staticVersions from '../../versions.json'
+import staticVersions from '@/versions.json'
 
 const iconMap = {
   bird: Bird,
@@ -81,7 +80,7 @@ export function DropdownVersion() {
     const targetVersion =
       label === 'canary' ? 'canary' : label.replace('version-', '')
     const pathname = window.location.pathname
-    const match = pathname.match(/^\/docs\/([^\/]+)\/([^\/]+)$/)
+    const match = pathname.match(/^\/docs\/([^/]+)\/([^/]+)$/)
     const currentFilename = match?.[2] || 'intro'
 
     setVersion(targetVersion)

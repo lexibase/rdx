@@ -4,10 +4,10 @@ import { useState } from 'react'
 import { SidebarOpen } from 'lucide-react'
 import { Button } from '@rdx/ui/components/button'
 import { usePathname } from 'next/navigation'
+import type { DocCategory } from '@rdx/types/loaders'
 
 import { DesktopSidebar } from './Desktop'
-
-import type { DocCategory } from '@/lib/docs'
+import { MobileSidebar } from './Mobile'
 
 export const Sidebar = ({ categories }: { categories: DocCategory[] }) => {
   const pathname = usePathname()
@@ -25,13 +25,13 @@ export const Sidebar = ({ categories }: { categories: DocCategory[] }) => {
         <div className="h-full hidden md:block">
           <DesktopSidebar pathname={pathname} categories={categories} />
         </div>
-        <div className="w-full md:hidden block relative">
-          {/* <MobileSidebar
+        <div className="w-full md:hidden block relative hidden">
+          <MobileSidebar
             pathname={pathname}
             categories={categories}
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
-          /> */}
+          />
         </div>
       </aside>
     </>
