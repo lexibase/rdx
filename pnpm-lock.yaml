@@ -136,6 +136,9 @@ importers:
       '@rdx/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@rdx/types':
+        specifier: workspace:*
+        version: link:../rdx-types
       '@rdx/typescript-config':
         specifier: workspace:*
         version: link:../ts-config
@@ -145,7 +148,6 @@ importers:
       '@types/react':
         specifier: 19.1.0
         version: 19.1.0
-
   packages/rdx-types:
     dependencies:
       react:
@@ -158,7 +160,6 @@ importers:
       '@types/react':
         specifier: 19.1.0
         version: 19.1.0
-
   packages/rdx-ui:
     dependencies:
       '@radix-ui/react-dropdown-menu':
