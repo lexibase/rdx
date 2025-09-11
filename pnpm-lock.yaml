@@ -23,6 +23,9 @@ importers:
       '@rdx/rdx-loaders':
         specifier: workspace:*
         version: link:../../packages/rdx-loaders
+      '@rdx/rdx-versioning':
+        specifier: workspace:*
+        version: link:../../packages/rdx-versioning
       '@rdx/ui':
         specifier: workspace:*
         version: link:../../packages/rdx-ui
@@ -136,9 +139,6 @@ importers:
       '@rdx/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@rdx/types':
-        specifier: workspace:*
-        version: link:../rdx-types
       '@rdx/typescript-config':
         specifier: workspace:*
         version: link:../ts-config
@@ -148,6 +148,7 @@ importers:
       '@types/react':
         specifier: 19.1.0
         version: 19.1.0
+
   packages/rdx-types:
     dependencies:
       react:
@@ -160,6 +161,7 @@ importers:
       '@types/react':
         specifier: 19.1.0
         version: 19.1.0
+
   packages/rdx-ui:
     dependencies:
       '@radix-ui/react-dropdown-menu':
@@ -226,6 +228,18 @@ importers:
       typescript:
         specifier: 5.9.2
         version: 5.9.2
+
+  packages/rdx-versioning:
+    devDependencies:
+      '@rdx/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@rdx/typescript-config':
+        specifier: workspace:*
+        version: link:../ts-config
+      '@types/node':
+        specifier: ^22.15.3
+        version: 22.15.3
 
   packages/ts-config: {}
 

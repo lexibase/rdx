@@ -2,8 +2,9 @@
 
 import { createContext, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { getParsedVersions } from '@rdx/rdx-versioning'
 
-import staticVersions from '@/versions.json'
+import versionsRaw from '../versions.json'
 
 type VersionContextType = {
   version: string
@@ -15,21 +16,21 @@ export const VersionContext = createContext<VersionContextType | undefined>(
 )
 
 export function VersionProvider({ children }: { children: React.ReactNode }) {
-  const defaultVersion = staticVersions[0]?.replace('version-', '') || 'canary'
+  const defaultVersion =
+    getParsedVersions(versionsRaw).active[0]?.label || 'canary'
   const [version, setVersion] = useState(defaultVersion)
   const pathname = usePathname()
 
   useEffect(() => {
-    const saved = localStorage.getItem('mdxRenderDocs-selectedVersion')
+    const saved = localStorage.getItem('rdx-version')
     if (saved) {
-      const clean =
-        saved === 'canary' ? 'canary' : saved.replace('version-', '')
+      const clean = saved === 'canary' ? 'canary' : saved
       setVersion(clean)
     }
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('mdxRenderDocs-selectedVersion', version)
+    localStorage.setItem('rdx-version', version)
   }, [version])
 
   useEffect(() => {

@@ -22,9 +22,11 @@ import {
   DropdownMenuTrigger,
 } from '@rdx/ui/components/dropdown-menu'
 import Link from 'next/link'
+import { getParsedVersions } from '@rdx/rdx-versioning'
 
 import { useVersion } from '@/hooks/use-version'
-import staticVersions from '@/versions.json'
+
+import versionsRaw from '../../versions.json'
 
 const iconMap = {
   bird: Bird,
@@ -32,53 +34,20 @@ const iconMap = {
   archive: Archive,
 }
 
-type VersionMeta = {
-  label: string
-  icon: keyof typeof iconMap
-}
-
 export function DropdownVersion() {
   const { version, setVersion } = useVersion()
   const router = useRouter()
 
-  const [versions, setVersions] = useState<{
-    canary: VersionMeta
-    active: VersionMeta[]
-    archived: VersionMeta[]
-  } | null>(null)
+  const [versions, setVersions] = useState<ReturnType<
+    typeof getParsedVersions
+  > | null>(null)
 
   useEffect(() => {
-    const inferIcon = (label: string): keyof typeof iconMap => {
-      const version = label.replace('version-', '')
-      return version <= '1.0.0' ? 'archive' : 'packageOpen'
-    }
-
-    const parsedVersions = (staticVersions as string[]).map(
-      (label): VersionMeta => ({
-        label,
-        icon: inferIcon(label),
-      })
-    )
-
-    const current: VersionMeta = parsedVersions[0] ?? {
-      label: 'unknown',
-      icon: 'archive',
-    }
-    const rest = parsedVersions.slice(1)
-
-    const active = rest.filter((v) => v.icon === 'packageOpen')
-    const archived = rest.filter((v) => v.icon === 'archive')
-
-    setVersions({
-      canary: { label: 'canary', icon: 'bird' },
-      active: [current, ...active],
-      archived,
-    })
+    setVersions(getParsedVersions(versionsRaw))
   }, [])
 
   function handleSelectVersion(label: string) {
-    const targetVersion =
-      label === 'canary' ? 'canary' : label.replace('version-', '')
+    const targetVersion = label === 'canary' ? 'canary' : label
     const pathname = window.location.pathname
     const match = pathname.match(/^\/docs\/([^/]+)\/([^/]+)$/)
     const currentFilename = match?.[2] || 'intro'
@@ -90,18 +59,14 @@ export function DropdownVersion() {
   const getIconByLabel = (label: string): JSX.Element | null => {
     if (!versions || !label) return null
 
-    const normalizedLabel = label.toLowerCase().replace('version-', '')
-
     const all = [versions.canary, ...versions.active, ...versions.archived]
-
-    const found = all.find((v) => {
-      const vNormalized = v.label.toLowerCase().replace('version-', '')
-      return vNormalized === normalizedLabel
-    })
+    const found = all.find((v) => v.label === label)
 
     const Icon = found?.icon ? iconMap[found.icon] : null
     return Icon ? <Icon className="size-4" /> : null
   }
+
+  const isCurrentVersion = (label: string) => label === version
 
   if (!versions) {
     return (
@@ -117,9 +82,6 @@ export function DropdownVersion() {
     )
   }
 
-  const isCurrentVersion = (label: string) =>
-    label.replace('version-', '') === version
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -128,20 +90,14 @@ export function DropdownVersion() {
           size="sm"
           className="min-w-[134px] capitalize"
         >
-          {version === 'canary'
-            ? 'canary'
-            : `Version ${version?.replace('version-', '')}`}
+          {version === 'canary' ? 'canary' : `Version ${version}`}
           <DropdownMenuShortcut
             className={
               version === 'canary'
                 ? 'text-blue-500'
-                : versions?.archived.some(
-                      (v) => v.label.replace('version-', '') === version
-                    )
+                : versions?.archived.some((v) => v.label === version)
                   ? 'text-red-500'
-                  : versions?.active.some(
-                        (v) => v.label.replace('version-', '') === version
-                      )
+                  : versions?.active.some((v) => v.label === version)
                     ? 'text-primary'
                     : ''
             }
@@ -173,7 +129,7 @@ export function DropdownVersion() {
               className={`capitalize ${isCurrentVersion(label) ? 'bg-accent/30 border-1 border-border' : ''}`}
               onClick={() => handleSelectVersion(label)}
             >
-              {label.replace('version-', 'version ')}
+              Version {label}
               <DropdownMenuShortcut>
                 {getIconByLabel(label)}
               </DropdownMenuShortcut>
@@ -191,7 +147,7 @@ export function DropdownVersion() {
               className={`text-primary/60 capitalize ${isCurrentVersion(label) ? 'bg-red-800/5 border-1 border-red-600/20' : ''}`}
               onClick={() => handleSelectVersion(label)}
             >
-              {label.replace('version-', 'version ')}
+              {label}
               <DropdownMenuShortcut>
                 {getIconByLabel(label)}
               </DropdownMenuShortcut>
