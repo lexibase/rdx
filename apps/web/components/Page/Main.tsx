@@ -1,9 +1,3 @@
-import { ReactNode } from 'react'
-
-interface MainProps {
-  children: ReactNode
-}
-
-export const Main = ({ children }: MainProps) => {
+export const Main = ({ children }: { children: React.ReactNode }) => {
   return <main className="h-full w-full flex-1 max-w-[960px]">{children}</main>
 }

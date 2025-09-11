@@ -1,6 +1,6 @@
-import { Sidebar } from '@/components/layout/Sidebar'
+import { docsIndexer } from '@rdx/rdx-loaders'
 
-import { getAllDocs } from '@/lib/docs'
+import { Sidebar } from '@/components/layout/Sidebar'
 
 export default async function DocsLayout({
   children,
@@ -11,7 +11,7 @@ export default async function DocsLayout({
 }) {
   const { version } = await params
   const resolvedParams = version || 'canary'
-  const categories = getAllDocs(resolvedParams)
+  const categories = docsIndexer(resolvedParams)
 
   return (
     <div className="flex flex-1 overflow-hidden relative">

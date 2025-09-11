@@ -1,6 +1,5 @@
+import { docsIndexer } from '@rdx/rdx-loaders'
 import { redirect } from 'next/navigation'
-
-import { getAllDocs } from '@/lib/docs'
 
 export default async function VersionRoot({
   params,
@@ -8,7 +7,7 @@ export default async function VersionRoot({
   params: Promise<{ version: string }>
 }) {
   const { version } = await params
-  const categories = getAllDocs(version)
+  const categories = docsIndexer(version)
   const firstHref = categories.flatMap((c) => c.links)[0]?.href
 
   if (firstHref) {

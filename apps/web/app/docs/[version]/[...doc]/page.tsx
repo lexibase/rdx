@@ -1,13 +1,11 @@
 import { Button } from '@rdx/ui/components/button'
 import Link from 'next/link'
 import { mdxComponents } from '@rdx/ui/components/mdx-components'
-import { mdxLoader } from '@rdx/mdx-loader'
 import { notFound } from 'next/navigation'
+import { docsIndexer, mdxLoader } from '@rdx/rdx-loaders'
 
 import { Main } from '@/components/Page/Main'
-import { getAllDocs } from '@/lib/docs'
-
-import staticVersions from '../../../../versions.json'
+import staticVersions from '@/versions.json'
 
 export default async function DocPage({
   params,
@@ -33,7 +31,7 @@ export default async function DocPage({
     return notFound()
   }
 
-  const sidebarLinks = getAllDocs(version)
+  const sidebarLinks = docsIndexer(version)
   const flatLinks = sidebarLinks.flatMap((category) => category.links)
   const currentIndex = flatLinks.findIndex((link) => link.href === slug)
 

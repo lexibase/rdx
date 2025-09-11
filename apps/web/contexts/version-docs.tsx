@@ -3,7 +3,7 @@
 import { createContext, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 
-import staticVersions from '../versions.json'
+import staticVersions from '@/versions.json'
 
 type VersionContextType = {
   version: string
@@ -33,7 +33,7 @@ export function VersionProvider({ children }: { children: React.ReactNode }) {
   }, [version])
 
   useEffect(() => {
-    const match = pathname.match(/^\/docs\/([^\/]+)\/?.*$/)
+    const match = pathname.match(/^\/docs\/([^/]+)\/?.*$/)
     const versionFromUrl = match?.[1]
     if (versionFromUrl && versionFromUrl !== version) {
       setVersion(versionFromUrl)

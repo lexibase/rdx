@@ -1,8 +1,7 @@
+import type { DocCategory } from '@rdx/types/loaders'
 import { Button } from '@rdx/ui/components/button'
 import { Separator } from '@rdx/ui/components/separator'
 import Link from 'next/link'
-
-import type { DocCategory } from '@/lib/docs'
 
 export function DesktopSidebar({
   pathname,

@@ -7,7 +7,6 @@ import { Button } from '@rdx/ui/components/button'
 import { Separator } from '@rdx/ui/components/separator'
 
 import { DropdownVersion } from '@/components/Dropdown'
-
 import { useVersion } from '@/hooks/use-version'
 
 export function Header() {
@@ -17,7 +16,7 @@ export function Header() {
   return (
     <header className="w-full flex items-center justify-between px-6 py-2 border-b border-border">
       <Button size="icon" variant="ghost" asChild>
-        <Link href="/">
+        <Link href="/" className="cursor-default">
           <Logo className="size-5" />
         </Link>
       </Button>
@@ -29,7 +28,7 @@ export function Header() {
         {/* <ModeToggle /> */}
         <Separator orientation="vertical" />
         <Button asChild size="icon" title="GitHub" variant="ghost">
-          <a
+          <Link
             className="cursor-default"
             href="https://github.com/duhnunes"
             rel="noopener noreferrer"
@@ -37,7 +36,7 @@ export function Header() {
           >
             <Github className="h-[1.2rem] w-[1.2rem]" />
             <span className="sr-only">GitHub</span>
-          </a>
+          </Link>
         </Button>
       </div>
     </header>

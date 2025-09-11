@@ -2,19 +2,9 @@ import fs from 'fs'
 import path from 'node:path'
 
 import matter from 'gray-matter'
+import type { DocCategory, DocLink } from '@rdx/types'
 
-export type DocLink = {
-  href: string
-  label: string
-  description?: string
-}
-
-export type DocCategory = {
-  title: string
-  links: DocLink[]
-}
-
-export function getAllDocs(version?: string): DocCategory[] {
+export function docsIndexer(version?: string): DocCategory[] {
   const resolvedVersion = version || 'canary'
 
   const basePath =
@@ -46,7 +36,13 @@ export function getAllDocs(version?: string): DocCategory[] {
   const entries = fs.readdirSync(basePath, { withFileTypes: true })
 
   entries.forEach((entry) => {
-    if (!entry.isDirectory()) return
+    if (!entry.isDirectory()) {
+      if (entry.name.endsWith('.mdx')) {
+        throw new Error(
+          `File '${entry.name}' detected inside "${basePath}".\nPlease move it into a folder`
+        )
+      }
+    }
 
     const categoryPath = path.join(basePath, entry.name)
     const hasMdxFile = fs
@@ -93,6 +89,7 @@ export function getAllDocs(version?: string): DocCategory[] {
         }
       })
       .sort((a, b) => a.position - b.position)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       .map(({ position: _position, ...link }) => link)
 
     categories.push({
@@ -102,7 +99,10 @@ export function getAllDocs(version?: string): DocCategory[] {
     })
   })
 
-  return categories
-    .sort((a, b) => a.position - b.position)
-    .map(({ position: _position, ...category }) => category)
+  return (
+    categories
+      .sort((a, b) => a.position - b.position)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .map(({ position: _position, ...category }) => category)
+  )
 }
