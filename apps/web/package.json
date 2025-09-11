@@ -4,16 +4,17 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "npm run generate:versions && next dev --turbopack --port 3000",
-    "build": "npm run generate:versions && next build",
+    "dev": "npm run prepare && next dev --turbopack --port 3000",
+    "build": "npm run prepare && next build",
     "start": "next start",
     "lint": "next lint",
     "check-types": "tsc --noEmit",
-    "generate:versions": "tsx scripts/generate-versions.ts"
+    "prepare": "npm exec rdx-generate-versions"
   },
   "dependencies": {
     "@rdx/ui": "workspace:*",
     "@rdx/rdx-loaders": "workspace:*",
+    "@rdx/rdx-versioning": "workspace:*",
     "gray-matter": "^4.0.3",
     "lucide-react": "^0.542.0",
     "next": "^15.5.0",

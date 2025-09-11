@@ -1,3 +1,3 @@
 # `@rdx/types`
 
-Common types for RenderDocX packages.
+Common types for RDX packages.

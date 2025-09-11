@@ -1,5 +1,3 @@
-import versionsRaw from '@/versions.json'
-
 export type VersionMeta = {
   label: string
   icon: 'bird' | 'packageOpen' | 'archive'
@@ -9,12 +7,12 @@ function inferIcon(label: string): VersionMeta['icon'] {
   return label <= '1.0.0' ? 'archive' : 'packageOpen'
 }
 
-export function getParsedVersions(): {
+export function getParsedVersions(versionsRaw: string[]): {
   canary: VersionMeta
   active: VersionMeta[]
   archived: VersionMeta[]
 } {
-  const parsed = (versionsRaw as string[]).map(
+  const parsed = versionsRaw.map(
     (label): VersionMeta => ({
       label,
       icon: inferIcon(label),

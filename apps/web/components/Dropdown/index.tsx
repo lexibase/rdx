@@ -22,9 +22,11 @@ import {
   DropdownMenuTrigger,
 } from '@rdx/ui/components/dropdown-menu'
 import Link from 'next/link'
+import { getParsedVersions } from '@rdx/rdx-versioning'
 
 import { useVersion } from '@/hooks/use-version'
-import { getParsedVersions } from '@/lib/versioning'
+
+import versionsRaw from '../../versions.json'
 
 const iconMap = {
   bird: Bird,
@@ -41,7 +43,7 @@ export function DropdownVersion() {
   > | null>(null)
 
   useEffect(() => {
-    setVersions(getParsedVersions)
+    setVersions(getParsedVersions(versionsRaw))
   }, [])
 
   function handleSelectVersion(label: string) {

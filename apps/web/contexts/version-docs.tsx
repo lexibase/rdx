@@ -2,8 +2,9 @@
 
 import { createContext, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { getParsedVersions } from '@rdx/rdx-versioning'
 
-import { getParsedVersions } from '@/lib/versioning'
+import versionsRaw from '../versions.json'
 
 type VersionContextType = {
   version: string
@@ -15,7 +16,8 @@ export const VersionContext = createContext<VersionContextType | undefined>(
 )
 
 export function VersionProvider({ children }: { children: React.ReactNode }) {
-  const defaultVersion = getParsedVersions().active[0]?.label || 'canary'
+  const defaultVersion =
+    getParsedVersions(versionsRaw).active[0]?.label || 'canary'
   const [version, setVersion] = useState(defaultVersion)
   const pathname = usePathname()
 

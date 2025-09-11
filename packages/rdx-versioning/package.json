@@ -1,0 +1,17 @@
+{
+  "name": "@rdx/rdx-versioning",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./generate-versions.ts": "./src/script/generate-versions.ts"
+  },
+  "bin": {
+    "rdx-generate-versions": "./bin/generate-versions.ts"
+  },
+  "devDependencies": {
+    "@rdx/eslint-config": "workspace:*",
+    "@rdx/typescript-config": "workspace:*",
+    "@types/node": "^22.15.3"
+  }
+}

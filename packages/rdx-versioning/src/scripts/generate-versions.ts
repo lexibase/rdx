@@ -5,6 +5,9 @@ const versionDir = path.join(process.cwd(), 'app/docs/(versioned)')
 const outputPath = path.join(process.cwd(), 'versions.json')
 const versionValidate = /^version-(\d+(\.\d+)*)$/
 
+console.log('[versioning] CWD:', process.cwd())
+console.log('[versioning] Output path:', outputPath)
+
 if (!fs.existsSync(versionDir)) {
   console.warn(
     '[versioning] Folder "versioned" not found. Creating empty folder and version.json.'
