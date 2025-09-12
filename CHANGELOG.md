@@ -1,7 +1,18 @@
 # Changelog
 
-## 2.1.1 (2025-09-11)
+## 2.1.1 (unreleased)
 
+- Refactor Navbar to consume configuration `rdx.config.ts`.
+- Added `ModeToggle` button for switching between light and dark themes.
+- Layout now uses `rdx.config.ts` for metadata, theme, and navbar configuration.
+- Created `rdx.config.ts` for centralized site configuration and branding.
+- Added typed config interface (`RDXConfig`) for use in `rdx.config.ts`.
+- Updated version reference in doc page to use `versionsRaw` for consistency.
+- Sidebar now highlights active link using `Button` variant logic.
+- Replaced `next-themes` with internal theme provider from `@rdx/ui`, fixing toggle behavior.
+- Fixed incorrect alias path for `@rdx/ui/*` in `apps/web/tsconfig.json` to reflect actual package structure.
+- Harmonized version field naming (`staticVersions` -> `versionsRaw`) to improve consistency across packages.
+- Refactored `Button` component to accept `active` as a variant prop, avoiding DOM leakage when rendered via `Slot`.
 - Refactored versioning logic to be data-driven, removing hardcoded assumptions and improving maintainability.
 - Promoted `generate-versions.ts` to workspace-level script, now exposed via `npm exec rdx-generate-versions`.
 - Modularized versioning system into dedicated package `@rdx/rdx-versioning`, enabling reuse across app and CLI.

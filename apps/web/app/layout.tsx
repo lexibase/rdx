@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import { Bebas_Neue, Space_Mono } from 'next/font/google'
 import '@rdx/ui/globals.css'
-import { ThemeProvider } from 'next-themes'
 
-import { Header } from '@/components/layout/Header'
+import { ThemeProvider } from '@rdx/ui/providers/theme-provider'
+
+import { Navbar } from '@/components/layout/Navbar'
 import { VersionProvider } from '@/contexts/version-docs'
+import config from '@/rdx.config'
 
 const bebas = Bebas_Neue({
   variable: '--font-bebas',
@@ -24,10 +26,9 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico',
   },
-  title: 'RDX',
-  description:
-    'Uma ferramenta pra ajudar a criar documentações com MDX e NextJS de forma simples e rápida.',
-  authors: [{ name: 'DuH Nunes', url: 'https://github.com/duhnunes' }],
+  title: config.title,
+  description: config.description,
+  authors: [{ name: config.author, url: config.navbar.actions.githubUrl }],
   keywords: [
     'duhnunes',
     'RDX',
@@ -38,13 +39,13 @@ export const metadata: Metadata = {
     'ptbr',
     'nextjs',
     'mdx',
+    'rdx',
   ],
   robots: 'index, follow',
   openGraph: {
-    title: 'RDX',
-    description:
-      'Uma ferramenta pra ajudar a criar documentações com MDX e NextJS de forma simples e rápida.',
-    url: 'https://rdx-tool.vercel.app',
+    title: config.title,
+    description: config.description,
+    url: config.url,
     images: [
       {
         url: '/icons/favicon-96x96.png',
@@ -56,9 +57,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RDX',
-    description:
-      'Uma ferramenta pra ajudar a criar documentações com MDX e NextJS de forma simples e rápida.',
+    title: config.title,
+    description: config.description,
     images: ['/icons/favicon-96x96.png'],
   },
 }
@@ -80,7 +80,7 @@ export default function RootLayout({
         />
         <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml" />
         <link href="/favicon.ico" rel="shortcut icon" />
-        <meta content="RDX" name="apple-mobile-web-app-title" />
+        <meta content={config.title} name="apple-mobile-web-app-title" />
         <link href="/site.webmanifest" rel="manifest" />
 
         {/* MOBILE BAR COLOR */}
@@ -91,11 +91,11 @@ export default function RootLayout({
           disableTransitionOnChange
           enableSystem
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme={config.theme.defaultTheme}
         >
           <VersionProvider>
             <div className="flex flex-col h-screen">
-              <Header />
+              <Navbar />
               {children}
             </div>
           </VersionProvider>
