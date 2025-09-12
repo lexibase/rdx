@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, type JSX } from 'react'
+import { useCallback, type JSX } from 'react'
 import {
   Archive,
   Bird,
@@ -9,24 +9,22 @@ import {
   PackageOpen,
   Spline,
 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Button } from '@rdx/ui/components/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@rdx/ui/components/dropdown-menu'
 import Link from 'next/link'
-import { getParsedVersions } from '@rdx/rdx-versioning'
 
 import { useVersion } from '@/hooks/use-version'
 
-import versionsRaw from '../../versions.json'
+import { GroupDropdown } from './group'
 
 const iconMap = {
   bird: Bird,
@@ -35,47 +33,43 @@ const iconMap = {
 }
 
 export function DropdownVersion() {
-  const { version, setVersion } = useVersion()
+  const { currentVersion, setCurrentVersion, versionGroups } = useVersion()
   const router = useRouter()
-
-  const [versions, setVersions] = useState<ReturnType<
-    typeof getParsedVersions
-  > | null>(null)
-
-  useEffect(() => {
-    setVersions(getParsedVersions(versionsRaw))
-  }, [])
+  const pathname = usePathname()
 
   function handleSelectVersion(label: string) {
     const targetVersion = label === 'canary' ? 'canary' : label
-    const pathname = window.location.pathname
     const match = pathname.match(/^\/docs\/([^/]+)\/([^/]+)$/)
     const currentFilename = match?.[2] || 'intro'
 
-    setVersion(targetVersion)
+    setCurrentVersion(targetVersion)
     router.push(`/docs/${targetVersion}/${currentFilename}`)
   }
 
-  const getIconByLabel = (label: string): JSX.Element | null => {
-    if (!versions || !label) return null
+  const getIconByLabel = useCallback(
+    (label: string): JSX.Element | null => {
+      const all = [
+        versionGroups.canary,
+        ...versionGroups.active,
+        ...versionGroups.archived,
+      ]
+      const found = all.find((v) => v.label === label)
+      const Icon = found?.icon ? iconMap[found.icon] : null
+      return Icon ? <Icon className="size-4" /> : null
+    },
+    [versionGroups]
+  )
 
-    const all = [versions.canary, ...versions.active, ...versions.archived]
-    const found = all.find((v) => v.label === label)
+  const isCurrentVersion = (label: string) => label === currentVersion
 
-    const Icon = found?.icon ? iconMap[found.icon] : null
-    return Icon ? <Icon className="size-4" /> : null
-  }
-
-  const isCurrentVersion = (label: string) => label === version
-
-  if (!versions) {
+  if (!currentVersion) {
     return (
       <Button
         variant="outline"
         size="sm"
         className="w-[134px] px-9 overflow-hidden"
       >
-        <div className="animate-spin flex item-center justify-center">
+        <div className="animate-spin flex items-center justify-center">
           <Spline className="size-4" />
         </div>
       </Button>
@@ -90,71 +84,56 @@ export function DropdownVersion() {
           size="sm"
           className="min-w-[134px] capitalize"
         >
-          {version === 'canary' ? 'canary' : `Version ${version}`}
+          {currentVersion === 'canary' ? 'canary' : `Version ${currentVersion}`}
           <DropdownMenuShortcut
             className={
-              version === 'canary'
+              currentVersion === 'canary'
                 ? 'text-blue-500'
-                : versions?.archived.some((v) => v.label === version)
+                : versionGroups.archived.some((v) => v.label === currentVersion)
                   ? 'text-red-500'
-                  : versions?.active.some((v) => v.label === version)
+                  : versionGroups.active.some((v) => v.label === currentVersion)
                     ? 'text-primary'
                     : ''
             }
           >
-            {getIconByLabel(version)}
+            {getIconByLabel(currentVersion)}
           </DropdownMenuShortcut>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="start">
         <DropdownMenuGroup>
           <DropdownMenuItem
-            onClick={() => handleSelectVersion(versions.canary.label)}
-            className={`capitalize ${isCurrentVersion(versions.canary.label) ? 'bg-accent/30 border-1 border-border' : ''}`}
+            onClick={() => handleSelectVersion(versionGroups.canary.label)}
+            className={`capitalize ${isCurrentVersion(versionGroups.canary.label) ? 'bg-accent/30 border-1 border-border' : ''}`}
             aria-label="Version Canary"
           >
-            {versions.canary.label}
+            {versionGroups.canary.label}
             <DropdownMenuShortcut>
-              {getIconByLabel(versions.canary.label)}
+              {getIconByLabel(versionGroups.canary.label)}
             </DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuGroup>
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuGroup>
-          {versions.active.map(({ label }) => (
-            <DropdownMenuItem
-              key={label}
-              className={`capitalize ${isCurrentVersion(label) ? 'bg-accent/30 border-1 border-border' : ''}`}
-              onClick={() => handleSelectVersion(label)}
-            >
-              Version {label}
-              <DropdownMenuShortcut>
-                {getIconByLabel(label)}
-              </DropdownMenuShortcut>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuLabel className="text-center py-px cursor-default">
-            Archived
-          </DropdownMenuLabel>
-          {versions.archived.map(({ label }) => (
-            <DropdownMenuItem
-              key={label}
-              className={`text-primary/60 capitalize ${isCurrentVersion(label) ? 'bg-red-800/5 border-1 border-red-600/20' : ''}`}
-              onClick={() => handleSelectVersion(label)}
-            >
-              {label}
-              <DropdownMenuShortcut>
-                {getIconByLabel(label)}
-              </DropdownMenuShortcut>
-            </DropdownMenuItem>
-          ))}
+        <GroupDropdown
+          versions={versionGroups.active}
+          currentVersion={currentVersion}
+          getIconByLabel={getIconByLabel}
+          onSelect={handleSelectVersion}
+          style="active"
+        />
 
-          <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <GroupDropdown
+            title="Archived"
+            versions={versionGroups.archived}
+            currentVersion={currentVersion}
+            getIconByLabel={getIconByLabel}
+            onSelect={handleSelectVersion}
+            style="archived"
+          />
+
           <DropdownMenuItem
             className="bg-red-900/20 text-primary/60 border-1 border-red-800/40 capitalize hover:!bg-red-900/30"
             asChild

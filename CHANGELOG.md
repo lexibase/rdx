@@ -2,6 +2,12 @@
 
 ## 2.1.1 (unreleased)
 
+- Added `useVersionGroup` hook to encapsulate version parsing logic from `versionsRaw`, enabling reuse and simplifying component state management.
+- Added `GroupDropdown` component to modularize version list rendering in dropdown, improving readability and separation of active and archived versions.
+- Refactored `DropdownVersion` to use centralized version context, removing local state and version parsing logic. Improved loading behavior with spinner and replaced manual rendering with `GroupDropdown` component.
+- Updated `Navbar` to consume `currentVersion` from `VersionContext`, replacing legacy `version` reference.
+- Changed `version` state to `currentVersion` for better control over initial loading state.
+- Added `versionGroups` to `VersionContext` for centralized access to parsed version metadata
 - Refactor Navbar to consume configuration `rdx.config.ts`.
 - Added `ModeToggle` button for switching between light and dark themes.
 - Layout now uses `rdx.config.ts` for metadata, theme, and navbar configuration.
