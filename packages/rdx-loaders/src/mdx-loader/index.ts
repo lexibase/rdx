@@ -6,11 +6,11 @@ import type { MDXLoader } from '@rdx/types'
 export async function mdxLoader({
   filename,
   version,
-  staticVersions,
+  versionsRaw,
   mdxComponents,
   docsRoot = 'app/docs',
 }: MDXLoader) {
-  const defaultVersion = staticVersions[0]
+  const defaultVersion = versionsRaw[0]
   if (!defaultVersion) {
     throw new Error('No static versions provided')
   }

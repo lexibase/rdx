@@ -4,7 +4,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "@rdx/ui/*": ["../../packages/ui/src/*"],
+      "@rdx/ui/*": ["../../packages/rdx-ui/src/*"],
       "@rdx/types/*": ["../../packages/rdx-types/src/*"],
     },
     "plugins": [

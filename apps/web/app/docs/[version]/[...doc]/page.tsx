@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation'
 import { docsIndexer, mdxLoader } from '@rdx/rdx-loaders'
 
 import { Main } from '@/components/Page/Main'
-import staticVersions from '@/versions.json'
+import versionsRaw from '@/versions.json'
 
 export default async function DocPage({
   params,
@@ -23,7 +23,7 @@ export default async function DocPage({
     const result = await mdxLoader({
       filename,
       version,
-      staticVersions,
+      versionsRaw,
       mdxComponents,
     })
     content = result.content
@@ -44,7 +44,7 @@ export default async function DocPage({
   const nextLink =
     currentIndex < flatLinks.length - 1 ? flatLinks[currentIndex + 1] : null
 
-  const currentVersion = staticVersions[0]
+  const currentVersion = versionsRaw[0]
   const isCanary = version === 'canary'
   const isOutdated = version !== currentVersion && !isCanary
 

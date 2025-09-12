@@ -1,7 +1,7 @@
 export interface MDXLoader {
   filename: string
   version?: string
-  staticVersions: string[]
+  versionsRaw: string[]
   mdxComponents: Record<string, React.ComponentType<any>>
   docsRoot?: string
 }

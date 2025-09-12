@@ -5,7 +5,7 @@
 <div align="center">
 
 [![created by](https://img.shields.io/badge/Created%20By-DuHNunes-0a0a0a?style=flat)](https://github.com/duhnunes)
-![license](https://img.shields.io/badge/license-MIT-green?style=flat)
+[![license](https://img.shields.io/badge/license-MIT-green?style=flat)](./LICENSE)
 
 </div>
 
@@ -18,4 +18,4 @@ Crafted with **Next.js**, **TailwindCSS**, and **shadcn/ui**, it delivers a slee
 
 RDX is [MIT licensed](./LICENSE)
 
-All content inside the `/docs` folder or `.mdx` files is covered under [Creative Commons licenses](./LICENSE-docs)
+All content inside the `/web/docs` folder or `.mdx` files is covered under [Creative Commons licenses](./LICENSE-docs)
