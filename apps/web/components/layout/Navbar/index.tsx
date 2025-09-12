@@ -12,8 +12,8 @@ import { useVersion } from '@/hooks/use-version'
 import config from '@/rdx.config'
 
 export function Navbar() {
-  const { version } = useVersion()
-  const href = `/docs/${version}`
+  const { currentVersion } = useVersion()
+  const href = `/docs/${currentVersion}`
   const LogoComponent = config.navbar.logo
 
   return (

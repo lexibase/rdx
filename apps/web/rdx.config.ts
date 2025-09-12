@@ -3,7 +3,8 @@ import { Logo } from '@rdx/ui/components/logo'
 
 const config: RDXConfig = {
   title: 'RDX',
-  description: '',
+  description:
+    'RDX streamlines the process of building documentation with clarity and efficiency',
   author: 'DuHNunes',
   favicon: 'img/favicon.ico',
 

@@ -4,7 +4,7 @@ export type RDXConfig = {
    * Displayed in the navbar and browser tab.
    */
   title: string
-  
+
   /**
    * A short description of the project.
    * Used for SEO and meta tags.
@@ -22,7 +22,7 @@ export type RDXConfig = {
    * Should be a relative URL or absolute path.
    */
   favicon: string
-  
+
   /**
    * The base URL where the documentation is hosted.
    * Used for generating canonical links and metatada.
@@ -56,7 +56,7 @@ export type RDXConfig = {
      * Consumers of the design system can override the default logo by providing their own component,
      * such as an inline SVG or image-based logo, allowing full customization of branding.
      */
-    logo: React.ComponentType<{className?: string}>
+    logo: React.ComponentType<{ className?: string }>
 
     /**
      * List of navigation links to display in the navbar.
@@ -86,6 +86,6 @@ export type RDXConfig = {
        * Wheter to show the theme toggle (system/dark/light)
        */
       showToggleMode: boolean
-    },
-  },
+    }
+  }
 }

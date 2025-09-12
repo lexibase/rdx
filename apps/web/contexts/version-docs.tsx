@@ -7,8 +7,9 @@ import { getParsedVersions } from '@rdx/rdx-versioning'
 import versionsRaw from '../versions.json'
 
 type VersionContextType = {
-  version: string
-  setVersion: (v: string) => void
+  currentVersion: string | null
+  setCurrentVersion: (v: string) => void
+  versionGroups: ReturnType<typeof getParsedVersions>
 }
 
 export const VersionContext = createContext<VersionContextType | undefined>(
@@ -16,33 +17,35 @@ export const VersionContext = createContext<VersionContextType | undefined>(
 )
 
 export function VersionProvider({ children }: { children: React.ReactNode }) {
-  const defaultVersion =
-    getParsedVersions(versionsRaw).active[0]?.label || 'canary'
-  const [version, setVersion] = useState(defaultVersion)
+  const versionGroups = getParsedVersions(versionsRaw)
+  const [currentVersion, setCurrentVersion] = useState<string | null>(null)
   const pathname = usePathname()
 
   useEffect(() => {
     const saved = localStorage.getItem('rdx-version')
     if (saved) {
       const clean = saved === 'canary' ? 'canary' : saved
-      setVersion(clean)
+      setCurrentVersion(clean)
     }
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('rdx-version', version)
-  }, [version])
+    const saved = localStorage.getItem('rdx-version')
+    const versionFromUrl = pathname.match(/^\/docs\/([^/]+)\/?.*$/)?.[1]
+    const initial =
+      versionFromUrl || saved || versionGroups.active[0]?.label || 'canary'
+    setCurrentVersion(initial)
+  }, [pathname, versionGroups.active])
 
   useEffect(() => {
-    const match = pathname.match(/^\/docs\/([^/]+)\/?.*$/)
-    const versionFromUrl = match?.[1]
-    if (versionFromUrl && versionFromUrl !== version) {
-      setVersion(versionFromUrl)
-    }
-  }, [pathname, version])
+    if (!currentVersion) return
+    localStorage.setItem('rdx-version', currentVersion)
+  }, [currentVersion])
 
   return (
-    <VersionContext.Provider value={{ version, setVersion }}>
+    <VersionContext.Provider
+      value={{ currentVersion, setCurrentVersion, versionGroups }}
+    >
       {children}
     </VersionContext.Provider>
   )
