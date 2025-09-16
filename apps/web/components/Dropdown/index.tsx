@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ExternalLink, Github, Spline } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@rdx/ui/components/button'
 import {
   DropdownMenu,
@@ -12,21 +11,24 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
-  DropdownMenuTrigger,
 } from '@rdx/ui/components/dropdown-menu'
 import Link from 'next/link'
 import { getParsedVersions } from '@rdx/rdx-versioning'
+import { LoadingButton } from '@rdx/ui/components/loading-button'
 
 import { useVersion } from '@/hooks/use-version'
 import { createGetIconByLabel } from '@/lib/get-icon-by-label'
+import { useVersionNavigation } from '@/hooks/use-version-navigation'
 
 import versionsRaw from '../../versions.json'
 
 import { VersionItem } from './version-item'
+import { DropdownTrigger } from './trigger'
+import { VersionGroup } from './group'
 
 export function DropdownVersion() {
-  const { version, setVersion } = useVersion()
-  const router = useRouter()
+  const { version } = useVersion()
+  const { navigateToVersion } = useVersionNavigation()
 
   const [versions, setVersions] = useState<ReturnType<
     typeof getParsedVersions
@@ -41,95 +43,51 @@ export function DropdownVersion() {
     setVersions(getParsedVersions(versionsRaw))
   }, [])
 
-  function handleSelectVersion(label: string) {
-    const targetVersion = label === 'canary' ? 'canary' : label
-    const pathname = window.location.pathname
-    const match = pathname.match(/^\/docs\/([^/]+)\/([^/]+)$/)
-    const currentFilename = match?.[2] || 'intro'
-
-    setVersion(targetVersion)
-    router.push(`/docs/${targetVersion}/${currentFilename}`)
-  }
-
-  const isCurrentVersion = (label: string) => label === version
+  const isCurrentVersion = useCallback(
+    (label: string) => label === version,
+    [version]
+  )
 
   if (!versions) {
-    return (
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-[134px] px-9 overflow-hidden"
-        disabled
-      >
-        <div className="animate-spin flex items-center justify-center">
-          <Spline className="size-4" />
-        </div>
-      </Button>
-    )
+    return <LoadingButton />
   }
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="min-w-[134px] capitalize"
-        >
-          {version === 'canary' ? 'canary' : `Version ${version}`}
-          <DropdownMenuShortcut
-            className={
-              version === 'canary'
-                ? 'text-blue-500'
-                : versions.archived.some((v) => v.label === version)
-                  ? 'text-red-500'
-                  : versions.active.some((v) => v.label === version)
-                    ? 'text-primary'
-                    : ''
-            }
-          >
-            {getIconByLabel(version)}
-          </DropdownMenuShortcut>
-        </Button>
-      </DropdownMenuTrigger>
+      <DropdownTrigger
+        version={version}
+        versions={versions}
+        getIconByLabel={getIconByLabel}
+      />
+
       <DropdownMenuContent className="w-56" align="start">
         <DropdownMenuGroup>
           <VersionItem
             label={versions.canary.label}
             isActive={isCurrentVersion(versions.canary.label)}
-            onSelect={handleSelectVersion}
+            onSelect={navigateToVersion}
             icon={getIconByLabel(versions.canary.label)}
           />
         </DropdownMenuGroup>
-
         <DropdownMenuSeparator />
 
-        <DropdownMenuGroup>
-          {versions.active.map(({ label }) => (
-            <VersionItem
-              key={label}
-              label={label}
-              isActive={isCurrentVersion(label)}
-              onSelect={handleSelectVersion}
-              icon={getIconByLabel(label)}
-            />
-          ))}
-        </DropdownMenuGroup>
+        <VersionGroup
+          versions={versions.active}
+          isCurrentVersion={isCurrentVersion}
+          getIconByLabel={getIconByLabel}
+          onSelect={navigateToVersion}
+        />
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuLabel className="text-center py-px cursor-default">
             Archived
           </DropdownMenuLabel>
-          {versions.archived.map(({ label }) => (
-            <VersionItem
-              key={label}
-              label={label}
-              isActive={isCurrentVersion(label)}
-              onSelect={handleSelectVersion}
-              icon={getIconByLabel(label)}
-              className="text-primary/60"
-            />
-          ))}
+          <VersionGroup
+            versions={versions.archived}
+            isCurrentVersion={isCurrentVersion}
+            getIconByLabel={getIconByLabel}
+            onSelect={navigateToVersion}
+          />
 
           <DropdownMenuSeparator />
           <DropdownMenuItem
