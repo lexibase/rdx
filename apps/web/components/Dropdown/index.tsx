@@ -1,8 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ExternalLink, Github, Spline } from 'lucide-react'
-import { Button } from '@rdx/ui/components/button'
+import { ExternalLink, Github } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
