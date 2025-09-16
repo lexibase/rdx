@@ -2,6 +2,10 @@
 
 ## 2.1.1 (unreleased)
 
+- Extracted `ExternalLink` into standalone component for cleaner separation of external link logic in dropdown.
+- Modularized `DropdownVersion` component by extracting `DropdownTrigger`, `VersionGroup`, and `LoadingButton` for improved readability and reusability.
+- Promoted `LoadingButton` to global component in `@rdx/ui`, ensuring consistent loading behavior across the design system.
+- Extracted `VersionItem` into reusable component to reduce duplication and improve readability in `DropdownVersion`.
 - Replaced inline icon resolution in `DropdownVersion` with memoized factory instance.
 - Centralized icon mapping logic (`iconMap`) to improve maintainability and visual consistency.
 - Extracted `getIconByLabel` into factory function for cleaner reuse across components.
