@@ -1,13 +1,9 @@
 'use client'
 
-import { useEffect, useState, type JSX } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
-  Archive,
-  Bird,
   ExternalLink,
-  Github,
-  PackageOpen,
-  Spline,
+  Github, Spline
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@rdx/ui/components/button'
@@ -27,12 +23,7 @@ import { getParsedVersions } from '@rdx/rdx-versioning'
 import { useVersion } from '@/hooks/use-version'
 
 import versionsRaw from '../../versions.json'
-
-const iconMap = {
-  bird: Bird,
-  packageOpen: PackageOpen,
-  archive: Archive,
-}
+import { createGetIconByLabel } from '@/lib/get-icon-by-label'
 
 export function DropdownVersion() {
   const { version, setVersion } = useVersion()
@@ -41,6 +32,8 @@ export function DropdownVersion() {
   const [versions, setVersions] = useState<ReturnType<
     typeof getParsedVersions
   > | null>(null)
+
+  const getIconByLabel = useMemo(() => createGetIconByLabel(versions), [versions])
 
   useEffect(() => {
     setVersions(getParsedVersions(versionsRaw))
@@ -54,16 +47,6 @@ export function DropdownVersion() {
 
     setVersion(targetVersion)
     router.push(`/docs/${targetVersion}/${currentFilename}`)
-  }
-
-  const getIconByLabel = (label: string): JSX.Element | null => {
-    if (!versions || !label) return null
-
-    const all = [versions.canary, ...versions.active, ...versions.archived]
-    const found = all.find((v) => v.label === label)
-
-    const Icon = found?.icon ? iconMap[found.icon] : null
-    return Icon ? <Icon className="size-4" /> : null
   }
 
   const isCurrentVersion = (label: string) => label === version

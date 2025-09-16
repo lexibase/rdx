@@ -2,6 +2,9 @@
 
 ## 2.1.1 (unreleased)
 
+- Replaced inline icon resolution in `DropdownVersion` with memoized factory instance.
+- Centralized icon mapping logic (`iconMap`) to improve maintainability and visual consistency.
+- Extracted `getIconByLabel` into factory function for cleaner reuse across components.
 - Refactor Navbar to consume configuration `rdx.config.ts`.
 - Added `ModeToggle` button for switching between light and dark themes.
 - Layout now uses `rdx.config.ts` for metadata, theme, and navbar configuration.
