@@ -2,6 +2,7 @@
 
 ## 2.1.1 (unreleased)
 
+- Extracted `VersionItem` into reusable component to reduce duplication and improve readability in `DropdownVersion`.
 - Replaced inline icon resolution in `DropdownVersion` with memoized factory instance.
 - Centralized icon mapping logic (`iconMap`) to improve maintainability and visual consistency.
 - Extracted `getIconByLabel` into factory function for cleaner reuse across components.

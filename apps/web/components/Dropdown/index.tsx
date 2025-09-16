@@ -1,10 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import {
-  ExternalLink,
-  Github, Spline
-} from 'lucide-react'
+import { ExternalLink, Github, Spline } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@rdx/ui/components/button'
 import {
@@ -21,9 +18,11 @@ import Link from 'next/link'
 import { getParsedVersions } from '@rdx/rdx-versioning'
 
 import { useVersion } from '@/hooks/use-version'
+import { createGetIconByLabel } from '@/lib/get-icon-by-label'
 
 import versionsRaw from '../../versions.json'
-import { createGetIconByLabel } from '@/lib/get-icon-by-label'
+
+import { VersionItem } from './version-item'
 
 export function DropdownVersion() {
   const { version, setVersion } = useVersion()
@@ -33,7 +32,10 @@ export function DropdownVersion() {
     typeof getParsedVersions
   > | null>(null)
 
-  const getIconByLabel = useMemo(() => createGetIconByLabel(versions), [versions])
+  const getIconByLabel = useMemo(
+    () => createGetIconByLabel(versions),
+    [versions]
+  )
 
   useEffect(() => {
     setVersions(getParsedVersions(versionsRaw))
@@ -57,8 +59,9 @@ export function DropdownVersion() {
         variant="outline"
         size="sm"
         className="w-[134px] px-9 overflow-hidden"
+        disabled
       >
-        <div className="animate-spin flex item-center justify-center">
+        <div className="animate-spin flex items-center justify-center">
           <Spline className="size-4" />
         </div>
       </Button>
@@ -78,9 +81,9 @@ export function DropdownVersion() {
             className={
               version === 'canary'
                 ? 'text-blue-500'
-                : versions?.archived.some((v) => v.label === version)
+                : versions.archived.some((v) => v.label === version)
                   ? 'text-red-500'
-                  : versions?.active.some((v) => v.label === version)
+                  : versions.active.some((v) => v.label === version)
                     ? 'text-primary'
                     : ''
             }
@@ -91,32 +94,25 @@ export function DropdownVersion() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="start">
         <DropdownMenuGroup>
-          <DropdownMenuItem
-            onClick={() => handleSelectVersion(versions.canary.label)}
-            className={`capitalize ${isCurrentVersion(versions.canary.label) ? 'bg-accent/30 border-1 border-border' : ''}`}
-            aria-label="Version Canary"
-          >
-            {versions.canary.label}
-            <DropdownMenuShortcut>
-              {getIconByLabel(versions.canary.label)}
-            </DropdownMenuShortcut>
-          </DropdownMenuItem>
+          <VersionItem
+            label={versions.canary.label}
+            isActive={isCurrentVersion(versions.canary.label)}
+            onSelect={handleSelectVersion}
+            icon={getIconByLabel(versions.canary.label)}
+          />
         </DropdownMenuGroup>
 
         <DropdownMenuSeparator />
 
         <DropdownMenuGroup>
           {versions.active.map(({ label }) => (
-            <DropdownMenuItem
+            <VersionItem
               key={label}
-              className={`capitalize ${isCurrentVersion(label) ? 'bg-accent/30 border-1 border-border' : ''}`}
-              onClick={() => handleSelectVersion(label)}
-            >
-              Version {label}
-              <DropdownMenuShortcut>
-                {getIconByLabel(label)}
-              </DropdownMenuShortcut>
-            </DropdownMenuItem>
+              label={label}
+              isActive={isCurrentVersion(label)}
+              onSelect={handleSelectVersion}
+              icon={getIconByLabel(label)}
+            />
           ))}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -125,16 +121,14 @@ export function DropdownVersion() {
             Archived
           </DropdownMenuLabel>
           {versions.archived.map(({ label }) => (
-            <DropdownMenuItem
+            <VersionItem
               key={label}
-              className={`text-primary/60 capitalize ${isCurrentVersion(label) ? 'bg-red-800/5 border-1 border-red-600/20' : ''}`}
-              onClick={() => handleSelectVersion(label)}
-            >
-              {label}
-              <DropdownMenuShortcut>
-                {getIconByLabel(label)}
-              </DropdownMenuShortcut>
-            </DropdownMenuItem>
+              label={label}
+              isActive={isCurrentVersion(label)}
+              onSelect={handleSelectVersion}
+              icon={getIconByLabel(label)}
+              className="text-primary/60"
+            />
           ))}
 
           <DropdownMenuSeparator />
