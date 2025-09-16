@@ -2,6 +2,10 @@
 
 ## 2.1.1 (unreleased)
 
+- Added accessibility attributes to close button in mobile sidebar.
+- Added Animation from `MobileSideBar`.
+- Added `aria-current="page"` to active sidebar links for better accessibility.
+- Extracted `SidebarCategory` component from `DesktopSidebar` for improved reability and testability.
 - Componentized `Navbar` into `NavbarLogo`, `NavbarLinks`, and `NavbarActions`, for improved readability and maintainability.
 - Extracted `ExternalLink` into standalone component for cleaner separation of external link logic in dropdown.
 - Modularized `DropdownVersion` component by extracting `DropdownTrigger`, `VersionGroup`, and `LoadingButton` for improved readability and reusability.

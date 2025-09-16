@@ -12,11 +12,12 @@
     "prepare": "npm exec rdx-generate-versions"
   },
   "dependencies": {
-    "@rdx/ui": "workspace:*",
     "@rdx/rdx-loaders": "workspace:*",
     "@rdx/rdx-versioning": "workspace:*",
+    "@rdx/ui": "workspace:*",
     "gray-matter": "^4.0.3",
     "lucide-react": "^0.542.0",
+    "motion": "^12.23.13",
     "next": "^15.5.0",
     "next-mdx-remote": "^5.0.0",
     "react": "^19.1.0",

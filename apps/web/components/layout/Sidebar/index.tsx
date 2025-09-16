@@ -20,7 +20,7 @@ export const Sidebar = ({ categories }: { categories: DocCategory[] }) => {
         <div className="h-full hidden md:block">
           <DesktopSidebar pathname={pathname} categories={categories} />
         </div>
-        <div className="w-full md:hidden block relative hidden">
+        <div className="w-full md:hidden block relative">
           <MobileSidebar
             pathname={pathname}
             categories={categories}
