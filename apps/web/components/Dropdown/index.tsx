@@ -1,17 +1,13 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ExternalLink, Github } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
 } from '@rdx/ui/components/dropdown-menu'
-import Link from 'next/link'
 import { getParsedVersions } from '@rdx/rdx-versioning'
 import { LoadingButton } from '@rdx/ui/components/loading-button'
 
@@ -24,6 +20,7 @@ import versionsRaw from '../../versions.json'
 import { VersionItem } from './version-item'
 import { DropdownTrigger } from './trigger'
 import { VersionGroup } from './group'
+import { ExternalLink } from './external-link'
 
 export function DropdownVersion() {
   const { version } = useVersion()
@@ -89,24 +86,7 @@ export function DropdownVersion() {
           />
 
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="bg-red-900/20 text-primary/60 border-1 border-red-800/40 capitalize hover:!bg-red-900/30"
-            asChild
-          >
-            <Link
-              href="https://github.com/duhnunes/mdxRenderDocs"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Version 1.1.1
-              <DropdownMenuShortcut>
-                <div className="flex items-center gap-2">
-                  <Github className="size-4" />
-                  <ExternalLink className="size-4" />
-                </div>
-              </DropdownMenuShortcut>
-            </Link>
-          </DropdownMenuItem>
+          <ExternalLink />
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
