@@ -16,8 +16,8 @@ export function NavbarActions() {
             <Link
               className="cursor-default"
               href={config.navbar.actions.githubUrl}
-              rel="noopoener noreferrer"
               target="_blank"
+              rel="noopener noreferrer"
             >
               <Github className="h-[1.2rem] w-[1.2rem]" />
               <span className="sr-only">GitHub</span>
