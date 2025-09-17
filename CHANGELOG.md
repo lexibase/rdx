@@ -2,6 +2,11 @@
 
 ## 2.1.1 (unreleased)
 
+- Updated `versions.json` structure to include `active` and `archived` arrays.
+- Adjusted `getParsedVersions()` to parse and categorize versions.
+- Updated dropdown UI to visually separate archived versions.
+- Applied muted styling and line-through to archived items.
+- Improved accessibility and clarity for version selection.
 - Extracted version logic into `VersionBanner` component.
 - Moved header rendering logic into `DocHeader` component.
 - Delegated navigation and footer rendering to `DocFooter` component.

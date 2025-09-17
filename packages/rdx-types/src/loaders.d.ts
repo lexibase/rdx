@@ -1,7 +1,12 @@
+export interface VersionsRaw {
+  active: string[]
+  archived: string[]
+}
+
 export interface MDXLoader {
   filename: string
   version?: string
-  versionsRaw: string[]
+  versionsRaw: VersionsRaw
   mdxComponents: Record<string, React.ComponentType<any>>
   docsRoot?: string
 }

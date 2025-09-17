@@ -73,21 +73,25 @@ export function DropdownVersion() {
           getIconByLabel={getIconByLabel}
           onSelect={navigateToVersion}
         />
+        {versions.archived.length > 0 && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="text-center py-px cursor-default">
+                Archived
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <VersionGroup
+                versions={versions.archived}
+                isCurrentVersion={isCurrentVersion}
+                getIconByLabel={getIconByLabel}
+                onSelect={navigateToVersion}
+              />
+            </DropdownMenuGroup>
+          </>
+        )}
         <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuLabel className="text-center py-px cursor-default">
-            Archived
-          </DropdownMenuLabel>
-          <VersionGroup
-            versions={versions.archived}
-            isCurrentVersion={isCurrentVersion}
-            getIconByLabel={getIconByLabel}
-            onSelect={navigateToVersion}
-          />
-
-          <DropdownMenuSeparator />
-          <ExternalLink />
-        </DropdownMenuGroup>
+        <ExternalLink />
       </DropdownMenuContent>
     </DropdownMenu>
   )

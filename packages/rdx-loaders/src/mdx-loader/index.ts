@@ -10,22 +10,37 @@ export async function mdxLoader({
   mdxComponents,
   docsRoot = 'app/docs',
 }: MDXLoader) {
-  const defaultVersion = versionsRaw[0]
+  const defaultVersion = versionsRaw.active[0]
   if (!defaultVersion) {
     throw new Error('No static versions provided')
   }
 
-  const basePath =
-    version === 'canary'
-      ? path.join(process.cwd(), docsRoot, '(canary)')
-      : version
-        ? path.join(
-            process.cwd(),
-            docsRoot,
-            '(versioned)',
-            `version-${version}`
-          )
-        : path.join(process.cwd(), docsRoot, '(versioned)', defaultVersion)
+  let basePath: string
+  if (version === 'canary') {
+    basePath = path.join(process.cwd(), docsRoot, '(canary)')
+  } else if (version) {
+    const versionedPath = path.join(
+      process.cwd(),
+      docsRoot,
+      '(versioned)',
+      `version-${version}`
+    )
+    const archivedPath = path.join(
+      process.cwd(),
+      docsRoot,
+      '(archived)',
+      `version-${version}`
+    )
+
+    basePath = fs.existsSync(versionedPath) ? versionedPath : archivedPath
+  } else {
+    basePath = path.join(
+      process.cwd(),
+      docsRoot,
+      '(versioned)',
+      `version-${defaultVersion}`
+    )
+  }
 
   const findFile = (dir: string): string | null => {
     const entries = fs.readdirSync(dir, { withFileTypes: true })

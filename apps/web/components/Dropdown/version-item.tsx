@@ -9,6 +9,7 @@ type VersionItemProps = {
   isActive?: boolean
   onSelect: (label: string) => void
   icon: JSX.Element | null
+  iconType?: string
   className?: string
 }
 
@@ -17,15 +18,18 @@ export function VersionItem({
   isActive,
   onSelect,
   icon,
+  iconType,
   className = '',
 }: VersionItemProps) {
+  const isArchived = iconType === 'archive'
+
   return (
     <DropdownMenuItem
       key={label}
       onClick={() => onSelect(label)}
-      className={`capitalize ${isActive ? 'bg-accent/30 border-1 border-border' : ''} ${className}`}
+      className={`capitalize ${isActive ? 'bg-accent/30 border-1 border-border' : ''} ${isArchived ? 'text-muted-foreground line-through' : ''} ${className}`}
     >
-      {label}
+      {label === 'canary' ? label : `Version ${label}`}
       <DropdownMenuShortcut>{icon}</DropdownMenuShortcut>
     </DropdownMenuItem>
   )
