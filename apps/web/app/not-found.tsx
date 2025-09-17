@@ -15,15 +15,17 @@ export default function NotFound() {
         <h1 className="text-9xl font-bold font-mono text-center">404</h1>
         <article className="flex flex-col gap-y-5">
           <p className="text-3xl font-bold font-mono text-center">
-            Página não encontrada
+            Page not Found
           </p>
-          <p className="text-sm ">Não encontramos o que você está procuando</p>
+          <p className="text-sm ">
+            We couldn&apos;t find what you were looking for.
+          </p>
           <p className="text-sm">
-            Por favor, entre em contato com o responsável pelo site que te levou
-            ao link original e avise que o link está quebrado.
+            Please contact the owner of the site that led you to this link and
+            let them know the link is broken.
           </p>
           <Button variant="primary" asChild>
-            <Link href={href}>Voltar para documentação</Link>
+            <Link href={href}>Go back to documentation</Link>
           </Button>
         </article>
       </div>
