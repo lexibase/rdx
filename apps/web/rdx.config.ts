@@ -16,7 +16,7 @@ const config: RDXConfig = {
   },
 
   navbar: {
-    // Leave the title empty so that no title appears next to the logo
+    // Leave the title empty or delete so that no title appears next to the logo
     title: '',
     // Custom logo component (SVG or React)
     // Must accept `className` for styling
@@ -29,9 +29,11 @@ const config: RDXConfig = {
     ],
 
     actions: {
-      githubButton: true,
-      githubUrl: 'https://github.com/lexibase/rdx',
-      showToggleMode: true,
+      github: {
+        visible: true,
+        url: 'https://github.com/lexibase/rdx',
+      },
+      showToggleMode: false,
     },
   },
 }

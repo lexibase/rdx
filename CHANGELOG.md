@@ -2,6 +2,25 @@
 
 ## 2.1.1 (unreleased)
 
+- Updated `layout.tsx` to safely access `github.url` via optional chaining.
+- Applied fallback to `'system'` theme when `config.theme.defaultTheme` is undefined.
+
+- Replaced hardcoded author name in `DocFooter` with dynamic `config.author` value.
+
+- Improved rendering logic with safe access to `navbar.item`.
+- Introduced fallback `defaultHref` based on current version.
+- Refactored `NavbarLinks` to enforce reserved behavior for `"Docs"` link.
+
+- Improved conditional rendering for `showToggleMode` with optional chaining.
+- Replace legacy `githubButton` and `githubUrl` usage with `github.visible` and `github.url`.
+- Refactored `NavbarActions` to use structure `github` config with safe access adn early return.
+
+- Improved JSDoc descriptions across config fields for consistency and precision.
+- Made `navbar.items`, `navbar.title`, and `navbar.actions` optional for better config ergonomics.
+- Refined `RDXConfig` type definitions for improved clarity and flexibility.
+- Replaced legacy `githubButton` and `githubUrl` with structured `github` object.
+- Refactored GitHub action config to structured format.
+
 - Updated `versions.json` structure to include `active` and `archived` arrays.
 - Adjusted `getParsedVersions()` to parse and categorize versions.
 - Updated dropdown UI to visually separate archived versions.
