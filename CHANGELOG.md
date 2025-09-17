@@ -2,6 +2,11 @@
 
 ## 2.1.1 (unreleased)
 
+- Extracted version logic into `VersionBanner` component.
+- Moved header rendering logic into `DocHeader` component.
+- Delegated navigation and footer rendering to `DocFooter` component.
+- Removed inline logic from `DocPage` for version status, navigation, and metadata.
+- Improved readability and maintainability of the documentation layout.
 - Added accessibility attributes to close button in mobile sidebar.
 - Added Animation from `MobileSideBar`.
 - Added `aria-current="page"` to active sidebar links for better accessibility.
