@@ -11,13 +11,14 @@ export const iconMap = {
 const createGetIconByLabel = (
   versions: ReturnType<typeof getParsedVersions> | null
 ) => {
+  if (!versions) return () => null
+
+  const all = [versions.canary, ...versions.active, ...versions.archived]
+  const versionMap = new Map(all.map((v) => [v.label, v.icon]))
+
   const getIconByLabel = (label: string): JSX.Element | null => {
-    if (!versions || !label) return null
-
-    const all = [versions.canary, ...versions.active, ...versions.archived]
-    const found = all.find((v) => v.label === label)
-
-    const Icon = found?.icon ? iconMap[found.icon] : null
+    const iconKey = versionMap.get(label)
+    const Icon = iconKey ? iconMap[iconKey] : null
     return Icon ? <Icon className="size-4" /> : null
   }
 
