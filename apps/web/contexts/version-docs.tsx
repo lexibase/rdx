@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useEffect, useState } from 'react'
+import { createContext, useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { getParsedVersions } from '@rdx/rdx-versioning'
 
@@ -16,10 +16,15 @@ export const VersionContext = createContext<VersionContextType | undefined>(
 )
 
 export function VersionProvider({ children }: { children: React.ReactNode }) {
-  const defaultVersion =
-    getParsedVersions(versionsRaw).active[0]?.label || 'canary'
+  const parsedVersions = useMemo(() => getParsedVersions(versionsRaw), [])
+  const defaultVersion = parsedVersions.active[0]?.label || 'canary'
   const [version, setVersion] = useState(defaultVersion)
   const pathname = usePathname()
+
+  const versionFromUrl = useMemo(() => {
+    const match = pathname.match(/^\/docs\/([^/]+)\/?.*$/)
+    return match?.[1]
+  }, [pathname])
 
   useEffect(() => {
     const saved = localStorage.getItem('rdx-version')
@@ -34,12 +39,10 @@ export function VersionProvider({ children }: { children: React.ReactNode }) {
   }, [version])
 
   useEffect(() => {
-    const match = pathname.match(/^\/docs\/([^/]+)\/?.*$/)
-    const versionFromUrl = match?.[1]
     if (versionFromUrl && versionFromUrl !== version) {
       setVersion(versionFromUrl)
     }
-  }, [pathname, version])
+  }, [versionFromUrl, version])
 
   return (
     <VersionContext.Provider value={{ version, setVersion }}>

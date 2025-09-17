@@ -24,7 +24,7 @@ import { ExternalLink } from './external-link'
 
 export function DropdownVersion() {
   const { version } = useVersion()
-  const { navigateToVersion } = useVersionNavigation()
+  const navigateToVersion = useVersionNavigation()
 
   const [versions, setVersions] = useState<ReturnType<
     typeof getParsedVersions

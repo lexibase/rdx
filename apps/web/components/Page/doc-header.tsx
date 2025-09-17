@@ -1,5 +1,6 @@
 import { docsIndexer } from '@rdx/rdx-loaders'
 import type { DocCategory } from '@rdx/types/loaders'
+import { useMemo } from 'react'
 
 export function DocHeader({
   version,
@@ -8,11 +9,20 @@ export function DocHeader({
   version: string
   filename: string
 }) {
-  const sidebarLinks: DocCategory[] = docsIndexer(version)
+  const sidebarLinks: DocCategory[] = useMemo(
+    () => docsIndexer(version),
+    [version]
+  )
   const slug = `/docs/${version}/${filename}`
 
-  const flatLinks = sidebarLinks.flatMap((cat) => cat.links)
-  const currentLink = flatLinks.find((link) => link.href === slug)
+  const flatLinks = useMemo(
+    () => sidebarLinks.flatMap((cat) => cat.links),
+    [sidebarLinks]
+  )
+  const currentLink = useMemo(
+    () => flatLinks.find((link) => link.href === slug),
+    [flatLinks, slug]
+  )
   const currentCategory = sidebarLinks.find((cat) =>
     cat.links.some((link) => link.href === slug)
   )

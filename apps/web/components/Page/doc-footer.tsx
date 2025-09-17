@@ -2,6 +2,7 @@ import { docsIndexer } from '@rdx/rdx-loaders'
 import type { DocCategory } from '@rdx/types/loaders'
 import { Button } from '@rdx/ui/components/button'
 import Link from 'next/link'
+import { useMemo } from 'react'
 
 export function DocFooter({
   version,
@@ -10,11 +11,20 @@ export function DocFooter({
   version: string
   filename: string
 }) {
-  const sidebarLinks: DocCategory[] = docsIndexer(version)
+  const sidebarLinks: DocCategory[] = useMemo(
+    () => docsIndexer(version),
+    [version]
+  )
   const slug = `/docs/${version}/${filename}`
 
-  const flatLinks = sidebarLinks.flatMap((cat) => cat.links)
-  const currentIndex = flatLinks.findIndex((link) => link.href === slug)
+  const flatLinks = useMemo(
+    () => sidebarLinks.flatMap((cat) => cat.links),
+    [sidebarLinks]
+  )
+  const currentIndex = useMemo(
+    () => flatLinks.findIndex((link) => link.href === slug),
+    [flatLinks, slug]
+  )
 
   const prevLink =
     currentIndex > 0 ? (flatLinks[currentIndex - 1] ?? null) : null
@@ -22,6 +32,8 @@ export function DocFooter({
     currentIndex < flatLinks.length - 1
       ? (flatLinks[currentIndex + 1] ?? null)
       : null
+
+  const currentYear = useMemo(() => new Date().getFullYear(), [])
 
   return (
     <footer className="flex flex-col">
@@ -49,10 +61,15 @@ export function DocFooter({
 
       <section className="flex items-center justify-center w-full py-5">
         <p className="text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} <strong>RDX</strong>. Desenvolvido
-          por{' '}
+          &copy; {currentYear} <strong>RDX</strong>. Desenvolvido por{' '}
           <Button variant="link" size="link" asChild>
-            <Link href="https://github.com/duhnunes">DuHNunes</Link>
+            <Link
+              href="https://github.com/duhnunes"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              DuHNunes
+            </Link>
           </Button>
         </p>
       </section>
