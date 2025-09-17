@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
   title: config.title,
   description: config.description,
-  authors: [{ name: config.author, url: config.navbar.actions.githubUrl }],
+  authors: [{ name: config.author, url: config.navbar.actions?.github?.url }],
   keywords: [
     'duhnunes',
     'RDX',
@@ -91,7 +91,7 @@ export default function RootLayout({
           disableTransitionOnChange
           enableSystem
           attribute="class"
-          defaultTheme={config.theme.defaultTheme}
+          defaultTheme={config.theme?.defaultTheme ?? 'system'}
         >
           <VersionProvider>
             <div className="flex flex-col h-screen">

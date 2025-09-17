@@ -4,6 +4,8 @@ import { Button } from '@rdx/ui/components/button'
 import Link from 'next/link'
 import { useMemo } from 'react'
 
+import config from '@/rdx.config'
+
 export function DocFooter({
   version,
   filename,
@@ -88,7 +90,7 @@ export function DocFooter({
               target="_blank"
               rel="noopener noreferrer"
             >
-              DuHNunes
+              {config.author}
             </Link>
           </Button>
         </p>

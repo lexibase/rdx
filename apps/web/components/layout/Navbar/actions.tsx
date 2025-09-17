@@ -7,9 +7,13 @@ import { ModeToggle } from '@rdx/ui/components/mode-toggle'
 import config from '@/rdx.config'
 
 export function NavbarActions() {
+  const github = config.navbar?.actions?.github
+
+  if (!github?.visible || !github.url) return null
+
   return (
     <>
-      {config.navbar.actions.githubButton && (
+      {github.visible && (
         <>
           <Separator orientation="vertical" />
           <Button
@@ -21,7 +25,7 @@ export function NavbarActions() {
           >
             <Link
               className="cursor-default"
-              href={config.navbar.actions.githubUrl}
+              href={github.url}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -32,7 +36,7 @@ export function NavbarActions() {
         </>
       )}
 
-      {config.navbar.actions.showToggleMode && (
+      {config.navbar.actions?.showToggleMode && (
         <>
           <Separator orientation="vertical" />
           <ModeToggle />
