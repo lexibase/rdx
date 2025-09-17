@@ -16,7 +16,7 @@ export default async function DocsLayout({
   return (
     <div className="flex flex-1 overflow-hidden relative">
       <Sidebar categories={categories} />
-      <div className="flex-1 h-full overflow-y-auto pt-12 md:pt-0">
+      <div className="flex-1 h-full overflow-y-auto pt-12 md:pt-0 outline-none">
         {children}
       </div>
     </div>

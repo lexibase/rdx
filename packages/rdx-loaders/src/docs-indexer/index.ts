@@ -7,24 +7,23 @@ import type { DocCategory, DocLink } from '@rdx/types'
 export function docsIndexer(version?: string): DocCategory[] {
   const resolvedVersion = version || 'canary'
 
-  const basePath =
-    resolvedVersion === 'canary'
-      ? path.join(process.cwd(), 'app/docs/(canary)')
-      : path.join(
-            process.cwd(),
-            'app/docs/(versioned)',
-            `version-${resolvedVersion}`
-          )
-        ? path.join(
-            process.cwd(),
-            'app/docs/(versioned)',
-            `version-${resolvedVersion}`
-          )
-        : path.join(
-            process.cwd(),
-            'app/docs/(archived)',
-            `version-${resolvedVersion}`
-          )
+  let basePath: string
+  if (resolvedVersion === 'canary') {
+    basePath = path.join(process.cwd(), 'app/docs/(canary)')
+  } else {
+    const versionedPath = path.join(
+      process.cwd(),
+      'app/docs/(versioned)',
+      `version-${resolvedVersion}`
+    )
+    const archivedPath = path.join(
+      process.cwd(),
+      'app/docs/(archived)',
+      `version-${resolvedVersion}`
+    )
+
+    basePath = fs.existsSync(versionedPath) ? versionedPath : archivedPath
+  }
 
   if (!fs.existsSync(basePath)) {
     console.warn(`Docs Folder not found: ${basePath}`)

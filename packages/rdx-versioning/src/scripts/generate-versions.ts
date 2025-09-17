@@ -1,62 +1,82 @@
 import fs from 'fs'
 import path from 'node:path'
 
-const versionDir = path.join(process.cwd(), 'app/docs/(versioned)')
+const baseDir = path.join(process.cwd(), 'app/docs')
+const versionDir = path.join(baseDir, '(versioned)')
+const archivedDir = path.join(baseDir, '(archived)')
 const outputPath = path.join(process.cwd(), 'versions.json')
 const versionValidate = /^version-(\d+(\.\d+)*)$/
 
 console.log('[versioning] CWD:', process.cwd())
 console.log('[versioning] Output path:', outputPath)
 
-if (!fs.existsSync(versionDir)) {
-  console.warn(
-    '[versioning] Folder "versioned" not found. Creating empty folder and version.json.'
-  )
-  fs.mkdirSync(versionDir, { recursive: true })
-  fs.writeFileSync(outputPath, JSON.stringify([], null, 2))
-  process.exit(0)
+function getVersionsFrom(dir: string): string[] {
+  if (!fs.existsSync(dir)) return []
+
+  const folders = fs.readdirSync(dir)
+  return folders
+    .filter((folder) => versionValidate.test(folder))
+    .map((folder) => folder.replace('version-', ''))
+    .sort((a, b) =>
+      b.localeCompare(a, undefined, {
+        numeric: true,
+        sensitivity: 'base',
+      })
+    )
 }
 
-const folders = fs.readdirSync(versionDir)
+const activeVersions = getVersionsFrom(versionDir)
+const archivedVersions = getVersionsFrom(archivedDir)
 
-const invalidFolders: string[] = []
-const validVersions = folders
-  .filter((folder) => {
-    const isValid = versionValidate.test(folder)
-    if (!isValid) invalidFolders.push(folder)
-    return isValid
-  })
-  .map((folder) => folder.replace('version-', ''))
-  .sort((a, b) =>
-    b.localeCompare(a, undefined, {
-      numeric: true,
-      sensitivity: 'base',
-    })
-  )
+const newContent = JSON.stringify(
+  {
+    active: activeVersions,
+    archived: archivedVersions,
+  },
+  null,
+  2
+)
 
-if (invalidFolders.length > 0) {
-  console.error(
-    '\n[versioning] Invalid folder name(s) detected in "versioned" folder.\n' +
-      'The following folders do not match the required format "version-<numberVersion>":\n'
-  )
-  invalidFolders.forEach((folder) => console.error(` - ${folder}`))
-  console.error(
-    '\nSolution: Rename these folders to follow the format "version-<numberVersion>" (e.g. version-1.0.0).\n' +
-      'The script will not continue until all folder names are valid.\n'
-  )
-  process.exit(1)
-}
-
-const newContent = JSON.stringify(validVersions, null, 2)
 const currentContent = fs.existsSync(outputPath)
   ? fs.readFileSync(outputPath, 'utf-8')
   : ''
 
 if (currentContent !== newContent) {
-  fs.writeFileSync(outputPath, newContent)
-  console.log(
-    `[versioning] "versions.json" updated with ${validVersions.length} version(s).`
+  const parsed = currentContent ? JSON.parse(currentContent) : {}
+  const previous: { active: string[]; archived: string[] } = {
+    active: Array.isArray(parsed.active) ? parsed.active : [],
+    archived: Array.isArray(parsed.archived) ? parsed.archived : [],
+  }
+
+  const addedActive = activeVersions.filter((v) => !previous.active.includes(v))
+  const removedActive = previous.active.filter(
+    (v) => !activeVersions.includes(v)
   )
+
+  const addedArchived = archivedVersions.filter(
+    (v) => !previous.archived.includes(v)
+  )
+  const removedArchived = previous.archived.filter(
+    (v) => !archivedVersions.includes(v)
+  )
+
+  fs.writeFileSync(outputPath, newContent)
+
+  console.log(`[versioning] "versions.json" updated.`)
+
+  if (addedActive.length || removedActive.length) {
+    console.log('\n[versioning] Active versions changed:')
+    addedActive.forEach((v) => console.log(` + ${v}`))
+    removedActive.forEach((v) => console.log(` - ${v}`))
+  }
+
+  if (addedArchived.length || removedArchived.length) {
+    console.log('\n[versioning] Archived versions changed:')
+    addedArchived.forEach((v) => console.log(` + ${v}`))
+    removedArchived.forEach((v) => console.log(` - ${v}`))
+  }
+
+  console.log('')
 } else {
-  console.log('[versioning] "versions.json" is up to date. No changes made.')
+  console.log('\n[versioning] "versions.json" is up to date. No changes made.')
 }

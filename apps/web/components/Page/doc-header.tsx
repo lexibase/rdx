@@ -29,7 +29,7 @@ export function DocHeader({
 
   return (
     <>
-      <span className="text-xs text-zinc-700 font-semibold uppercase block -mb-0.5">
+      <span className="text-xs text-zinc-600 font-semibold uppercase block -mb-0.5">
         {currentCategory?.title}
       </span>
       <h1 className="text-4xl uppercase font-bold mb-2">

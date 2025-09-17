@@ -3,31 +3,34 @@ export type VersionMeta = {
   icon: 'bird' | 'packageOpen' | 'archive'
 }
 
-function inferIcon(label: string): VersionMeta['icon'] {
-  return label <= '1.0.0' ? 'archive' : 'packageOpen'
-}
-
-export function getParsedVersions(versionsRaw: string[]): {
+export function getParsedVersions(versionsRaw: {
+  active: string[]
+  archived: string[]
+}): {
   canary: VersionMeta
   active: VersionMeta[]
   archived: VersionMeta[]
 } {
-  const parsed = versionsRaw.map(
+  const parsedActive = versionsRaw.active.map(
     (label): VersionMeta => ({
       label,
-      icon: inferIcon(label),
+      icon: 'packageOpen',
     })
   )
 
-  const current = parsed[0] ?? { label: '0.0.0', icon: 'packageOpen' }
-  const rest = parsed.slice(1)
+  const parsedArchived = versionsRaw.archived.map(
+    (label): VersionMeta => ({
+      label,
+      icon: 'archive',
+    })
+  )
 
-  const active = rest.filter((v) => v.icon === 'packageOpen')
-  const archived = rest.filter((v) => v.icon === 'archive')
+  const current = parsedActive[0] ?? { label: '0.0.0', icon: 'packageOpen' }
+  const restActive = parsedActive.slice(1)
 
   return {
     canary: { label: 'canary', icon: 'bird' },
-    active: [current, ...active],
-    archived,
+    active: [current, ...restActive],
+    archived: parsedArchived,
   }
 }

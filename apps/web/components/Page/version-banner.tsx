@@ -1,3 +1,5 @@
+
+import type { VersionsRaw } from '@rdx/types/loaders'
 import Link from 'next/link'
 
 export function VersionBanner({
@@ -5,9 +7,9 @@ export function VersionBanner({
   versionsRaw,
 }: {
   version: string
-  versionsRaw: string[]
+  versionsRaw: VersionsRaw
 }) {
-  const currentVersion = versionsRaw[0]
+  const currentVersion = versionsRaw.active[0]
   const isCanary = version === 'canary'
   const isOutdated = version !== currentVersion && !isCanary
 
