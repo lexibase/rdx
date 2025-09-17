@@ -12,7 +12,13 @@ export function NavbarActions() {
       {config.navbar.actions.githubButton && (
         <>
           <Separator orientation="vertical" />
-          <Button variant="ghost" size="icon" title="GitHub" asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            title="GitHub"
+            asChild
+            aria-label="GitHub"
+          >
             <Link
               className="cursor-default"
               href={config.navbar.actions.githubUrl}

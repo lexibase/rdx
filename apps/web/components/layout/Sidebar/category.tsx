@@ -25,6 +25,7 @@ export function SidebarCategory({
           className="justify-start"
           active={pathname.startsWith(link.href)}
           asChild
+          aria-label={link.label}
         >
           <Link
             className="text-sm text-primary"
