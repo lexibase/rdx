@@ -32,18 +32,18 @@ export type RDXConfig = {
   /**
    * Theme configuration options
    */
-  theme: {
+  theme?: {
     /**
      * The default theme to apply on first load.
      * Common values: 'system', 'dark' or 'light'
      */
-    defaultTheme: string
+    defaultTheme?: string
   }
 
   /**
    * Navbar configurations options.
    */
-  navbar: {
+  navbar?: {
     /**
      * Title displayed next to the logo in the navbar.
      * If empty, only the logo will be shown.

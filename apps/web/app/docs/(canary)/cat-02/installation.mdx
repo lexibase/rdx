@@ -4,4 +4,52 @@ description: How to install RDX
 link_position: 1
 ---
 
-Soon
+## Requirements
+---
+
+- [Node.js](https://nodejs.org/) version 18 or above (which can be checked by running `node -v`).
+
+## Scaffold project website
+---
+
+You can create project cloning the repository using `gh repo clone lexibase/rdx` or `git repo clone https://github.com/lexibase/rdx.git`.  
+
+```
+gh repo clone lexibase/rdx
+code rdx
+pnpm i
+pnpm dev
+```
+
+## Project Structure
+---
+
+Only the contents inside `apps/web` are relevant for configuring and assembling your project. Minimal setup is required for it to function properly:
+
+```folder
+my-documentation
+apps/
+├── web
+│   ├── app
+│   │   ├── docs
+|   |   |   ├── (archived)
+|   |   |   ├── (canary)
+|   |   |   ├── (versioned)
+│   ├── rdx.config.ts
+└── └── versions.json
+```
+
+## Project structure rundown
+---
+
+- `(archived)` - This is where you store archived versions - those that are no longer supported. See [archived config](/docs/canary/docs) for more details.
+- `(canary)` - This section of the documentation is still under development and this not the main version. See [canary config](/docs/canary/docs) for more details.
+- `(versioned)` - This is where you manage versioning for your documentation. The latest released version (the one with the highest number) is always considered the `current` version. See [versioned config](/docs/canary/docs) for more details. 
+
+## Running the development server
+---
+
+Too see changes made to your `.mdx` files, you`ll need to either navigate to a different page or manually reload the current one, due to the server-side nature of how MDX content is loaded.
+
+Congratulations! You have created your first RDX Documentation!
+

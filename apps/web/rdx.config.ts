@@ -10,7 +10,6 @@ const config: RDXConfig = {
 
   // Set the production url of your site here
   url: 'https://rdx-tool.vercel.app',
-  // baseUrl: '/',
 
   theme: {
     defaultTheme: 'system',

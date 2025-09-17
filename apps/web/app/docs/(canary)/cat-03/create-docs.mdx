@@ -1,0 +1,49 @@
+---
+title: Creating
+description: The docs feature lets you organize Markdown files into a structured, hierarchical format.
+link_position: 2
+---
+
+## Create a Doc
+---
+
+To create a documentation page, add a `.mdx` file inside a folder within `(canary)`.  
+The folder acts as a category, adn the `.mdx` file becomes the actual page.
+
+```
+// apps/web/app/docs/ # root directory of your docs
+├── (canary)
+│   └── cat-01  // folder name can be anyting
+│   |   └── hello.mdx
+├── ...
+```
+```
+---
+title: Hello
+description: Create a doc page with rich content.
+link_position: 1
+---
+
+# Hello World
+
+Are you ready to create the documentation for your project.
+
+```
+
+## Doc front matter
+---
+
+Front matter is required and provides metadata for your doc page.  
+
+Each content plugin defines its own front matter schema, which helps enrich the default metadata inferred from the contet or other configuration.
+
+Front matter must be placed at the very top of the file, wrapped in triple dashes `---`.   It's parsed using [YAML](https://yaml.org/spec/1.2.2/).
+
+```
+---
+title: My Page Title
+description: Description for my Page
+link_position: Number indicating position within the category sidebar
+---
+```
+
