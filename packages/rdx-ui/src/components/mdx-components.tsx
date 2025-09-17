@@ -7,6 +7,7 @@ export const mdxComponents: Record<string, React.ComponentType<any>> = {
   p: (props) => <p className="my-4" {...props} />,
   ul: (props) => <ul className="list-disc my-4 ml-6" {...props} />,
   li: (props) => <li className="my-2 before:mr-2" {...props} />,
+  a: (props) => <a className="underline text-chart-1" {...props} />,
   blockquote: (props) => (
     <blockquote
       className="bg-secondary text-muted-foreground border-l-2 pl-4 py-px my-2"

@@ -1,0 +1,64 @@
+---
+title: Docs
+description: Documentation structure and behavior
+link_position: 1
+---
+
+## Archived
+---
+
+The `(archived)` folder stores versions you no longer support, but still want to keep publicly available for legacy compatibility.  
+Each folder inside must be prefixed with `version-` followed by the version number.  
+The internal structure of each versioned folder (e.g. `version-1.0.0`) should follow the same pattern used in `(canary)`, including category folders and `_category.json` files.
+
+```
+docs/(archived) # root directory
+├── version-1.0.0
+|   ├── cat-01 // folder name can be anyting
+|   |   ├── _category.json // required config file
+|   └── └── hello.mdx
+```
+
+## Canary
+---
+
+The `(canary)` folder is where you actively develop your documentation. It is not considered the ***current*** version by the system.  
+Unlike `(archived)` and `(versioned)`, folders here don't use a prefix - each folder becomes a category in the sidebar.  
+Each category folder must include a `_category.json` file to define sidebar settings.
+
+```
+docs/(canary) # root directory
+├── cat-01 // folder name can be anyting
+|   ├── _category.json
+|   ├── hello.mdx
+|   └── license.mdx
+├── cat-02 // folder name can be anything
+|   ├── _category.json
+└── └── install.mdx
+```
+```
+// _category.json
+{
+  "title": "string",
+  "sidebar_position": Numb
+}
+```
+- `title` - The category name displayd in the sidebar.
+- `sidebar_position`: The position of the category in the sidebar.
+
+## Versioned
+---
+
+The `(versioned)` folder contains released versions of your documentation. Like `(archived)`, each folder must be prefixed with `version-`.
+
+```
+docs/(versioned) # root directory
+├── version-1.0.5\
+|   ├── cat-01 // folder name can be anyting
+|   |   ├── _category.json // required config file
+|   |   ├── hello.mdx
+└── └── └── license.mdx
+```
+
+The version with the highest number is always considered the **current** version.
+

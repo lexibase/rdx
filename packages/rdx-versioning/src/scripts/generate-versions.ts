@@ -78,5 +78,5 @@ if (currentContent !== newContent) {
 
   console.log('')
 } else {
-  console.log('\n[versioning] "versions.json" is up to date. No changes made.')
+  console.log('[versioning] "versions.json" is up to date. No changes made.\n')
 }
