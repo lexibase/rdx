@@ -2,6 +2,16 @@
 
 ## 2.1.1 (unreleased)
 
+- Extracted version logic into `VersionBanner` component.
+- Moved header rendering logic into `DocHeader` component.
+- Delegated navigation and footer rendering to `DocFooter` component.
+- Removed inline logic from `DocPage` for version status, navigation, and metadata.
+- Improved readability and maintainability of the documentation layout.
+- Added accessibility attributes to close button in mobile sidebar.
+- Added Animation from `MobileSideBar`.
+- Added `aria-current="page"` to active sidebar links for better accessibility.
+- Extracted `SidebarCategory` component from `DesktopSidebar` for improved reability and testability.
+- Componentized `Navbar` into `NavbarLogo`, `NavbarLinks`, and `NavbarActions`, for improved readability and maintainability.
 - Extracted `ExternalLink` into standalone component for cleaner separation of external link logic in dropdown.
 - Modularized `DropdownVersion` component by extracting `DropdownTrigger`, `VersionGroup`, and `LoadingButton` for improved readability and reusability.
 - Promoted `LoadingButton` to global component in `@rdx/ui`, ensuring consistent loading behavior across the design system.
