@@ -13,7 +13,12 @@ export function ModeToggle() {
   }
 
   return (
-    <Button size="icon" variant="ghost" onClick={toggleTheme}>
+    <Button
+      size="icon"
+      variant="ghost"
+      onClick={toggleTheme}
+      aria-label="Mode Toggle"
+    >
       <SunMoon className="h-[1.2rem] w-[1.2rem]" />
       <span className="sr-only">colorTheme</span>
     </Button>

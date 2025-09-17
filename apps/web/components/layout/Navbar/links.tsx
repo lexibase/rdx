@@ -13,7 +13,13 @@ export function NavbarLinks() {
   return (
     <>
       {config.navbar.items.map((link) => (
-        <Button key={link.label ?? href} variant="link" size="sm" asChild>
+        <Button
+          key={link.label ?? href}
+          variant="link"
+          size="sm"
+          asChild
+          aria-label={link.label}
+        >
           <Link href={link.href ?? href}>{link.label}</Link>
         </Button>
       ))}

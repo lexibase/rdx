@@ -3,9 +3,10 @@ import { Logo } from '@rdx/ui/components/logo'
 
 const config: RDXConfig = {
   title: 'RDX',
-  description: '',
+  description:
+    'A tool for building documentation with MDX in a friendly and focused way — fast, easy, and built for clarity',
   author: 'DuHNunes',
-  favicon: 'img/favicon.ico',
+  favicon: '/favicon.ico',
 
   // Set the production url of your site here
   url: 'https://rdx-tool.vercel.app',
@@ -31,7 +32,7 @@ const config: RDXConfig = {
     actions: {
       githubButton: true,
       githubUrl: 'https://github.com/lexibase/rdx',
-      showToggleMode: false,
+      showToggleMode: true,
     },
   },
 }

@@ -39,30 +39,50 @@ export function DocFooter({
     <footer className="flex flex-col">
       <section className="flex items-center justify-between">
         {prevLink ? (
-          <Button variant="outline" size="sm" asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            aria-label={prevLink.label}
+          >
             <Link href={prevLink.href}>{prevLink.label}</Link>
           </Button>
         ) : (
-          <Button variant="outline" size="sm" disabled>
-            Anterior
+          <Button
+            variant="outline"
+            size="sm"
+            disabled
+            aria-label="previous page"
+          >
+            Previous
           </Button>
         )}
 
         {nextLink ? (
-          <Button variant="outline" size="sm" asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            aria-label={nextLink.label}
+          >
             <Link href={nextLink.href}>{nextLink.label}</Link>
           </Button>
         ) : (
-          <Button variant="outline" size="sm" disabled>
-            Próxima
+          <Button variant="outline" size="sm" disabled aria-label="next link">
+            Next
           </Button>
         )}
       </section>
 
       <section className="flex items-center justify-center w-full py-5">
         <p className="text-sm text-muted-foreground">
-          &copy; {currentYear} <strong>RDX</strong>. Desenvolvido por{' '}
-          <Button variant="link" size="link" asChild>
+          &copy; {currentYear} <strong>RDX</strong>. Developed by{' '}
+          <Button
+            variant="link"
+            size="link"
+            asChild
+            aria-label="go to github page from duhnunes"
+          >
             <Link
               href="https://github.com/duhnunes"
               target="_blank"

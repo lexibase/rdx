@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   ),
   icons: {
-    icon: '/favicon.ico',
+    icon: config.favicon,
   },
   title: config.title,
   description: config.description,
@@ -79,7 +79,7 @@ export default function RootLayout({
           type="image/png"
         />
         <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml" />
-        <link href="/favicon.ico" rel="shortcut icon" />
+        <link href={config.favicon} rel="shortcut icon" />
         <meta content={config.title} name="apple-mobile-web-app-title" />
         <link href="/site.webmanifest" rel="manifest" />
 

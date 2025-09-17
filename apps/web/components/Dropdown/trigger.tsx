@@ -26,7 +26,12 @@ export function DropdownTrigger({
 
   return (
     <DropdownMenuTrigger asChild>
-      <Button variant="outline" size="sm" className="min-w-[134px] capitalize">
+      <Button
+        variant="outline"
+        size="sm"
+        className="min-w-[134px] capitalize"
+        aria-label={version}
+      >
         {version === 'canary' ? 'canary' : `Version ${version}`}
         <DropdownMenuShortcut className={colorClass}>
           {getIconByLabel(version)}

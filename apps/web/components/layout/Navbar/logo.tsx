@@ -7,13 +7,18 @@ export function NavbarLogo() {
   const LogoComponent = config.navbar.logo
 
   return config.navbar.title === '' ? (
-    <Button variant="ghost" size="icon" asChild>
+    <Button variant="ghost" size="icon" asChild aria-label="Logo">
       <Link href="/" className="cursor-default">
         <LogoComponent className="size-5" />
       </Link>
     </Button>
   ) : (
-    <Button variant="ghost" size="default" asChild>
+    <Button
+      variant="ghost"
+      size="default"
+      asChild
+      aria-label={`Logo from ${config.navbar.title}`}
+    >
       <Link href="/" className="cursor-default flex items-center gap-2">
         <LogoComponent className="size-5" /> <span>{config.navbar.title}</span>
       </Link>
