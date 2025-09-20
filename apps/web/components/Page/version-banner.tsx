@@ -1,37 +1,37 @@
-import type { VersionsRaw } from '@rdx/types/loaders'
-import Link from 'next/link'
+import type { VersionsRaw } from "@rdx/types/loaders";
+import Link from "next/link";
 
 export function VersionBanner({
   version,
   versionsRaw,
 }: {
-  version: string
-  versionsRaw: VersionsRaw
+  version: string;
+  versionsRaw: VersionsRaw;
 }) {
-  const currentVersion = versionsRaw.active[0]
-  const isCanary = version === 'canary'
-  const isOutdated = version !== currentVersion && !isCanary
+  const currentVersion = versionsRaw.active[0];
+  const isCanary = version === "canary";
+  const isOutdated = version !== currentVersion && !isCanary;
 
-  if (!isOutdated && !isCanary) return null
+  if (!isOutdated && !isCanary) return null;
 
-  const variant = isOutdated ? 'red' : 'amber'
+  const variant = isOutdated ? "red" : "amber";
   const message = isOutdated
-    ? 'This is an outdated version of the documentation.'
-    : 'This is a pre-release version of the documentation.'
+    ? "This is an outdated version of the documentation."
+    : "This is a pre-release version of the documentation.";
 
   const styles = {
     red: {
-      bg: 'bg-red-100',
-      border: 'border-red-500',
-      text: 'text-red-700',
+      bg: "bg-red-100",
+      border: "border-red-500",
+      text: "text-red-700",
     },
     amber: {
-      bg: 'bg-amber-100',
-      border: 'border-amber-500',
-      text: 'text-amber-700',
+      bg: "bg-amber-100",
+      border: "border-amber-500",
+      text: "text-amber-700",
     },
-  }
-  const style = styles[variant]
+  };
+  const style = styles[variant];
 
   return (
     <div
@@ -42,5 +42,5 @@ export function VersionBanner({
         Go back to the current version
       </Link>
     </div>
-  )
+  );
 }

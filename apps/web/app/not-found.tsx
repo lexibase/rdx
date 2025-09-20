@@ -1,13 +1,13 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { Button } from '@rdx/ui/components/button'
+import Link from "next/link";
+import { Button } from "@rdx/ui/components/button";
 
-import { useVersion } from '@/hooks/use-version'
+import { useVersion } from "@/hooks/use-version";
 
 export default function NotFound() {
-  const { version } = useVersion()
-  const href = `/docs/${version}`
+  const { version } = useVersion();
+  const href = `/docs/${version}`;
 
   return (
     <section className="bg-transparent text-primary h-full flex items-center justify-center cursor-default">
@@ -30,5 +30,5 @@ export default function NotFound() {
         </article>
       </div>
     </section>
-  )
+  );
 }

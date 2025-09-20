@@ -1,12 +1,12 @@
-import { Button } from '@rdx/ui/components/button'
-import Link from 'next/link'
+import { Button } from "@rdx/ui/components/button";
+import Link from "next/link";
 
-import config from '@/rdx.config'
+import config from "@/rdx.config";
 
 export function NavbarLogo() {
-  const LogoComponent = config.navbar.logo
+  const LogoComponent = config.navbar.logo;
 
-  return config.navbar.title === '' ? (
+  return config.navbar.title === "" ? (
     <Button variant="ghost" size="icon" asChild aria-label="Logo">
       <Link href="/" className="cursor-default">
         <LogoComponent className="size-5" />
@@ -23,5 +23,5 @@ export function NavbarLogo() {
         <LogoComponent className="size-5" /> <span>{config.navbar.title}</span>
       </Link>
     </Button>
-  )
+  );
 }

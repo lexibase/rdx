@@ -1,16 +1,16 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { usePathname } from 'next/navigation'
-import type { DocCategory } from '@rdx/types/loaders'
+import { useState } from "react";
+import { usePathname } from "next/navigation";
+import type { DocCategory } from "@rdx/types/loaders";
 
-import { DesktopSidebar } from './Desktop'
-import { MobileSidebar } from './Mobile'
-import { SidebarToggle } from './toggle'
+import { DesktopSidebar } from "./Desktop";
+import { MobileSidebar } from "./Mobile";
+import { SidebarToggle } from "./toggle";
 
 export const Sidebar = ({ categories }: { categories: DocCategory[] }) => {
-  const pathname = usePathname()
-  const [isOpen, setIsOpen] = useState(false)
+  const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
@@ -30,5 +30,5 @@ export const Sidebar = ({ categories }: { categories: DocCategory[] }) => {
         </div>
       </aside>
     </>
-  )
-}
+  );
+};
