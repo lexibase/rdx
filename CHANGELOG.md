@@ -2,7 +2,7 @@
 
 ## 2.1.1 (unreleased)
 
-- Add Husky pre-commit hook to enforce lintin and formatting before commits.
+- Add Husky pre-commit hook to enforce formatting before commits.
 - Add `prettier-plugin-tailwindcss` to auto-sort Tailwind classes during formatting.
 - Extract `prettier` config into standalone `@rdx/prettier-config` inside `config/`, removing `.prettierrc` from project root.
 - Move `ts-config` and `eslint-config` into `config/` to separate what is tooling from logic.
