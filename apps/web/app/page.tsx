@@ -1,4 +1,4 @@
-import { Logo } from '@rdx/ui/components/logo'
+import { Logo } from "@rdx/ui/components/logo";
 
 export default function Home() {
   return (
@@ -6,5 +6,5 @@ export default function Home() {
       <Logo className="size-52 hover:scale-105 hover:rotate-1 transition-[scale, rotation] duration-1000" />
       <span className="text-3xl font-mono uppercase">RDX</span>
     </section>
-  )
+  );
 }

@@ -1,17 +1,17 @@
-import { docsIndexer } from '@rdx/core'
+import { docsIndexer } from "@rdx/core";
 
-import { Sidebar } from '@/components/layout/Sidebar'
+import { Sidebar } from "@/components/layout/Sidebar";
 
 export default async function DocsLayout({
   children,
   params,
 }: {
-  children: React.ReactNode
-  params: Promise<{ version: string }>
+  children: React.ReactNode;
+  params: Promise<{ version: string }>;
 }) {
-  const { version } = await params
-  const resolvedParams = version || 'canary'
-  const categories = docsIndexer(resolvedParams)
+  const { version } = await params;
+  const resolvedParams = version || "canary";
+  const categories = docsIndexer(resolvedParams);
 
   return (
     <div className="flex flex-1 overflow-hidden relative">
@@ -20,5 +20,5 @@ export default async function DocsLayout({
         {children}
       </div>
     </div>
-  )
+  );
 }

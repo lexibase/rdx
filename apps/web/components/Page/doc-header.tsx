@@ -1,31 +1,31 @@
-import { docsIndexer } from '@rdx/core'
-import type { DocCategory } from '@rdx/types/loaders'
-import { useMemo } from 'react'
+import { docsIndexer } from "@rdx/core";
+import type { DocCategory } from "@rdx/types/loaders";
+import { useMemo } from "react";
 
 export function DocHeader({
   version,
   filename,
 }: {
-  version: string
-  filename: string
+  version: string;
+  filename: string;
 }) {
   const sidebarLinks: DocCategory[] = useMemo(
     () => docsIndexer(version),
-    [version]
-  )
-  const slug = `/docs/${version}/${filename}`
+    [version],
+  );
+  const slug = `/docs/${version}/${filename}`;
 
   const flatLinks = useMemo(
     () => sidebarLinks.flatMap((cat) => cat.links),
-    [sidebarLinks]
-  )
+    [sidebarLinks],
+  );
   const currentLink = useMemo(
     () => flatLinks.find((link) => link.href === slug),
-    [flatLinks, slug]
-  )
+    [flatLinks, slug],
+  );
   const currentCategory = sidebarLinks.find((cat) =>
-    cat.links.some((link) => link.href === slug)
-  )
+    cat.links.some((link) => link.href === slug),
+  );
 
   return (
     <>
@@ -36,8 +36,8 @@ export function DocHeader({
         {currentLink?.label}
       </h1>
       <p className="text-sm text-ring max-w-[726px]">
-        {currentLink?.description || 'Sem descrição disponível'}
+        {currentLink?.description || "Sem descrição disponível"}
       </p>
     </>
-  )
+  );
 }

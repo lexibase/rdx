@@ -1,51 +1,51 @@
-'use client'
+"use client";
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from '@rdx/ui/components/dropdown-menu'
-import { getParsedVersions } from '@rdx/rdx-versioning'
-import { LoadingButton } from '@rdx/ui/components/loading-button'
+} from "@rdx/ui/components/dropdown-menu";
+import { getParsedVersions } from "@rdx/rdx-versioning";
+import { LoadingButton } from "@rdx/ui/components/loading-button";
 
-import { useVersion } from '@/hooks/use-version'
-import { createGetIconByLabel } from '@/lib/get-icon-by-label'
-import { useVersionNavigation } from '@/hooks/use-version-navigation'
+import { useVersion } from "@/hooks/use-version";
+import { createGetIconByLabel } from "@/lib/get-icon-by-label";
+import { useVersionNavigation } from "@/hooks/use-version-navigation";
 
-import versionsRaw from '../../versions.json'
+import versionsRaw from "../../versions.json";
 
-import { VersionItem } from './version-item'
-import { DropdownTrigger } from './trigger'
-import { VersionGroup } from './group'
-import { ExternalLink } from './external-link'
+import { VersionItem } from "./version-item";
+import { DropdownTrigger } from "./trigger";
+import { VersionGroup } from "./group";
+import { ExternalLink } from "./external-link";
 
 export function DropdownVersion() {
-  const { version } = useVersion()
-  const navigateToVersion = useVersionNavigation()
+  const { version } = useVersion();
+  const navigateToVersion = useVersionNavigation();
 
   const [versions, setVersions] = useState<ReturnType<
     typeof getParsedVersions
-  > | null>(null)
+  > | null>(null);
 
   const getIconByLabel = useMemo(
     () => createGetIconByLabel(versions),
-    [versions]
-  )
+    [versions],
+  );
 
   useEffect(() => {
-    setVersions(getParsedVersions(versionsRaw))
-  }, [])
+    setVersions(getParsedVersions(versionsRaw));
+  }, []);
 
   const isCurrentVersion = useCallback(
     (label: string) => label === version,
-    [version]
-  )
+    [version],
+  );
 
   if (!versions) {
-    return <LoadingButton />
+    return <LoadingButton />;
   }
 
   return (
@@ -73,6 +73,7 @@ export function DropdownVersion() {
           getIconByLabel={getIconByLabel}
           onSelect={navigateToVersion}
         />
+
         {versions.archived.length > 0 && (
           <>
             <DropdownMenuSeparator />
@@ -90,9 +91,8 @@ export function DropdownVersion() {
             </DropdownMenuGroup>
           </>
         )}
-        <DropdownMenuSeparator />
         <ExternalLink />
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

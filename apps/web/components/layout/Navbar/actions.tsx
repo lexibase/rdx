@@ -1,15 +1,15 @@
-import { Button } from '@rdx/ui/components/button'
-import { Separator } from '@rdx/ui/components/separator'
-import { Github } from 'lucide-react'
-import Link from 'next/link'
-import { ModeToggle } from '@rdx/ui/components/mode-toggle'
+import { Button } from "@rdx/ui/components/button";
+import { Separator } from "@rdx/ui/components/separator";
+import { Github } from "lucide-react";
+import Link from "next/link";
+import { ModeToggle } from "@rdx/ui/components/mode-toggle";
 
-import config from '@/rdx.config'
+import config from "@/rdx.config";
 
 export function NavbarActions() {
-  const github = config.navbar?.actions?.github
+  const github = config.navbar?.actions?.github;
 
-  if (!github?.visible || !github.url) return null
+  if (!github?.visible || !github.url) return null;
 
   return (
     <>
@@ -43,5 +43,5 @@ export function NavbarActions() {
         </>
       )}
     </>
-  )
+  );
 }

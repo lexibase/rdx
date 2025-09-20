@@ -1,9 +1,9 @@
 import {
   DropdownMenuItem,
   DropdownMenuShortcut,
-} from '@rdx/ui/components/dropdown-menu'
-import { Github, ExternalLinkIcon } from 'lucide-react'
-import Link from 'next/link'
+} from "@rdx/ui/components/dropdown-menu";
+import { Github, ExternalLinkIcon } from "lucide-react";
+import Link from "next/link";
 
 export function ExternalLink() {
   return (
@@ -25,5 +25,5 @@ export function ExternalLink() {
         </DropdownMenuShortcut>
       </Link>
     </DropdownMenuItem>
-  )
+  );
 }

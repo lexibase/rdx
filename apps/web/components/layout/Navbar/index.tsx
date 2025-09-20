@@ -1,8 +1,8 @@
-import { DropdownVersion } from '@/components/Dropdown'
+import { DropdownVersion } from "@/components/Dropdown";
 
-import { NavbarLogo } from './logo'
-import { NavbarLinks } from './links'
-import { NavbarActions } from './actions'
+import { NavbarLogo } from "./logo";
+import { NavbarLinks } from "./links";
+import { NavbarActions } from "./actions";
 
 export function Navbar() {
   return (
@@ -16,5 +16,5 @@ export function Navbar() {
         <NavbarActions />
       </div>
     </nav>
-  )
+  );
 }

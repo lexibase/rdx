@@ -1,16 +1,16 @@
-import type { DocCategory } from '@rdx/types/loaders'
-import { Button } from '@rdx/ui/components/button'
-import { Separator } from '@rdx/ui/components/separator'
-import Link from 'next/link'
+import type { DocCategory } from "@rdx/types/loaders";
+import { Button } from "@rdx/ui/components/button";
+import { Separator } from "@rdx/ui/components/separator";
+import Link from "next/link";
 
 export function SidebarCategory({
   category,
   pathname,
   showSeparator,
 }: {
-  category: DocCategory
-  pathname: string
-  showSeparator: boolean
+  category: DocCategory;
+  pathname: string;
+  showSeparator: boolean;
 }) {
   return (
     <div className="flex flex-col gap-0.5 mb-3 first:mt-4">
@@ -30,7 +30,7 @@ export function SidebarCategory({
           <Link
             className="text-sm text-primary"
             href={link.href}
-            aria-current={pathname.startsWith(link.href) ? 'page' : undefined}
+            aria-current={pathname.startsWith(link.href) ? "page" : undefined}
           >
             {link.label}
           </Link>
@@ -38,5 +38,5 @@ export function SidebarCategory({
       ))}
       {showSeparator && <Separator className="my-4" />}
     </div>
-  )
+  );
 }
