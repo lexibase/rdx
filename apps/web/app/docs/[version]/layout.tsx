@@ -1,4 +1,4 @@
-import { docsIndexer } from '@rdx/rdx-loaders'
+import { docsIndexer } from '@rdx/core'
 
 import { Sidebar } from '@/components/layout/Sidebar'
 

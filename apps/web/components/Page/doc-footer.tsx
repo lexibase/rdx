@@ -1,8 +1,8 @@
-import { docsIndexer } from '@rdx/rdx-loaders'
 import type { DocCategory } from '@rdx/types/loaders'
 import { Button } from '@rdx/ui/components/button'
 import Link from 'next/link'
 import { useMemo } from 'react'
+import { docsIndexer } from '@rdx/core'
 
 import config from '@/rdx.config'
 

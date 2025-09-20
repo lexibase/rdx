@@ -1,4 +1,4 @@
-import { docsIndexer } from '@rdx/rdx-loaders'
+import { docsIndexer } from '@rdx/core'
 import type { DocCategory } from '@rdx/types/loaders'
 import { useMemo } from 'react'
 

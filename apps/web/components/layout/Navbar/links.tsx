@@ -8,29 +8,13 @@ import config from '@/rdx.config'
 
 export function NavbarLinks() {
   const { version } = useVersion()
-  const defaultHref = `/docs/${version}`
-
-  const links = config.navbar.items ?? []
+  const href = `/docs/${version}`
 
   return (
     <>
-      {links.length > 0 &&
-        links.map((link) => {
-          const isDocs = link.label?.toLowerCase() === 'docs'
-          const href = isDocs ? defaultHref : (link.href ?? defaultHref)
-
-          return (
-            <Button
-              key={link.label ?? href}
-              variant="link"
-              size="sm"
-              asChild
-              aria-label={link.label}
-            >
-              <Link href={href}>{link.label}</Link>
-            </Button>
-          )
-        })}
+      <Button key={href} variant="link" size="sm" asChild>
+        <Link href={href}>Docs</Link>
+      </Button>
     </>
   )
 }

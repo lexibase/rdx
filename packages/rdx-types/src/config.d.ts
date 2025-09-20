@@ -70,18 +70,6 @@ export type RDXConfig = {
     logo: React.ComponentType<{ className?: string }>
 
     /**
-     * List of navigation links to display in the navbar.
-     * Each item must have a label and optionally a custom href.
-     * 
-     * The "Docs" link is reserved and cannot be overridden.
-     * 
-     */
-    items?: {
-      label: string
-      href?: string
-    }[]
-
-    /**
      * Configuration for navbar action buttons
      * 
      */
