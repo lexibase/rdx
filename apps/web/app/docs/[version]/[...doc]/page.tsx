@@ -1,6 +1,6 @@
 import { mdxComponents } from '@rdx/ui/components/mdx-components'
 import { notFound } from 'next/navigation'
-import { mdxLoader } from '@rdx/rdx-loaders'
+import { mdxLoader } from '@rdx/core'
 
 import versionsRaw from '@/versions.json'
 import { VersionBanner } from '@/components/Page/version-banner'

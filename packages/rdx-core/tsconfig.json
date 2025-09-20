@@ -6,7 +6,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "@rdx/rdx-loaders/*": ["./src/*"],
+      "@rdx/rdx-core/*": ["./src/*"],
       "@rdx/types": ["../rdx-types/src/*"],
     }
   },

@@ -22,12 +22,6 @@ const config: RDXConfig = {
     // Must accept `className` for styling
     logo: Logo,
 
-    items: [
-      {
-        label: 'Docs',
-      },
-    ],
-
     actions: {
       github: {
         visible: true,
