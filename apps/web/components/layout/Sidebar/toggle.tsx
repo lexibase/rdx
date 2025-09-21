@@ -1,9 +1,9 @@
-import { Button } from "@rdx/ui/components/button";
-import { SidebarOpen } from "lucide-react";
+import { Button } from '@rdx/ui/components/button'
+import { SidebarOpen } from 'lucide-react'
 
 type Props = {
-  onToggle: () => void;
-};
+  onToggle: () => void
+}
 
 export function SidebarToggle({ onToggle }: Props) {
   return (
@@ -16,5 +16,5 @@ export function SidebarToggle({ onToggle }: Props) {
         <SidebarOpen className="size-4" />
       </Button>
     </div>
-  );
+  )
 }

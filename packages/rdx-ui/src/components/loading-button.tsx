@@ -1,5 +1,5 @@
-import { Spline } from "lucide-react";
-import { Button } from "@rdx/ui/components/button";
+import { Spline } from 'lucide-react'
+import { Button } from '@rdx/ui/components/button'
 
 export function LoadingButton() {
   return (
@@ -15,5 +15,5 @@ export function LoadingButton() {
         <Spline className="size-4" />
       </div>
     </Button>
-  );
+  )
 }

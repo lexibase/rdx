@@ -1,3 +1,3 @@
 #!/usr/bin/env tsx
 
-import "../src/scripts/generate-versions";
+import '../src/scripts/generate-versions'

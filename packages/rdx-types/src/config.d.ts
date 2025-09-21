@@ -4,35 +4,35 @@ export type RDXConfig = {
    * Displayed in the navbar and browser tab.
    *
    */
-  title: string;
+  title: string
 
   /**
    * A short description of the project.
    * Used for SEO and meta tags.
    *
    */
-  description: string;
+  description: string
 
   /**
    * The name of the author or organization.
    * Can be shown in the metadata.
    *
    */
-  author: string;
+  author: string
 
   /**
    * Path to the favicon file.
    * Must be located at 'public/favicon.ico' by default.
    *
    */
-  favicon: string;
+  favicon: string
 
   /**
    * The base URL where the documentation is hosted.
    * Used for generating canonical links and metadata.
    *
    */
-  url: string;
+  url: string
 
   /**
    * Theme configuration options.
@@ -45,8 +45,8 @@ export type RDXConfig = {
      * Accepted values: 'system', 'dark', or 'light'
      *
      */
-    defaultTheme: string;
-  };
+    defaultTheme: string
+  }
 
   /**
    * Navbar configurations options.
@@ -58,7 +58,7 @@ export type RDXConfig = {
      * Leave empty to show only the logo.
      *
      */
-    title?: string;
+    title?: string
 
     /**
      * This logo component is injected via `rdx.config.ts` and must be a valid React component.
@@ -67,7 +67,7 @@ export type RDXConfig = {
      * such as an inline SVG or image-based logo, allowing full customization of branding.
      *
      */
-    logo: React.ComponentType<{ className?: string }>;
+    logo: React.ComponentType<{ className?: string }>
 
     /**
      * Configuration for navbar action buttons
@@ -83,20 +83,20 @@ export type RDXConfig = {
          * Whether to show the GitHub button in the navbar.
          *
          */
-        visible: boolean;
+        visible: boolean
         /**
          * URL of the GitHub repository.
          * Used as the target for the GitHub button.
          *
          */
-        url: string;
-      };
+        url: string
+      }
 
       /**
        * Whether to display the theme toggle (system/dark/light) in the navbar.
        *
        */
-      showToggleMode?: boolean;
-    };
-  };
-};
+      showToggleMode?: boolean
+    }
+  }
+}

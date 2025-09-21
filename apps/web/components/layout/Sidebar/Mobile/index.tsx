@@ -1,9 +1,9 @@
-import { SidebarClose } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import type { DocCategory } from "@rdx/types/loaders";
-import { Button } from "@rdx/ui/components/button";
+import { SidebarClose } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
+import type { DocCategory } from '@rdx/types/loaders'
+import { Button } from '@rdx/ui/components/button'
 
-import { SidebarCategory } from "../category";
+import { SidebarCategory } from '../category'
 
 export function MobileSidebar({
   pathname,
@@ -11,19 +11,19 @@ export function MobileSidebar({
   isOpen,
   onClose,
 }: {
-  pathname: string;
-  categories: DocCategory[];
-  isOpen: boolean;
-  onClose: () => void;
+  pathname: string
+  categories: DocCategory[]
+  isOpen: boolean
+  onClose: () => void
 }) {
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.section
-          initial={{ x: "-100%" }}
+          initial={{ x: '-100%' }}
           animate={{ x: 0 }}
-          exit={{ x: "-100%" }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          exit={{ x: '-100%' }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="fixed top-0 left-0 w-full h-full p-4 border-r border-border z-50 bg-background overflow-y-auto"
         >
           <div className="fixed top-2 right-5">
@@ -48,5 +48,5 @@ export function MobileSidebar({
         </motion.section>
       )}
     </AnimatePresence>
-  );
+  )
 }

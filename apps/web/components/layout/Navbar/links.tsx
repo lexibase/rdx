@@ -1,14 +1,14 @@
-"use client";
+'use client'
 
-import { Button } from "@rdx/ui/components/button";
-import Link from "next/link";
+import { Button } from '@rdx/ui/components/button'
+import Link from 'next/link'
 
-import { useVersion } from "@/hooks/use-version";
-import config from "@/rdx.config";
+import { useVersion } from '@/hooks/use-version'
+import config from '@/rdx.config'
 
 export function NavbarLinks() {
-  const { version } = useVersion();
-  const href = `/docs/${version}`;
+  const { version } = useVersion()
+  const href = `/docs/${version}`
 
   return (
     <>
@@ -16,5 +16,5 @@ export function NavbarLinks() {
         <Link href={href}>Docs</Link>
       </Button>
     </>
-  );
+  )
 }

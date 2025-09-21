@@ -1,13 +1,13 @@
-import type { DocCategory } from "@rdx/types/loaders";
+import type { DocCategory } from '@rdx/types/loaders'
 
-import { SidebarCategory } from "../category";
+import { SidebarCategory } from '../category'
 
 export function DesktopSidebar({
   pathname,
   categories,
 }: {
-  pathname: string;
-  categories: DocCategory[];
+  pathname: string
+  categories: DocCategory[]
 }) {
   return (
     <div className="w-full h-full p-4 border-r border-border relative">
@@ -20,5 +20,5 @@ export function DesktopSidebar({
         />
       ))}
     </div>
-  );
+  )
 }
