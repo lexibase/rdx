@@ -1,32 +1,32 @@
-import { mdxComponents } from "@rdx/ui/components/mdx-components";
-import { notFound } from "next/navigation";
-import { mdxLoader } from "@rdx/core";
+import { mdxComponents } from '@rdx/ui/components/mdx-components'
+import { notFound } from 'next/navigation'
+import { mdxLoader } from '@rdx/core'
 
-import versionsRaw from "@/versions.json";
-import { VersionBanner } from "@/components/Page/version-banner";
-import { DocHeader } from "@/components/Page/doc-header";
-import { DocFooter } from "@/components/Page/doc-footer";
+import versionsRaw from '@/versions.json'
+import { VersionBanner } from '@/components/Page/version-banner'
+import { DocHeader } from '@/components/Page/doc-header'
+import { DocFooter } from '@/components/Page/doc-footer'
 
 export default async function DocPage({
   params,
 }: {
-  params: Promise<{ version: string; doc: string[] }>;
+  params: Promise<{ version: string; doc: string[] }>
 }) {
-  const { version, doc } = await params;
-  const filename = doc.at(-1);
-  if (!filename) return notFound();
+  const { version, doc } = await params
+  const filename = doc.at(-1)
+  if (!filename) return notFound()
 
-  let content;
+  let content
   try {
     const result = await mdxLoader({
       filename,
       version,
       versionsRaw,
       mdxComponents,
-    });
-    content = result.content;
+    })
+    content = result.content
   } catch {
-    return notFound();
+    return notFound()
   }
 
   return (
@@ -40,5 +40,5 @@ export default async function DocPage({
       </div>
       <DocFooter version={version} filename={filename} />
     </section>
-  );
+  )
 }

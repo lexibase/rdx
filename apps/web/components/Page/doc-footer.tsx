@@ -1,41 +1,41 @@
-import type { DocCategory } from "@rdx/types/loaders";
-import { Button } from "@rdx/ui/components/button";
-import Link from "next/link";
-import { useMemo } from "react";
-import { docsIndexer } from "@rdx/core";
+import type { DocCategory } from '@rdx/types/loaders'
+import { Button } from '@rdx/ui/components/button'
+import Link from 'next/link'
+import { useMemo } from 'react'
+import { docsIndexer } from '@rdx/core'
 
-import config from "@/rdx.config";
+import config from '@/rdx.config'
 
 export function DocFooter({
   version,
   filename,
 }: {
-  version: string;
-  filename: string;
+  version: string
+  filename: string
 }) {
   const sidebarLinks: DocCategory[] = useMemo(
     () => docsIndexer(version),
-    [version],
-  );
-  const slug = `/docs/${version}/${filename}`;
+    [version]
+  )
+  const slug = `/docs/${version}/${filename}`
 
   const flatLinks = useMemo(
     () => sidebarLinks.flatMap((cat) => cat.links),
-    [sidebarLinks],
-  );
+    [sidebarLinks]
+  )
   const currentIndex = useMemo(
     () => flatLinks.findIndex((link) => link.href === slug),
-    [flatLinks, slug],
-  );
+    [flatLinks, slug]
+  )
 
   const prevLink =
-    currentIndex > 0 ? (flatLinks[currentIndex - 1] ?? null) : null;
+    currentIndex > 0 ? (flatLinks[currentIndex - 1] ?? null) : null
   const nextLink =
     currentIndex < flatLinks.length - 1
       ? (flatLinks[currentIndex + 1] ?? null)
-      : null;
+      : null
 
-  const currentYear = useMemo(() => new Date().getFullYear(), []);
+  const currentYear = useMemo(() => new Date().getFullYear(), [])
 
   return (
     <footer className="flex flex-col">
@@ -78,7 +78,7 @@ export function DocFooter({
 
       <section className="flex items-center justify-center w-full py-5">
         <p className="text-sm text-muted-foreground">
-          &copy; {currentYear} <strong>RDX</strong>. Developed by{" "}
+          &copy; {currentYear} <strong>RDX</strong>. Developed by{' '}
           <Button
             variant="link"
             size="link"
@@ -96,5 +96,5 @@ export function DocFooter({
         </p>
       </section>
     </footer>
-  );
+  )
 }
