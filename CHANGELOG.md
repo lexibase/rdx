@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.1.1 (unreleased)
+## 2.1.1 (2025-09-22)
 
 - Add Husky pre-commit hook to enforce formatting before commits.
 - Add `prettier-plugin-tailwindcss` to auto-sort Tailwind classes during formatting.
