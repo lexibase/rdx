@@ -1,0 +1,77 @@
+---
+title: "Configuration"
+description: "Customize yor documentation setup"
+link_position: 2
+---
+
+RDX includes a configuration file where you can tweak settings, enable or disable features, and define key information for your documentation.
+
+## What goes into?
+---
+
+You don't need to write your `rdx.config.ts` from scratch - even when building your documentation from the ground up.
+
+## Metadata
+---
+
+Your documentation's metadata includes essential global fields like `title`, `description`, `author`, `favicon`, and `url`, all of which are required.
+
+These values are used across your site - in page titles, browser tab icons, social sharing previews, and even tog enerate correct paths for serving static assets.
+
+## Theme
+---
+
+You can choose between three theme modes for your documentations: `system`, `dark`, and `light`.
+
+```ts
+// rdx.config.ts
+{
+  // ...
+  theme: {
+    defaultTheme: 'system',
+  },
+}
+```
+
+- `system` - Automatically detects the user's system theme preference.
+- `dark` - Forces the documentation to always use dark mode.
+- `light` - Forces the documentation to always use light mode.
+
+## Navbar
+---
+
+You can customize your navbar with a few simple options:
+
+```ts
+// rdx.config.ts
+{
+  // ...
+  navbar: {
+      title: '',
+      logo: Logo,
+
+      items: [
+        {
+          label: 'Docs',
+        },
+      ],
+
+      actions: {
+        githubButton: true,
+        githubUrl: 'https://github.com/lexibase/rdx',
+        showToggleMode: true,
+      },
+    },
+}
+```
+
+- `title` - Sets the name of your documentation shown next to the logo. Leave it blank to hide the title.
+- `logo` - Imports a `.tsx` component containing your logo.
+- `items[]` - Defines the navigation links in your navbar.
+  - `label` - The name of the link displayed in the navbar.
+  - `href` - The URL for the link (optional for `Docs`).
+- `actions` - Configures action buttons.
+  - `githubButton` - Enables/disables the GitHub button.
+  - `githubUrl` - Sets the URL the GitHub button points to.
+  - `showToggleMode` - Enables/disables the theme toggle (dark/light).
+
