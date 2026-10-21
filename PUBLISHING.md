@@ -31,11 +31,15 @@ requires the updated runtime.
 
 | Package                                      | Version        |
 | -------------------------------------------- | -------------- |
-| `@lexibase/rdx-types`                        | `1.0.0-beta.2` |
-| `@lexibase/rdx-core`                         | `1.0.0-beta.2` |
-| `@lexibase/rdx-next`                         | `1.0.0-beta.4` |
-| `@lexibase/create-rdx`                       | `1.0.0-beta.3` |
-| `@lexibase/rdx-versioning` (optional plugin) | `1.0.0-beta.0` |
+| `@lexibase/rdx-types`                        | `1.0.0-beta.3` |
+| `@lexibase/rdx-core`                         | `1.0.0-beta.3` |
+| `@lexibase/rdx-next`                         | `1.0.0-beta.5` |
+| `@lexibase/create-rdx`                       | `1.0.0-beta.4` |
+| `@lexibase/rdx-versioning` (optional plugin) | `1.0.0-beta.1` |
+
+This release adds the opt-in homepage, navbar version dropdown, and collapsible
+sidebar. The versioning package is republished to align its exact workspace
+dependencies with the updated core and types; its plugin API is unchanged.
 
 From the repository root, install the workspace dependencies and run the checks:
 
@@ -77,14 +81,14 @@ pnpm dev
 ```
 
 If `pnpm create` still resolves an older cached generator, select the release
-explicitly with `pnpm dlx @lexibase/create-rdx@1.0.0-beta.3`.
+explicitly with `pnpm dlx @lexibase/create-rdx@1.0.0-beta.4`.
 
 pnpm 11 may delay installing newly published versions according to its
 `minimumReleaseAge` policy. For a release test of your own packages, use an
 explicit version and temporarily set the policy for that invocation only:
 
 ```powershell
-pnpm --config.minimumReleaseAge=0 dlx @lexibase/create-rdx@1.0.0-beta.3 rdx-beta-test
+pnpm --config.minimumReleaseAge=0 dlx @lexibase/create-rdx@1.0.0-beta.4 rdx-beta-test
 ```
 
 Keep the usual age policy enabled for regular projects. If a subsequent pnpm

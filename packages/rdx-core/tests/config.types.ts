@@ -3,8 +3,12 @@ import { defineConfig } from '../src/config/index'
 defineConfig({
   title: 'Typed docs',
   docsDir: 'content',
+  homepage: { enabled: true, buttons: [{ label: 'Docs', href: '/docs' }] },
   theme: { defaultTheme: 'dark' },
 })
+
+// @ts-expect-error Homepage activation must be boolean.
+defineConfig({ title: 'Typed docs', homepage: { enabled: 'yes' } })
 
 // @ts-expect-error Unknown config keys must also be rejected by TypeScript.
 defineConfig({ title: 'Typed docs', docsDirectory: 'content' })
