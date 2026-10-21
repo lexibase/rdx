@@ -6,6 +6,7 @@ const nextConfig = {
   transpilePackages: [
     '@lexibase/rdx-core',
     '@lexibase/rdx-next',
+    '@lexibase/rdx-ui',
     'next-mdx-remote',
   ],
 }

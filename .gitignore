@@ -15,6 +15,8 @@ node_modules
 # Testing
 coverage
 .runtime-test-*/
+.rdx-theme-preview/
+.rdx-package-smoke/
 
 # Turbo
 .turbo

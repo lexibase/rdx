@@ -1,6 +1,6 @@
 {
   "name": "@lexibase/rdx-next",
-  "version": "1.0.0-beta.5",
+  "version": "1.0.0-beta.6",
   "description": "The Next.js runtime for RDX documentation projects.",
   "license": "MIT",
   "type": "module",
@@ -8,6 +8,8 @@
     "rdx": "./bin/rdx.mjs"
   },
   "exports": {
+    "./postcss.config": "./postcss.config.mjs",
+    "./styles.css": "./src/runtime/styles.css",
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
@@ -21,6 +23,8 @@
     "bin",
     "dist",
     "templates",
+    "postcss.config.mjs",
+    "src/runtime/styles.css",
     "README.md"
   ],
   "scripts": {
@@ -31,6 +35,7 @@
     "test:runtime": "node --test tests/runtime.integration.mjs"
   },
   "dependencies": {
+    "@lexibase/rdx-ui": "workspace:*",
     "@lexibase/rdx-core": "workspace:*",
     "@lexibase/rdx-types": "workspace:*",
     "jiti": "^2.6.1",

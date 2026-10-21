@@ -1,0 +1,16 @@
+@import '@lexibase/rdx-ui/globals.css';
+@source '../../dist/**/*.js';
+
+/* Colors, buttons, dropdowns and typography come from the shared UI theme. */
+.rdx-skip-link {
+  position: fixed;
+  top: -100px;
+  left: 16px;
+  z-index: 100;
+  padding: 12px;
+  background: var(--background);
+  color: var(--foreground);
+}
+.rdx-skip-link:focus {
+  top: 12px;
+}

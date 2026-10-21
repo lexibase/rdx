@@ -22,7 +22,9 @@ Only `title` is required. Defaults are `description: ''`, `lang: 'en'`,
 The documentation URL remains `/docs`; `docsDir` changes the filesystem source,
 not the URL. Theme values are `system`, `light`, and `dark`.
 
-`navbar.title` overrides the site title in the header; an empty string hides it.
+`navbar.title` adds text beside the logo; absent or empty means logo-only, as in
+the development website. `navbar.logo` accepts a React component with an optional
+`className` prop and defaults to the shared RDX logo.
 `navbar.actions.github` accepts `{ visible: boolean, url: string }` with an HTTP
 or HTTPS URL. Unknown configuration keys fail with the field name rather than
 being silently ignored. Configuration paths must stay inside the project.
@@ -47,32 +49,69 @@ export default defineConfig({
 })
 ```
 
-`homepage.enabled` defaults to false. The homepage title and description fall back
-to the site configuration. Omitting `buttons` supplies a documentation button;
-an empty array hides all hero buttons. Links accept root-relative paths (starting
+`homepage.enabled` defaults to false. With only `{ enabled: true }`, the homepage
+is the same centered logo and site name as `apps/web`, not a marketing hero.
+The title defaults to the site title; descriptions and buttons appear only when
+explicitly configured. Links accept root-relative paths (starting
 with a single `/`) or HTTP(S) URLs, not JavaScript URLs or protocol-relative URLs.
-The first button is primary. This initial API is configuration-based; custom React
-homepage components are not supported yet.
+The first button is primary.
 
-The navbar includes Documentation, optional Home and GitHub links, and a native
-expandable version dropdown when additional content sources exist. Switching
+For a custom homepage, create `home.tsx` at the project root:
+
+```tsx
+import { Home } from '@lexibase/rdx-ui/components/home'
+
+export default function MyHome() {
+  return <Home title="My project" />
+}
+```
+
+Then import the component in `rdx.config.ts`:
+
+```ts
+import { defineConfig } from '@lexibase/rdx-next'
+import MyHome from './home'
+
+export default defineConfig({
+  title: 'My project',
+  homepage: { enabled: true, component: MyHome },
+})
+```
+
+The custom component owns the homepage body; the shared navbar remains. Pass a
+component, not JSX or a string file path. Custom components can import the same
+buttons, logo and other exports from `@lexibase/rdx-ui`. Homepage-specific
+`title`, `description` and `buttons` are used by the built-in Home, not injected
+into a custom component.
+
+The navbar uses the original logo, Docs link, optional GitHub icon/theme toggle,
+and the same Radix version dropdown as `apps/web`. The logo returns to the
+homepage when enabled. Set `navbar.actions.showToggleMode: true` to show the
+shared theme toggle, independently of the GitHub action. Switching
 versions preserves the current page when it exists in the destination; otherwise
-it opens that edition's first page. Archived versions keep their badge.
-The dropdown and collapsible sidebar support keyboard navigation without client
-JavaScript. A skip link and visible focus outlines support keyboard users.
-Navigation wraps on small screens and the sidebar can be collapsed there or on
-desktop. The built-in interface labels currently use English, independently of
+it opens that edition's first page. The dropdown is absent without extra sources;
+archived versions retain their separate group, icon and muted styling.
+The Radix dropdown supports keyboard selection, Escape, focus return and outside
+click dismissal. The mobile sidebar uses a modal dialog with focus containment;
+desktop keeps the development site's sidebar. A skip link supports keyboard users.
+The built-in interface labels currently use English, independently of
 the HTML `lang` setting.
 
 Restart development after configuration changes and rebuild for production.
 Edit the project-owned `rdx.config.ts`, not generated files inside `.rdx/`, which
-are refreshed by the CLI. These changes affect generated sites; the legacy
-development website under `apps/web` is not migrated.
+are refreshed by the CLI. `apps/web` and generated sites now import the same
+navbar, dropdown, Home, sidebar, MDX components and theme from `packages/rdx-ui`,
+published as `@lexibase/rdx-ui`. Only their content/version adapters differ.
+Tailwind scanning, PostCSS and Next's transpilation are configured by the runtime;
+there are no monorepo paths or private UI dependencies in generated projects.
 
 For contributors, run `pnpm check`, then
 `pnpm --filter @lexibase/rdx-next test:runtime` to exercise a disposable generated
 site in development and production. This integration test requires the workspace
 packages to be built and does not publish or download framework packages.
+Optional browser checks use an installed Playwright module and browser via
+`RDX_PLAYWRIGHT_MODULE` and `RDX_BROWSER_EXECUTABLE`. Set `RDX_THEME_SCREENSHOTS`
+to a disposable output directory to save desktop/mobile screenshots.
 
 ## Activating versioning
 

@@ -1,20 +1,21 @@
-import { DropdownVersion } from '@/components/Dropdown'
+import { Navbar as SharedNavbar } from '@lexibase/rdx-ui/components/navbar'
 
-import { NavbarLogo } from './logo'
+import { DropdownVersion } from '@/components/Dropdown'
+import config from '@/rdx.config'
+
 import { NavbarLinks } from './links'
-import { NavbarActions } from './actions'
 
 export function Navbar() {
+  const BrandLogo = config.navbar.logo
   return (
-    <nav className="w-full flex items-center justify-between px-6 py-2 border-b border-border">
-      <div className="flex items-center gap-1">
-        <NavbarLogo />
-      </div>
-      <div className="flex items-center md:gap-x-2 h-4">
-        <DropdownVersion />
-        <NavbarLinks />
-        <NavbarActions />
-      </div>
-    </nav>
+    <SharedNavbar
+      title={config.navbar.title ?? ''}
+      siteTitle={config.title}
+      logo={<BrandLogo className="size-5" />}
+      versionMenu={<DropdownVersion />}
+      docsLink={<NavbarLinks />}
+      github={config.navbar.actions?.github}
+      showToggleMode={config.navbar.actions?.showToggleMode}
+    />
   )
 }

@@ -6,6 +6,7 @@ This repository publishes the framework and an optional versioning plugin:
 | ---------------------- | -------- | -------------------------------------------------------- |
 | `@lexibase/rdx-types`  | Lexibase | Shared TypeScript types                                  |
 | `@lexibase/rdx-core`   | Lexibase | Documentation indexing and content utilities             |
+| `@lexibase/rdx-ui`     | Lexibase | Shared development and generated-site theme              |
 | `@lexibase/rdx-next`   | Lexibase | Next.js runtime and `rdx` command                        |
 | `@lexibase/create-rdx` | Lexibase | The project generator used by `npm create @lexibase/rdx` |
 
@@ -31,14 +32,18 @@ requires the updated runtime.
 
 | Package                                      | Version        |
 | -------------------------------------------- | -------------- |
-| `@lexibase/rdx-types`                        | `1.0.0-beta.3` |
-| `@lexibase/rdx-core`                         | `1.0.0-beta.3` |
-| `@lexibase/rdx-next`                         | `1.0.0-beta.5` |
-| `@lexibase/create-rdx`                       | `1.0.0-beta.4` |
-| `@lexibase/rdx-versioning` (optional plugin) | `1.0.0-beta.1` |
+| `@lexibase/rdx-types`                        | `1.0.0-beta.4` |
+| `@lexibase/rdx-core`                         | `1.0.0-beta.4` |
+| `@lexibase/rdx-ui`                           | `1.0.0-beta.0` |
+| `@lexibase/rdx-next`                         | `1.0.0-beta.6` |
+| `@lexibase/create-rdx`                       | `1.0.0-beta.5` |
+| `@lexibase/rdx-versioning` (optional plugin) | `1.0.0-beta.2` |
 
-This release adds the opt-in homepage, navbar version dropdown, and collapsible
-sidebar. The versioning package is republished to align its exact workspace
+This release replaces the parallel beta theme with the actual shared UI from
+`apps/web` and `packages/rdx-ui`. The UI package ships its source, styles and
+PostCSS configuration; Next preserves its React client/server boundaries.
+Homepage components can be imported from a project-owned `home.tsx`.
+The versioning package is republished to align its exact workspace
 dependencies with the updated core and types; its plugin API is unchanged.
 
 From the repository root, install the workspace dependencies and run the checks:
@@ -53,6 +58,7 @@ Inspect exactly what each package would upload before publishing:
 ```powershell
 pnpm --filter @lexibase/rdx-types exec npm pack --dry-run
 pnpm --filter @lexibase/rdx-core exec npm pack --dry-run
+pnpm --filter @lexibase/rdx-ui exec npm pack --dry-run
 pnpm --filter @lexibase/rdx-next exec npm pack --dry-run
 pnpm --filter @lexibase/create-rdx exec npm pack --dry-run
 pnpm --filter @lexibase/rdx-versioning exec npm pack --dry-run
@@ -63,6 +69,7 @@ Publish in dependency order. The `beta` tag keeps this pre-release separate from
 ```powershell
 pnpm --filter @lexibase/rdx-types publish --tag beta --access public --no-git-checks
 pnpm --filter @lexibase/rdx-core publish --tag beta --access public --no-git-checks
+pnpm --filter @lexibase/rdx-ui publish --tag beta --access public --no-git-checks
 pnpm --filter @lexibase/rdx-next publish --tag beta --access public --no-git-checks
 pnpm --filter @lexibase/create-rdx publish --tag beta --access public --no-git-checks
 pnpm --filter @lexibase/rdx-versioning publish --tag beta --access public --no-git-checks
@@ -81,14 +88,14 @@ pnpm dev
 ```
 
 If `pnpm create` still resolves an older cached generator, select the release
-explicitly with `pnpm dlx @lexibase/create-rdx@1.0.0-beta.4`.
+explicitly with `pnpm dlx @lexibase/create-rdx@1.0.0-beta.5`.
 
 pnpm 11 may delay installing newly published versions according to its
 `minimumReleaseAge` policy. For a release test of your own packages, use an
 explicit version and temporarily set the policy for that invocation only:
 
 ```powershell
-pnpm --config.minimumReleaseAge=0 dlx @lexibase/create-rdx@1.0.0-beta.4 rdx-beta-test
+pnpm --config.minimumReleaseAge=0 dlx @lexibase/create-rdx@1.0.0-beta.5 rdx-beta-test
 ```
 
 Keep the usual age policy enabled for regular projects. If a subsequent pnpm

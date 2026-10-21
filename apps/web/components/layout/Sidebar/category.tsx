@@ -1,6 +1,6 @@
 import type { DocCategory } from '@rdx/types/loaders'
-import { Button } from '@rdx/ui/components/button'
-import { Separator } from '@rdx/ui/components/separator'
+import { Button } from '@lexibase/rdx-ui/components/button'
+import { Separator } from '@lexibase/rdx-ui/components/separator'
 import Link from 'next/link'
 
 export function SidebarCategory({

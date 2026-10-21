@@ -13,6 +13,15 @@
     "test": {
       "dependsOn": ["build"]
     },
+    "test:runtime": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "env": [
+        "RDX_PLAYWRIGHT_MODULE",
+        "RDX_BROWSER_EXECUTABLE",
+        "RDX_THEME_SCREENSHOTS"
+      ]
+    },
     "check-types": {
       "dependsOn": ["^check-types"]
     },

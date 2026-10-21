@@ -2,7 +2,7 @@
 
 import { SunMoon } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { Button } from '@rdx/ui/components/button'
+import { Button } from '@lexibase/rdx-ui/components/button'
 
 export function ModeToggle() {
   const { theme, setTheme } = useTheme()

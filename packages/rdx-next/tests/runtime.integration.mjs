@@ -125,6 +125,7 @@ test(
       ['rdx-next', 'rdx-next'],
       ['rdx-core', 'rdx-core'],
       ['rdx-types', 'rdx-types'],
+      ['rdx-ui', 'rdx-ui'],
       ['rdx-versioning', 'rdx-plugin-versioning'],
     ])
       await link(`@lexibase/${name}`, path.resolve(packageRoot, '..', folder))
@@ -149,18 +150,34 @@ test(
     assert.equal(redirect.status, 307, running.logs())
     assert.equal(redirect.headers.get('location'), '/docs')
     const plain = await (await fetch(`${running.base}/docs/init/intro`)).text()
-    assert.doesNotMatch(plain, /class="rdx-version-menu"/)
-    assert.match(plain, /Documentation/)
+    assert.doesNotMatch(plain, /data-rdx-version-trigger/)
+    assert.match(plain, /data-rdx-navbar/)
+    assert.match(plain, />Docs</)
+    assert.match(plain, /data-rdx-sidebar/)
+    running.close()
+    running = undefined
+
+    await writeFile(
+      configPath,
+      `export default { title: 'Fixture docs', homepage: { enabled: true } }`
+    )
+    await command(rootDir, cli, ['prepare'])
+    running = await server(rootDir, 'dev')
+    const defaultHome = await (await fetch(running.base)).text()
+    assert.match(defaultHome, /data-rdx-home/)
+    assert.match(defaultHome, /viewBox="0 0 681 606"/)
+    assert.doesNotMatch(defaultHome, /data-rdx-version-trigger/)
     running.close()
     running = undefined
 
     await writeFile(
       configPath,
       `import { versioning } from '@lexibase/rdx-versioning'
-export default { title: 'Fixture docs', homepage: { enabled: true, title: 'Build with RDX', description: 'A configurable homepage', buttons: [{ label: 'Start here', href: '/docs/init/intro' }] }, plugins: [versioning()] }`
+export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '', actions: { github: { visible: true, url: 'https://github.com/lexibase/rdx' } } }, plugins: [versioning()] }`
     )
     await command(rootDir, cli, ['prepare'])
     await command(rootDir, cli, ['version', '1.0.0'])
+    await command(rootDir, cli, ['version', '1.1.0'])
     await writeFile(
       path.join(rootDir, 'docs/init/intro.mdx'),
       '---\ntitle: Introduction\n---\nChanged live body'
@@ -171,32 +188,30 @@ export default { title: 'Fixture docs', homepage: { enabled: true, title: 'Build
     )
     await writeFile(
       path.join(rootDir, 'versions.json'),
-      JSON.stringify({ active: [], archived: ['1.0.0'] })
+      JSON.stringify({ active: ['1.1.0'], archived: ['1.0.0'] })
     )
     await command(rootDir, nextCli, ['build', path.join(rootDir, '.rdx')])
     running = await server(rootDir, 'start')
     const home = await fetch(running.base)
     assert.equal(home.status, 200)
-    assert.match(await home.text(), /Build with RDX/)
+    assert.match(await home.text(), /data-rdx-home/)
     const live = await (await fetch(`${running.base}/docs/init/intro`)).text()
     assert.match(live, /Changed live body/)
-    assert.match(
-      live,
-      /<header class="rdx-header">[\s\S]*?class="rdx-version-menu"[\s\S]*?<\/header>/
-    )
-    assert.match(live, /href="\/docs\/1.0.0\/init\/intro"/)
+    assert.match(live, /data-rdx-version-trigger/)
+    assert.match(live, /Version 1.0.0/)
     assert.doesNotMatch(
       live.match(/<aside[\s\S]*?<\/aside>/)?.[0] ?? '',
-      /rdx-version-menu/
+      /data-rdx-version-trigger/
     )
     const archived = await (
       await fetch(`${running.base}/docs/1.0.0/init/intro`)
     ).text()
     assert.match(archived, /Original snapshot body/)
     assert.doesNotMatch(archived, /Changed live body/)
-    assert.match(archived.replace(/<!--.*?-->/g, ''), /1.0.0 \(Archived\)/)
+    assert.match(archived, /Documentation version: Version 1.0.0/)
+    assert.match(archived, />Archived</)
     const added = await (await fetch(`${running.base}/docs/init/new`)).text()
-    assert.match(added, /href="\/docs\/1.0.0\/init\/intro"/)
+    assert.match(added, /Only in current/)
     assert.equal(
       (await fetch(`${running.base}/docs/9.9.9/init/intro`)).status,
       404
@@ -210,5 +225,97 @@ export default { title: 'Fixture docs', homepage: { enabled: true, title: 'Build
         .archived[0],
       '1.0.0'
     )
+
+    // Optional browser QA uses an existing Playwright installation and browser,
+    // without downloading browsers or adding a runtime dependency.
+    if (process.env.RDX_PLAYWRIGHT_MODULE) {
+      const { chromium } = require(process.env.RDX_PLAYWRIGHT_MODULE)
+      const browser = await chromium.launch({
+        headless: true,
+        executablePath: process.env.RDX_BROWSER_EXECUTABLE,
+      })
+      try {
+        const page = await browser.newPage({
+          viewport: { width: 1872, height: 955 },
+          colorScheme: 'dark',
+        })
+        const errors = []
+        page.on('pageerror', (error) => errors.push(error.message))
+        await page.addInitScript(() => localStorage.setItem('theme', 'dark'))
+        await page.goto(running.base)
+        await page
+          .getByRole('button', { name: 'Documentation version: Current' })
+          .click()
+        await page.getByRole('menuitem', { name: 'Version 1.0.0' }).waitFor()
+        if (process.env.RDX_THEME_SCREENSHOTS) {
+          await mkdir(process.env.RDX_THEME_SCREENSHOTS, { recursive: true })
+          await page.screenshot({
+            path: path.join(
+              process.env.RDX_THEME_SCREENSHOTS,
+              'homepage-dropdown.png'
+            ),
+          })
+        }
+        await page.keyboard.press('Escape')
+        assert.equal(
+          await page
+            .getByRole('button', { name: 'Documentation version: Current' })
+            .getAttribute('data-state'),
+          'closed'
+        )
+        await page.goto(`${running.base}/docs/init/new`)
+        await page
+          .getByRole('button', { name: 'Documentation version: Current' })
+          .click()
+        await page.getByRole('menuitem', { name: 'Version 1.0.0' }).click()
+        await page.waitForURL('**/docs/1.0.0/init/intro')
+        assert.match(
+          await page.locator('main').innerText(),
+          /Original snapshot body/
+        )
+        await page.setViewportSize({ width: 390, height: 844 })
+        await page.getByRole('button', { name: 'Open sidebar' }).click()
+        await page
+          .getByRole('dialog', { name: 'Documentation navigation' })
+          .waitFor()
+        await page.keyboard.press('Escape')
+        await page
+          .getByRole('dialog', { name: 'Documentation navigation' })
+          .waitFor({ state: 'hidden' })
+        assert.equal(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= window.innerWidth
+          ),
+          true
+        )
+        if (process.env.RDX_THEME_SCREENSHOTS)
+          await page.screenshot({
+            path: path.join(
+              process.env.RDX_THEME_SCREENSHOTS,
+              'docs-mobile.png'
+            ),
+          })
+        assert.deepEqual(errors, [])
+      } finally {
+        await browser.close()
+      }
+    }
+
+    running.close()
+    running = undefined
+    await writeFile(
+      path.join(rootDir, 'home.tsx'),
+      `import { Home } from '@lexibase/rdx-ui/components/home'
+export default function MyHome() { return <Home title="Project owned homepage" /> }`
+    )
+    await writeFile(
+      configPath,
+      `import MyHome from './home'
+export default { title: 'Custom site', homepage: { enabled: true, component: MyHome } }`
+    )
+    await command(rootDir, cli, ['prepare'])
+    running = await server(rootDir, 'dev')
+    const custom = await (await fetch(running.base)).text()
+    assert.match(custom, /Project owned homepage/)
   }
 )

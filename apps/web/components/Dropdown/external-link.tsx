@@ -1,7 +1,7 @@
 import {
   DropdownMenuItem,
   DropdownMenuShortcut,
-} from '@rdx/ui/components/dropdown-menu'
+} from '@lexibase/rdx-ui/components/dropdown-menu'
 import { Github, ExternalLinkIcon } from 'lucide-react'
 import Link from 'next/link'
 

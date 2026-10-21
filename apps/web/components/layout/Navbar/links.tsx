@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@rdx/ui/components/button'
+import { Button } from '@lexibase/rdx-ui/components/button'
 import Link from 'next/link'
 
 import { useVersion } from '@/hooks/use-version'

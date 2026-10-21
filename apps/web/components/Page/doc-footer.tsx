@@ -1,5 +1,5 @@
 import type { DocCategory } from '@rdx/types/loaders'
-import { Button } from '@rdx/ui/components/button'
+import { Button } from '@lexibase/rdx-ui/components/button'
 import Link from 'next/link'
 import { useMemo } from 'react'
 import { docsIndexer } from '@rdx/core'

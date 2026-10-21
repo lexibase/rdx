@@ -110,6 +110,34 @@ test('homepage is opt-in and validates labels, nested options and safe button UR
     assert.throws(() => resolveConfig({ title: 'Docs', homepage }), /homepage/)
 })
 
+test('project-owned homepage and navbar components are preserved without executing them', () => {
+  const Home = () => {
+    throw new Error('must not execute during validation')
+  }
+  const Logo = () => null
+  const config = resolveConfig({
+    title: 'Docs',
+    homepage: { enabled: true, component: Home },
+    navbar: { logo: Logo, actions: { showToggleMode: true } },
+  })
+  assert.equal(config.homepage.component, Home)
+  assert.equal(config.navbar.logo, Logo)
+  for (const input of [
+    { homepage: { component: './home.tsx' } },
+    {
+      homepage: {
+        component: { $$typeof: Symbol.for('react.transitional.element') },
+      },
+    },
+    { navbar: { logo: 'logo.svg' } },
+    { navbar: { actions: { showToggleMode: 'yes' } } },
+  ])
+    assert.throws(
+      () => resolveConfig({ title: 'Docs', ...input }),
+      /homepage.component|navbar.logo|showToggleMode/
+    )
+})
+
 test('plain projects ignore versions.json and use configured docsDir', async (t) => {
   const rootDir = await fixture(t)
   await writeFile(path.join(rootDir, 'versions.json'), 'not even json')
