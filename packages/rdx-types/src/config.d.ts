@@ -106,11 +106,19 @@ export type RDXConfig = {
 }
 
 /** Public configuration shared by the CLI, runtime, and plugins. */
+export type RdxHomepage = {
+  enabled?: boolean
+  title?: string
+  description?: string
+  buttons?: { label: string; href: string }[]
+}
+
 export type RdxConfig = {
   title: string
   description?: string
   lang?: string
   docsDir?: string
+  homepage?: RdxHomepage
   plugins?: RdxPlugin[]
   theme?: {
     defaultTheme?: 'system' | 'dark' | 'light'

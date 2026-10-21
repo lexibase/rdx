@@ -2,6 +2,7 @@ export { VersionsRaw, MDXLoader, DocLink, DocCategory } from './loaders'
 export {
   RDXConfig,
   RdxConfig,
+  RdxHomepage,
   RdxRuntimeConfig,
   ResolvedRdxConfig,
 } from './config'

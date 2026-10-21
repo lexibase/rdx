@@ -9,7 +9,7 @@
     "start": "rdx start"
   },
   "dependencies": {
-    "@lexibase/rdx-next": "^1.0.0-beta.4",
+    "@lexibase/rdx-next": "^1.0.0-beta.5",
     "next": "^15.5.0",
     "react": "19.1.0",
     "react-dom": "19.1.0"

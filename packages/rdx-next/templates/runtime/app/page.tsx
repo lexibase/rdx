@@ -1,5 +1,7 @@
-import { redirect } from 'next/navigation'
+import { HomePage } from '@lexibase/rdx-next/runtime'
 
-export default function Home() {
-  redirect('/docs')
+import { getProject } from '../rdx-project'
+
+export default async function Home() {
+  return <HomePage project={await getProject()} />
 }

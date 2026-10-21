@@ -73,7 +73,16 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
   const config = object(input, 'default export')
   keys(
     config,
-    ['title', 'description', 'lang', 'docsDir', 'theme', 'navbar', 'plugins'],
+    [
+      'title',
+      'description',
+      'lang',
+      'docsDir',
+      'theme',
+      'navbar',
+      'plugins',
+      'homepage',
+    ],
     ''
   )
   text(config.title, 'title')
@@ -81,6 +90,39 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
     text(config.description, 'description', true)
   if (config.lang !== undefined) text(config.lang, 'lang')
   if (config.docsDir !== undefined) text(config.docsDir, 'docsDir')
+
+  if (config.homepage !== undefined) {
+    const homepage = object(config.homepage, 'homepage')
+    keys(homepage, ['enabled', 'title', 'description', 'buttons'], 'homepage.')
+    if (homepage.enabled !== undefined && typeof homepage.enabled !== 'boolean')
+      throw new RdxConfigError('homepage.enabled must be a boolean.')
+    if (homepage.title !== undefined) text(homepage.title, 'homepage.title')
+    if (homepage.description !== undefined)
+      text(homepage.description, 'homepage.description', true)
+    if (homepage.buttons !== undefined) {
+      if (!Array.isArray(homepage.buttons))
+        throw new RdxConfigError('homepage.buttons must be an array.')
+      for (const [index, value] of homepage.buttons.entries()) {
+        const field = `homepage.buttons[${index}]`
+        const button = object(value, field)
+        keys(button, ['label', 'href'], `${field}.`)
+        text(button.label, `${field}.label`)
+        const href = text(button.href, `${field}.href`)
+        if (
+          /[\s\\]/.test(href) ||
+          (!/^\/(?!\/)/.test(href) && !/^https?:\/\//i.test(href))
+        )
+          throw new RdxConfigError(
+            `${field}.href must be a root-relative path or http(s) URL.`
+          )
+        try {
+          new URL(href, 'https://rdx.local')
+        } catch {
+          throw new RdxConfigError(`${field}.href must be a valid URL.`)
+        }
+      }
+    }
+  }
 
   if (config.theme !== undefined) {
     const theme = object(config.theme, 'theme')

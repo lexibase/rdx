@@ -27,6 +27,53 @@ not the URL. Theme values are `system`, `light`, and `dark`.
 or HTTPS URL. Unknown configuration keys fail with the field name rather than
 being silently ignored. Configuration paths must stay inside the project.
 
+## Optional homepage and navigation
+
+By default `/` redirects to `/docs`. Enable the built-in landing page explicitly:
+
+```ts
+export default defineConfig({
+  title: 'My documentation',
+  description: 'Everything you need to build with our tools.',
+  homepage: {
+    enabled: true,
+    title: 'Build something great.',
+    description: 'Guides, examples, and reference in one place.',
+    buttons: [
+      { label: 'Get started', href: '/docs/init/intro' },
+      { label: 'GitHub', href: 'https://github.com/lexibase/rdx' },
+    ],
+  },
+})
+```
+
+`homepage.enabled` defaults to false. The homepage title and description fall back
+to the site configuration. Omitting `buttons` supplies a documentation button;
+an empty array hides all hero buttons. Links accept root-relative paths (starting
+with a single `/`) or HTTP(S) URLs, not JavaScript URLs or protocol-relative URLs.
+The first button is primary. This initial API is configuration-based; custom React
+homepage components are not supported yet.
+
+The navbar includes Documentation, optional Home and GitHub links, and a native
+expandable version dropdown when additional content sources exist. Switching
+versions preserves the current page when it exists in the destination; otherwise
+it opens that edition's first page. Archived versions keep their badge.
+The dropdown and collapsible sidebar support keyboard navigation without client
+JavaScript. A skip link and visible focus outlines support keyboard users.
+Navigation wraps on small screens and the sidebar can be collapsed there or on
+desktop. The built-in interface labels currently use English, independently of
+the HTML `lang` setting.
+
+Restart development after configuration changes and rebuild for production.
+Edit the project-owned `rdx.config.ts`, not generated files inside `.rdx/`, which
+are refreshed by the CLI. These changes affect generated sites; the legacy
+development website under `apps/web` is not migrated.
+
+For contributors, run `pnpm check`, then
+`pnpm --filter @lexibase/rdx-next test:runtime` to exercise a disposable generated
+site in development and production. This integration test requires the workspace
+packages to be built and does not publish or download framework packages.
+
 ## Activating versioning
 
 Install the matching beta of `@lexibase/rdx-versioning` and explicitly configure
@@ -63,7 +110,7 @@ This copies the current `docsDir` to `versioned_docs/version-1.0.0/` and prepend
 `major.minor.patch` and prerelease suffixes such as `1.0.0-beta.1`.
 
 The live docs remain at `/docs/guides/intro`; the snapshot appears at
-`/docs/1.0.0/guides/intro`. A navigation list appears only when extra content
+`/docs/1.0.0/guides/intro`. A navbar dropdown appears only when extra content
 sources exist. To archive a version, move its label from `active` to `archived`
 in `versions.json`; keep the snapshot directory. It remains accessible and is
 marked `Archived`. The order of each array is the navigation order.

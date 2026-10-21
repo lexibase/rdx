@@ -1,6 +1,6 @@
 {
   "name": "@lexibase/rdx-next",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0-beta.5",
   "description": "The Next.js runtime for RDX documentation projects.",
   "license": "MIT",
   "type": "module",
@@ -27,7 +27,8 @@
     "build": "tsup src/index.ts src/runtime/index.tsx --format esm --dts --clean --external @lexibase/rdx-core --external @lexibase/rdx-types --external next --external react --external react-dom --external next-mdx-remote",
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "test:runtime": "node --test tests/runtime.integration.mjs"
   },
   "dependencies": {
     "@lexibase/rdx-core": "workspace:*",

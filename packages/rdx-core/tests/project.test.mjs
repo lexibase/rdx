@@ -71,6 +71,45 @@ test('invalid options fail with the exact configuration field', () => {
     )
 })
 
+test('homepage is opt-in and validates labels, nested options and safe button URLs', () => {
+  assert.equal(resolveConfig({ title: 'Docs' }).homepage, undefined)
+  const homepage = {
+    enabled: true,
+    title: 'Welcome',
+    description: '',
+    buttons: [
+      { label: 'Docs', href: '/docs' },
+      { label: 'Source', href: 'https://github.com/lexibase/rdx' },
+    ],
+  }
+  assert.deepEqual(
+    resolveConfig({ title: 'Docs', homepage }).homepage,
+    homepage
+  )
+  assert.equal(
+    resolveConfig({ title: 'Docs', homepage: { enabled: false } }).homepage
+      .enabled,
+    false
+  )
+  for (const homepage of [
+    null,
+    { enabled: 'yes' },
+    { title: '' },
+    { extra: true },
+    { buttons: {} },
+    { buttons: [{ label: '', href: '/docs' }] },
+    ...[
+      'javascript:alert(1)',
+      '//evil.test',
+      '/\\evil.test',
+      'https://',
+      '/docs\n',
+      'relative',
+    ].map((href) => ({ buttons: [{ label: 'Go', href }] })),
+  ])
+    assert.throws(() => resolveConfig({ title: 'Docs', homepage }), /homepage/)
+})
+
 test('plain projects ignore versions.json and use configured docsDir', async (t) => {
   const rootDir = await fixture(t)
   await writeFile(path.join(rootDir, 'versions.json'), 'not even json')
