@@ -1,17 +1,44 @@
 {
-  "name": "@rdx/core",
-  "version": "1.0.0",
-  "main": "./src/index.ts",
+  "name": "@lexibase/rdx-core",
+  "version": "1.0.0-beta.1",
+  "description": "Content indexing and document utilities for RDX documentation projects.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean --external @lexibase/rdx-types --external gray-matter --external next-mdx-remote",
+    "check-types": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lexibase/rdx.git",
+    "directory": "packages/rdx-core"
+  },
+  "bugs": {
+    "url": "https://github.com/lexibase/rdx/issues"
+  },
+  "homepage": "https://github.com/lexibase/rdx#readme",
   "dependencies": {
-    "@rdx/types": "workspace:*",
+    "@lexibase/rdx-types": "workspace:*",
     "gray-matter": "^4.0.3",
     "next-mdx-remote": "^5.0.0"
   },
   "peerDependencies": {
-    "react": "^19.1.1"
+    "react": "^19.1.0"
   },
   "devDependencies": {
     "@rdx/eslint-config": "workspace:*",

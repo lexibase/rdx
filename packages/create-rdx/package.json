@@ -1,12 +1,35 @@
 {
-  "name": "create-rdx",
-  "version": "1.0.0",
+  "name": "@lexibase/create-rdx",
+  "version": "1.0.0-beta.2",
+  "description": "Create a new RDX documentation project.",
+  "license": "MIT",
   "bin": {
     "create-rdx": "./bin/index.js"
   },
   "type": "module",
+  "files": [
+    "bin",
+    "templates",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lexibase/rdx.git",
+    "directory": "packages/create-rdx"
+  },
+  "bugs": {
+    "url": "https://github.com/lexibase/rdx/issues"
+  },
+  "homepage": "https://github.com/lexibase/rdx#readme",
   "dependencies": {
-    "prompts": "^2.4.2",
-    "fs-extra": "^11.1.1"
+    "cross-spawn": "^7.0.6",
+    "fs-extra": "^11.1.1",
+    "prompts": "^2.4.2"
   }
 }

@@ -1,0 +1,5 @@
+node_modules
+.rdx
+.next
+out
+.env*

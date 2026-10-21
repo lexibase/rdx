@@ -1,10 +1,36 @@
 {
-  "name": "@rdx/types",
-  "version": "1.0.0",
+  "name": "@lexibase/rdx-types",
+  "version": "1.0.0-beta.1",
   "license": "MIT",
-  "types": "./src/index.d.ts",
+  "description": "Shared TypeScript types for RDX documentation projects.",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node ./build.mjs",
+    "check-types": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lexibase/rdx.git",
+    "directory": "packages/rdx-types"
+  },
+  "bugs": {
+    "url": "https://github.com/lexibase/rdx/issues"
+  },
+  "homepage": "https://github.com/lexibase/rdx#readme",
   "peerDependencies": {
-    "react": "^19.1.1"
+    "react": "^19.1.0"
   },
   "devDependencies": {
     "@rdx/typescript-config": "workspace:*",
