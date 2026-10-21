@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 import {
   getDocument,
@@ -7,56 +7,46 @@ import {
   resolveDocsRoute,
 } from '@lexibase/rdx-core'
 import type { RdxProject, RdxRuntimeConfig } from '@lexibase/rdx-types'
+import { Button } from '@lexibase/rdx-ui/components/button'
+import { DocsSidebar } from '@lexibase/rdx-ui/components/docs-sidebar'
+import { Home } from '@lexibase/rdx-ui/components/home'
+import { Logo } from '@lexibase/rdx-ui/components/logo'
+import { mdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
+import { Navbar } from '@lexibase/rdx-ui/components/navbar'
+import {
+  VersionDropdown,
+  type VersionOption,
+} from '@lexibase/rdx-ui/components/version-dropdown'
+import { ThemeProvider } from '@lexibase/rdx-ui/providers/theme-provider'
 import { compileMDX } from 'next-mdx-remote/rsc'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 export { createRdxProject, getProjectDocsPaths } from '@lexibase/rdx-core'
 
-const mdxComponents = {
-  h1: (props: ComponentProps<'h1'>) => <h1 {...props} />,
-  h2: (props: ComponentProps<'h2'>) => <h2 {...props} />,
-  h3: (props: ComponentProps<'h3'>) => <h3 {...props} />,
-  p: (props: ComponentProps<'p'>) => <p {...props} />,
-  ul: (props: ComponentProps<'ul'>) => <ul {...props} />,
-  ol: (props: ComponentProps<'ol'>) => <ol {...props} />,
-  li: (props: ComponentProps<'li'>) => <li {...props} />,
-  blockquote: (props: ComponentProps<'blockquote'>) => (
-    <blockquote {...props} />
-  ),
-  pre: (props: ComponentProps<'pre'>) => <pre {...props} />,
-  code: (props: ComponentProps<'code'>) => <code {...props} />,
-  a: ({ href, ...props }: ComponentProps<'a'>) => {
-    const isExternal = href?.startsWith('http')
-
-    return (
-      <a
-        href={href}
-        rel={isExternal ? 'noreferrer' : undefined}
-        target={isExternal ? '_blank' : undefined}
-        {...props}
-      />
-    )
-  },
-}
-
 export function RdxLayout({
   children,
   config,
+  bodyClassName,
 }: {
   children: ReactNode
   config: RdxRuntimeConfig
+  bodyClassName?: string
 }) {
   return (
-    <html
-      lang={config.lang ?? 'en'}
-      data-theme={config.theme?.defaultTheme ?? 'system'}
-    >
-      <body>
-        <a className="rdx-skip-link" href="#rdx-main">
-          Skip to content
-        </a>
-        {children}
+    <html suppressHydrationWarning lang={config.lang ?? 'en'}>
+      <body className={bodyClassName}>
+        <ThemeProvider
+          disableTransitionOnChange
+          enableSystem
+          attribute="class"
+          defaultTheme={config.theme?.defaultTheme ?? 'system'}
+        >
+          <a className="rdx-skip-link" href="#rdx-main">
+            Skip to content
+          </a>
+          <div className="flex flex-col h-dvh">{children}</div>
+        </ThemeProvider>
       </body>
     </html>
   )
@@ -71,65 +61,42 @@ function RdxHeader({
 }) {
   const { config } = project
   const { source, slug: currentSlug } = resolveDocsRoute(project, slug)
-  const brand = config.navbar?.title ?? config.title
+  const options: VersionOption[] = project.sources.map((edition) => {
+    const docs = getSourceOptions(project, edition)
+    const destination =
+      currentSlug && getDocument(currentSlug, docs)
+        ? currentSlug
+        : getDocsPaths(docs)[0]
+    return {
+      id: edition.id,
+      label: edition.id === 'current' ? 'Current' : `Version ${edition.label}`,
+      kind:
+        edition.id === 'current'
+          ? 'live'
+          : edition.badge === 'Archived'
+            ? 'archived'
+            : 'version',
+      href: ['/docs', edition.routePrefix, destination]
+        .filter(Boolean)
+        .join('/'),
+    }
+  })
+  const BrandLogo = config.navbar?.logo ?? Logo
   return (
-    <header className="rdx-header">
-      <Link
-        className="rdx-brand"
-        href={config.homepage?.enabled ? '/' : '/docs'}
-        aria-label={config.title}
-      >
-        {brand}
-      </Link>
-      <nav className="rdx-header-actions" aria-label="Main navigation">
-        {config.homepage?.enabled && <Link href="/">Home</Link>}
-        <Link href="/docs">Documentation</Link>
-        {project.sources.length > 1 && (
-          <details className="rdx-version-menu">
-            <summary aria-label={`Documentation version: ${source.label}`}>
-              {source.label}
-              {source.badge ? ` (${source.badge})` : ''}
-            </summary>
-            <ul aria-label="Documentation versions">
-              {project.sources.map((edition) => {
-                const options = getSourceOptions(project, edition)
-                const destination =
-                  currentSlug && getDocument(currentSlug, options)
-                    ? currentSlug
-                    : getDocsPaths(options)[0]
-                const href = ['/docs', edition.routePrefix, destination]
-                  .filter(Boolean)
-                  .join('/')
-                return (
-                  <li key={edition.id}>
-                    <Link
-                      href={href}
-                      aria-current={
-                        edition.id === source.id ? 'true' : undefined
-                      }
-                    >
-                      {edition.label}
-                      {edition.badge ? ` (${edition.badge})` : ''}
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          </details>
-        )}
-        {config.navbar?.actions?.github?.visible &&
-          config.navbar.actions.github.url && (
-            <a
-              className="rdx-github-link"
-              href={config.navbar.actions.github.url}
-              rel="noreferrer"
-              target="_blank"
-            >
-              GitHub
-            </a>
-          )}
-      </nav>
-    </header>
+    <Navbar
+      title={config.navbar?.title ?? ''}
+      siteTitle={config.title}
+      logo={<BrandLogo className="size-5" />}
+      homeHref={config.homepage?.enabled ? '/' : '/docs'}
+      docsHref={['/docs', source.routePrefix].filter(Boolean).join('/')}
+      versionMenu={
+        project.sources.length > 1 ? (
+          <VersionDropdown options={options} currentId={source.id} />
+        ) : undefined
+      }
+      github={config.navbar?.actions?.github}
+      showToggleMode={config.navbar?.actions?.showToggleMode}
+    />
   )
 }
 
@@ -137,31 +104,28 @@ export function HomePage({ project }: { project: RdxProject }) {
   const { config } = project
   if (!config.homepage?.enabled) redirect('/docs')
   const homepage = config.homepage
-  const buttons = homepage.buttons ?? [
-    { label: 'Read the documentation', href: '/docs' },
-  ]
+  const CustomHome = homepage.component
+  const BrandLogo = config.navbar?.logo ?? Logo
   return (
     <>
       <RdxHeader project={project} />
-      <main id="rdx-main" tabIndex={-1} className="rdx-homepage">
-        <p className="rdx-homepage-eyebrow">{config.title}</p>
-        <h1>{homepage.title ?? config.title}</h1>
-        <p className="rdx-homepage-description">
-          {homepage.description ?? config.description}
-        </p>
-        <div className="rdx-homepage-buttons">
-          {buttons.map((button, index) => (
-            <Link
-              key={`${index}:${button.href}`}
-              className={
-                index === 0 ? 'rdx-button rdx-button-primary' : 'rdx-button'
-              }
-              href={button.href}
-            >
-              {button.label}
-            </Link>
-          ))}
-        </div>
+      <main
+        id="rdx-main"
+        tabIndex={-1}
+        className="flex-1 min-h-0 overflow-y-auto"
+      >
+        {CustomHome ? (
+          <CustomHome />
+        ) : (
+          <Home
+            title={homepage.title ?? config.title}
+            logo={
+              <BrandLogo className="size-52 hover:scale-105 hover:rotate-1 transition-[scale,rotation] duration-1000" />
+            }
+            description={homepage.description}
+            buttons={homepage.buttons}
+          />
+        )}
       </main>
     </>
   )
@@ -180,26 +144,23 @@ export async function DocsPage({
     document,
     categories,
   } = resolveDocsRoute(project, slug)
-
-  if (!currentSlug) {
+  if (!currentSlug)
     return (
       <>
         <RdxHeader project={project} slug={slug} />
-        <main id="rdx-main" tabIndex={-1} className="rdx-empty-state">
+        <main id="rdx-main" tabIndex={-1} className="p-8">
           <h1>Your documentation is ready.</h1>
-          <p>Add an `.mdx` file inside `docs/` to create your first page.</p>
+          <p>
+            Add an .mdx file inside your configured documentation directory.
+          </p>
         </main>
       </>
     )
-  }
-
   if (!document) notFound()
-
   const { content } = await compileMDX({
     source: document.content,
     components: mdxComponents,
   })
-
   const title =
     typeof document.frontmatter.title === 'string'
       ? document.frontmatter.title
@@ -208,53 +169,87 @@ export async function DocsPage({
     typeof document.frontmatter.description === 'string'
       ? document.frontmatter.description
       : null
-
+  const hrefFor = (pageSlug: string) =>
+    ['/docs', source.routePrefix, pageSlug].filter(Boolean).join('/')
+  const sidebarCategories = categories.map((category) => ({
+    title: category.title,
+    links: category.pages.map((page) => ({
+      label: page.title,
+      href: hrefFor(page.slug),
+    })),
+  }))
+  const pages = categories.flatMap((category) => category.pages)
+  const index = pages.findIndex((page) => page.slug === currentSlug)
+  const previous = pages[index - 1]
+  const next = pages[index + 1]
+  const category = categories.find((entry) =>
+    entry.pages.some((page) => page.slug === currentSlug)
+  )
   return (
     <>
       <RdxHeader project={project} slug={slug} />
-      <div className="rdx-docs-layout">
-        <aside className="rdx-sidebar" aria-label="Documentation navigation">
-          <details className="rdx-sidebar-menu" open>
-            <summary>On this site</summary>
-            <nav aria-label="Documentation pages">
-              {categories.map((category) => (
-                <section key={category.id} className="rdx-sidebar-category">
-                  <h2>{category.title}</h2>
-                  <ul>
-                    {category.pages.map((page) => {
-                      const href = ['/docs', source.routePrefix, page.slug]
-                        .filter(Boolean)
-                        .join('/')
-                      const isCurrentPage = page.slug === currentSlug
-
-                      return (
-                        <li key={page.slug}>
-                          <Link
-                            aria-current={isCurrentPage ? 'page' : undefined}
-                            className={isCurrentPage ? 'is-active' : undefined}
-                            href={href}
-                          >
-                            {page.title}
-                          </Link>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </section>
-              ))}
-            </nav>
-          </details>
-        </aside>
-
-        <main id="rdx-main" tabIndex={-1} className="rdx-document">
-          <header className="rdx-document-header">
-            {source.badge && <p className="rdx-source-badge">{source.badge}</p>}
-            <p className="rdx-breadcrumb">{currentSlug}</p>
-            <h1>{title}</h1>
-            {description && <p className="rdx-description">{description}</p>}
-          </header>
-          <article className="rdx-mdx-content">{content}</article>
-        </main>
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
+        <DocsSidebar
+          categories={sidebarCategories}
+          pathname={hrefFor(currentSlug)}
+        />
+        <div className="flex-1 h-full overflow-y-auto pt-12 md:pt-0 outline-none">
+          <section className="w-full min-h-full px-7 flex flex-col gap-5 pb-8 md:py-8">
+            <div className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1">
+              <header className="mb-6">
+                {source.badge && (
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {source.badge}
+                  </p>
+                )}
+                <span className="text-xs text-zinc-600 font-semibold uppercase block -mb-0.5">
+                  {category?.title}
+                </span>
+                <h1 className="text-4xl uppercase font-bold mb-2">{title}</h1>
+                {description && (
+                  <p className="text-sm text-ring max-w-[726px]">
+                    {description}
+                  </p>
+                )}
+              </header>
+              <main
+                id="rdx-main"
+                tabIndex={-1}
+                className="h-full w-full flex-1 max-w-[960px]"
+              >
+                {content}
+              </main>
+            </div>
+            <footer className="flex flex-col">
+              <section className="flex items-center justify-between">
+                {previous ? (
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={hrefFor(previous.slug)}>{previous.title}</Link>
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" disabled>
+                    Previous
+                  </Button>
+                )}
+                {next ? (
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={hrefFor(next.slug)}>{next.title}</Link>
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" disabled>
+                    Next
+                  </Button>
+                )}
+              </section>
+              <section className="flex items-center justify-center w-full py-5">
+                <p className="text-sm text-muted-foreground">
+                  &copy; {new Date().getFullYear()}{' '}
+                  <strong>{project.config.title}</strong>
+                </p>
+              </section>
+            </footer>
+          </section>
+        </div>
       </div>
     </>
   )

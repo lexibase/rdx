@@ -47,6 +47,7 @@ async function main() {
   const jiti = createJiti(import.meta.url, {
     moduleCache: false,
     fsCache: false,
+    jsx: { runtime: 'automatic' },
   })
   let input
   try {

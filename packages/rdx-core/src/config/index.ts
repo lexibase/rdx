@@ -35,6 +35,23 @@ function text(value: unknown, field: string, allowEmpty = false): string {
   return value
 }
 
+function component(value: unknown, field: string) {
+  if (
+    typeof value !== 'function' &&
+    !(
+      record(value) &&
+      [
+        Symbol.for('react.memo'),
+        Symbol.for('react.forward_ref'),
+        Symbol.for('react.lazy'),
+      ].includes(value.$$typeof as symbol)
+    )
+  )
+    throw new RdxConfigError(
+      `${field} must be a React component, not JSX or a file path.`
+    )
+}
+
 function keys(
   value: Record<string, unknown>,
   allowed: string[],
@@ -93,7 +110,13 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
 
   if (config.homepage !== undefined) {
     const homepage = object(config.homepage, 'homepage')
-    keys(homepage, ['enabled', 'title', 'description', 'buttons'], 'homepage.')
+    keys(
+      homepage,
+      ['enabled', 'component', 'title', 'description', 'buttons'],
+      'homepage.'
+    )
+    if (homepage.component !== undefined)
+      component(homepage.component, 'homepage.component')
     if (homepage.enabled !== undefined && typeof homepage.enabled !== 'boolean')
       throw new RdxConfigError('homepage.enabled must be a boolean.')
     if (homepage.title !== undefined) text(homepage.title, 'homepage.title')
@@ -139,11 +162,19 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
   }
   if (config.navbar !== undefined) {
     const navbar = object(config.navbar, 'navbar')
-    keys(navbar, ['title', 'actions'], 'navbar.')
+    keys(navbar, ['title', 'logo', 'actions'], 'navbar.')
+    if (navbar.logo !== undefined) component(navbar.logo, 'navbar.logo')
     if (navbar.title !== undefined) text(navbar.title, 'navbar.title', true)
     if (navbar.actions !== undefined) {
       const actions = object(navbar.actions, 'navbar.actions')
-      keys(actions, ['github'], 'navbar.actions.')
+      keys(actions, ['github', 'showToggleMode'], 'navbar.actions.')
+      if (
+        actions.showToggleMode !== undefined &&
+        typeof actions.showToggleMode !== 'boolean'
+      )
+        throw new RdxConfigError(
+          'navbar.actions.showToggleMode must be a boolean.'
+        )
       if (actions.github !== undefined) {
         const github = object(actions.github, 'navbar.actions.github')
         keys(github, ['visible', 'url'], 'navbar.actions.github.')

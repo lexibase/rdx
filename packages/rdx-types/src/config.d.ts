@@ -108,6 +108,8 @@ export type RDXConfig = {
 /** Public configuration shared by the CLI, runtime, and plugins. */
 export type RdxHomepage = {
   enabled?: boolean
+  /** Custom project-owned homepage, e.g. import Home from './home'. */
+  component?: ComponentType
   title?: string
   description?: string
   buttons?: { label: string; href: string }[]
@@ -125,7 +127,9 @@ export type RdxConfig = {
   }
   navbar?: {
     title?: string
+    logo?: ComponentType<{ className?: string }>
     actions?: {
+      showToggleMode?: boolean
       github?: {
         visible: boolean
         url: string

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { Bebas_Neue, Space_Mono } from 'next/font/google'
-import '@rdx/ui/globals.css'
+import '@lexibase/rdx-ui/globals.css'
 
-import { ThemeProvider } from '@rdx/ui/providers/theme-provider'
+import { ThemeProvider } from '@lexibase/rdx-ui/providers/theme-provider'
 
 import { Navbar } from '@/components/layout/Navbar'
 import { VersionProvider } from '@/contexts/version-docs'

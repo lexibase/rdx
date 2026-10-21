@@ -1,5 +1,5 @@
 import type { RDXConfig } from '@rdx/types/config'
-import { Logo } from '@rdx/ui/components/logo'
+import { Logo } from '@lexibase/rdx-ui/components/logo'
 
 const config: RDXConfig = {
   title: 'RDX',

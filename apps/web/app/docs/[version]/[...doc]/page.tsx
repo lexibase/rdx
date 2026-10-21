@@ -1,4 +1,4 @@
-import { mdxComponents } from '@rdx/ui/components/mdx-components'
+import { mdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { notFound } from 'next/navigation'
 import { mdxLoader } from '@rdx/core'
 

@@ -1,8 +1,8 @@
-import { Button } from '@rdx/ui/components/button'
-import { Separator } from '@rdx/ui/components/separator'
+import { Button } from '@lexibase/rdx-ui/components/button'
+import { Separator } from '@lexibase/rdx-ui/components/separator'
 import { Github } from 'lucide-react'
 import Link from 'next/link'
-import { ModeToggle } from '@rdx/ui/components/mode-toggle'
+import { ModeToggle } from '@lexibase/rdx-ui/components/mode-toggle'
 
 import config from '@/rdx.config'
 

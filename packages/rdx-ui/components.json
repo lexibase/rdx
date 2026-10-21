@@ -11,13 +11,13 @@
     "prefix": ""
   },
   "aliases": {
-    "components": "@rdx/ui/components",
-    "utils": "@rdx/ui/lib/utils",
-    "hooks": "@rdx/ui/hooks",
-    "contexts": "@rdx/ui/contexts",
-    "lib": "@rdx/ui/lib",
-    "ui": "@rdx/ui/components",
-    "providers": "@rdx/ui/providers"
+    "components": "@lexibase/rdx-ui/components",
+    "utils": "@lexibase/rdx-ui/lib/utils",
+    "hooks": "@lexibase/rdx-ui/hooks",
+    "contexts": "@lexibase/rdx-ui/contexts",
+    "lib": "@lexibase/rdx-ui/lib",
+    "ui": "@lexibase/rdx-ui/components",
+    "providers": "@lexibase/rdx-ui/providers"
   },
   "iconLibrary": "lucide"
 }

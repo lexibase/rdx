@@ -15,8 +15,8 @@
     "hooks": "@/hooks",
     "lib": "@/lib",
     "contexts": "@/contexts",
-    "utils": "@rdx/ui/lib/utils",
-    "ui": "@rdx/ui/components",
-    "providers": "@rdx/ui/providers"
+    "utils": "@lexibase/rdx-ui/lib/utils",
+    "ui": "@lexibase/rdx-ui/components",
+    "providers": "@lexibase/rdx-ui/providers"
   }
 }

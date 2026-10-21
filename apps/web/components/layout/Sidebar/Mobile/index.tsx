@@ -1,7 +1,7 @@
 import { SidebarClose } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import type { DocCategory } from '@rdx/types/loaders'
-import { Button } from '@rdx/ui/components/button'
+import { Button } from '@lexibase/rdx-ui/components/button'
 
 import { SidebarCategory } from '../category'
 

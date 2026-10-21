@@ -1,9 +1,9 @@
 import type { getParsedVersions } from '@rdx/rdx-versioning'
-import { Button } from '@rdx/ui/components/button'
+import { Button } from '@lexibase/rdx-ui/components/button'
 import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from '@rdx/ui/components/dropdown-menu'
+} from '@lexibase/rdx-ui/components/dropdown-menu'
 import type { JSX } from 'react'
 
 export function DropdownTrigger({

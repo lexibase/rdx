@@ -1,4 +1,4 @@
-import { Button } from '@rdx/ui/components/button'
+import { Button } from '@lexibase/rdx-ui/components/button'
 import { SidebarOpen } from 'lucide-react'
 
 type Props = {
