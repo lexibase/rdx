@@ -2,12 +2,14 @@
   "extends": "@rdx/typescript-config/base.json",
   "compilerOptions": {
     "outDir": "dist",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
 
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "@rdx/rdx-core/*": ["./src/*"],
-      "@rdx/types": ["../rdx-types/src/*"],
+      "@lexibase/rdx-core/*": ["./src/*"],
+      "@lexibase/rdx-types": ["../rdx-types/src/index.d.ts"],
     }
   },
   "include": ["."],

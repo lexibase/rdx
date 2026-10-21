@@ -1,35 +1,11 @@
-import type { RDXConfig } from "@rdx/types/config";
-import { Logo } from "@rdx/ui/components/logo";
+import type { RdxRuntimeConfig } from '@lexibase/rdx-next'
 
-const config: RDXConfig = {
-  title: "RDX",
-  description:
-    "A tool for building documentation with MDX in a friendly and focused way — fast, easy, and built for clarity",
-  author: "DuHNunes",
-  favicon: "/favicon.ico",
-
-  // Set the production url of your site here
-  url: "https://rdx-tool.vercel.app",
-
+const config: RdxRuntimeConfig = {
+  title: 'My documentation',
+  description: 'Documentation built with RDX.',
   theme: {
-    defaultTheme: "system",
+    defaultTheme: 'system',
   },
+}
 
-  navbar: {
-    // Leave the title empty or delete so that no title appears next to the logo
-    title: "",
-    // Custom logo component (SVG or React)
-    // Must accept `className` for styling
-    logo: Logo,
-
-    actions: {
-      github: {
-        visible: true,
-        url: "https://github.com/lexibase/rdx",
-      },
-      showToggleMode: false,
-    },
-  },
-};
-
-export default config;
+export default config

@@ -1,0 +1,65 @@
+{
+  "name": "@lexibase/rdx-next",
+  "version": "1.0.0-beta.3",
+  "description": "The Next.js runtime for RDX documentation projects.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "rdx": "./bin/rdx.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime/index.d.ts",
+      "import": "./dist/runtime/index.js"
+    }
+  },
+  "files": [
+    "bin",
+    "dist",
+    "templates",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts src/runtime/index.tsx --format esm --dts --clean --external @lexibase/rdx-core --external @lexibase/rdx-types --external next --external react --external react-dom --external next-mdx-remote",
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@lexibase/rdx-core": "workspace:*",
+    "@lexibase/rdx-types": "workspace:*",
+    "next-mdx-remote": "^5.0.0"
+  },
+  "peerDependencies": {
+    "next": "^15.5.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lexibase/rdx.git",
+    "directory": "packages/rdx-next"
+  },
+  "bugs": {
+    "url": "https://github.com/lexibase/rdx/issues"
+  },
+  "homepage": "https://github.com/lexibase/rdx#readme",
+  "devDependencies": {
+    "@rdx/eslint-config": "workspace:*",
+    "@rdx/typescript-config": "workspace:*",
+    "@types/node": "^22.15.3",
+    "@types/react": "19.1.0",
+    "@types/react-dom": "19.1.1",
+    "eslint": "^9.34.0",
+    "next": "^15.5.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "typescript": "5.9.2"
+  }
+}

@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'node:path'
 
 import matter from 'gray-matter'
-import type { DocCategory, DocLink } from '@rdx/types'
+import type { DocCategory, DocLink } from '@lexibase/rdx-types'
 
 export function docsIndexer(version?: string): DocCategory[] {
   const resolvedVersion = version || 'canary'

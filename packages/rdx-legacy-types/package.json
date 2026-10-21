@@ -1,0 +1,13 @@
+{
+  "name": "@rdx/types",
+  "private": true,
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts"
+    }
+  },
+  "dependencies": {
+    "@lexibase/rdx-types": "workspace:*"
+  }
+}

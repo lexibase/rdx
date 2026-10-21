@@ -1,3 +1,5 @@
+import type { ComponentType } from 'react'
+
 export type RDXConfig = {
   /**
    * The title of the documentation site.
@@ -67,7 +69,7 @@ export type RDXConfig = {
      * such as an inline SVG or image-based logo, allowing full customization of branding.
      *
      */
-    logo: React.ComponentType<{ className?: string }>
+    logo: ComponentType<{ className?: string }>
 
     /**
      * Configuration for navbar action buttons
@@ -97,6 +99,24 @@ export type RDXConfig = {
        *
        */
       showToggleMode?: boolean
+    }
+  }
+}
+
+/** The minimal configuration accepted by the official RDX Next.js runtime. */
+export type RdxRuntimeConfig = {
+  title: string
+  description?: string
+  theme?: {
+    defaultTheme?: 'system' | 'dark' | 'light'
+  }
+  navbar?: {
+    title?: string
+    actions?: {
+      github?: {
+        visible: boolean
+        url: string
+      }
     }
   }
 }

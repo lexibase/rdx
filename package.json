@@ -7,12 +7,14 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types",
+    "check-types": "pnpm --filter @lexibase/rdx-types build && turbo run check-types",
+    "check": "pnpm lint && pnpm check-types && pnpm build",
     "prepare": "husky install"
   },
   "devDependencies": {
     "husky": "^8.0.0",
     "prettier": "^3.6.2",
+    "tsup": "^8.5.0",
     "turbo": "^2.5.6",
     "typescript": "5.9.2"
   },
