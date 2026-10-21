@@ -1,11 +1,17 @@
 import type { ComponentProps, ReactNode } from 'react'
 
-import { getDocument, getDocsIndex, getDocsPaths } from '@lexibase/rdx-core'
-export { getDocsPaths } from '@lexibase/rdx-core'
-import type { RdxRuntimeConfig } from '@lexibase/rdx-types'
+import {
+  getDocument,
+  getDocsPaths,
+  getSourceOptions,
+  resolveDocsRoute,
+} from '@lexibase/rdx-core'
+import type { RdxProject, RdxRuntimeConfig } from '@lexibase/rdx-types'
 import { compileMDX } from 'next-mdx-remote/rsc'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+
+export { createRdxProject, getProjectDocsPaths } from '@lexibase/rdx-core'
 
 const mdxComponents = {
   h1: (props: ComponentProps<'h1'>) => <h1 {...props} />,
@@ -41,13 +47,16 @@ export function RdxLayout({
   children: ReactNode
   config: RdxRuntimeConfig
 }) {
-  const brand = config.navbar?.title || config.title
+  const brand = config.navbar?.title ?? config.title
 
   return (
-    <html lang="en">
+    <html
+      lang={config.lang ?? 'en'}
+      data-theme={config.theme?.defaultTheme ?? 'system'}
+    >
       <body>
         <header className="rdx-header">
-          <Link className="rdx-brand" href="/docs">
+          <Link className="rdx-brand" href="/docs" aria-label={config.title}>
             {brand}
           </Link>
           {config.navbar?.actions?.github?.visible &&
@@ -68,9 +77,19 @@ export function RdxLayout({
   )
 }
 
-export async function DocsPage({ slug }: { slug?: string[] }) {
-  const categories = getDocsIndex()
-  const currentSlug = slug?.join('/') || getDocsPaths()[0]
+export async function DocsPage({
+  slug,
+  project,
+}: {
+  slug?: string[]
+  project: RdxProject
+}) {
+  const {
+    source,
+    slug: currentSlug,
+    document,
+    categories,
+  } = resolveDocsRoute(project, slug)
 
   if (!currentSlug) {
     return (
@@ -81,7 +100,6 @@ export async function DocsPage({ slug }: { slug?: string[] }) {
     )
   }
 
-  const document = getDocument(currentSlug)
   if (!document) notFound()
 
   const { content } = await compileMDX({
@@ -101,12 +119,37 @@ export async function DocsPage({ slug }: { slug?: string[] }) {
   return (
     <div className="rdx-docs-layout">
       <aside className="rdx-sidebar" aria-label="Documentation navigation">
+        {project.sources.length > 1 && (
+          <nav className="rdx-editions" aria-label="Documentation editions">
+            {project.sources.map((edition) => {
+              const options = getSourceOptions(project, edition)
+              const destination = getDocument(currentSlug, options)
+                ? currentSlug
+                : getDocsPaths(options)[0]
+              const href = ['/docs', edition.routePrefix, destination]
+                .filter(Boolean)
+                .join('/')
+              return (
+                <Link
+                  key={edition.id}
+                  href={href}
+                  aria-current={edition.id === source.id ? 'page' : undefined}
+                >
+                  {edition.label}
+                  {edition.badge ? ` (${edition.badge})` : ''}
+                </Link>
+              )
+            })}
+          </nav>
+        )}
         {categories.map((category) => (
           <section key={category.id} className="rdx-sidebar-category">
             <h2>{category.title}</h2>
             <ul>
               {category.pages.map((page) => {
-                const href = `/docs/${page.slug}`
+                const href = ['/docs', source.routePrefix, page.slug]
+                  .filter(Boolean)
+                  .join('/')
                 const isCurrentPage = page.slug === currentSlug
 
                 return (
@@ -128,6 +171,7 @@ export async function DocsPage({ slug }: { slug?: string[] }) {
 
       <main className="rdx-document">
         <header className="rdx-document-header">
+          {source.badge && <p className="rdx-source-badge">{source.badge}</p>}
           <p className="rdx-breadcrumb">{currentSlug}</p>
           <h1>{title}</h1>
           {description && <p className="rdx-description">{description}</p>}

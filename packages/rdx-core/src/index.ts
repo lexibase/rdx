@@ -1,3 +1,13 @@
-export { docsIndexer } from './loaders/docs-indexer/index'
-export { mdxLoader } from './loaders/mdx-loader/index'
 export { getDocument, getDocsIndex, getDocsPaths } from './content/index'
+export {
+  createRdxProject,
+  defineConfig,
+  resolveConfig,
+  resolveProjectPath,
+  RdxConfigError,
+} from './config/index'
+export {
+  getSourceOptions,
+  resolveDocsRoute,
+  getProjectDocsPaths,
+} from './project/index'

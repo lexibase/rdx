@@ -8,7 +8,8 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "pnpm --filter @lexibase/rdx-types build && turbo run check-types",
-    "check": "pnpm lint && pnpm check-types && pnpm build",
+    "check": "pnpm lint && pnpm check-types && pnpm build && pnpm test",
+    "test": "turbo run test",
     "prepare": "husky install"
   },
   "devDependencies": {

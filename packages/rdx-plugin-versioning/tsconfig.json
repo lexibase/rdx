@@ -1,0 +1,12 @@
+{
+  "extends": "../../config/ts-config/base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "@lexibase/rdx-core/config": ["../rdx-core/src/config/index.ts"],
+      "@lexibase/rdx-types": ["../rdx-types/src/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}
