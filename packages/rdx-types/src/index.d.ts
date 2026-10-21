@@ -1,5 +1,17 @@
 export { VersionsRaw, MDXLoader, DocLink, DocCategory } from './loaders'
-export { RDXConfig, RdxRuntimeConfig } from './config'
+export {
+  RDXConfig,
+  RdxConfig,
+  RdxRuntimeConfig,
+  ResolvedRdxConfig,
+} from './config'
+export {
+  RdxContentSource,
+  RdxPlugin,
+  RdxPluginCommand,
+  RdxPluginContext,
+  RdxProject,
+} from './plugins'
 export {
   RdxDocCategory,
   RdxDocFrontmatter,

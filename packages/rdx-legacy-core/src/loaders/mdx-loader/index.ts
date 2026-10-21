@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 import path from 'node:path'
 import { compileMDX } from 'next-mdx-remote/rsc'
 import type { MDXLoader } from '@lexibase/rdx-types'

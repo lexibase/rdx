@@ -1,7 +1,11 @@
-import { DocsPage, getDocsPaths } from '@lexibase/rdx-next/runtime'
+import { DocsPage, getProjectDocsPaths } from '@lexibase/rdx-next/runtime'
 
-export function generateStaticParams() {
-  return getDocsPaths().map((slug) => ({ slug: slug.split('/') }))
+import { getProject } from '../../../rdx-project'
+
+export async function generateStaticParams() {
+  return getProjectDocsPaths(await getProject()).map((slug) => ({
+    slug: slug.split('/'),
+  }))
 }
 
 export default async function DocumentationPage({
@@ -11,5 +15,5 @@ export default async function DocumentationPage({
 }) {
   const { slug } = await params
 
-  return <DocsPage slug={slug} />
+  return <DocsPage slug={slug} project={await getProject()} />
 }

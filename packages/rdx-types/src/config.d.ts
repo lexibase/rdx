@@ -1,5 +1,7 @@
 import type { ComponentType } from 'react'
+import type { RdxPlugin } from './plugins'
 
+/** @deprecated Legacy development website config. New projects use RdxConfig. */
 export type RDXConfig = {
   /**
    * The title of the documentation site.
@@ -103,10 +105,13 @@ export type RDXConfig = {
   }
 }
 
-/** The minimal configuration accepted by the official RDX Next.js runtime. */
-export type RdxRuntimeConfig = {
+/** Public configuration shared by the CLI, runtime, and plugins. */
+export type RdxConfig = {
   title: string
   description?: string
+  lang?: string
+  docsDir?: string
+  plugins?: RdxPlugin[]
   theme?: {
     defaultTheme?: 'system' | 'dark' | 'light'
   }
@@ -119,4 +124,18 @@ export type RdxRuntimeConfig = {
       }
     }
   }
+}
+
+/** Compatibility alias for projects created by the first beta. */
+export type RdxRuntimeConfig = RdxConfig
+
+export type ResolvedRdxConfig = Omit<
+  RdxConfig,
+  'description' | 'lang' | 'docsDir' | 'theme' | 'plugins'
+> & {
+  description: string
+  lang: string
+  docsDir: string
+  theme: { defaultTheme: 'system' | 'dark' | 'light' }
+  plugins: RdxPlugin[]
 }

@@ -1,0 +1,40 @@
+{
+  "name": "@lexibase/rdx-versioning",
+  "version": "1.0.0-beta.0",
+  "description": "Optional documentation snapshots and version navigation for RDX.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean --external @lexibase/rdx-core --external @lexibase/rdx-types",
+    "check-types": "tsc --noEmit",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lexibase/rdx.git",
+    "directory": "packages/rdx-plugin-versioning"
+  },
+  "dependencies": {
+    "@lexibase/rdx-core": "workspace:*",
+    "@lexibase/rdx-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3"
+  }
+}

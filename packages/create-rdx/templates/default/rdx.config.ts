@@ -1,11 +1,9 @@
-import type { RdxRuntimeConfig } from '@lexibase/rdx-next'
+import { defineConfig } from '@lexibase/rdx-next'
 
-const config: RdxRuntimeConfig = {
+export default defineConfig({
   title: 'My documentation',
   description: 'Documentation built with RDX.',
   theme: {
     defaultTheme: 'system',
   },
-}
-
-export default config
+})

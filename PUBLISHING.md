@@ -1,6 +1,6 @@
 # Publishing the RDX beta
 
-This repository publishes four packages in the first public beta:
+This repository publishes the framework and an optional versioning plugin:
 
 | Package                | Owner    | Purpose                                                  |
 | ---------------------- | -------- | -------------------------------------------------------- |
@@ -9,7 +9,10 @@ This repository publishes four packages in the first public beta:
 | `@lexibase/rdx-next`   | Lexibase | Next.js runtime and `rdx` command                        |
 | `@lexibase/create-rdx` | Lexibase | The project generator used by `npm create @lexibase/rdx` |
 
-`@rdx/rdx-versioning` remains private until it has a stable plugin API. The development website also has private compatibility packages for its older imports; do not publish them.
+`@lexibase/rdx-versioning` is the new optional plugin. The old
+`@rdx/rdx-versioning` helper and compatibility packages remain private for the
+development website; do not publish them. Configuration and plugin usage are
+documented in [CONFIGURATION.md](./CONFIGURATION.md).
 
 ## One-time npm setup
 
@@ -22,16 +25,17 @@ The unscoped `create-rdx` name belongs to another project. RDX uses `@lexibase/c
 
 ## Publish a beta
 
-The next release contains these versions. Publish all four in the order below;
+The next release contains these versions. Publish in the order below;
 the runtime depends on the updated core and types, and the generator template
 requires the updated runtime.
 
-| Package                | Version        |
-| ---------------------- | -------------- |
-| `@lexibase/rdx-types`  | `1.0.0-beta.1` |
-| `@lexibase/rdx-core`   | `1.0.0-beta.1` |
-| `@lexibase/rdx-next`   | `1.0.0-beta.3` |
-| `@lexibase/create-rdx` | `1.0.0-beta.2` |
+| Package                                      | Version        |
+| -------------------------------------------- | -------------- |
+| `@lexibase/rdx-types`                        | `1.0.0-beta.2` |
+| `@lexibase/rdx-core`                         | `1.0.0-beta.2` |
+| `@lexibase/rdx-next`                         | `1.0.0-beta.4` |
+| `@lexibase/create-rdx`                       | `1.0.0-beta.3` |
+| `@lexibase/rdx-versioning` (optional plugin) | `1.0.0-beta.0` |
 
 From the repository root, install the workspace dependencies and run the checks:
 
@@ -47,6 +51,7 @@ pnpm --filter @lexibase/rdx-types exec npm pack --dry-run
 pnpm --filter @lexibase/rdx-core exec npm pack --dry-run
 pnpm --filter @lexibase/rdx-next exec npm pack --dry-run
 pnpm --filter @lexibase/create-rdx exec npm pack --dry-run
+pnpm --filter @lexibase/rdx-versioning exec npm pack --dry-run
 ```
 
 Publish in dependency order. The `beta` tag keeps this pre-release separate from `latest`:
@@ -56,6 +61,7 @@ pnpm --filter @lexibase/rdx-types publish --tag beta --access public --no-git-ch
 pnpm --filter @lexibase/rdx-core publish --tag beta --access public --no-git-checks
 pnpm --filter @lexibase/rdx-next publish --tag beta --access public --no-git-checks
 pnpm --filter @lexibase/create-rdx publish --tag beta --access public --no-git-checks
+pnpm --filter @lexibase/rdx-versioning publish --tag beta --access public --no-git-checks
 ```
 
 npm may ask for a one-time password from the authenticator app. Enter it only in the terminal; never put it in this repository or send it in chat.
@@ -71,14 +77,14 @@ pnpm dev
 ```
 
 If `pnpm create` still resolves an older cached generator, select the release
-explicitly with `pnpm dlx @lexibase/create-rdx@1.0.0-beta.2`.
+explicitly with `pnpm dlx @lexibase/create-rdx@1.0.0-beta.3`.
 
 pnpm 11 may delay installing newly published versions according to its
 `minimumReleaseAge` policy. For a release test of your own packages, use an
 explicit version and temporarily set the policy for that invocation only:
 
 ```powershell
-pnpm --config.minimumReleaseAge=0 dlx @lexibase/create-rdx@1.0.0-beta.2 rdx-beta-test
+pnpm --config.minimumReleaseAge=0 dlx @lexibase/create-rdx@1.0.0-beta.3 rdx-beta-test
 ```
 
 Keep the usual age policy enabled for regular projects. If a subsequent pnpm
@@ -90,4 +96,4 @@ Open `http://localhost:3000/docs/init/intro`. The generated project should have 
 
 ## Promote to stable
 
-Only promote after validating the beta in a clean directory. Publish the same four packages with stable versions and without `--tag beta`; npm then assigns the `latest` tag. The `workspace:*` dependencies between RDX packages are converted to their matching published versions by pnpm during publication.
+Only promote after validating the beta in a clean directory. Publish the framework packages with stable versions and without `--tag beta`; npm then assigns the `latest` tag. The optional plugin has its own release cycle. The `workspace:*` dependencies between RDX packages are converted to their matching published versions by pnpm during publication.

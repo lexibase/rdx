@@ -10,6 +10,8 @@
     }
   },
   "dependencies": {
-    "@lexibase/rdx-core": "workspace:*"
+    "@lexibase/rdx-types": "workspace:*",
+    "gray-matter": "^4.0.3",
+    "next-mdx-remote": "^5.0.0"
   }
 }

@@ -8,7 +8,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --rdx-background: #121212;
     --rdx-foreground: #f4f4f5;
     --rdx-muted: #a1a1aa;
@@ -16,6 +16,26 @@
     --rdx-accent: #202022;
     --rdx-link: #7bb0ff;
   }
+}
+
+:root[data-theme='dark'] {
+  --rdx-background: #121212;
+  --rdx-foreground: #f4f4f5;
+  --rdx-muted: #a1a1aa;
+  --rdx-border: #303033;
+  --rdx-accent: #202022;
+  --rdx-link: #7bb0ff;
+}
+
+.rdx-editions {
+  border-bottom: 1px solid var(--rdx-border);
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+}
+
+.rdx-source-badge {
+  color: var(--rdx-muted);
+  font-size: 0.85rem;
 }
 
 * {
