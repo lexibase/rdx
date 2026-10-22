@@ -2,6 +2,12 @@
 
 The official Next.js runtime for RDX documentation projects.
 
+Requires Node.js 20.9 or newer; use a currently supported Node.js LTS release.
+The MDX renderer keeps JavaScript expression blocking enabled. Markdown, fenced
+code and registered JSX components with literal props remain supported, but
+expressions such as `{value}` or `style={{ ... }}` are not evaluated. Documentation
+must still be trusted project-owned content, not untrusted uploads.
+
 It exposes the `rdx` command used by generated projects to create their
 internal `.rdx` application and run Next.js.
 

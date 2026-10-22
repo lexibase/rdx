@@ -2,6 +2,8 @@
 
 This documentation site was created with RDX.
 
+Requires Node.js 20.9 or newer. Use a currently supported Node.js LTS release.
+
 ## Development
 
 ```bash
