@@ -17,7 +17,8 @@ Table cells have a minimum width so wider comparisons remain readable on mobile
 instead of compressing every sentence into a narrow column.
 Images retain their aspect ratio and cannot exceed the content width. Existing
 classes are merged with custom `className` values rather than discarded.
-Fenced code displays its language (or "Code" when omitted) and a copy button.
+Fenced code displays its language (or "Code" when omitted) and an icon-only copy
+button with an accessible name, a tooltip and a checkmark on success.
 Copying preserves the code's indentation, line breaks and trailing newline,
 without copying the header. Success is announced only after the clipboard write
 finishes (the operating system may normalize LF/CRLF line endings),

@@ -880,8 +880,7 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         )
         await npmPanel.getByRole('button', { name: 'Copy code' }).click()
         await npmPanel
-          .getByRole('button', { name: 'Copy code' })
-          .filter({ hasText: 'Copied' })
+          .locator('button[aria-label="Copy code"][data-status="copied"]')
           .waitFor()
         assert.equal(
           (await page.evaluate(() => navigator.clipboard.readText())).replace(
@@ -1049,10 +1048,11 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         const copy = blocks.first().getByRole('button', { name: 'Copy code' })
         await copy.focus()
         await page.keyboard.press('Enter')
-        await page.waitForFunction(() =>
-          document
-            .querySelector('[data-rdx-code-block] button')
-            ?.textContent.includes('Copied')
+        await page.waitForFunction(
+          () =>
+            document
+              .querySelector('[data-rdx-code-block] button')
+              ?.getAttribute('data-status') === 'copied'
         )
         assert.equal(
           (await page.evaluate(() => navigator.clipboard.readText())).replace(
@@ -1062,7 +1062,9 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
           copySample
         )
         await blocks.nth(1).getByRole('button', { name: 'Copy code' }).click()
-        await blocks.nth(1).getByText('Copied', { exact: true }).waitFor()
+        await blocks.nth(1).locator('button[data-status="copied"]').waitFor()
+        assert.equal(await copy.innerText(), '')
+        assert.equal(await copy.getAttribute('title'), 'Copied!')
         assert.equal(
           (await page.evaluate(() => navigator.clipboard.readText())).replace(
             /\r\n/g,
@@ -1075,7 +1077,7 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
           copySample
         )
         assert.equal(await page.locator('p [data-rdx-code-block]').count(), 0)
-        await copy.filter({ hasText: /^Copy$/ }).waitFor()
+        await blocks.first().locator('button[data-status="idle"]').waitFor()
         if (process.env.RDX_THEME_SCREENSHOTS) {
           await mkdir(process.env.RDX_THEME_SCREENSHOTS, { recursive: true })
           for (const theme of ['dark', 'light']) {
@@ -1136,9 +1138,10 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
             hasText: 'Could not copy. Select the code and copy it manually.',
           })
           .waitFor()
-        assert.doesNotMatch(
-          await failed.getByRole('button').innerText(),
-          /Copied/
+        assert.equal(await failed.getByRole('button').innerText(), '')
+        assert.equal(
+          await failed.getByRole('button').getAttribute('data-status'),
+          'error'
         )
         const retryBounds = await failed.getByRole('button').boundingBox()
         assert.ok(

@@ -165,7 +165,11 @@ test(
           const code = page.locator('[data-rdx-code-block]').first()
           const expectedCode = await code.locator('pre').textContent()
           await code.getByRole('button', { name: 'Copy code' }).click()
-          await code.getByText('Copied', { exact: true }).waitFor()
+          await code.locator('button[data-status="copied"]').waitFor()
+          assert.equal(
+            await code.getByRole('button', { name: 'Copy code' }).innerText(),
+            ''
+          )
           assert.equal(
             (await page.evaluate(() => navigator.clipboard.readText())).replace(
               /\r\n/g,

@@ -525,6 +525,10 @@ test('code blocks preserve text and language while inline code has no copy butto
   const html = renderToStaticMarkup(content)
   assert.equal((html.match(/data-rdx-code-block/g) ?? []).length, 2)
   assert.equal((html.match(/aria-label="Copy code"/g) ?? []).length, 2)
+  for (const button of html.matchAll(/<button\b[^>]*>([\s\S]*?)<\/button>/g)) {
+    assert.match(button[1], /<svg\b/)
+    assert.equal(button[1].replace(/<[^>]*>/g, '').trim(), '')
+  }
   assert.match(html, /language-ts/)
   assert.match(
     html,
