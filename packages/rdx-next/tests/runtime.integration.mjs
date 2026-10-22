@@ -433,6 +433,22 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         const tableRegion = page
           .locator('[data-slot="mdx-table-scroll"]')
           .first()
+        const wideTable = page.locator('[data-slot="mdx-table-scroll"]').nth(1)
+        assert.equal(await wideTable.locator('th').count(), 5)
+        assert.equal(await wideTable.locator('tbody > tr').count(), 4)
+        for (const row of await wideTable.locator('tbody > tr').all())
+          assert.equal(await row.locator('td').count(), 5)
+        assert.equal(
+          await wideTable
+            .locator('th')
+            .nth(2)
+            .evaluate((element) => getComputedStyle(element).textAlign),
+          'center'
+        )
+        assert.equal(
+          await wideTable.locator('th').last().innerText(),
+          'Example'
+        )
         const tableColors = await tableRegion
           .locator('tbody > tr')
           .evaluateAll((rows) =>
@@ -491,12 +507,46 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
               ),
               animations: 'disabled',
             })
+            await wideTable.screenshot({
+              path: path.join(
+                process.env.RDX_THEME_SCREENSHOTS,
+                `five-columns-${theme}.png`
+              ),
+              animations: 'disabled',
+            })
           }
           await page.evaluate(() =>
             document.documentElement.classList.add('dark')
           )
         }
         await page.setViewportSize({ width: 390, height: 844 })
+        assert.ok(
+          await wideTable.evaluate(
+            (element) => element.scrollWidth > element.clientWidth
+          )
+        )
+        assert.ok(
+          await wideTable
+            .locator('tbody tr:first-child td')
+            .evaluateAll((cells) =>
+              cells.every((cell) => cell.getBoundingClientRect().width >= 160)
+            )
+        )
+        await wideTable.focus()
+        await page.keyboard.press('ArrowRight')
+        await page.waitForFunction(
+          () =>
+            document.querySelectorAll('[data-slot="mdx-table-scroll"]')[1]
+              .scrollLeft > 0
+        )
+        if (process.env.RDX_THEME_SCREENSHOTS)
+          await wideTable.screenshot({
+            path: path.join(
+              process.env.RDX_THEME_SCREENSHOTS,
+              'five-columns-mobile.png'
+            ),
+            animations: 'disabled',
+          })
         assert.equal(
           await page.evaluate(
             () => document.documentElement.scrollWidth <= innerWidth

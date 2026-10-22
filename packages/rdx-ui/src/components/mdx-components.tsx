@@ -104,7 +104,7 @@ export const mdxComponents = {
   td: ({ className, ...props }: ComponentProps<'td'>) => (
     <td
       className={cn(
-        'border-b border-r border-border/70 px-4 py-3 align-top leading-6 last:border-r-0',
+        'min-w-40 border-b border-r border-border/70 px-4 py-3 align-top leading-6 last:border-r-0',
         className
       )}
       {...props}

@@ -13,6 +13,8 @@ the default. No Markdown-specific plugin needs to be configured by the author.
 
 Tables and code blocks scroll horizontally within the document, not the entire
 page. Their containers can receive keyboard focus for horizontal scrolling.
+Table cells have a minimum width so wider comparisons remain readable on mobile
+instead of compressing every sentence into a narrow column.
 Images retain their aspect ratio and cannot exceed the content width. Existing
 classes are merged with custom `className` values rather than discarded.
 Fenced code displays its language (or "Code" when omitted) and a copy button.
