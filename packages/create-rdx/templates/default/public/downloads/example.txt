@@ -1,0 +1,2 @@
+This file is served by RDX from public/downloads/example.txt.
+You can replace it with your own downloadable files.

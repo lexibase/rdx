@@ -17,3 +17,10 @@ explicitly configured plugins enable the shared navbar dropdown.
 
 `.rdx/` is generated. Configure the site or edit a project-owned `home.tsx`
 instead of modifying files inside `.rdx/`.
+
+Place images, favicon and downloads in the project-root `public/` directory.
+The CLI links `.rdx/public` to it using a junction on Windows or a directory
+symlink elsewhere. `/images/logo.svg` serves `public/images/logo.svg` in dev and
+production. No asset copies are cached and original files are never removed.
+Restart/redeploy production after adding/removing assets. Documentation versions
+share this directory; snapshots do not copy its contents.

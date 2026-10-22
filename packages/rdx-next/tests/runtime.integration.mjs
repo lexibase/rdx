@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { Buffer } from 'node:buffer'
 import { spawn, spawnSync } from 'node:child_process'
 import { createRequire } from 'node:module'
 import {
@@ -7,6 +8,7 @@ import {
   writeFile,
   readFile,
   symlink,
+  unlink,
   rm,
 } from 'node:fs/promises'
 import { createServer } from 'node:net'
@@ -19,6 +21,17 @@ const packageRoot = fileURLToPath(new URL('../', import.meta.url))
 const require = createRequire(path.join(packageRoot, 'package.json'))
 const cli = path.join(packageRoot, 'bin/rdx.mjs')
 const nextCli = require.resolve('next/dist/bin/next')
+
+async function assertPublicFile(base, url, expected, contentType) {
+  const response = await fetch(`${base}${url}`)
+  assert.equal(response.status, 200, `Expected public asset ${url}`)
+  if (contentType)
+    assert.match(response.headers.get('content-type') ?? '', contentType)
+  assert.deepEqual(
+    Buffer.from(await response.arrayBuffer()),
+    Buffer.from(expected)
+  )
+}
 
 async function command(cwd, entry, args) {
   const child = spawn(process.execPath, [entry, ...args], { cwd })
@@ -138,9 +151,28 @@ test(
       })
     )
     await mkdir(path.join(rootDir, 'docs/init'), { recursive: true })
+    const publicRoot = path.join(rootDir, 'public')
+    const asset =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="32"><rect width="64" height="32" fill="green"/></svg>'
+    const changedAsset = asset.replace('green', 'orange')
+    await mkdir(path.join(publicRoot, 'images'), { recursive: true })
+    await mkdir(path.join(publicRoot, 'downloads'), { recursive: true })
+    await writeFile(path.join(publicRoot, 'images/public logo.svg'), asset)
+    await writeFile(
+      path.join(publicRoot, 'downloads/manual.txt'),
+      'Original download'
+    )
+    const favicon = Buffer.from([0, 0, 1, 0])
+    const downloadableCode =
+      'const value: number = "download, not application code"\n'
+    await writeFile(
+      path.join(publicRoot, 'downloads/example.ts'),
+      downloadableCode
+    )
+    await writeFile(path.join(publicRoot, 'favicon.ico'), favicon)
     await writeFile(
       path.join(rootDir, 'docs/init/intro.mdx'),
-      '---\ntitle: Introduction\n---\nOriginal snapshot body'
+      '---\ntitle: Introduction\n---\nOriginal snapshot body\n\n![Public asset](/images/public%20logo.svg)'
     )
     const configPath = path.join(rootDir, 'rdx.config.ts')
     await writeFile(configPath, `export default { title: 'Fixture docs' }`)
@@ -154,6 +186,57 @@ test(
     assert.match(plain, /data-rdx-navbar/)
     assert.match(plain, />Docs</)
     assert.match(plain, /data-rdx-sidebar/)
+    await assertPublicFile(
+      running.base,
+      '/downloads/example.ts',
+      downloadableCode
+    )
+    assert.match(plain, /alt="Public asset"/)
+    await assertPublicFile(
+      running.base,
+      '/images/public%20logo.svg',
+      asset,
+      /image\/svg\+xml/
+    )
+    await assertPublicFile(
+      running.base,
+      '/downloads/manual.txt',
+      'Original download',
+      /text\/plain/
+    )
+    await assertPublicFile(running.base, '/favicon.ico', favicon, /image\//)
+    assert.equal(
+      (await fetch(`${running.base}/public/images/public%20logo.svg`)).status,
+      404
+    )
+    assert.equal((await fetch(`${running.base}/rdx.config.ts`)).status, 404)
+    await writeFile(
+      path.join(publicRoot, 'images/public logo.svg'),
+      changedAsset
+    )
+    await assertPublicFile(
+      running.base,
+      '/images/public%20logo.svg',
+      changedAsset
+    )
+    await writeFile(
+      path.join(publicRoot, 'downloads/new file.txt'),
+      'Added while dev is running'
+    )
+    await assertPublicFile(
+      running.base,
+      '/downloads/new%20file.txt',
+      'Added while dev is running'
+    )
+    await unlink(path.join(publicRoot, 'downloads/manual.txt'))
+    assert.equal(
+      (await fetch(`${running.base}/downloads/manual.txt`)).status,
+      404
+    )
+    await writeFile(
+      path.join(publicRoot, 'downloads/manual.txt'),
+      'Updated download'
+    )
     running.close()
     running = undefined
 
@@ -195,6 +278,24 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
     const home = await fetch(running.base)
     assert.equal(home.status, 200)
     assert.match(await home.text(), /data-rdx-home/)
+    await assertPublicFile(
+      running.base,
+      '/downloads/example.ts',
+      downloadableCode
+    )
+    await assertPublicFile(
+      running.base,
+      '/images/public%20logo.svg',
+      changedAsset,
+      /image\/svg\+xml/
+    )
+    await assertPublicFile(
+      running.base,
+      '/downloads/manual.txt',
+      'Updated download',
+      /text\/plain/
+    )
+    await assertPublicFile(running.base, '/favicon.ico', favicon, /image\//)
     const live = await (await fetch(`${running.base}/docs/init/intro`)).text()
     assert.match(live, /Changed live body/)
     assert.match(live, /data-rdx-version-trigger/)
@@ -272,6 +373,12 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         assert.match(
           await page.locator('main').innerText(),
           /Original snapshot body/
+        )
+        assert.equal(
+          await page
+            .getByAltText('Public asset')
+            .evaluate((image) => image.complete && image.naturalWidth > 0),
+          true
         )
         await page.setViewportSize({ width: 390, height: 844 })
         await page.getByRole('button', { name: 'Open sidebar' }).click()

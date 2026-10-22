@@ -90,6 +90,7 @@ const templateDir = path.resolve(
   '../templates/default'
 )
 await fs.copy(templateDir, targetDir, { errorOnExist: true })
+await fs.ensureDir(path.join(targetDir, 'public'))
 
 const gitignoreTemplatePath = path.join(targetDir, 'gitignore.template')
 await fs.move(gitignoreTemplatePath, path.join(targetDir, '.gitignore'), {
@@ -107,7 +108,9 @@ const readmePath = path.join(targetDir, 'README.md')
 const readme = await fs.readFile(readmePath, 'utf8')
 await fs.writeFile(
   readmePath,
-  readme.replaceAll('__RDX_PROJECT_NAME__', projectName)
+  readme
+    .replaceAll('{{RDX_PROJECT_NAME}}', projectName)
+    .replaceAll('__RDX_PROJECT_NAME__', projectName)
 )
 
 const packageManager = getPackageManager()

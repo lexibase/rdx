@@ -1,6 +1,6 @@
 {
   "name": "@lexibase/create-rdx",
-  "version": "1.0.0-beta.5",
+  "version": "1.0.0-beta.6",
   "description": "Create a new RDX documentation project.",
   "license": "MIT",
   "bin": {
@@ -12,6 +12,9 @@
     "templates",
     "README.md"
   ],
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  },
   "engines": {
     "node": ">=18.18"
   },
