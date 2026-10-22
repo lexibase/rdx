@@ -21,7 +21,7 @@ configurations receive manual instructions and are not automatically edited.
 Installing a package with npm/pnpm/yarn alone never edits `rdx.config.ts`.
 
 Generated sites use the same theme and components as the development website,
-through `@lexibase/rdx-ui`: logo, navbar, Radix version dropdown, mobile/desktop
+through `@lexibase/rdx-ui`: logo, navbar, Base UI version dropdown, mobile/desktop
 sidebar, landing page, MDX styles and theme provider. The adapter owns content
 and route data; it does not implement a parallel UI theme.
 

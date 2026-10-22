@@ -73,6 +73,24 @@ components inside `packages/rdx-ui`, preserve the existing RDX theme/layout and
 verify composition, focus, keyboard interaction and generated sites. The current
 Radix-backed components stay in place until that migration is validated.
 
+### Follow-up: Base UI migration
+
+The follow-up UI branch replaces the three direct Radix dependencies (Slot,
+dropdown-menu and separator) with `@base-ui/react` 1.9.0. Both the development
+website and generated runtime consume the same migrated components. RDX's
+theme classes remain unchanged except for the primitive-specific state selectors
+and positioning variables. The shadcn configuration now selects `base-nova`;
+this selects the Base UI registry for future additions, not a new site theme.
+
+Navigation uses the shared `ButtonLink` or `DropdownMenuLinkItem`; button/menu
+composition uses Base UI's `render` API. The beta composition changes are
+documented in `packages/rdx-ui/README.md`. No public package versions are bumped
+and nothing is published by this migration.
+
+The installed Floating UI React DOM 2.1.9 used by Base UI declares React and
+React DOM peers `>=16.8.0`, compatible with the workspace's 19.3.1. The migration
+does not add peer overrides or retain the former Radix dependency chain.
+
 ## Audit results and remaining work
 
 The production audit (`pnpm audit --prod`) went from 67 advisories (4 critical,

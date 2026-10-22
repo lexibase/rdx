@@ -1,7 +1,6 @@
-import { Button } from '@lexibase/rdx-ui/components/button'
+import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 import { Separator } from '@lexibase/rdx-ui/components/separator'
 import { Github } from 'lucide-react'
-import Link from 'next/link'
 import { ModeToggle } from '@lexibase/rdx-ui/components/mode-toggle'
 
 import config from '@/rdx.config'
@@ -16,23 +15,19 @@ export function NavbarActions() {
       {github.visible && (
         <>
           <Separator orientation="vertical" />
-          <Button
+          <ButtonLink
             variant="ghost"
             size="icon"
             title="GitHub"
-            asChild
             aria-label="GitHub"
+            href={github.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cursor-default"
           >
-            <Link
-              className="cursor-default"
-              href={github.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Github className="h-[1.2rem] w-[1.2rem]" />
-              <span className="sr-only">GitHub</span>
-            </Link>
-          </Button>
+            <Github className="h-[1.2rem] w-[1.2rem]" />
+            <span className="sr-only">GitHub</span>
+          </ButtonLink>
         </>
       )}
 

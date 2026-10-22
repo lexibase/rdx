@@ -19,9 +19,21 @@ test('shared class merging preserves theme, dimensions and dropdown animation va
   assert.equal(cn('size-4', 'h-6'), 'size-4 h-6')
   assert.equal(cn('max-h-(--rdx-height)', 'max-h-96'), 'max-h-96')
   assert.equal(
-    cn('data-[state=open]:animate-in', 'data-[state=closed]:animate-out'),
-    'data-[state=open]:animate-in data-[state=closed]:animate-out'
+    cn('data-open:animate-in', 'data-closed:animate-out'),
+    'data-open:animate-in data-closed:animate-out'
   )
+})
+
+test('Base UI state class callbacks preserve the shared theme and consumer overrides', async () => {
+  const { mergeStateClassName } = await jiti.import(
+    '../../rdx-ui/src/lib/utils.ts'
+  )
+  assert.equal(mergeStateClassName('h-8 bg-primary', 'h-10'), 'bg-primary h-10')
+  const classes = mergeStateClassName('h-8 bg-primary', (state) =>
+    state.disabled ? 'bg-secondary' : undefined
+  )
+  assert.equal(classes({ disabled: true }), 'h-8 bg-secondary')
+  assert.equal(classes({ disabled: false }), 'h-8 bg-primary')
 })
 
 test('icons used by the RDX navbar, versions, theme and sidebar remain renderable', () => {
