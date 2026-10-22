@@ -52,6 +52,27 @@ The wrapper resolves the actual local binary under
 No global installation, warning-suppression flag or manual node_modules link is
 used as a workaround. Recheck this when updating the workspace package manager.
 
+## Final UI maintenance boundary
+
+- Lucide React: 0.577.0 in the shared UI and showcase, kept on the 0.x line.
+  Lucide 1 removes brand icons, including the GitHub mark used by RDX; that
+  migration needs an explicit replacement rather than silently losing the icon.
+- Motion: 12.43.0 in the showcase, without the separate migration to Motion 14.
+- Tailwind Merge: 3.7.0; animation utilities: tw-animate-css 1.4.0. RDX does not
+  use Tailwind prefixes, so its existing animation import remains appropriate.
+- CVA, clsx and next-themes already match the current stable versions checked
+  during this pass and remain unchanged.
+
+Regression tests cover RDX's class-merging cases and the icons used by the
+navbar, version menu, theme toggle and sidebar. The existing browser checks
+exercise the resulting dropdown animations and mobile navigation.
+
+Base UI has been selected as the direction for a separate component migration,
+not installed in this maintenance PR. That change will adapt the shadcn source
+components inside `packages/rdx-ui`, preserve the existing RDX theme/layout and
+verify composition, focus, keyboard interaction and generated sites. The current
+Radix-backed components stay in place until that migration is validated.
+
 ## Audit results and remaining work
 
 The production audit (`pnpm audit --prod`) went from 67 advisories (4 critical,
