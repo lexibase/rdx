@@ -92,3 +92,12 @@ default; set `decorative={false}` for an accessible separator role.
 
 See [Base UI Menu](https://base-ui.com/react/components/menu) and
 [shadcn Base UI](https://ui.shadcn.com/docs/components/base/button).
+
+## Documentation tabs
+
+`Tabs`, `TabsList`, `TabsTrigger` and `TabsContent` wrap Base UI Tabs and are
+automatically registered in MDX. Import them from
+`@lexibase/rdx-ui/components/tabs` in React files. Use an explicit `defaultValue`,
+matching string values and an `aria-label` on each list. Arrow keys move focus;
+Enter or Space activates a tab. The list scrolls on small screens. See
+the repository's `MDX.md` and `docs/examples/tabs.mdx` for complete examples.

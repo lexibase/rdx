@@ -196,6 +196,16 @@ test(
         )
       ).replace('link_position: 1', 'link_position: 10')
     )
+    await writeFile(
+      path.join(rootDir, 'docs/init/tabs.mdx'),
+      await readFile(
+        new URL(
+          '../../create-rdx/templates/default/docs/examples/tabs.mdx',
+          import.meta.url
+        ),
+        'utf8'
+      )
+    )
     const copySample =
       '  const message = \'<tag> & "RDX"\';\n\tconsole.log(message)\n'
     await writeFile(
@@ -578,6 +588,175 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
           .grantPermissions(['clipboard-read', 'clipboard-write'], {
             origin: running.base,
           })
+        await page.goto(`${running.base}/docs/init/tabs`)
+        const managers = page.getByRole('tablist', { name: 'Package manager' })
+        const environments = page.getByRole('tablist', { name: 'Environment' })
+        const npmTab = managers.getByRole('tab', { name: 'npm', exact: true })
+        const pnpmTab = managers.getByRole('tab', { name: 'pnpm', exact: true })
+        const yarnTab = managers.getByRole('tab', { name: 'yarn', exact: true })
+        const selectedValue = (tab) => tab.getAttribute('aria-selected')
+        assert.equal(await selectedValue(pnpmTab), 'true')
+        assert.equal(
+          await page
+            .getByRole('tabpanel', { name: 'pnpm', exact: true })
+            .isVisible(),
+          true
+        )
+        await pnpmTab.focus()
+        await page.keyboard.press('ArrowRight')
+        assert.equal(
+          await yarnTab.evaluate(
+            (element) => element === document.activeElement
+          ),
+          true
+        )
+        assert.equal(await selectedValue(pnpmTab), 'true')
+        await page.keyboard.press('Enter')
+        await page
+          .getByRole('tabpanel', { name: 'yarn', exact: true })
+          .waitFor()
+        await page.keyboard.press('Home')
+        assert.equal(
+          await npmTab.evaluate(
+            (element) => element === document.activeElement
+          ),
+          true
+        )
+        await page.keyboard.press('Space')
+        const npmPanel = page.getByRole('tabpanel', {
+          name: 'npm',
+          exact: true,
+        })
+        await npmPanel.waitFor()
+        const panelId = await npmPanel.getAttribute('id')
+        assert.equal(await npmTab.getAttribute('aria-controls'), panelId)
+        assert.equal(
+          await npmPanel.getAttribute('aria-labelledby'),
+          await npmTab.getAttribute('id')
+        )
+        await page.keyboard.press('Tab')
+        assert.equal(
+          await npmPanel.evaluate(
+            (element) => element === document.activeElement
+          ),
+          true
+        )
+        await npmPanel.getByRole('button', { name: 'Copy code' }).click()
+        await npmPanel
+          .getByRole('button', { name: 'Copy code' })
+          .filter({ hasText: 'Copied' })
+          .waitFor()
+        assert.equal(
+          (await page.evaluate(() => navigator.clipboard.readText())).replace(
+            /\r\n/g,
+            '\n'
+          ),
+          'npm install\n'
+        )
+        assert.equal(
+          await selectedValue(
+            environments.getByRole('tab', { name: 'Development', exact: true })
+          ),
+          'true'
+        )
+        await environments
+          .getByRole('tab', { name: 'Production', exact: true })
+          .focus()
+        await page.keyboard.press('End')
+        assert.equal(
+          await environments
+            .getByRole('tab', { name: 'Preview (soon)', exact: true })
+            .evaluate((element) => element === document.activeElement),
+          true
+        )
+        assert.equal(
+          await environments
+            .getByRole('tab', { name: 'Preview (soon)', exact: true })
+            .isDisabled(),
+          true
+        )
+        await page.keyboard.press('Enter')
+        assert.equal(
+          await selectedValue(
+            environments.getByRole('tab', { name: 'Development', exact: true })
+          ),
+          'true'
+        )
+        await page.keyboard.press('ArrowLeft')
+        await page.keyboard.press('Space')
+        await page
+          .getByRole('tabpanel', { name: 'Production', exact: true })
+          .waitFor()
+        assert.equal(await selectedValue(npmTab), 'true')
+        if (process.env.RDX_THEME_SCREENSHOTS) {
+          for (const theme of ['dark', 'light']) {
+            await page.evaluate(
+              (value) =>
+                document.documentElement.classList.toggle(
+                  'dark',
+                  value === 'dark'
+                ),
+              theme
+            )
+            await page
+              .locator('[data-slot="tabs"]')
+              .first()
+              .screenshot({
+                path: path.join(
+                  process.env.RDX_THEME_SCREENSHOTS,
+                  `tabs-${theme}-desktop.png`
+                ),
+                animations: 'disabled',
+              })
+          }
+        }
+        await page.setViewportSize({ width: 390, height: 844 })
+        await page.evaluate(() => {
+          for (const tab of document.querySelectorAll(
+            '[data-slot="tabs-trigger"]'
+          )) {
+            tab.textContent += ' — long label'
+          }
+        })
+        assert.equal(
+          await managers.evaluate(
+            (element) => element.scrollWidth > element.clientWidth
+          ),
+          true
+        )
+        await managers.getByRole('tab').first().focus()
+        await page.keyboard.press('End')
+        await page.keyboard.press('Enter')
+        await page.getByRole('tabpanel', { name: /yarn/ }).waitFor()
+        assert.equal(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= window.innerWidth
+          ),
+          true
+        )
+        if (process.env.RDX_THEME_SCREENSHOTS) {
+          for (const theme of ['dark', 'light']) {
+            await page.evaluate(
+              (value) =>
+                document.documentElement.classList.toggle(
+                  'dark',
+                  value === 'dark'
+                ),
+              theme
+            )
+            await page
+              .locator('[data-slot="tabs"]')
+              .first()
+              .screenshot({
+                path: path.join(
+                  process.env.RDX_THEME_SCREENSHOTS,
+                  `tabs-${theme}-mobile.png`
+                ),
+                animations: 'disabled',
+              })
+          }
+        }
+        await page.setViewportSize({ width: 1872, height: 955 })
         await page.goto(`${running.base}/docs/init/code`)
         const blocks = page.locator('[data-rdx-code-block]')
         assert.equal(await blocks.count(), 2)

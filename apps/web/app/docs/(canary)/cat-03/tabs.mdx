@@ -1,0 +1,72 @@
+---
+title: Tabs
+description: Accessible tabs for related examples and documentation.
+link_position: 4
+---
+
+## Choose your package manager
+
+Use the arrow keys to move between tabs and Enter or Space to select one.
+Tabs are included in RDX without imports or plugins.
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Package manager">
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="npm">
+
+Install dependencies with **npm**:
+
+```bash
+npm install
+```
+
+  </TabsContent>
+  <TabsContent value="pnpm">
+
+Install dependencies with **pnpm**:
+
+```bash
+pnpm install
+```
+
+  </TabsContent>
+  <TabsContent value="yarn">
+
+Install dependencies with **yarn**:
+
+```bash
+yarn install
+```
+
+  </TabsContent>
+</Tabs>
+
+## Markdown and components
+
+Each group maintains its own selection. Panels support normal Markdown and RDX components.
+
+<Tabs defaultValue="development">
+  <TabsList aria-label="Environment">
+    <TabsTrigger value="development">Development</TabsTrigger>
+    <TabsTrigger value="production">Production</TabsTrigger>
+    <TabsTrigger value="preview" disabled>Preview (soon)</TabsTrigger>
+  </TabsList>
+  <TabsContent value="development">
+
+<Callout variant="tip" title="Live updates">
+
+Run `pnpm dev` and edit your documentation to see changes locally.
+
+</Callout>
+
+  </TabsContent>
+  <TabsContent value="production">
+
+1. Run `pnpm build`.
+2. Run `pnpm start` to check the production site.
+
+  </TabsContent>
+</Tabs>

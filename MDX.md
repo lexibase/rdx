@@ -61,6 +61,47 @@ export default function Home() {
 }
 ```
 
+## Tabs
+
+Tabs use Base UI and are available in every MDX page without an import:
+
+```mdx
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Package manager">
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+  </TabsList>
+  <TabsContent value="npm">
+
+Run `npm install`.
+
+  </TabsContent>
+  <TabsContent value="pnpm">
+
+Run `pnpm install`.
+
+  </TabsContent>
+</Tabs>
+```
+
+Give each list an accessible `aria-label`, and use matching, unique string
+values for its triggers and panels. Set `defaultValue` explicitly to an enabled
+tab so the selected panel is also present in server-rendered HTML. Keep blank
+lines around Markdown content. Panels accept fenced code, lists and Callouts.
+Each group maintains its own selection; choices are not synchronized or stored.
+
+Arrow keys move focus; Enter or Space selects the focused tab. Home and End move
+to the first and last tabs. Disabled triggers remain focusable so readers can
+discover them, following Base UI's behavior, but cannot be activated. Tab moves out
+of the tab list into the selected panel. Inactive panels unmount by default;
+React authors can use `keepMounted` on `TabsContent` to preserve local state.
+Long tab lists scroll horizontally on small screens.
+
+React components can import `Tabs`, `TabsList`, `TabsTrigger` and `TabsContent`
+from `@lexibase/rdx-ui/components/tabs`. The wrappers preserve Base UI props,
+refs and state-based `className` callbacks. See `docs/examples/tabs.mdx` for
+package-manager examples.
+
 ## Authoring boundaries
 
 Documentation MDX retains `blockJS` and `blockDangerousJS`. Components are
@@ -69,6 +110,6 @@ Markdown content. JavaScript expressions, imports and arbitrary event handlers
 are not an authoring API. This is not a general HTML sanitizer: only compile
 documentation from trusted project sources, and review externally supplied MDX.
 
-The custom RDX shorthand syntax, Tabs and Accordion remain separate future work.
+The custom RDX shorthand syntax and Accordion remain separate future work.
 Examples live in `apps/web/app/docs/(canary)/cat-03/mdx-components.mdx` and the
 generated project's `docs/examples/callouts.mdx`.

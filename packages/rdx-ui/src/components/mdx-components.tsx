@@ -4,6 +4,7 @@ import { cn } from '../lib/utils'
 import { Blockquote } from './blockquote'
 import { Callout } from './callout'
 import { CodeBlock } from './code-block'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs'
 import { Separator } from '@lexibase/rdx-ui/components/separator'
 
 export const mdxComponents = {
@@ -111,6 +112,10 @@ export const mdxComponents = {
     />
   ),
   Callout,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
   Separator: ({ className, ...props }: ComponentProps<typeof Separator>) => (
     <Separator
       className={
