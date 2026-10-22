@@ -28,6 +28,9 @@
     "check-types": {
       "dependsOn": ["^check-types"]
     },
+    "web#check-types": {
+      "dependsOn": ["^check-types", "@lexibase/rdx-core#build"]
+    },
     "dev": {
       "cache": false,
       "persistent": true

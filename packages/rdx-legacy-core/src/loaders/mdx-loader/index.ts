@@ -3,6 +3,17 @@ import path from 'node:path'
 import { compileMDX } from 'next-mdx-remote/rsc'
 import remarkGfm from 'remark-gfm'
 import type { MDXLoader } from '@lexibase/rdx-types'
+import {
+  remarkDocumentLinks,
+  rehypeDocumentationHeadings,
+} from '@lexibase/rdx-core/mdx'
+
+export class RdxDocumentNotFoundError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'RdxDocumentNotFoundError'
+  }
+}
 
 export async function mdxLoader({
   filename,
@@ -43,29 +54,35 @@ export async function mdxLoader({
     )
   }
 
-  const findFile = (dir: string): string | null => {
+  const findFiles = (dir: string): string[] => {
     // apps/web traces the documentation tree explicitly in next.config.js.
     const entries = fs.readdirSync(/* turbopackIgnore: true */ dir, {
       withFileTypes: true,
     })
 
-    for (const entry of entries) {
+    return entries.flatMap((entry) => {
       const fullPath = path.join(dir, entry.name)
       if (entry.isDirectory()) {
-        const found = findFile(fullPath)
-        if (found) return found
+        return findFiles(fullPath)
       }
-      if (entry.isFile() && entry.name === `${filename}.mdx`) {
-        return fullPath
+      if (entry.isFile() && entry.name.endsWith('.mdx')) {
+        return [fullPath]
       }
-    }
-
-    return null
+      return []
+    })
   }
 
-  const filePath = findFile(basePath)
+  if (!fs.existsSync(/* turbopackIgnore: true */ basePath)) {
+    throw new RdxDocumentNotFoundError(
+      `Documentation source not found: ${basePath}`
+    )
+  }
+  const files = findFiles(basePath)
+  const filePath = files.find(
+    (file) => path.basename(file) === `${filename}.mdx`
+  )
   if (!filePath) {
-    throw new Error(`MDX File not found: ${filename}`)
+    throw new RdxDocumentNotFoundError(`MDX File not found: ${filename}`)
   }
 
   const source = fs.readFileSync(/* turbopackIgnore: true */ filePath, 'utf8')
@@ -77,7 +94,24 @@ export async function mdxLoader({
       parseFrontmatter: true,
       blockJS: true,
       blockDangerousJS: true,
-      mdxOptions: { remarkPlugins: [remarkGfm] },
+      mdxOptions: {
+        remarkPlugins: [
+          remarkGfm,
+          [
+            remarkDocumentLinks,
+            {
+              sourceRoot: basePath,
+              sourcePath: filePath,
+              routePrefix: version || defaultVersion,
+              documents: files.map((sourcePath) => ({
+                sourcePath,
+                slug: path.basename(sourcePath, '.mdx'),
+              })),
+            },
+          ],
+        ],
+        rehypePlugins: [rehypeDocumentationHeadings],
+      },
     },
   })
 

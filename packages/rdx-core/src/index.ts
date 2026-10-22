@@ -1,5 +1,10 @@
 export { getDocument, getDocsIndex, getDocsPaths } from './content/index'
 export {
+  createDocumentLinkResolver,
+  RdxDocumentLinkError,
+  type DocumentLinkOptions,
+} from './content/document-links'
+export {
   createRdxProject,
   defineConfig,
   resolveConfig,

@@ -181,9 +181,22 @@ test(
     await writeFile(path.join(publicRoot, 'favicon.ico'), favicon)
     await writeFile(
       path.join(rootDir, 'docs/init/intro.mdx'),
-      '---\ntitle: Introduction\nlink_position: 1\n---\nOriginal snapshot body\n\n![Public asset](/images/public%20logo.svg)'
+      '---\ntitle: Introduction\nlink_position: 1\n---\nOriginal snapshot body\n\n![Public asset](/images/public%20logo.svg)\n\n## Details\n\nSnapshot details.'
+    )
+    await writeFile(
+      path.join(rootDir, 'docs/init/_category.json'),
+      JSON.stringify({ title: 'Init', sidebar_position: 0 })
     )
     const configPath = path.join(rootDir, 'rdx.config.ts')
+    await writeFile(
+      path.join(rootDir, 'docs/init/links.mdx'),
+      '---\ntitle: Links\nlink_position: 20\n---\n## Links\n\n[Original page](./intro.mdx?from=links#details)\n\n[Cross category](../api/target.mdx#configuration)\n\n[External](https://example.com/guide.mdx)\n\n[Download](/downloads/manual.txt)\n'
+    )
+    await mkdir(path.join(rootDir, 'docs/api'), { recursive: true })
+    await writeFile(
+      path.join(rootDir, 'docs/api/target.mdx'),
+      '---\ntitle: Target\n---\n## Configuration\n\nA linked page.\n\n## Configuration\n\nDuplicate heading.\n'
+    )
     await writeFile(
       path.join(rootDir, 'docs/init/quotes.mdx'),
       (
@@ -265,6 +278,12 @@ test(
     ).text()
     assert.match(components, /data-rdx-callout="warning"/)
     assert.match(components, /data-slot="mdx-table-scroll"/)
+    const brokenPage = path.join(rootDir, 'docs/init/broken.mdx')
+    await writeFile(brokenPage, '[Missing destination](./does-not-exist.mdx)')
+    const brokenResponse = await fetch(`${running.base}/docs/init/broken`)
+    assert.equal(brokenResponse.status, 500)
+    assert.match(running.logs(), /Invalid document link/)
+    await unlink(brokenPage)
     const githubPlaceholder = plain.match(
       /<a\b[^>]*aria-label="GitHub"[^>]*>/
     )?.[0]
@@ -348,7 +367,7 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
     await command(rootDir, cli, ['version', '1.1.0'])
     await writeFile(
       path.join(rootDir, 'docs/init/intro.mdx'),
-      '---\ntitle: Introduction\nlink_position: 1\n---\nChanged live body'
+      '---\ntitle: Introduction\nlink_position: 1\n---\nChanged live body\n\n## Details\n\nLive details.'
     )
     await writeFile(
       path.join(rootDir, 'docs/init/new.mdx'),
@@ -401,6 +420,21 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
     assert.doesNotMatch(archived, /Changed live body/)
     assert.match(archived, /Documentation version: Version 1.0.0/)
     assert.match(archived, />Archived</)
+    for (const prefix of ['', '/1.1.0', '/1.0.0']) {
+      const linked = await (
+        await fetch(`${running.base}/docs${prefix}/init/links`)
+      ).text()
+      assert.match(
+        linked,
+        new RegExp(`href="/docs${prefix}/init/intro\\?from=links#details"`)
+      )
+      assert.match(
+        linked,
+        new RegExp(`href="/docs${prefix}/api/target#configuration"`)
+      )
+      assert.match(linked, /href="https:\/\/example.com\/guide.mdx"/)
+      assert.match(linked, /href="\/downloads\/manual.txt"/)
+    }
     const added = await (await fetch(`${running.base}/docs/init/new`)).text()
     assert.match(added, /Only in current/)
     assert.equal(
@@ -433,6 +467,17 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         const errors = []
         page.on('pageerror', (error) => errors.push(error.message))
         await page.addInitScript(() => localStorage.setItem('theme', 'dark'))
+        await page.goto(`${running.base}/docs/1.0.0/init/links`)
+        const crossCategoryLink = page.getByRole('link', {
+          name: 'Cross category',
+          exact: true,
+        })
+        await crossCategoryLink.click()
+        await page.waitForURL(
+          `${running.base}/docs/1.0.0/api/target#configuration`
+        )
+        await page.locator('#configuration').waitFor()
+        assert.equal(await page.locator('#configuration-1').count(), 1)
         await page.goto(`${running.base}/docs/init/quotes`)
         const quote = page.locator('blockquote').first()
         await quote.waitFor()

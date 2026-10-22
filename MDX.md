@@ -24,7 +24,39 @@ finishes (the operating system may normalize LF/CRLF line endings),
 then resets after two seconds. If clipboard access is unavailable or
 denied, a visible message offers manual copying; the code remains selectable.
 Clipboard access requires HTTPS or localhost and the browser's permission.
-Syntax highlighting and relative document-link rewriting remain future tasks.
+Syntax highlighting remains a future task.
+
+## Links between documents
+
+Write relative `.mdx` file paths; RDX resolves them against the current file:
+
+```md
+[Next page](./getting-started.mdx)
+[API reference](../api/reference.mdx#authentication)
+[Guide](./guide.mdx?lang=pt#setup)
+```
+
+Generated sites preserve full document slugs and the current content source's
+route prefix, including archived snapshots. There is no fallback to Current
+when a target is absent from a snapshot. The development website uses the same
+resolver with its existing filename-only routes. Custom `docsDir` works too.
+
+Inline links, reference-style Markdown links and literal `<a href="...">` links
+are supported, including Markdown inside Callouts, Tabs and Accordion panels.
+Queries and fragments are preserved. Filenames with spaces or accents can use
+URL encoding. Use `/` separators and exact file capitalization for portability.
+Only explicit relative `.mdx` destinations are resolved; external URLs,
+root-relative URLs, image sources, downloads, same-page anchors, and code samples
+are left unchanged. Paths without `.mdx` retain normal browser URL behavior.
+
+Missing document destinations, ambiguous legacy routes, malformed encoded MDX
+paths and paths escaping the current source fail compilation with the referring
+file and URL. Missing assets, arbitrary site URLs and fragment existence are not
+validated by this document-link check. This is not a site-wide link crawler.
+
+Markdown headings receive IDs through `rehype-slug` (GitHub-style slugs), including
+duplicate suffixes such as `setup-1`. Explicit existing IDs are preserved. This
+does not add automatic heading anchor buttons or a table of contents.
 
 ## Callout
 

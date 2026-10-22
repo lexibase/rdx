@@ -1,0 +1,34 @@
+---
+title: Document links
+description: Write file paths and let RDX resolve documentation URLs.
+link_position: 6
+---
+
+## Relative links
+
+Read the [Tabs example](./tabs.mdx) or the [Accordion example](./accordion.mdx).
+Jump directly to the [Markdown example](./mdx-components.mdx#native-markdown).
+
+```md
+[Tabs](./tabs.mdx)
+[Accordion](./accordion.mdx)
+```
+
+RDX resolves the file path inside the same documentation version. In this
+development website, category folders are omitted from the route; generated
+projects preserve the complete document path.
+
+## Section links
+
+Return to [relative links](#relative-links). Markdown headings receive automatic
+IDs so anchors can be used without adding custom JSX.
+
+## Validation
+
+<Callout title="Portable documentation">
+
+Use `.mdx` file paths with forward slashes. A missing document or a path outside
+this version's documentation directory produces an error identifying the link
+and source file. Links inside code samples and image paths are not rewritten.
+
+</Callout>

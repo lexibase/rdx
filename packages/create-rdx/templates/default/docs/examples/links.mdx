@@ -1,0 +1,38 @@
+---
+title: Document links
+description: Link to documentation files using their relative paths.
+link_position: 7
+---
+
+## Link to a page
+
+Read the [introduction](../init/intro.mdx) or learn how to
+[create a page](../init/getting-started.mdx#create-a-page).
+
+```md
+[Introduction](../init/intro.mdx)
+[Create a page](../init/getting-started.mdx#create-a-page)
+```
+
+RDX resolves these paths relative to this file. When viewing a snapshot,
+links stay inside that snapshot instead of switching to Current.
+
+## Link to a section
+
+Jump to the [tables example](./markdown.mdx#tables), or return to
+[the first section](#link-to-a-page) of this page.
+
+Markdown headings receive automatic IDs. Repeated headings get suffixes such as
+`tables-1`. Relative document links must include the `.mdx` extension.
+
+<Callout title="Keep links portable">
+
+Use forward slashes and match the file's name and capitalization. If a destination
+does not exist in the current version, RDX reports the source file and link to fix.
+
+</Callout>
+
+## Assets and external links
+
+[External links](https://example.com/), `/images/logo.svg` and paths to downloads
+are not rewritten. Put public assets in `public/` and reference them from `/`.

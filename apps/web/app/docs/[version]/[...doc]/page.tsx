@@ -1,6 +1,6 @@
 import { mdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { notFound } from 'next/navigation'
-import { mdxLoader } from '@rdx/core'
+import { mdxLoader, RdxDocumentNotFoundError } from '@rdx/core'
 
 import versionsRaw from '@/versions.json'
 import { VersionBanner } from '@/components/Page/version-banner'
@@ -25,8 +25,9 @@ export default async function DocPage({
       mdxComponents,
     })
     content = result.content
-  } catch {
-    return notFound()
+  } catch (error) {
+    if (error instanceof RdxDocumentNotFoundError) return notFound()
+    throw error
   }
 
   return (

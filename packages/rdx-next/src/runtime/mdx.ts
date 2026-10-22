@@ -1,9 +1,15 @@
 import { compileMDX } from 'next-mdx-remote/rsc'
 import remarkGfm from 'remark-gfm'
+import {
+  remarkDocumentLinks,
+  rehypeDocumentationHeadings,
+  type DocumentLinkOptions,
+} from '@lexibase/rdx-core/mdx'
 
 export function compileDocumentation(
   source: string,
-  components: Parameters<typeof compileMDX>[0]['components']
+  components: Parameters<typeof compileMDX>[0]['components'],
+  links?: DocumentLinkOptions
 ) {
   return compileMDX({
     source,
@@ -11,7 +17,10 @@ export function compileDocumentation(
     options: {
       blockJS: true,
       blockDangerousJS: true,
-      mdxOptions: { remarkPlugins: [remarkGfm] },
+      mdxOptions: {
+        remarkPlugins: [remarkGfm, [remarkDocumentLinks, links]],
+        rehypePlugins: [rehypeDocumentationHeadings],
+      },
     },
   })
 }

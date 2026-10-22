@@ -1,2 +1,5 @@
 export { docsIndexer } from './src/loaders/docs-indexer/index'
-export { mdxLoader } from './src/loaders/mdx-loader/index'
+export {
+  mdxLoader,
+  RdxDocumentNotFoundError,
+} from './src/loaders/mdx-loader/index'
