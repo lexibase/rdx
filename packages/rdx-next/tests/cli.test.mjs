@@ -32,6 +32,7 @@ test('prepare loads typed config with defineConfig without loading a Next server
     await readFile(path.join(rootDir, '.rdx/tsconfig.json'))
   )
   assert.equal(config.compilerOptions.isolatedModules, true)
+  assert.ok(config.exclude.includes('public'))
 })
 
 test('preflight rejects invalid config before creating .rdx', async (t) => {

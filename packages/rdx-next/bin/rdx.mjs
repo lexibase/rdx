@@ -10,6 +10,8 @@ import process from 'node:process'
 import { createRdxProject } from '@lexibase/rdx-core/config'
 import { createJiti } from 'jiti'
 
+import { preparePublicAssets } from './public-assets.mjs'
+
 const supportedCommands = new Set(['dev', 'build', 'start'])
 const command = process.argv[2]
 const commandArgs = process.argv.slice(3)
@@ -23,6 +25,7 @@ const runtimeDirectory = path.join(projectRoot, '.rdx')
 
 async function prepareRuntime() {
   await mkdir(runtimeDirectory, { recursive: true })
+  await preparePublicAssets(projectRoot, runtimeDirectory)
   await cp(runtimeTemplate, runtimeDirectory, { force: true, recursive: true })
 }
 

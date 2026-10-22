@@ -1,0 +1,33 @@
+---
+title: Images and downloads
+description: Serve files from your project's public directory.
+link_position: 3
+---
+
+## Images
+
+Put images inside `public/` and reference them from the site root:
+
+![RDX logo](/images/rdx.svg)
+
+```md
+![RDX logo](/images/rdx.svg)
+```
+
+The file above lives at `public/images/rdx.svg`, not in `docs/` or `.rdx/`.
+
+## Downloads
+
+Put downloadable files in `public/` too:
+
+[Download the example file](/downloads/example.txt)
+
+```md
+[Download the example file](/downloads/example.txt)
+```
+
+Use `/images/rdx.svg`, not `/public/images/rdx.svg`. Files in `public/` are
+publicly accessible: never put passwords, tokens or private documents there.
+
+All documentation versions share these files. To preserve an image for a
+snapshot, keep a version-specific filename, such as `/images/1.0.0/diagram.svg`.

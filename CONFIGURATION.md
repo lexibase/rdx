@@ -113,6 +113,50 @@ Optional browser checks use an installed Playwright module and browser via
 `RDX_PLAYWRIGHT_MODULE` and `RDX_BROWSER_EXECUTABLE`. Set `RDX_THEME_SCREENSHOTS`
 to a disposable output directory to save desktop/mobile screenshots.
 
+## Public files: images, favicon and downloads
+
+Use `public/` at the documentation project root, beside `docs/` and
+`rdx.config.ts`. New projects include an image and a downloadable text example.
+Existing projects get an empty `public/` automatically when preparing the runtime.
+
+| Project file                | Site URL              |
+| --------------------------- | --------------------- |
+| `public/images/diagram.png` | `/images/diagram.png` |
+| `public/files/manual.pdf`   | `/files/manual.pdf`   |
+| `public/favicon.ico`        | `/favicon.ico`        |
+
+```md
+![Diagram](/images/diagram.png)
+
+[Download the manual](/files/manual.pdf)
+```
+
+Do not include `/public` in URLs. Root-relative asset URLs also work from nested
+and versioned documentation. These URLs serve files directly; they do not imply
+image optimization, automatic favicon metadata for arbitrary filenames, or
+version-specific asset snapshots.
+
+`rdx prepare`, `rdx dev`, `rdx build` and `rdx start` connect `.rdx/public` to
+the original directory with a directory link (a junction on Windows). There is
+no copied cache of assets to become stale. Additions, edits and removals are
+available during development without rerunning preparation. In production,
+restart/redeploy after adding or removing files, and deploy the project-root
+`public/` alongside the application. Standalone/static-export deployment is not
+introduced by this feature.
+
+Both `public/` and `.rdx/` must be real directories. The filesystem must support
+directory links. RDX refuses a conflicting regular `.rdx/public` directory/file
+without deleting its contents, and provides instructions to move assets to the
+project-root directory. It may repair an internal link after moving a project;
+the link's previous target is never deleted. Work in `public/`, not via the
+generated link, because edits through a link also affect the original files.
+
+Everything in `public/` is public: never store credentials or private documents
+there. Avoid URL names reserved by Next/RDX routes, such as `/docs` and `/_next`.
+Documentation snapshots share public assets; keep distinct filenames such as
+`/images/1.0.0/diagram.png` if a historical version must retain an older image.
+The versioning plugin continues snapshotting documentation only.
+
 ## Activating versioning
 
 Install the matching beta of `@lexibase/rdx-versioning` and explicitly configure
