@@ -26,23 +26,23 @@ The unscoped `create-rdx` name belongs to another project. RDX uses `@lexibase/c
 
 ## Publish a beta
 
-This release enables GitHub and theme-toggle actions in generated projects.
-Publish in this order; the runtime requires the updated core and UI, and the
-generator template requires the updated runtime and UI.
+This release introduces assisted plugin installation with `pnpm rdx add versioning`.
+Publish in this order: the core reserves the `add` command, the runtime implements
+installation/config editing, and the generator requires that runtime.
 
 | Package                | Version        |
 | ---------------------- | -------------- |
-| `@lexibase/rdx-core`   | `1.0.0-beta.5` |
-| `@lexibase/rdx-ui`     | `1.0.0-beta.1` |
-| `@lexibase/rdx-next`   | `1.0.0-beta.8` |
-| `@lexibase/create-rdx` | `1.0.0-beta.7` |
+| `@lexibase/rdx-core`   | `1.0.0-beta.6` |
+| `@lexibase/rdx-next`   | `1.0.0-beta.9` |
+| `@lexibase/create-rdx` | `1.0.0-beta.8` |
 
-The core accepts the exact GitHub URL placeholder `#`, and the shared navbar
-keeps that placeholder in the same tab. Real HTTP(S) repository links still open
-in a new tab. Existing project configuration is not automatically rewritten.
+The runtime ships the TypeScript parser and Windows-compatible process runner
+as production dependencies. Its `bin/` includes the config editor and installer.
+No install hook modifies user configuration; activation requires the explicit
+`rdx add` command. Existing plugin options and installed versions are preserved.
 
-Reuse the already released types `1.0.0-beta.4` and optional versioning
-`1.0.0-beta.2`. Do not republish those unchanged versions.
+Reuse the already released types `1.0.0-beta.4`, UI `1.0.0-beta.1` and optional
+versioning `1.0.0-beta.2`. Do not republish those unchanged versions.
 
 From the repository root, install the workspace dependencies and run the checks:
 
@@ -55,7 +55,6 @@ Inspect exactly what each package would upload before publishing:
 
 ```powershell
 pnpm --filter @lexibase/rdx-core exec npm pack --dry-run
-pnpm --filter @lexibase/rdx-ui exec npm pack --dry-run
 pnpm --filter @lexibase/rdx-next exec npm pack --dry-run
 pnpm --filter @lexibase/create-rdx exec npm pack --dry-run
 ```
@@ -64,7 +63,6 @@ Publish in dependency order. The `beta` tag keeps this pre-release separate from
 
 ```powershell
 pnpm --filter @lexibase/rdx-core publish --tag beta --access public --no-git-checks
-pnpm --filter @lexibase/rdx-ui publish --tag beta --access public --no-git-checks
 pnpm --filter @lexibase/rdx-next publish --tag beta --access public --no-git-checks
 pnpm --filter @lexibase/create-rdx publish --tag beta --access public --no-git-checks
 ```
@@ -82,14 +80,14 @@ pnpm dev
 ```
 
 If `pnpm create` still resolves an older cached generator, select the release
-explicitly with `pnpm dlx @lexibase/create-rdx@1.0.0-beta.7`.
+explicitly with `pnpm dlx @lexibase/create-rdx@1.0.0-beta.8`.
 
 pnpm 11 may delay installing newly published versions according to its
 `minimumReleaseAge` policy. For a release test of your own packages, use an
 explicit version and temporarily set the policy for that invocation only:
 
 ```powershell
-pnpm --config.minimumReleaseAge=0 dlx @lexibase/create-rdx@1.0.0-beta.7 rdx-beta-test --skip-install
+pnpm --config.minimumReleaseAge=0 dlx @lexibase/create-rdx@1.0.0-beta.8 rdx-beta-test --skip-install
 Set-Location rdx-beta-test
 pnpm --config.minimumReleaseAge=0 install
 pnpm --config.minimumReleaseAge=0 dev
@@ -101,6 +99,25 @@ being tested to `minimumReleaseAgeExclude` in that test workspace's
 `pnpm-workspace.yaml`, preserving any existing entries.
 
 Open `http://localhost:3000/docs/init/intro`. The generated project should have a `docs/` directory, `.gitignore`, `rdx.config.ts`, and a generated `.rdx/` runtime directory.
+
+Stop development before validating assisted activation:
+
+```powershell
+pnpm --config.minimumReleaseAge=0 rdx add versioning
+pnpm --config.minimumReleaseAge=0 rdx add versioning
+pnpm --config.minimumReleaseAge=0 rdx version 1.0.0
+pnpm --config.minimumReleaseAge=0 build
+pnpm --config.minimumReleaseAge=0 start
+```
+
+For normal use after the age cutoff, omit `--config.minimumReleaseAge=0`.
+The first activation must add the import and plugin, save a `.bak` config backup,
+and initialize `versions.json`. The repeat must not add another plugin, backup,
+or installation. The snapshot must load at `/docs/1.0.0/init/intro` in production.
+Review `rdx.config.ts`, `package.json` and the lockfile before committing the
+generated project; remove the backup once satisfied. If the child package manager
+still rejects a fresh version, approve only the exact trusted RDX versions in
+`minimumReleaseAgeExclude`; the CLI intentionally does not change this policy.
 
 ## Promote to stable
 

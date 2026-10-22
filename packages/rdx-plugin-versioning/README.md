@@ -3,7 +3,7 @@
 Optional version snapshots for RDX. Installing this package has no effect until
 `versioning()` is added to `plugins` in `rdx.config.ts`.
 
-For assisted installation, use `pnpm exec rdx add versioning` or
+For assisted installation, use `pnpm rdx add versioning` or
 `npm exec -- rdx add versioning`. The RDX CLI installs the package, safely adds
 the configuration and runs preparation. Manual configuration is also supported:
 
@@ -17,8 +17,8 @@ export default defineConfig({
 })
 ```
 
-Run `pnpm exec rdx prepare` to initialize `versions.json`, then
-`pnpm exec rdx version 1.0.0` to snapshot the current docs in
+Run `pnpm rdx prepare` to initialize `versions.json`, then
+`pnpm rdx version 1.0.0` to snapshot the current docs in
 `versioned_docs/version-1.0.0/`. Read snapshots at `/docs/1.0.0/<page>`.
 Current docs stay at `/docs/<page>`.
 

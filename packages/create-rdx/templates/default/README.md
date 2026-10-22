@@ -11,6 +11,20 @@ pnpm dev
 Edit files in `docs/` to create your documentation. RDX creates and maintains
 its internal runtime in `.rdx/`.
 
+## Optional versioning
+
+```bash
+pnpm rdx add versioning
+pnpm rdx version 1.0.0
+```
+
+The first command installs the official plugin, activates it in `rdx.config.ts`
+and prepares the runtime. It preserves existing options and saves a backup
+before changing the configuration. Restart `pnpm dev` afterward. Repeated
+activation does not duplicate the plugin or upgrade its installed version.
+If the configuration is too dynamic to edit safely, follow the manual
+instructions printed by the CLI. Installing a package alone does not activate it.
+
 ## Public files
 
 Put images and downloads in the project-root `public/` folder:
