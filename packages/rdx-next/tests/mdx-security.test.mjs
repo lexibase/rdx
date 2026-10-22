@@ -72,7 +72,9 @@ const framework = 'RDX'
   assert.match(html, /href="\/docs\/init\/intro"/)
   assert.match(html, /<pre\b[^>]*tabindex="0"/)
   assert.match(html, /class="[^"]*language-ts/)
-  assert.doesNotMatch(html, /role="alert"|aria-live=/)
+  assert.doesNotMatch(html, /role="alert"/)
+  assert.match(html, /data-rdx-code-block/)
+  assert.match(html, /aria-label="Copy code"/)
 })
 
 test('Callout supports all variants, optional titles, safe defaults and class overrides', () => {
@@ -89,6 +91,7 @@ test('Callout supports all variants, optional titles, safe defaults and class ov
     assert.match(html, /my-2/)
     assert.doesNotMatch(html, /my-6/)
     assert.match(html, /Body/)
+    assert.doesNotMatch(html, /aria-live=/)
   }
   const html = renderToStaticMarkup(createElement(Callout, {}, 'Body'))
   assert.match(html, /aria-label="Note"/)
@@ -108,6 +111,23 @@ test('Callout supports all variants, optional titles, safe defaults and class ov
   )
   assert.match(heading, /text-2xl font-bold my-2/)
   assert.doesNotMatch(heading, /my-6/)
+})
+
+test('code blocks preserve text and language while inline code has no copy button', async () => {
+  const { content } = await compileDocumentation(
+    'Use `inline` code.\n\n```ts\n  const text = "<tag> & RDX"\n\tconsole.log(text)\n```\n\n```\nplain text\n```',
+    mdxComponents
+  )
+  const html = renderToStaticMarkup(content)
+  assert.equal((html.match(/data-rdx-code-block/g) ?? []).length, 2)
+  assert.equal((html.match(/aria-label="Copy code"/g) ?? []).length, 2)
+  assert.match(html, /language-ts/)
+  assert.match(
+    html,
+    / {2}const text = &quot;&lt;tag&gt; &amp; RDX&quot;\n\tconsole.log\(text\)\n/
+  )
+  assert.match(html, />Code<\/span>/)
+  assert.match(html, />inline<\/code>/)
 })
 
 test('MDX keeps Markdown, links, images, fenced code and registered JSX components usable', async () => {

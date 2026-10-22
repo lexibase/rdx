@@ -15,8 +15,14 @@ Tables and code blocks scroll horizontally within the document, not the entire
 page. Their containers can receive keyboard focus for horizontal scrolling.
 Images retain their aspect ratio and cannot exceed the content width. Existing
 classes are merged with custom `className` values rather than discarded.
-Fenced code keeps its language class but does not yet include syntax highlighting
-or a copy button. Relative document-link rewriting is a separate future task.
+Fenced code displays its language (or "Code" when omitted) and a copy button.
+Copying preserves the code's indentation, line breaks and trailing newline,
+without copying the header. Success is announced only after the clipboard write
+finishes (the operating system may normalize LF/CRLF line endings),
+then resets after two seconds. If clipboard access is unavailable or
+denied, a visible message offers manual copying; the code remains selectable.
+Clipboard access requires HTTPS or localhost and the browser's permission.
+Syntax highlighting and relative document-link rewriting remain future tasks.
 
 ## Callout
 

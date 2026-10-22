@@ -2,6 +2,7 @@ import type { ComponentProps } from 'react'
 
 import { cn } from '../lib/utils'
 import { Callout } from './callout'
+import { CodeBlock } from './code-block'
 import { Separator } from '@lexibase/rdx-ui/components/separator'
 
 export const mdxComponents = {
@@ -50,16 +51,7 @@ export const mdxComponents = {
       {...props}
     />
   ),
-  pre: ({ className, ...props }: ComponentProps<'pre'>) => (
-    <pre
-      tabIndex={0}
-      className={cn(
-        'bg-secondary text-secondary-foreground rounded-md p-4 my-4 overflow-x-auto max-w-full focus-visible:outline-2 focus-visible:outline-ring [&>code]:bg-transparent [&>code]:rounded-none [&>code]:p-0',
-        className
-      )}
-      {...props}
-    />
-  ),
+  pre: CodeBlock,
   code: ({ className, ...props }: ComponentProps<'code'>) => (
     <code
       className={cn(

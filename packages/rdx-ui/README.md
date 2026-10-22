@@ -37,6 +37,9 @@ Read **release notes** before deploying.
 In React, import it from `@lexibase/rdx-ui/components/callout`. It renders a static
 note, not an automatic live alert. The Markdown map also styles all six heading
 levels, responsive images, GFM tables and keyboard-scrollable code blocks.
+Fenced code blocks include a language label and copy button automatically;
+inline code remains unchanged. Copy failures leave the code selectable and show
+manual-copy guidance instead of a false success message.
 
 ## Base UI composition
 

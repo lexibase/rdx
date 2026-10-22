@@ -141,6 +141,21 @@ test(
           await page.getByRole('note', { name: 'Before updating' }).waitFor()
           assert.equal(await page.locator('[data-rdx-callout]').count(), 6)
           await page.getByRole('table').waitFor()
+          await context.grantPermissions(
+            ['clipboard-read', 'clipboard-write'],
+            { origin: running.base }
+          )
+          const code = page.locator('[data-rdx-code-block]').first()
+          const expectedCode = await code.locator('pre').textContent()
+          await code.getByRole('button', { name: 'Copy code' }).click()
+          await code.getByText('Copied', { exact: true }).waitFor()
+          assert.equal(
+            (await page.evaluate(() => navigator.clipboard.readText())).replace(
+              /\r\n/g,
+              '\n'
+            ),
+            expectedCode
+          )
           assert.deepEqual(errors, [], `${mode}: shared Callout and Markdown`)
           await context.close()
 

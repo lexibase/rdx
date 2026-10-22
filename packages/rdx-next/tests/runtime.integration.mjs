@@ -184,6 +184,14 @@ test(
       '---\ntitle: Introduction\nlink_position: 1\n---\nOriginal snapshot body\n\n![Public asset](/images/public%20logo.svg)'
     )
     const configPath = path.join(rootDir, 'rdx.config.ts')
+    const copySample =
+      '  const message = \'<tag> & "RDX"\';\n\tconsole.log(message)\n'
+    await writeFile(
+      path.join(rootDir, 'docs/init/code.mdx'),
+      '---\ntitle: Code\n---\nInline `example`.\n\n```ts\n' +
+        copySample +
+        '```\n\n```\nSecond block\n```\n'
+    )
     await writeFile(
       path.join(rootDir, 'docs/init/components.mdx'),
       (await readFile(
@@ -393,6 +401,76 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         const errors = []
         page.on('pageerror', (error) => errors.push(error.message))
         await page.addInitScript(() => localStorage.setItem('theme', 'dark'))
+        await page
+          .context()
+          .grantPermissions(['clipboard-read', 'clipboard-write'], {
+            origin: running.base,
+          })
+        await page.goto(`${running.base}/docs/init/code`)
+        const blocks = page.locator('[data-rdx-code-block]')
+        assert.equal(await blocks.count(), 2)
+        const copy = blocks.first().getByRole('button', { name: 'Copy code' })
+        await copy.focus()
+        await page.keyboard.press('Enter')
+        await page.waitForFunction(() =>
+          document
+            .querySelector('[data-rdx-code-block] button')
+            ?.textContent.includes('Copied')
+        )
+        assert.equal(
+          (await page.evaluate(() => navigator.clipboard.readText())).replace(
+            /\r\n/g,
+            '\n'
+          ),
+          copySample
+        )
+        await blocks.nth(1).getByRole('button', { name: 'Copy code' }).click()
+        await blocks.nth(1).getByText('Copied', { exact: true }).waitFor()
+        assert.equal(
+          (await page.evaluate(() => navigator.clipboard.readText())).replace(
+            /\r\n/g,
+            '\n'
+          ),
+          'Second block\n'
+        )
+        assert.equal(
+          await blocks.first().locator('pre').textContent(),
+          copySample
+        )
+        assert.equal(await page.locator('p [data-rdx-code-block]').count(), 0)
+        await copy.filter({ hasText: /^Copy$/ }).waitFor()
+        if (process.env.RDX_THEME_SCREENSHOTS) {
+          await mkdir(process.env.RDX_THEME_SCREENSHOTS, { recursive: true })
+          await page.screenshot({
+            path: path.join(process.env.RDX_THEME_SCREENSHOTS, 'code-copy.png'),
+            animations: 'disabled',
+          })
+        }
+        const rejected = await browser.newPage()
+        await rejected.addInitScript(() =>
+          Object.defineProperty(navigator, 'clipboard', {
+            configurable: true,
+            value: {
+              writeText: async () => {
+                throw new DOMException('Permission denied', 'NotAllowedError')
+              },
+            },
+          })
+        )
+        await rejected.goto(`${running.base}/docs/init/code`)
+        const failed = rejected.locator('[data-rdx-code-block]').first()
+        await failed.getByRole('button', { name: 'Copy code' }).click()
+        await failed
+          .getByRole('status')
+          .filter({
+            hasText: 'Could not copy. Select the code and copy it manually.',
+          })
+          .waitFor()
+        assert.doesNotMatch(
+          await failed.getByRole('button').innerText(),
+          /Copied/
+        )
+        await rejected.close()
         await page.goto(`${running.base}/docs/init/components`)
         await page.getByRole('note', { name: 'Before updating' }).waitFor()
         assert.equal(await page.locator('[data-rdx-callout]').count(), 6)
