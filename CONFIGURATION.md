@@ -194,12 +194,12 @@ Dynamic config exports, spreads or computed options are refused before installin
 follow the manual instructions instead. Only `versioning` is currently supported;
 arbitrary package names and additional install flags are not accepted.
 
-Before saving a changed config, the command creates an exact backup named
-`rdx.config.ts.<unique-id>.bak` in the project root. Once you have verified the
-result, you may remove that backup. If installation or config validation fails,
+The command validates the new config before replacing the original file and
+does not create backups. Its temporary validation file is removed afterward.
+If installation or config validation fails,
 the original config is left unchanged; package-manager changes to dependencies
 and lockfiles are retained for inspection, not rolled back. If preparation fails
-after activation, the valid edited config and its backup remain: fix the reported
+after activation, the valid edited config remains: fix the reported
 problem and run `rdx prepare` again. Custom plugin factories are trusted code and
 are evaluated during validation, but setup hooks run only during preparation.
 

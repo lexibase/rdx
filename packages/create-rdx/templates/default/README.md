@@ -19,8 +19,8 @@ pnpm rdx version 1.0.0
 ```
 
 The first command installs the official plugin, activates it in `rdx.config.ts`
-and prepares the runtime. It preserves existing options and saves a backup
-before changing the configuration. Restart `pnpm dev` afterward. Repeated
+and prepares the runtime. It preserves existing options and validates the
+configuration before saving it, without creating backup files. Restart `pnpm dev` afterward. Repeated
 activation does not duplicate the plugin or upgrade its installed version.
 If the configuration is too dynamic to edit safely, follow the manual
 instructions printed by the CLI. Installing a package alone does not activate it.

@@ -113,7 +113,7 @@ test('manager detection uses declaration, locks, then invoking manager; ambiguit
   )
 })
 
-test('first activation installs, validates, backs up exact bytes and does not create runtime or manifest itself', async (t) => {
+test('first activation installs and validates without leaving backups or temporary files', async (t) => {
   const root = await fixture(t)
   let calls = 0
   const options = {
@@ -128,7 +128,11 @@ test('first activation installs, validates, backs up exact bytes and does not cr
   }
   const result = await addVersioning(root, options)
   assert.equal(result.changed, true)
-  assert.equal(await readFile(result.backup, 'utf8'), basic)
+  assert.equal('backup' in result, false)
+  assert.equal(
+    (await readdir(root)).some((name) => name.endsWith('.bak')),
+    false
+  )
   const updated = await readFile(path.join(root, 'rdx.config.ts'), 'utf8')
   assert.match(updated, /plugins: \[versioning\(\)\]/)
   assert.match(updated, /navbar: \{ title: 'Custom' \}/)
@@ -137,7 +141,7 @@ test('first activation installs, validates, backs up exact bytes and does not cr
   assert.equal(again.changed, false)
   assert.equal(calls, 1)
   const files = await readdir(root)
-  assert.equal(files.filter((name) => name.endsWith('.bak')).length, 1)
+  assert.equal(files.filter((name) => name.endsWith('.bak')).length, 0)
   assert.equal(
     files.some((name) => name.startsWith('rdx.config.add-')),
     false
