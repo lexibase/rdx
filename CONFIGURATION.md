@@ -166,7 +166,7 @@ The versioning plugin continues snapshotting documentation only.
 From the documentation project root, run:
 
 ```sh
-pnpm exec rdx add versioning
+pnpm rdx add versioning
 # npm alternative: npm exec -- rdx add versioning
 # Yarn alternative: yarn rdx add versioning
 ```
@@ -215,7 +215,7 @@ export default defineConfig({
 })
 ```
 
-Run `pnpm exec rdx prepare` (or `pnpm dev`) to initialize `versions.json` if it
+Run `pnpm rdx prepare` (or `pnpm dev`) to initialize `versions.json` if it
 does not exist. Its format stays compatible with the original manifest:
 
 ```json
@@ -228,7 +228,7 @@ does not exist. Its format stays compatible with the original manifest:
 Create a snapshot with:
 
 ```sh
-pnpm exec rdx version 1.0.0
+pnpm rdx version 1.0.0
 ```
 
 This copies the current `docsDir` to `versioned_docs/version-1.0.0/` and prepends

@@ -5,7 +5,7 @@ The official Next.js runtime for RDX documentation projects.
 It exposes the `rdx` command used by generated projects to create their
 internal `.rdx` application and run Next.js.
 
-Run `pnpm exec rdx add versioning` (or `npm exec -- rdx add versioning`) from a
+Run `pnpm rdx add versioning` (or `npm exec -- rdx add versioning`) from a
 documentation project to install and activate the official optional plugin.
 The command detects the package manager, preserves config and plugin options,
 creates a config backup when changing it, validates the result and prepares
