@@ -122,6 +122,7 @@ test('CSS declarations do not silently accept misspelled paths or pretend styles
     root,
     `import '@lexibase/rdx-ui/missing.css'; import './missing.css'; import { missing } from '@lexibase/rdx-ui/globals.css';`
   )
-  assert.equal(diagnostics.filter((entry) => entry.code === 2307).length, 2)
+  // TypeScript 6 reports unresolved side-effect imports with TS2882.
+  assert.equal(diagnostics.filter((entry) => entry.code === 2882).length, 2)
   assert.ok(diagnostics.some((entry) => entry.code === 2305))
 })

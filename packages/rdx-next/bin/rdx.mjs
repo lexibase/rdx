@@ -40,9 +40,8 @@ async function main() {
   }
 
   if (command === 'add') {
-    const { addVersioning, parseAddArguments } = await import(
-      './add-plugin.mjs'
-    )
+    const { addVersioning, parseAddArguments } =
+      await import('./add-plugin.mjs')
     const options = parseAddArguments(commandArgs)
     await addVersioning(projectRoot, options)
     command = 'prepare'

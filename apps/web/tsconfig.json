@@ -1,6 +1,7 @@
 {
   "extends": "@rdx/typescript-config/nextjs.json",
   "compilerOptions": {
+    "rootDir": "../..",
     "paths": {
       "@/*": ["./*"],
       "@lexibase/rdx-ui/*": ["../../packages/rdx-ui/src/*"],

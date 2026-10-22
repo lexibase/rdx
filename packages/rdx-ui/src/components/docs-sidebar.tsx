@@ -19,15 +19,13 @@ export function DocsSidebar({
   categories: SidebarCategory[]
   pathname: string
 }) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [openPath, setOpenPath] = useState<string | null>(null)
+  const isOpen = openPath === pathname
   const dialog = useRef<HTMLDialogElement>(null)
   useEffect(() => {
     if (isOpen && !dialog.current?.open) dialog.current?.showModal()
     if (!isOpen && dialog.current?.open) dialog.current?.close()
   }, [isOpen])
-  useEffect(() => {
-    setIsOpen(false)
-  }, [pathname])
   const content = (
     <nav aria-label="Documentation pages">
       {categories.map((category, index) => (
@@ -51,7 +49,7 @@ export function DocsSidebar({
               <Link
                 className="text-sm text-primary"
                 href={link.href}
-                onClick={() => setIsOpen(false)}
+                onClick={() => setOpenPath(null)}
                 aria-current={pathname === link.href ? 'page' : undefined}
               >
                 {link.label}
@@ -68,7 +66,7 @@ export function DocsSidebar({
       <div className="md:hidden absolute top-2 left-4 z-30">
         <Button
           variant="ghost"
-          onClick={() => setIsOpen(true)}
+          onClick={() => setOpenPath(pathname)}
           aria-label="Open sidebar"
         >
           <SidebarOpen className="size-4" />
@@ -83,13 +81,13 @@ export function DocsSidebar({
       <dialog
         ref={dialog}
         aria-label="Documentation navigation"
-        onClose={() => setIsOpen(false)}
+        onClose={() => setOpenPath(null)}
         className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none bg-background text-foreground border-0 p-4 backdrop:bg-black/40"
       >
         <div className="flex justify-end mb-4">
           <Button
             variant="ghost"
-            onClick={() => setIsOpen(false)}
+            onClick={() => setOpenPath(null)}
             aria-label="Close sidebar"
           >
             <SidebarClose className="size-4" />

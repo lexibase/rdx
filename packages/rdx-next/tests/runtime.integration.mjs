@@ -427,6 +427,23 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
               'docs-mobile.png'
             ),
           })
+        await page.goto(`${running.base}/docs/init/intro`)
+        await page.getByRole('button', { name: 'Open sidebar' }).click()
+        const navigation = page.getByRole('dialog', {
+          name: 'Documentation navigation',
+        })
+        await navigation.getByRole('link', { name: 'New page' }).click()
+        await page.waitForURL('**/docs/init/new')
+        await navigation.waitFor({ state: 'hidden' })
+        await page.getByRole('button', { name: 'Open sidebar' }).click()
+        await navigation.waitFor()
+        await page.goBack()
+        await page.waitForURL('**/docs/init/intro')
+        await navigation.waitFor({ state: 'hidden' })
+        await page.getByRole('button', { name: 'Open sidebar' }).click()
+        await navigation.waitFor()
+        await page.keyboard.press('Escape')
+        await navigation.waitFor({ state: 'hidden' })
         assert.deepEqual(errors, [])
       } finally {
         await browser.close()
