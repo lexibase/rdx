@@ -441,12 +441,45 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         await copy.filter({ hasText: /^Copy$/ }).waitFor()
         if (process.env.RDX_THEME_SCREENSHOTS) {
           await mkdir(process.env.RDX_THEME_SCREENSHOTS, { recursive: true })
+          for (const theme of ['dark', 'light']) {
+            await page.evaluate(
+              (theme) =>
+                document.documentElement.classList.toggle(
+                  'dark',
+                  theme === 'dark'
+                ),
+              theme
+            )
+            await page.screenshot({
+              path: path.join(
+                process.env.RDX_THEME_SCREENSHOTS,
+                `code-${theme}.png`
+              ),
+              animations: 'disabled',
+            })
+          }
+          await page.evaluate(() =>
+            document.documentElement.classList.add('dark')
+          )
+          await page.setViewportSize({ width: 390, height: 844 })
           await page.screenshot({
-            path: path.join(process.env.RDX_THEME_SCREENSHOTS, 'code-copy.png'),
+            path: path.join(
+              process.env.RDX_THEME_SCREENSHOTS,
+              'code-mobile.png'
+            ),
             animations: 'disabled',
           })
+          await page.setViewportSize({ width: 1872, height: 955 })
         }
+        assert.match(
+          await blocks
+            .first()
+            .locator('pre')
+            .evaluate((element) => getComputedStyle(element).fontFamily),
+          /mono/i
+        )
         const rejected = await browser.newPage()
+        await rejected.setViewportSize({ width: 390, height: 844 })
         await rejected.addInitScript(() =>
           Object.defineProperty(navigator, 'clipboard', {
             configurable: true,
@@ -469,6 +502,12 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         assert.doesNotMatch(
           await failed.getByRole('button').innerText(),
           /Copied/
+        )
+        const retryBounds = await failed.getByRole('button').boundingBox()
+        assert.ok(
+          retryBounds &&
+            retryBounds.x >= 0 &&
+            retryBounds.x + retryBounds.width <= 390
         )
         await rejected.close()
         await page.goto(`${running.base}/docs/init/components`)

@@ -57,9 +57,10 @@ export function CopyCodeButton() {
       </span>
       <Button
         type="button"
-        variant="ghost"
+        variant="outline"
         size="sm"
-        className="shrink-0"
+        data-status={status}
+        className="h-7 shrink-0 gap-1.5 border-border/70 bg-background/60 px-2.5 text-xs text-muted-foreground shadow-none hover:text-foreground data-[status=copied]:border-emerald-500/30 data-[status=copied]:bg-emerald-500/10 data-[status=copied]:text-emerald-700 dark:data-[status=copied]:text-emerald-400 data-[status=error]:border-amber-500/30 [&>svg]:size-3.5"
         aria-label="Copy code"
         onClick={(event) => copy(event.currentTarget)}
       >
