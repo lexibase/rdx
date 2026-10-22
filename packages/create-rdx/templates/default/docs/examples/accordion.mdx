@@ -1,0 +1,69 @@
+---
+title: Accordion
+description: Keep optional explanations close without crowding the page.
+link_position: 6
+---
+
+## Frequently asked questions
+
+Use Enter or Space to expand an item. Tab moves between questions and links.
+One item opens at a time; selecting it again closes it.
+
+<Accordion>
+  <AccordionItem value="content">
+    <AccordionTrigger>Where do I write my documentation?</AccordionTrigger>
+    <AccordionContent>
+
+Create folders and `.mdx` files inside **docs/**. Each folder becomes a category
+and each file becomes a page.
+
+Read the [introduction](/docs/init/intro) to get started.
+
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="preview">
+    <AccordionTrigger>How do I preview my changes?</AccordionTrigger>
+    <AccordionContent>
+
+Run the development server:
+
+```bash
+pnpm dev
+```
+
+<Callout variant="tip" title="Live updates">
+
+Keep the server running while editing your documentation.
+
+</Callout>
+
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="soon" disabled>
+    <AccordionTrigger>More examples (soon)</AccordionTrigger>
+    <AccordionContent>Not available yet.</AccordionContent>
+  </AccordionItem>
+</Accordion>
+
+## Production checklist
+
+Opening an answer closes the previous one in the same group.
+
+<Accordion>
+  <AccordionItem value="build">
+    <AccordionTrigger>Build for production</AccordionTrigger>
+    <AccordionContent>
+
+Run `pnpm build` to generate the production site.
+
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="start">
+    <AccordionTrigger>Check the production site</AccordionTrigger>
+    <AccordionContent>
+
+Run `pnpm start` after a successful build.
+
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>

@@ -19,6 +19,80 @@ const { Blockquote } = await jiti.import(
   '../../rdx-ui/src/components/blockquote.tsx'
 )
 
+test('MDX accordion accepts literal attributes and starts closed with native heading buttons', async () => {
+  const { content } = await compileDocumentation(
+    `<Accordion multiple>
+<AccordionItem value="guide">
+<AccordionTrigger>Read the guide</AccordionTrigger>
+<AccordionContent>
+
+**Optional explanation**
+
+</AccordionContent>
+</AccordionItem>
+<AccordionItem value="disabled" disabled>
+<AccordionTrigger>Not ready</AccordionTrigger>
+<AccordionContent>Unavailable.</AccordionContent>
+</AccordionItem>
+</Accordion>`,
+    mdxComponents
+  )
+  const html = renderToStaticMarkup(content)
+  assert.match(html, /data-slot="accordion"/)
+  assert.equal((html.match(/aria-expanded="false"/g) ?? []).length, 2)
+  assert.match(html, /<h3\b[^>]*><button\b/)
+  assert.match(html, /disabled=""/)
+  assert.doesNotMatch(html, /Optional explanation|Unavailable\./)
+})
+
+test('React accordion preserves initial expansion, mounted panels, state classes and native props', async () => {
+  const { Accordion, AccordionItem, AccordionTrigger, AccordionContent } =
+    await jiti.import('../../rdx-ui/src/components/accordion.tsx')
+  const html = renderToStaticMarkup(
+    createElement(
+      Accordion,
+      {
+        defaultValue: ['guide'],
+        id: 'custom-accordion',
+        className: () => 'my-2',
+      },
+      createElement(
+        AccordionItem,
+        { value: 'guide' },
+        createElement(
+          AccordionTrigger,
+          { className: (state) => (state.open ? 'text-blue-600' : undefined) },
+          'Guide'
+        ),
+        createElement(
+          AccordionContent,
+          null,
+          createElement(Callout, { title: 'Tip' }, 'Rich content')
+        )
+      ),
+      createElement(
+        AccordionItem,
+        { value: 'other' },
+        createElement(AccordionTrigger, null, 'Other'),
+        createElement(
+          AccordionContent,
+          { keepMounted: true },
+          'Preserved answer'
+        )
+      )
+    )
+  )
+  assert.match(html, /id="custom-accordion"/)
+  assert.match(html, /my-2/)
+  assert.doesNotMatch(html, /my-4/)
+  assert.match(html, /text-blue-600/)
+  assert.match(html, /aria-expanded="true"/)
+  assert.match(html, /role="region"/)
+  assert.match(html, /Rich content/)
+  assert.match(html, /Preserved answer/)
+  assert.match(html, /hidden=""/)
+})
+
 test('MDX tabs render the explicit default panel with rich content and no author JavaScript', async () => {
   const { content } = await compileDocumentation(
     `<Tabs defaultValue="pnpm">

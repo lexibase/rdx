@@ -106,6 +106,45 @@ from `@lexibase/rdx-ui/components/tabs`. The wrappers preserve Base UI props,
 refs and state-based `className` callbacks. See `docs/examples/tabs.mdx` for
 package-manager examples.
 
+## Accordion
+
+Use an Accordion for optional explanations and FAQs. Keep essential instructions
+visible in the page. The default layout is a question, a small chevron and a thin
+divider, with no card or extra container background.
+
+```mdx
+<Accordion>
+  <AccordionItem value="preview">
+    <AccordionTrigger>How do I preview my documentation?</AccordionTrigger>
+    <AccordionContent>
+
+Run `pnpm dev` and open the local site.
+
+    </AccordionContent>
+
+  </AccordionItem>
+</Accordion>
+```
+
+The implementation follows shadcn/ui's Base UI `base-nova` Accordion, with
+animated opening and closing using Base UI's measured panel height. Motion is
+disabled when the reader prefers reduced motion. One item opens at a time and
+can be closed again. Add the boolean `multiple`
+attribute to `Accordion` to allow several open answers. Use unique string values
+inside each group. Keep blank lines around Markdown; panels support code blocks,
+links, lists and Callouts. Each trigger is a native button inside an `h3` heading.
+Tab follows normal document focus order; Enter and Space toggle the focused item.
+There is no custom arrow-key navigation. Disabled items cannot be activated.
+
+React authors can import `Accordion`, `AccordionItem`, `AccordionTrigger` and
+`AccordionContent` from `@lexibase/rdx-ui/components/accordion`. The wrappers
+preserve Base UI props, refs and state-based class callbacks. React files can use
+`defaultValue={['preview']}` or controlled `value`/`onValueChange`; JavaScript
+expressions remain blocked in documentation MDX. Closed panels unmount by default;
+`keepMounted` preserves them, and `hiddenUntilFound` enables browser find-in-page
+discovery of collapsed content. No additional plugin is needed for this built-in
+component; optional plugins and future custom Markdown syntax remain separate APIs.
+
 ## Authoring boundaries
 
 Documentation MDX retains `blockJS` and `blockDangerousJS`. Components are
@@ -114,6 +153,6 @@ Markdown content. JavaScript expressions, imports and arbitrary event handlers
 are not an authoring API. This is not a general HTML sanitizer: only compile
 documentation from trusted project sources, and review externally supplied MDX.
 
-The custom RDX shorthand syntax and Accordion remain separate future work.
+The custom RDX shorthand syntax remains separate future work.
 Examples live in `apps/web/app/docs/(canary)/cat-03/mdx-components.mdx` and the
 generated project's `docs/examples/callouts.mdx`.

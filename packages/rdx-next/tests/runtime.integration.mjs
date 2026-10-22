@@ -206,6 +206,16 @@ test(
         'utf8'
       )
     )
+    await writeFile(
+      path.join(rootDir, 'docs/init/accordion.mdx'),
+      await readFile(
+        new URL(
+          '../../create-rdx/templates/default/docs/examples/accordion.mdx',
+          import.meta.url
+        ),
+        'utf8'
+      )
+    )
     const copySample =
       '  const message = \'<tag> & "RDX"\';\n\tconsole.log(message)\n'
     await writeFile(
@@ -588,6 +598,165 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
           .grantPermissions(['clipboard-read', 'clipboard-write'], {
             origin: running.base,
           })
+        await page.goto(`${running.base}/docs/init/accordion`)
+        await page.evaluate(() => {
+          window.accordionAnimations = []
+          document.addEventListener('animationstart', (event) => {
+            if (!event.target.matches('[data-slot="accordion-content"]')) return
+            const animation = event.target
+              .getAnimations()
+              .find((item) => item.animationName === event.animationName)
+            window.accordionAnimations.push({
+              name: event.animationName,
+              heights:
+                animation?.effect.getKeyframes().map((frame) => frame.height) ??
+                [],
+            })
+          })
+        })
+        const accordion = page.locator('[data-slot="accordion"]').first()
+        const question = accordion.getByRole('button', {
+          name: 'Where do I write my documentation?',
+        })
+        const preview = accordion.getByRole('button', {
+          name: 'How do I preview my changes?',
+        })
+        assert.equal(await question.getAttribute('aria-expanded'), 'false')
+        await question.focus()
+        await page.keyboard.press('Enter')
+        const answer = accordion.getByRole('region', {
+          name: 'Where do I write my documentation?',
+        })
+        await answer.waitFor()
+        assert.equal(
+          await question.getAttribute('aria-controls'),
+          await answer.getAttribute('id')
+        )
+        assert.equal(
+          await answer.getAttribute('aria-labelledby'),
+          await question.getAttribute('id')
+        )
+        assert.equal(
+          await question.evaluate((element) => element.parentElement.tagName),
+          'H3'
+        )
+        assert.match(await answer.innerText(), /Each folder becomes a category/)
+        await page.keyboard.press('Tab')
+        assert.equal(
+          await answer
+            .getByRole('link', { name: 'introduction' })
+            .evaluate((element) => element === document.activeElement),
+          true
+        )
+        await page.keyboard.press('Tab')
+        assert.equal(
+          await preview.evaluate(
+            (element) => element === document.activeElement
+          ),
+          true
+        )
+        await page.keyboard.press('Space')
+        const previewPanel = accordion.getByRole('region', {
+          name: 'How do I preview my changes?',
+        })
+        await previewPanel.waitFor()
+        await answer.waitFor({ state: 'hidden' })
+        const accordionAnimations = await page.evaluate(
+          () => window.accordionAnimations
+        )
+        assert.ok(
+          accordionAnimations.some(
+            (animation) => animation.name === 'accordion-up'
+          )
+        )
+        const opening = accordionAnimations.find(
+          (animation) => animation.name === 'accordion-down'
+        )
+        assert.ok(opening)
+        assert.equal(opening.heights[0], '0px')
+        assert.ok(Number.parseFloat(opening.heights.at(-1)) > 0)
+        assert.equal(await question.getAttribute('aria-expanded'), 'false')
+        assert.equal(
+          await accordion
+            .getByRole('button', { name: 'More examples (soon)' })
+            .isDisabled(),
+          true
+        )
+        await previewPanel.getByRole('button', { name: 'Copy code' }).click()
+        await page.waitForFunction(async () =>
+          (await navigator.clipboard.readText()).includes('pnpm dev')
+        )
+        assert.equal(
+          (await page.evaluate(() => navigator.clipboard.readText())).replace(
+            /\r\n/g,
+            '\n'
+          ),
+          'pnpm dev\n'
+        )
+        assert.equal(
+          await previewPanel
+            .getByRole('note', { name: 'Live updates' })
+            .isVisible(),
+          true
+        )
+        const multiple = page.locator('[data-slot="accordion"]').nth(1)
+        await multiple
+          .getByRole('button', { name: 'Build for production' })
+          .click()
+        await multiple
+          .getByRole('button', { name: 'Check the production site' })
+          .click()
+        await multiple
+          .getByRole('region', { name: 'Build for production' })
+          .waitFor({ state: 'hidden' })
+        await multiple
+          .getByRole('region', { name: 'Check the production site' })
+          .waitFor()
+        await preview.focus()
+        await page.keyboard.press('Enter')
+        await previewPanel.waitFor({ state: 'hidden' })
+        await preview.click()
+        await previewPanel.waitFor()
+        await page.emulateMedia({ reducedMotion: 'reduce' })
+        assert.equal(
+          await previewPanel.evaluate(
+            (element) => getComputedStyle(element).animationName
+          ),
+          'none'
+        )
+        await preview.click()
+        await previewPanel.waitFor({ state: 'hidden' })
+        await preview.click()
+        await previewPanel.waitFor()
+        await page.emulateMedia({ reducedMotion: 'no-preference' })
+        await page.setViewportSize({ width: 390, height: 844 })
+        assert.equal(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= window.innerWidth
+          ),
+          true
+        )
+        if (process.env.RDX_THEME_SCREENSHOTS) {
+          await mkdir(process.env.RDX_THEME_SCREENSHOTS, { recursive: true })
+          for (const theme of ['dark', 'light']) {
+            await page.evaluate(
+              (value) =>
+                document.documentElement.classList.toggle(
+                  'dark',
+                  value === 'dark'
+                ),
+              theme
+            )
+            await accordion.screenshot({
+              path: path.join(
+                process.env.RDX_THEME_SCREENSHOTS,
+                `accordion-${theme}-mobile.png`
+              ),
+              animations: 'disabled',
+            })
+          }
+        }
+        await page.setViewportSize({ width: 1872, height: 955 })
         await page.goto(`${running.base}/docs/init/tabs`)
         const managers = page.getByRole('tablist', { name: 'Package manager' })
         const environments = page.getByRole('tablist', { name: 'Environment' })
@@ -812,6 +981,26 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         await page.goto(`${running.base}/docs/init/code`)
         const blocks = page.locator('[data-rdx-code-block]')
         assert.equal(await blocks.count(), 2)
+        const codeMetrics = await blocks
+          .nth(1)
+          .locator('pre')
+          .evaluate((element) => {
+            const style = getComputedStyle(element)
+            return {
+              padding: style.padding,
+              fontSize: style.fontSize,
+              lineHeight: style.lineHeight,
+            }
+          })
+        assert.deepEqual(codeMetrics, {
+          padding: '12px',
+          fontSize: '13px',
+          lineHeight: '24px',
+        })
+        assert.ok(
+          (await blocks.nth(1).boundingBox()).height <= 96,
+          'A single-line code block should remain compact'
+        )
         const copy = blocks.first().getByRole('button', { name: 'Copy code' })
         await copy.focus()
         await page.keyboard.press('Enter')

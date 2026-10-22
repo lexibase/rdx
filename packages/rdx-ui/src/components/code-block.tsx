@@ -21,13 +21,13 @@ export function CodeBlock({
   return (
     <div
       data-rdx-code-block
-      className="my-6 min-w-0 max-w-full overflow-hidden rounded-lg border border-border bg-muted/30 text-foreground"
+      className="my-4 min-w-0 max-w-full overflow-hidden rounded-lg border border-border bg-muted/30 text-foreground"
     >
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-border/70 bg-muted/30 px-4 py-2.5">
-        <div className="flex min-w-0 items-center gap-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-b border-border/70 bg-muted/30 px-3 py-1.5">
+        <div className="flex min-w-0 items-center gap-2">
           <span
             aria-hidden="true"
-            className="flex size-7 shrink-0 items-center justify-center rounded-md border border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400"
+            className="flex size-6 shrink-0 items-center justify-center rounded-md border border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400"
           >
             <CodeXml className="size-3.5" />
           </span>
@@ -43,7 +43,7 @@ export function CodeBlock({
       <pre
         tabIndex={0}
         className={cn(
-          'm-0 max-w-full overflow-x-auto p-4 font-mono text-[13px] leading-7 text-foreground/90 sm:p-5 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring [&>code]:bg-transparent [&>code]:rounded-none [&>code]:p-0 [&>code]:[font-family:inherit] [&>code]:text-inherit',
+          'm-0 max-w-full overflow-x-auto p-3 font-mono text-[13px] leading-6 text-foreground/90 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring [&>code]:bg-transparent [&>code]:rounded-none [&>code]:p-0 [&>code]:[font-family:inherit] [&>code]:text-inherit',
           className
         )}
         {...props}

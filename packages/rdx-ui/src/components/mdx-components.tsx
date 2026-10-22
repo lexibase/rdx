@@ -1,6 +1,12 @@
 import type { ComponentProps } from 'react'
 
 import { cn } from '../lib/utils'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from './accordion'
 import { Blockquote } from './blockquote'
 import { Callout } from './callout'
 import { CodeBlock } from './code-block'
@@ -112,6 +118,10 @@ export const mdxComponents = {
     />
   ),
   Callout,
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
   Tabs,
   TabsList,
   TabsTrigger,
