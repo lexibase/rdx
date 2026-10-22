@@ -11,19 +11,15 @@ export function getParsedVersions(versionsRaw: {
   active: VersionMeta[]
   archived: VersionMeta[]
 } {
-  const parsedActive = versionsRaw.active.map(
-    (label): VersionMeta => ({
-      label,
-      icon: 'packageOpen',
-    })
-  )
+  const parsedActive = versionsRaw.active.map((label): VersionMeta => ({
+    label,
+    icon: 'packageOpen',
+  }))
 
-  const parsedArchived = versionsRaw.archived.map(
-    (label): VersionMeta => ({
-      label,
-      icon: 'archive',
-    })
-  )
+  const parsedArchived = versionsRaw.archived.map((label): VersionMeta => ({
+    label,
+    icon: 'archive',
+  }))
 
   const current = parsedActive[0] ?? { label: '0.0.0', icon: 'packageOpen' }
   const restActive = parsedActive.slice(1)

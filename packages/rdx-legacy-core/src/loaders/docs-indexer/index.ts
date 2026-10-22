@@ -25,14 +25,17 @@ export function docsIndexer(version?: string): DocCategory[] {
     basePath = fs.existsSync(versionedPath) ? versionedPath : archivedPath
   }
 
-  if (!fs.existsSync(basePath)) {
+  // apps/web traces the documentation tree explicitly in next.config.js.
+  if (!fs.existsSync(/* turbopackIgnore: true */ basePath)) {
     console.warn(`Docs Folder not found: ${basePath}`)
     return []
   }
 
   const categories: (DocCategory & { position: number })[] = []
 
-  const entries = fs.readdirSync(basePath, { withFileTypes: true })
+  const entries = fs.readdirSync(/* turbopackIgnore: true */ basePath, {
+    withFileTypes: true,
+  })
 
   entries.forEach((entry) => {
     if (!entry.isDirectory()) {
@@ -43,9 +46,12 @@ export function docsIndexer(version?: string): DocCategory[] {
       }
     }
 
-    const categoryPath = path.join(basePath, entry.name)
+    const categoryPath = path.join(
+      /* turbopackIgnore: true */ basePath,
+      entry.name
+    )
     const hasMdxFile = fs
-      .readdirSync(categoryPath)
+      .readdirSync(/* turbopackIgnore: true */ categoryPath)
       .some((file) => file.endsWith('.mdx'))
     if (!hasMdxFile) return
 
@@ -54,9 +60,12 @@ export function docsIndexer(version?: string): DocCategory[] {
     let categoryTitle = entry.name
     let categoryPosition = 999
 
-    if (fs.existsSync(categoryMetaPath)) {
+    if (fs.existsSync(/* turbopackIgnore: true */ categoryMetaPath)) {
       try {
-        const rawMeta = fs.readFileSync(categoryMetaPath, 'utf-8')
+        const rawMeta = fs.readFileSync(
+          /* turbopackIgnore: true */ categoryMetaPath,
+          'utf-8'
+        )
         const meta = JSON.parse(rawMeta)
         categoryTitle = meta.title || categoryTitle
         categoryPosition = meta.sidebar_position ?? categoryPosition
@@ -65,13 +74,19 @@ export function docsIndexer(version?: string): DocCategory[] {
       }
     }
 
-    const files = fs.readdirSync(categoryPath)
+    const files = fs.readdirSync(/* turbopackIgnore: true */ categoryPath)
 
     const links: DocLink[] = files
       .filter((file) => file.endsWith('.mdx'))
       .map((file) => {
-        const filePath = path.join(categoryPath, file)
-        const raw = fs.readFileSync(filePath, 'utf-8')
+        const filePath = path.join(
+          /* turbopackIgnore: true */ categoryPath,
+          file
+        )
+        const raw = fs.readFileSync(
+          /* turbopackIgnore: true */ filePath,
+          'utf-8'
+        )
         const { data } = matter(raw)
 
         const filename = file.replace('.mdx', '')

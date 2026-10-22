@@ -49,6 +49,16 @@ async function command(cwd, entry, args) {
       child.on('exit', resolve)
     })
     assert.equal(code, 0, output)
+    if (entry === cli && args[0] === 'prepare') {
+      // Only this harness links packages outside the generated project. Turbopack
+      // must see their common ancestor; installed projects keep their own root.
+      const configPath = path.join(cwd, '.rdx/next.config.mjs')
+      const config = await readFile(configPath, 'utf8')
+      await writeFile(
+        configPath,
+        `${config}\nnextConfig.turbopack.root = ${JSON.stringify(path.resolve(packageRoot, '../..'))}\n`
+      )
+    }
   } finally {
     clearTimeout(timer)
   }
@@ -103,8 +113,7 @@ test(
   'generated site: opt-in homepage, navbar version links, fallback, snapshots and production',
   { timeout: 360_000 },
   async (t) => {
-    // Keep Next and the fixture on the same Windows volume: webpack's relative
-    // entry paths cannot cross drive letters when using workspace junctions.
+    // Keep the linked packages and fixture inside the same Turbopack root.
     const rootDir = await mkdtemp(path.join(packageRoot, '.runtime-test-'))
     let running
     t.after(async () => {
@@ -418,6 +427,23 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
               'docs-mobile.png'
             ),
           })
+        await page.goto(`${running.base}/docs/init/intro`)
+        await page.getByRole('button', { name: 'Open sidebar' }).click()
+        const navigation = page.getByRole('dialog', {
+          name: 'Documentation navigation',
+        })
+        await navigation.getByRole('link', { name: 'New page' }).click()
+        await page.waitForURL('**/docs/init/new')
+        await navigation.waitFor({ state: 'hidden' })
+        await page.getByRole('button', { name: 'Open sidebar' }).click()
+        await navigation.waitFor()
+        await page.goBack()
+        await page.waitForURL('**/docs/init/intro')
+        await navigation.waitFor({ state: 'hidden' })
+        await page.getByRole('button', { name: 'Open sidebar' }).click()
+        await navigation.waitFor()
+        await page.keyboard.press('Escape')
+        await navigation.waitFor({ state: 'hidden' })
         assert.deepEqual(errors, [])
       } finally {
         await browser.close()

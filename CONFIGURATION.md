@@ -109,13 +109,18 @@ published as `@lexibase/rdx-ui`. Only their content/version adapters differ.
 Tailwind scanning, PostCSS and Next's transpilation are configured by the runtime;
 there are no monorepo paths or private UI dependencies in generated projects.
 
-For contributors, run `pnpm check`, then
-`pnpm --filter @lexibase/rdx-next test:runtime` to exercise a disposable generated
-site in development and production. This integration test requires the workspace
+For contributors, use a supported Node.js version matching
+`^22.18.0 || ^24.11.0 || >=26.0.0` for the monorepo build tools.
+Generated projects retain Node >=20.9 support.
+
+Run `pnpm check`, then `pnpm --filter @lexibase/rdx-next test:runtime` to exercise
+a disposable generated site in development and production. This integration test requires the workspace
 packages to be built and does not publish or download framework packages.
 Optional browser checks use an installed Playwright module and browser via
 `RDX_PLAYWRIGHT_MODULE` and `RDX_BROWSER_EXECUTABLE`. Set `RDX_THEME_SCREENSHOTS`
 to a disposable output directory to save desktop/mobile screenshots.
+With those browser variables configured, `pnpm --filter web test:runtime`
+also checks hydration and version persistence in the legacy development website.
 
 ## Public files: images, favicon and downloads
 
@@ -310,7 +315,16 @@ unavailable.
 
 The current runtime and generated projects require Node.js 20.9 or newer.
 The development workspace, generated template, React/React DOM and React types
-are kept aligned; this maintenance step stays on Next.js 15.
+are kept aligned on Next.js 16.4.2 or a compatible newer 16.x release.
+Development and production builds use Turbopack. The internal `.rdx/` application
+uses the project directory as its bundler root, including project-owned
+`rdx.config.ts` and optional `home.tsx` files. The existing shared UI remains
+the default theme; no layout replacement is involved in this migration.
+
+The development workspace runs ESLint separately (`pnpm lint`); Next.js 16 no
+longer provides `next lint` or runs lint during `next build`. `pnpm check` still
+validates lint, types, builds and tests. `apps/web` also generates route types
+before standalone type checking.
 
 The MDX renderer uses `next-mdx-remote` 6 with `blockJS` and `blockDangerousJS`
 enabled explicitly. Markdown, fenced code and registered JSX components remain

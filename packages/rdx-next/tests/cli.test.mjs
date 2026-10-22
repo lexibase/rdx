@@ -4,7 +4,7 @@ import { mkdtemp, readFile, writeFile, rm, access } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import test from 'node:test'
 
 const cli = fileURLToPath(new URL('../bin/rdx.mjs', import.meta.url))
@@ -34,6 +34,18 @@ test('prepare loads typed config with defineConfig without loading a Next server
   assert.equal(config.compilerOptions.isolatedModules, true)
   assert.equal(config.compilerOptions.allowArbitraryExtensions, true)
   assert.equal(config.compilerOptions.noUncheckedSideEffectImports, true)
+  assert.equal(config.compilerOptions.jsx, 'react-jsx')
+  assert.equal(config.compilerOptions.rootDir, '..')
+  assert.deepEqual(config.compilerOptions.types, ['node', 'react'])
+  assert.equal(config.compilerOptions.baseUrl, undefined)
+  assert.equal(config.compilerOptions.ignoreDeprecations, undefined)
+  assert.ok(config.include.includes('.next/dev/types/**/*.ts'))
+  const nextConfig = (
+    await import(pathToFileURL(path.join(rootDir, '.rdx/next.config.mjs')).href)
+  ).default
+  assert.equal(path.resolve(nextConfig.turbopack.root), rootDir)
+  assert.equal(nextConfig.agentRules, false)
+  assert.equal(nextConfig.experimental?.externalDir, undefined)
   await access(path.join(rootDir, '.rdx/app/globals.d.css.ts'))
   assert.ok(config.exclude.includes('public'))
 })

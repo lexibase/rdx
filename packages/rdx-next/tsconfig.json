@@ -1,6 +1,7 @@
 {
   "extends": "../../config/ts-config/nextjs.json",
   "compilerOptions": {
+    "rootDir": "../..",
     "jsx": "react-jsx",
     "paths": {
       "@lexibase/rdx-next/*": ["./src/*"],

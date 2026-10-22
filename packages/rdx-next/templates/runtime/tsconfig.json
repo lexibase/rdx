@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
+    "rootDir": "..",
+    "types": ["node", "react"],
     "allowArbitraryExtensions": true,
     "noUncheckedSideEffectImports": true,
     "allowJs": true,
     "esModuleInterop": true,
     "incremental": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "lib": ["dom", "dom.iterable", "esnext"],
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -17,6 +19,12 @@
     "strict": true,
     "target": "esnext"
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
   "exclude": ["node_modules", "public"]
 }

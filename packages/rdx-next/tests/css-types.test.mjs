@@ -9,12 +9,26 @@ import {
   copyFile,
 } from 'node:fs/promises'
 import os from 'node:os'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import process from 'node:process'
 import test from 'node:test'
 
 import ts from 'typescript'
+
+test('shared PostCSS config exposes a Node-loadable plugin through the published UI export', async () => {
+  const config = (await import('../../rdx-ui/postcss.config.mjs')).default
+  assert.deepEqual(Object.keys(config.plugins), [
+    '@lexibase/rdx-ui/postcss-plugin',
+  ])
+  const require = createRequire(
+    new URL('../../rdx-ui/package.json', import.meta.url)
+  )
+  const plugin = require('@lexibase/rdx-ui/postcss-plugin')
+  assert.equal(typeof plugin, 'function')
+  assert.equal(plugin.postcss, true)
+})
 
 async function fixture(t) {
   const root = await mkdtemp(path.join(os.tmpdir(), 'rdx-css-types-'))
@@ -91,6 +105,8 @@ test('public package CSS exports and generated global stylesheet have specific t
     await readFile(new URL('../package.json', import.meta.url), 'utf8')
   )
   assert.equal(ui.exports['./globals.css'].default, './src/styles/globals.css')
+  assert.equal(ui.exports['./postcss-plugin'], './postcss-plugin.cjs')
+  assert.ok(ui.files.includes('postcss-plugin.cjs'))
   assert.equal(
     runtime.exports['./styles.css'].default,
     './src/runtime/styles.css'
@@ -106,6 +122,7 @@ test('CSS declarations do not silently accept misspelled paths or pretend styles
     root,
     `import '@lexibase/rdx-ui/missing.css'; import './missing.css'; import { missing } from '@lexibase/rdx-ui/globals.css';`
   )
-  assert.equal(diagnostics.filter((entry) => entry.code === 2307).length, 2)
+  // TypeScript 6 reports unresolved side-effect imports with TS2882.
+  assert.equal(diagnostics.filter((entry) => entry.code === 2882).length, 2)
   assert.ok(diagnostics.some((entry) => entry.code === 2305))
 })
