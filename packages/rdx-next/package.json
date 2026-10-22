@@ -42,13 +42,14 @@
     "test:runtime": "node --test tests/runtime.integration.mjs"
   },
   "dependencies": {
-    "@lexibase/rdx-ui": "workspace:*",
     "@lexibase/rdx-core": "workspace:*",
     "@lexibase/rdx-types": "workspace:*",
+    "@lexibase/rdx-ui": "workspace:*",
     "cross-spawn": "^7.0.6",
-    "typescript": "6.0.3",
     "jiti": "^2.6.1",
-    "next-mdx-remote": "^6.0.0"
+    "next-mdx-remote": "^6.0.0",
+    "remark-gfm": "^4",
+    "typescript": "6.0.3"
   },
   "peerDependencies": {
     "next": "^16.4.2",

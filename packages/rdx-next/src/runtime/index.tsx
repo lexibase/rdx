@@ -194,7 +194,7 @@ export async function DocsPage({
           categories={sidebarCategories}
           pathname={hrefFor(currentSlug)}
         />
-        <div className="flex-1 h-full overflow-y-auto pt-12 md:pt-0 outline-none">
+        <div className="flex-1 min-w-0 h-full overflow-y-auto pt-12 md:pt-0 outline-none">
           <section className="w-full min-h-full px-7 flex flex-col gap-5 pb-8 md:py-8">
             <div className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1">
               <header className="mb-6">

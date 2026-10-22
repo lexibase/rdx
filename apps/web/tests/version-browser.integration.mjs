@@ -75,6 +75,13 @@ test(
       for (const mode of ['dev', 'start']) {
         const running = await server(mode)
         try {
+          const example = await fetch(
+            `${running.base}/docs/canary/mdx-components`
+          )
+          assert.equal(example.status, 200, `${mode}: showcase MDX example`)
+          const exampleHtml = await example.text()
+          assert.match(exampleHtml, /data-rdx-callout="warning"/)
+          assert.match(exampleHtml, /data-slot="mdx-table-scroll"/)
           const context = await browser.newContext()
           await context.addInitScript(() => {
             if (!localStorage.getItem('rdx-version'))
@@ -96,6 +103,10 @@ test(
           await page.waitForFunction(
             () => localStorage.getItem('rdx-version') === '2.1.1'
           )
+          assert.equal(
+            await page.locator('[data-rdx-version-notice]').count(),
+            0
+          )
           await page
             .getByRole('button', {
               name: 'Documentation version: Version 2.1.1',
@@ -112,6 +123,16 @@ test(
             .waitFor()
           await page.waitForFunction(
             () => localStorage.getItem('rdx-version') === '2.1.0'
+          )
+          const notice = page.locator('[data-rdx-version-notice="outdated"]')
+          await notice.waitFor()
+          assert.match(
+            await notice.innerText(),
+            /This is an outdated version of the documentation\./
+          )
+          assert.equal(
+            await notice.getByRole('link').getAttribute('href'),
+            '/docs/2.1.1'
           )
           await page.goBack()
           await page.waitForURL('**/docs/2.1.1/intro')
@@ -130,6 +151,29 @@ test(
             })
             .waitFor()
           assert.deepEqual(errors, [], `${mode}: hydration and navigation`)
+          await page.goto(`${running.base}/docs/canary/mdx-components`)
+          await page.getByRole('note', { name: 'Before updating' }).waitFor()
+          assert.equal(await page.locator('main [data-rdx-callout]').count(), 6)
+          await page
+            .getByRole('note', { name: 'Pre-release documentation' })
+            .waitFor()
+          await page.getByRole('table').waitFor()
+          await context.grantPermissions(
+            ['clipboard-read', 'clipboard-write'],
+            { origin: running.base }
+          )
+          const code = page.locator('[data-rdx-code-block]').first()
+          const expectedCode = await code.locator('pre').textContent()
+          await code.getByRole('button', { name: 'Copy code' }).click()
+          await code.getByText('Copied', { exact: true }).waitFor()
+          assert.equal(
+            (await page.evaluate(() => navigator.clipboard.readText())).replace(
+              /\r\n/g,
+              '\n'
+            ),
+            expectedCode
+          )
+          assert.deepEqual(errors, [], `${mode}: shared Callout and Markdown`)
           await context.close()
 
           const restricted = await browser.newContext()

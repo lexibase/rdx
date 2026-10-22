@@ -21,6 +21,26 @@ Configure project-owned components via `homepage.component` and `navbar.logo`.
 Do not edit generated `.rdx/` files. Installing the versioning plugin does not
 change this theme: it contributes data to the shared version dropdown.
 
+## Documentation components
+
+`Callout` is registered automatically in MDX, with optional `title` and variants
+`note` (default), `tip`, `success`, `warning`, `danger`:
+
+```mdx
+<Callout variant="warning" title="Before updating">
+
+Read **release notes** before deploying.
+
+</Callout>
+```
+
+In React, import it from `@lexibase/rdx-ui/components/callout`. It renders a static
+note, not an automatic live alert. The Markdown map also styles all six heading
+levels, responsive images, GFM tables and keyboard-scrollable code blocks.
+Fenced code blocks include a language label and copy button automatically;
+inline code remains unchanged. Copy failures leave the code selectable and show
+manual-copy guidance instead of a false success message.
+
 ## Base UI composition
 
 The shared components use `@base-ui/react`. Existing RDX colors, variants,

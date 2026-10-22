@@ -181,9 +181,44 @@ test(
     await writeFile(path.join(publicRoot, 'favicon.ico'), favicon)
     await writeFile(
       path.join(rootDir, 'docs/init/intro.mdx'),
-      '---\ntitle: Introduction\n---\nOriginal snapshot body\n\n![Public asset](/images/public%20logo.svg)'
+      '---\ntitle: Introduction\nlink_position: 1\n---\nOriginal snapshot body\n\n![Public asset](/images/public%20logo.svg)'
     )
     const configPath = path.join(rootDir, 'rdx.config.ts')
+    await writeFile(
+      path.join(rootDir, 'docs/init/quotes.mdx'),
+      (
+        await readFile(
+          new URL(
+            '../../create-rdx/templates/default/docs/examples/markdown.mdx',
+            import.meta.url
+          ),
+          'utf8'
+        )
+      ).replace('link_position: 1', 'link_position: 10')
+    )
+    const copySample =
+      '  const message = \'<tag> & "RDX"\';\n\tconsole.log(message)\n'
+    await writeFile(
+      path.join(rootDir, 'docs/init/code.mdx'),
+      '---\ntitle: Code\n---\nInline `example`.\n\n```ts\n' +
+        copySample +
+        '```\n\n```\nSecond block\n```\n'
+    )
+    await writeFile(
+      path.join(rootDir, 'docs/init/components.mdx'),
+      (await readFile(
+        new URL(
+          '../../create-rdx/templates/default/docs/examples/callouts.mdx',
+          import.meta.url
+        ),
+        'utf8'
+      )) +
+        '\n\n| Wide column | Status |\n| --- | --- |\n| ' +
+        'LongTableValue'.repeat(30) +
+        ' | Ready |\n\n```text\n' +
+        'long-code-value-'.repeat(30) +
+        '\n```\n'
+    )
     await writeFile(
       configPath,
       await readFile(
@@ -205,6 +240,11 @@ test(
     assert.match(plain, />Docs</)
     assert.match(plain, /data-rdx-sidebar/)
     assert.match(plain, /Mode Toggle/)
+    const components = await (
+      await fetch(`${running.base}/docs/init/components`)
+    ).text()
+    assert.match(components, /data-rdx-callout="warning"/)
+    assert.match(components, /data-slot="mdx-table-scroll"/)
     const githubPlaceholder = plain.match(
       /<a\b[^>]*aria-label="GitHub"[^>]*>/
     )?.[0]
@@ -288,7 +328,7 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
     await command(rootDir, cli, ['version', '1.1.0'])
     await writeFile(
       path.join(rootDir, 'docs/init/intro.mdx'),
-      '---\ntitle: Introduction\n---\nChanged live body'
+      '---\ntitle: Introduction\nlink_position: 1\n---\nChanged live body'
     )
     await writeFile(
       path.join(rootDir, 'docs/init/new.mdx'),
@@ -322,6 +362,11 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
     )
     await assertPublicFile(running.base, '/favicon.ico', favicon, /image\//)
     const live = await (await fetch(`${running.base}/docs/init/intro`)).text()
+    const productionComponents = await (
+      await fetch(`${running.base}/docs/init/components`)
+    ).text()
+    assert.match(productionComponents, /data-rdx-callout="danger"/)
+    assert.match(productionComponents, /data-slot="mdx-table-scroll"/)
     assert.match(live, /Changed live body/)
     assert.match(live, /data-rdx-version-trigger/)
     assert.match(live, /Version 1.0.0/)
@@ -368,6 +413,326 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         const errors = []
         page.on('pageerror', (error) => errors.push(error.message))
         await page.addInitScript(() => localStorage.setItem('theme', 'dark'))
+        await page.goto(`${running.base}/docs/init/quotes`)
+        const quote = page.locator('blockquote').first()
+        await quote.waitFor()
+        assert.equal(
+          await quote.evaluate((element) =>
+            element.hasAttribute('data-rdx-blockquote')
+          ),
+          true
+        )
+        assert.equal(
+          await quote.locator('strong').innerText(),
+          'formatted text'
+        )
+        assert.equal(
+          await quote.getByRole('link').getAttribute('href'),
+          '/docs/init/intro'
+        )
+        const tableRegion = page
+          .locator('[data-slot="mdx-table-scroll"]')
+          .first()
+        const wideTable = page.locator('[data-slot="mdx-table-scroll"]').nth(1)
+        assert.equal(await wideTable.locator('th').count(), 5)
+        assert.equal(await wideTable.locator('tbody > tr').count(), 4)
+        for (const row of await wideTable.locator('tbody > tr').all())
+          assert.equal(await row.locator('td').count(), 5)
+        assert.equal(
+          await wideTable
+            .locator('th')
+            .nth(2)
+            .evaluate((element) => getComputedStyle(element).textAlign),
+          'center'
+        )
+        assert.equal(
+          await wideTable.locator('th').last().innerText(),
+          'Example'
+        )
+        const tableColors = await tableRegion
+          .locator('tbody > tr')
+          .evaluateAll((rows) =>
+            rows.map((row) => getComputedStyle(row).backgroundColor)
+          )
+        assert.equal(tableColors.length, 4)
+        assert.notEqual(tableColors[0], tableColors[1])
+        assert.equal(tableColors[0], tableColors[2])
+        assert.equal(tableColors[1], tableColors[3])
+        for (const selector of ['thead tr', 'tbody tr:first-child']) {
+          const borders = await tableRegion
+            .locator(`${selector} > *`)
+            .evaluateAll((cells) =>
+              cells.map((cell) =>
+                parseFloat(getComputedStyle(cell).borderRightWidth)
+              )
+            )
+          assert.ok(borders.slice(0, -1).every((width) => width > 0))
+          assert.equal(borders.at(-1), 0)
+        }
+        assert.ok(
+          await tableRegion.evaluate(
+            (element) =>
+              parseFloat(getComputedStyle(element).borderTopLeftRadius) > 0
+          )
+        )
+        assert.equal(
+          await tableRegion
+            .locator('th')
+            .last()
+            .evaluate((element) => getComputedStyle(element).textAlign),
+          'right'
+        )
+        if (process.env.RDX_THEME_SCREENSHOTS) {
+          await mkdir(process.env.RDX_THEME_SCREENSHOTS, { recursive: true })
+          for (const theme of ['dark', 'light']) {
+            await page.evaluate(
+              (theme) =>
+                document.documentElement.classList.toggle(
+                  'dark',
+                  theme === 'dark'
+                ),
+              theme
+            )
+            await quote.screenshot({
+              path: path.join(
+                process.env.RDX_THEME_SCREENSHOTS,
+                `blockquote-${theme}.png`
+              ),
+              animations: 'disabled',
+            })
+            await tableRegion.screenshot({
+              path: path.join(
+                process.env.RDX_THEME_SCREENSHOTS,
+                `table-${theme}.png`
+              ),
+              animations: 'disabled',
+            })
+            await wideTable.screenshot({
+              path: path.join(
+                process.env.RDX_THEME_SCREENSHOTS,
+                `five-columns-${theme}.png`
+              ),
+              animations: 'disabled',
+            })
+          }
+          await page.evaluate(() =>
+            document.documentElement.classList.add('dark')
+          )
+        }
+        await page.setViewportSize({ width: 390, height: 844 })
+        assert.ok(
+          await wideTable.evaluate(
+            (element) => element.scrollWidth > element.clientWidth
+          )
+        )
+        assert.ok(
+          await wideTable
+            .locator('tbody tr:first-child td')
+            .evaluateAll((cells) =>
+              cells.every((cell) => cell.getBoundingClientRect().width >= 160)
+            )
+        )
+        await wideTable.focus()
+        await page.keyboard.press('ArrowRight')
+        await page.waitForFunction(
+          () =>
+            document.querySelectorAll('[data-slot="mdx-table-scroll"]')[1]
+              .scrollLeft > 0
+        )
+        if (process.env.RDX_THEME_SCREENSHOTS)
+          await wideTable.screenshot({
+            path: path.join(
+              process.env.RDX_THEME_SCREENSHOTS,
+              'five-columns-mobile.png'
+            ),
+            animations: 'disabled',
+          })
+        assert.equal(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= innerWidth
+          ),
+          true
+        )
+        if (process.env.RDX_THEME_SCREENSHOTS)
+          await quote.screenshot({
+            path: path.join(
+              process.env.RDX_THEME_SCREENSHOTS,
+              'blockquote-mobile.png'
+            ),
+            animations: 'disabled',
+          })
+        await page.setViewportSize({ width: 1872, height: 955 })
+        if (process.env.RDX_THEME_SCREENSHOTS) {
+          await page.setViewportSize({ width: 390, height: 844 })
+          await tableRegion.screenshot({
+            path: path.join(
+              process.env.RDX_THEME_SCREENSHOTS,
+              'table-mobile.png'
+            ),
+            animations: 'disabled',
+          })
+          await page.setViewportSize({ width: 1872, height: 955 })
+        }
+        await page
+          .context()
+          .grantPermissions(['clipboard-read', 'clipboard-write'], {
+            origin: running.base,
+          })
+        await page.goto(`${running.base}/docs/init/code`)
+        const blocks = page.locator('[data-rdx-code-block]')
+        assert.equal(await blocks.count(), 2)
+        const copy = blocks.first().getByRole('button', { name: 'Copy code' })
+        await copy.focus()
+        await page.keyboard.press('Enter')
+        await page.waitForFunction(() =>
+          document
+            .querySelector('[data-rdx-code-block] button')
+            ?.textContent.includes('Copied')
+        )
+        assert.equal(
+          (await page.evaluate(() => navigator.clipboard.readText())).replace(
+            /\r\n/g,
+            '\n'
+          ),
+          copySample
+        )
+        await blocks.nth(1).getByRole('button', { name: 'Copy code' }).click()
+        await blocks.nth(1).getByText('Copied', { exact: true }).waitFor()
+        assert.equal(
+          (await page.evaluate(() => navigator.clipboard.readText())).replace(
+            /\r\n/g,
+            '\n'
+          ),
+          'Second block\n'
+        )
+        assert.equal(
+          await blocks.first().locator('pre').textContent(),
+          copySample
+        )
+        assert.equal(await page.locator('p [data-rdx-code-block]').count(), 0)
+        await copy.filter({ hasText: /^Copy$/ }).waitFor()
+        if (process.env.RDX_THEME_SCREENSHOTS) {
+          await mkdir(process.env.RDX_THEME_SCREENSHOTS, { recursive: true })
+          for (const theme of ['dark', 'light']) {
+            await page.evaluate(
+              (theme) =>
+                document.documentElement.classList.toggle(
+                  'dark',
+                  theme === 'dark'
+                ),
+              theme
+            )
+            await page.screenshot({
+              path: path.join(
+                process.env.RDX_THEME_SCREENSHOTS,
+                `code-${theme}.png`
+              ),
+              animations: 'disabled',
+            })
+          }
+          await page.evaluate(() =>
+            document.documentElement.classList.add('dark')
+          )
+          await page.setViewportSize({ width: 390, height: 844 })
+          await page.screenshot({
+            path: path.join(
+              process.env.RDX_THEME_SCREENSHOTS,
+              'code-mobile.png'
+            ),
+            animations: 'disabled',
+          })
+          await page.setViewportSize({ width: 1872, height: 955 })
+        }
+        assert.match(
+          await blocks
+            .first()
+            .locator('pre')
+            .evaluate((element) => getComputedStyle(element).fontFamily),
+          /mono/i
+        )
+        const rejected = await browser.newPage()
+        await rejected.setViewportSize({ width: 390, height: 844 })
+        await rejected.addInitScript(() =>
+          Object.defineProperty(navigator, 'clipboard', {
+            configurable: true,
+            value: {
+              writeText: async () => {
+                throw new DOMException('Permission denied', 'NotAllowedError')
+              },
+            },
+          })
+        )
+        await rejected.goto(`${running.base}/docs/init/code`)
+        const failed = rejected.locator('[data-rdx-code-block]').first()
+        await failed.getByRole('button', { name: 'Copy code' }).click()
+        await failed
+          .getByRole('status')
+          .filter({
+            hasText: 'Could not copy. Select the code and copy it manually.',
+          })
+          .waitFor()
+        assert.doesNotMatch(
+          await failed.getByRole('button').innerText(),
+          /Copied/
+        )
+        const retryBounds = await failed.getByRole('button').boundingBox()
+        assert.ok(
+          retryBounds &&
+            retryBounds.x >= 0 &&
+            retryBounds.x + retryBounds.width <= 390
+        )
+        await rejected.close()
+        await page.goto(`${running.base}/docs/init/components`)
+        await page.getByRole('note', { name: 'Before updating' }).waitFor()
+        assert.equal(await page.locator('[data-rdx-callout]').count(), 6)
+        if (process.env.RDX_THEME_SCREENSHOTS) {
+          await mkdir(process.env.RDX_THEME_SCREENSHOTS, { recursive: true })
+          for (const theme of ['dark', 'light']) {
+            await page.evaluate(
+              (theme) =>
+                document.documentElement.classList.toggle(
+                  'dark',
+                  theme === 'dark'
+                ),
+              theme
+            )
+            await page.screenshot({
+              path: path.join(
+                process.env.RDX_THEME_SCREENSHOTS,
+                `callouts-${theme}.png`
+              ),
+              animations: 'disabled',
+            })
+          }
+          await page.evaluate(() =>
+            document.documentElement.classList.add('dark')
+          )
+        }
+        await page.setViewportSize({ width: 390, height: 844 })
+        assert.equal(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= window.innerWidth
+          ),
+          true
+        )
+        for (const selector of ['[data-slot="mdx-table-scroll"]', 'pre']) {
+          const wide = page.locator(selector).last()
+          assert.equal(
+            await wide.evaluate(
+              (element) => element.scrollWidth > element.clientWidth
+            ),
+            true,
+            `Expected horizontal scrolling for ${selector}`
+          )
+          await wide.focus()
+          await page.keyboard.press('ArrowRight')
+          await page.waitForFunction(
+            (selector) =>
+              [...document.querySelectorAll(selector)].at(-1).scrollLeft > 0,
+            selector
+          )
+        }
+        await page.setViewportSize({ width: 1872, height: 955 })
         await page.goto(running.base)
         await page
           .getByRole('button', { name: 'Documentation version: Current' })
