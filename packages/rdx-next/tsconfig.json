@@ -2,7 +2,6 @@
   "extends": "../../config/ts-config/nextjs.json",
   "compilerOptions": {
     "jsx": "react-jsx",
-    "baseUrl": ".",
     "paths": {
       "@lexibase/rdx-next/*": ["./src/*"],
       "@lexibase/rdx-core": ["../rdx-core/src/index.ts"],

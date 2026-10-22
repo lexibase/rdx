@@ -1,3 +1,3 @@
 # `RDX Docs`
 
-Website with documentation
+Example Website with documentation

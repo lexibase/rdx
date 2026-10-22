@@ -57,7 +57,10 @@
     "typescript": "5.9.2"
   },
   "exports": {
-    "./globals.css": "./src/styles/globals.css",
+    "./globals.css": {
+      "types": "./src/styles/globals.d.css.ts",
+      "default": "./src/styles/globals.css"
+    },
     "./postcss.config": "./postcss.config.mjs",
     "./lib/*": "./src/lib/*.ts",
     "./components/*": "./src/components/*.tsx",

@@ -9,7 +9,10 @@
   },
   "exports": {
     "./postcss.config": "./postcss.config.mjs",
-    "./styles.css": "./src/runtime/styles.css",
+    "./styles.css": {
+      "types": "./src/runtime/styles.d.css.ts",
+      "default": "./src/runtime/styles.css"
+    },
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
@@ -25,6 +28,7 @@
     "templates",
     "postcss.config.mjs",
     "src/runtime/styles.css",
+    "src/runtime/styles.d.css.ts",
     "README.md"
   ],
   "scripts": {

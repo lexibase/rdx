@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "allowArbitraryExtensions": true,
+    "noUncheckedSideEffectImports": true,
     "allowJs": true,
     "esModuleInterop": true,
     "incremental": true,
