@@ -26,20 +26,23 @@ The unscoped `create-rdx` name belongs to another project. RDX uses `@lexibase/c
 
 ## Publish a beta
 
-The next release changes only the runtime and generator. Publish in this order;
-the generator template requires the updated runtime.
+This release enables GitHub and theme-toggle actions in generated projects.
+Publish in this order; the runtime requires the updated core and UI, and the
+generator template requires the updated runtime and UI.
 
 | Package                | Version        |
 | ---------------------- | -------------- |
-| `@lexibase/rdx-next`   | `1.0.0-beta.7` |
-| `@lexibase/create-rdx` | `1.0.0-beta.6` |
+| `@lexibase/rdx-core`   | `1.0.0-beta.5` |
+| `@lexibase/rdx-ui`     | `1.0.0-beta.1` |
+| `@lexibase/rdx-next`   | `1.0.0-beta.8` |
+| `@lexibase/create-rdx` | `1.0.0-beta.7` |
 
-This release adds project-root `public/` support through a generated directory
-link, working image/download examples, explicit navbar/homepage defaults and a
-formatting-safe project-name placeholder in the README. The sidebar is unchanged.
+The core accepts the exact GitHub URL placeholder `#`, and the shared navbar
+keeps that placeholder in the same tab. Real HTTP(S) repository links still open
+in a new tab. Existing project configuration is not automatically rewritten.
 
-Reuse the already released types/core `1.0.0-beta.4`, UI `1.0.0-beta.0`, and
-optional versioning `1.0.0-beta.2`. Do not republish those unchanged versions.
+Reuse the already released types `1.0.0-beta.4` and optional versioning
+`1.0.0-beta.2`. Do not republish those unchanged versions.
 
 From the repository root, install the workspace dependencies and run the checks:
 
@@ -51,6 +54,8 @@ pnpm check
 Inspect exactly what each package would upload before publishing:
 
 ```powershell
+pnpm --filter @lexibase/rdx-core exec npm pack --dry-run
+pnpm --filter @lexibase/rdx-ui exec npm pack --dry-run
 pnpm --filter @lexibase/rdx-next exec npm pack --dry-run
 pnpm --filter @lexibase/create-rdx exec npm pack --dry-run
 ```
@@ -58,6 +63,8 @@ pnpm --filter @lexibase/create-rdx exec npm pack --dry-run
 Publish in dependency order. The `beta` tag keeps this pre-release separate from `latest`:
 
 ```powershell
+pnpm --filter @lexibase/rdx-core publish --tag beta --access public --no-git-checks
+pnpm --filter @lexibase/rdx-ui publish --tag beta --access public --no-git-checks
 pnpm --filter @lexibase/rdx-next publish --tag beta --access public --no-git-checks
 pnpm --filter @lexibase/create-rdx publish --tag beta --access public --no-git-checks
 ```
@@ -75,14 +82,17 @@ pnpm dev
 ```
 
 If `pnpm create` still resolves an older cached generator, select the release
-explicitly with `pnpm dlx @lexibase/create-rdx@1.0.0-beta.6`.
+explicitly with `pnpm dlx @lexibase/create-rdx@1.0.0-beta.7`.
 
 pnpm 11 may delay installing newly published versions according to its
 `minimumReleaseAge` policy. For a release test of your own packages, use an
 explicit version and temporarily set the policy for that invocation only:
 
 ```powershell
-pnpm --config.minimumReleaseAge=0 dlx @lexibase/create-rdx@1.0.0-beta.6 rdx-beta-test
+pnpm --config.minimumReleaseAge=0 dlx @lexibase/create-rdx@1.0.0-beta.7 rdx-beta-test --skip-install
+Set-Location rdx-beta-test
+pnpm --config.minimumReleaseAge=0 install
+pnpm --config.minimumReleaseAge=0 dev
 ```
 
 Keep the usual age policy enabled for regular projects. If a subsequent pnpm
