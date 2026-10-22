@@ -21,6 +21,8 @@ test('generated projects expose homepage and navbar defaults without activating 
   const projectDir = path.join(rootDir, 'rdx-defaults')
   const config = await readFile(path.join(projectDir, 'rdx.config.ts'), 'utf8')
   assert.match(config, /navbar:\s*\{\s*title:\s*''/)
+  assert.match(config, /github:\s*\{\s*visible:\s*true,\s*url:\s*'#'/)
+  assert.match(config, /showToggleMode:\s*true/)
   assert.match(config, /homepage:\s*\{\s*enabled:\s*false/)
   assert.doesNotMatch(config, /plugins\s*:/)
   await access(path.join(projectDir, 'docs/init/intro.mdx'))

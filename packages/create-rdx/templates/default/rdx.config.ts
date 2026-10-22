@@ -5,6 +5,13 @@ export default defineConfig({
   description: 'Documentation built with RDX.',
   navbar: {
     title: '',
+    actions: {
+      github: {
+        visible: true,
+        url: '#',
+      },
+      showToggleMode: true,
+    },
   },
   homepage: {
     enabled: false,

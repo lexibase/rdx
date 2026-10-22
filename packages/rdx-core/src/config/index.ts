@@ -183,12 +183,12 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
             'navbar.actions.github.visible must be a boolean.'
           )
         const url = text(github.url, 'navbar.actions.github.url')
-        if (!/^https?:\/\//i.test(url))
+        if (url !== '#' && !/^https?:\/\//i.test(url))
           throw new RdxConfigError(
-            'navbar.actions.github.url must use http or https.'
+            'navbar.actions.github.url must use http or https, or "#" as a placeholder.'
           )
         try {
-          new URL(url)
+          if (url !== '#') new URL(url)
         } catch {
           throw new RdxConfigError(
             'navbar.actions.github.url must be a valid URL.'

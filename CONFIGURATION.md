@@ -26,7 +26,11 @@ not the URL. Theme values are `system`, `light`, and `dark`.
 the development website. `navbar.logo` accepts a React component with an optional
 `className` prop and defaults to the shared RDX logo.
 `navbar.actions.github` accepts `{ visible: boolean, url: string }` with an HTTP
-or HTTPS URL. Unknown configuration keys fail with the field name rather than
+or HTTPS URL, or the explicit placeholder `"#"`. Generated projects include the
+GitHub action with `visible: true, url: '#'` and `showToggleMode: true`. Replace
+`#` with the project's repository URL when available. The placeholder stays in
+the current tab; real repository URLs open in a new tab. Existing project
+configurations are not modified. Unknown configuration keys fail with the field name rather than
 being silently ignored. Configuration paths must stay inside the project.
 
 ## Optional homepage and navigation

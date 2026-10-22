@@ -71,6 +71,39 @@ test('invalid options fail with the exact configuration field', () => {
     )
 })
 
+test('GitHub accepts only HTTP(S) URLs or the explicit placeholder', () => {
+  for (const url of [
+    '#',
+    'https://github.com/lexibase/rdx',
+    'http://localhost:3000',
+  ]) {
+    const config = resolveConfig({
+      title: 'Docs',
+      navbar: {
+        actions: { github: { visible: true, url }, showToggleMode: true },
+      },
+    })
+    assert.equal(config.navbar.actions.github.url, url)
+    assert.equal(config.navbar.actions.showToggleMode, true)
+  }
+  for (const url of [
+    '#repository',
+    '/repo',
+    '//example.com',
+    'javascript:alert(1)',
+    'https://',
+    '',
+  ])
+    assert.throws(
+      () =>
+        resolveConfig({
+          title: 'Docs',
+          navbar: { actions: { github: { visible: true, url } } },
+        }),
+      /github.url/
+    )
+})
+
 test('homepage is opt-in and validates labels, nested options and safe button URLs', () => {
   assert.equal(resolveConfig({ title: 'Docs' }).homepage, undefined)
   const homepage = {
