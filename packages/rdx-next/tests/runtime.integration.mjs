@@ -596,12 +596,9 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         const yarnTab = managers.getByRole('tab', { name: 'yarn', exact: true })
         const selectedValue = (tab) => tab.getAttribute('aria-selected')
         assert.equal(await selectedValue(pnpmTab), 'true')
-        assert.equal(
-          await page
-            .getByRole('tabpanel', { name: 'pnpm', exact: true })
-            .isVisible(),
-          true
-        )
+        await page
+          .getByRole('tabpanel', { name: 'pnpm', exact: true })
+          .waitFor()
         await pnpmTab.focus()
         await page.keyboard.press('ArrowRight')
         assert.equal(
@@ -634,6 +631,32 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
           await npmPanel.getAttribute('aria-labelledby'),
           await npmTab.getAttribute('id')
         )
+        await page.keyboard.press('Tab')
+        const copyTab = page
+          .locator('[data-slot="tabs"]')
+          .first()
+          .getByRole('button', { name: 'Copy active tab' })
+        assert.equal(
+          await copyTab.evaluate(
+            (element) => element === document.activeElement
+          ),
+          true
+        )
+        await page.keyboard.press('Enter')
+        await page.waitForFunction(
+          () =>
+            document
+              .querySelector('[aria-label="Copy active tab"]')
+              ?.getAttribute('data-status') === 'copied'
+        )
+        assert.equal(
+          (await page.evaluate(() => navigator.clipboard.readText())).replace(
+            /\r\n/g,
+            '\n'
+          ),
+          'Install dependencies with npm:\n\nnpm install'
+        )
+        assert.equal(await copyTab.innerText(), '')
         await page.keyboard.press('Tab')
         assert.equal(
           await npmPanel.evaluate(
@@ -687,6 +710,22 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         await page
           .getByRole('tabpanel', { name: 'Production', exact: true })
           .waitFor()
+        const environmentCopy = page
+          .locator('[data-slot="tabs"]')
+          .nth(1)
+          .getByRole('button', { name: 'Copy active tab' })
+        await environmentCopy.click()
+        await page.waitForFunction(async () =>
+          (await navigator.clipboard.readText()).includes('Run pnpm build.')
+        )
+        const environmentText = await page.evaluate(() =>
+          navigator.clipboard.readText()
+        )
+        assert.match(environmentText, /Run pnpm start/)
+        assert.doesNotMatch(
+          environmentText,
+          /install|Live updates|Development|Production/
+        )
         assert.equal(await selectedValue(npmTab), 'true')
         if (process.env.RDX_THEME_SCREENSHOTS) {
           for (const theme of ['dark', 'light']) {
@@ -728,6 +767,19 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         await page.keyboard.press('End')
         await page.keyboard.press('Enter')
         await page.getByRole('tabpanel', { name: /yarn/ }).waitFor()
+        await copyTab.click()
+        await page.waitForFunction(async () =>
+          (await navigator.clipboard.readText()).includes('yarn install')
+        )
+        const copiedTab = (
+          await page.evaluate(() => navigator.clipboard.readText())
+        ).replace(/\r\n/g, '\n')
+        assert.equal(
+          copiedTab,
+          'Install dependencies with yarn:\n\nyarn install'
+        )
+        const copyBounds = await copyTab.boundingBox()
+        assert.ok(copyBounds.x >= 0 && copyBounds.x + copyBounds.width <= 390)
         assert.equal(
           await page.evaluate(
             () => document.documentElement.scrollWidth <= window.innerWidth
@@ -860,6 +912,23 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
             retryBounds.x >= 0 &&
             retryBounds.x + retryBounds.width <= 390
         )
+        await rejected.goto(`${running.base}/docs/init/tabs`)
+        const rejectedCopyTab = rejected
+          .locator('[data-slot="tabs"]')
+          .first()
+          .getByRole('button', { name: 'Copy active tab' })
+        await rejectedCopyTab.click()
+        await rejected.waitForFunction(
+          () =>
+            document
+              .querySelector('[aria-label="Copy active tab"]')
+              ?.getAttribute('data-status') === 'error'
+        )
+        assert.match(
+          await rejectedCopyTab.getAttribute('title'),
+          /Could not copy/
+        )
+        assert.equal(await rejectedCopyTab.innerText(), '')
         await rejected.close()
         await page.goto(`${running.base}/docs/init/components`)
         await page.getByRole('note', { name: 'Before updating' }).waitFor()

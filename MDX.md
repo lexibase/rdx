@@ -96,6 +96,10 @@ discover them, following Base UI's behavior, but cannot be activated. Tab moves 
 of the tab list into the selected panel. Inactive panels unmount by default;
 React authors can use `keepMounted` on `TabsContent` to preserve local state.
 Long tab lists scroll horizontally on small screens.
+The icon-only button at the right of the tab header copies the active panel as
+plain text, without tab labels, code headers or copy-button text. Code indentation
+and internal line breaks are retained; outer blank lines are omitted. It uses the
+same clipboard permissions as code blocks and announces success or failure.
 
 React components can import `Tabs`, `TabsList`, `TabsTrigger` and `TabsContent`
 from `@lexibase/rdx-ui/components/tabs`. The wrappers preserve Base UI props,
