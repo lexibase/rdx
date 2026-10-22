@@ -15,6 +15,43 @@ const { mdxComponents } = await jiti.import(
   '../../rdx-ui/src/components/mdx-components.tsx'
 )
 const { Callout } = await jiti.import('../../rdx-ui/src/components/callout.tsx')
+const { VersionBanner } = await jiti.import(
+  '../../../apps/web/components/Page/version-banner.tsx'
+)
+
+test('version notices share Callout styling and preserve current-version navigation', () => {
+  const versionsRaw = { active: ['2.1.1', '2.1.0'], archived: ['2.0.0'] }
+  for (const [version, kind, message] of [
+    ['canary', 'canary', 'This is a pre-release version of the documentation.'],
+    ['2.1.0', 'outdated', 'This is an outdated version of the documentation.'],
+    ['2.0.0', 'outdated', 'This is an outdated version of the documentation.'],
+  ]) {
+    const html = renderToStaticMarkup(
+      createElement(VersionBanner, { version, versionsRaw })
+    )
+    assert.ok(html.includes(message))
+    assert.match(html, new RegExp(`data-rdx-version-notice="${kind}"`))
+    assert.match(html, /role="note"/)
+    assert.match(html, /href="\/docs\/2.1.1"/)
+    assert.match(html, /Go back to the current version/)
+    assert.doesNotMatch(html, /role="alert"|aria-live=|currento|undefined/)
+  }
+  assert.equal(
+    renderToStaticMarkup(
+      createElement(VersionBanner, { version: '2.1.1', versionsRaw })
+    ),
+    ''
+  )
+  assert.equal(
+    renderToStaticMarkup(
+      createElement(VersionBanner, {
+        version: 'canary',
+        versionsRaw: { active: [], archived: [] },
+      })
+    ),
+    ''
+  )
+})
 
 test('shared MDX renders GFM, headings, code, images and Callout without imports', async () => {
   const { content } = await compileDocumentation(

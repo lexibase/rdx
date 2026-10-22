@@ -103,6 +103,10 @@ test(
           await page.waitForFunction(
             () => localStorage.getItem('rdx-version') === '2.1.1'
           )
+          assert.equal(
+            await page.locator('[data-rdx-version-notice]').count(),
+            0
+          )
           await page
             .getByRole('button', {
               name: 'Documentation version: Version 2.1.1',
@@ -119,6 +123,16 @@ test(
             .waitFor()
           await page.waitForFunction(
             () => localStorage.getItem('rdx-version') === '2.1.0'
+          )
+          const notice = page.locator('[data-rdx-version-notice="outdated"]')
+          await notice.waitFor()
+          assert.match(
+            await notice.innerText(),
+            /This is an outdated version of the documentation\./
+          )
+          assert.equal(
+            await notice.getByRole('link').getAttribute('href'),
+            '/docs/2.1.1'
           )
           await page.goBack()
           await page.waitForURL('**/docs/2.1.1/intro')
@@ -139,7 +153,10 @@ test(
           assert.deepEqual(errors, [], `${mode}: hydration and navigation`)
           await page.goto(`${running.base}/docs/canary/mdx-components`)
           await page.getByRole('note', { name: 'Before updating' }).waitFor()
-          assert.equal(await page.locator('[data-rdx-callout]').count(), 6)
+          assert.equal(await page.locator('main [data-rdx-callout]').count(), 6)
+          await page
+            .getByRole('note', { name: 'Pre-release documentation' })
+            .waitFor()
           await page.getByRole('table').waitFor()
           await context.grantPermissions(
             ['clipboard-read', 'clipboard-write'],
