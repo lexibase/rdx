@@ -6,6 +6,7 @@ import type { MDXLoader } from '@lexibase/rdx-types'
 import {
   remarkDocumentLinks,
   rehypeDocumentationHeadings,
+  rehypeDocumentationCode,
 } from '@lexibase/rdx-core/mdx'
 
 export class RdxDocumentNotFoundError extends Error {
@@ -110,7 +111,7 @@ export async function mdxLoader({
             },
           ],
         ],
-        rehypePlugins: [rehypeDocumentationHeadings],
+        rehypePlugins: [rehypeDocumentationHeadings, rehypeDocumentationCode],
       },
     },
   })

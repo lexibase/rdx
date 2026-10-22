@@ -839,6 +839,11 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
           exact: true,
         })
         await npmPanel.waitFor()
+        assert.ok(
+          (await npmPanel.locator('[data-rdx-code-block]').boundingBox())
+            .height <= 96,
+          'Highlighting must not enlarge a single-line code block'
+        )
         const panelId = await npmPanel.getAttribute('id')
         assert.equal(await npmTab.getAttribute('aria-controls'), panelId)
         assert.equal(
@@ -1025,6 +1030,38 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         await page.goto(`${running.base}/docs/init/code`)
         const blocks = page.locator('[data-rdx-code-block]')
         assert.equal(await blocks.count(), 2)
+        const tokens = blocks
+          .first()
+          .locator('pre.shiki code span[style*="--shiki-light"]')
+        assert.ok((await tokens.count()) > 3)
+        const colors = {}
+        for (const theme of ['light', 'dark']) {
+          await page.evaluate(
+            (value) =>
+              document.documentElement.classList.toggle(
+                'dark',
+                value === 'dark'
+              ),
+            theme
+          )
+          colors[theme] = await tokens.evaluateAll((elements) => [
+            ...new Set(
+              elements.map((element) => getComputedStyle(element).color)
+            ),
+          ])
+          assert.ok(
+            colors[theme].length >= 3,
+            `${theme}: tokens should have distinct colors`
+          )
+        }
+        assert.notDeepEqual(colors.light, colors.dark)
+        assert.equal(
+          await blocks
+            .first()
+            .locator('pre')
+            .evaluate((element) => element.style.backgroundColor),
+          ''
+        )
         const codeMetrics = await blocks
           .nth(1)
           .locator('pre')

@@ -25,7 +25,15 @@ finishes (the operating system may normalize LF/CRLF line endings),
 then resets after two seconds. If clipboard access is unavailable or
 denied, a visible message offers manual copying; the code remains selectable.
 Clipboard access requires HTTPS or localhost and the browser's permission.
-Syntax highlighting remains a future task.
+Fenced code is highlighted automatically with Shiki, using the language after
+the opening fence (for example `ts`, `tsx`, `js`, `json`, `bash`, `py`, `css` or
+`sql`). This follows shadcn's Shiki/GitHub light and dark palette, adapted to the
+server-side MDX pipeline. Colors follow the existing theme toggle without
+changing the code-block surface or spacing. No extra configuration is required.
+Grammars load on demand on the server; the highlighter is not a client component.
+Unknown languages fall back to plain text; unlabelled fences stay plain. Inline
+code is not highlighted. Token markup preserves code whitespace and the trailing
+newline for both block copying and copying a complete tab.
 
 ## Links between documents
 

@@ -42,6 +42,7 @@
   },
   "homepage": "https://github.com/lexibase/rdx#readme",
   "dependencies": {
+    "@shikijs/rehype": "^4.5.0",
     "@lexibase/rdx-types": "workspace:*",
     "gray-matter": "^4.0.3",
     "rehype-slug": "^6.0.0"

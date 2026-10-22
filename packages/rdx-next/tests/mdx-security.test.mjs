@@ -23,6 +23,60 @@ const { Blockquote } = await jiti.import(
   '../../rdx-ui/src/components/blockquote.tsx'
 )
 
+function renderedCodeText(html) {
+  const body =
+    html.match(/<pre\b[^>]*><code\b[^>]*>([\s\S]*?)<\/code><\/pre>/)?.[1] ?? ''
+  const entities = {
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#x27;': "'",
+  }
+  return body
+    .replace(/<[^>]*>/g, '')
+    .replace(/&(?:amp|lt|gt|quot|#x27);/g, (entity) => entities[entity])
+}
+
+test('language fences use server-rendered dual-theme tokens while preserving exact code', async () => {
+  for (const [language, code] of [
+    ['ts', '  const text: string = "<tag> & RDX";\n\n\tconsole.log(text)\n'],
+    ['tsx', 'export const Home = () => <main title="RDX">Hello</main>\n'],
+    ['py', 'def hello(name):\n    return f"Hello {name}"\n'],
+    ['json', '{ "framework": "RDX", "ready": true }\n'],
+    ['sql', 'SELECT name FROM docs WHERE active = true;\n'],
+    ['css', '.docs { color: red; }\n'],
+    ['bash', 'pnpm dev\n'],
+    ['rust', 'fn main() { println!("RDX"); }\n'],
+  ]) {
+    const { content } = await compileDocumentation(
+      `\`\`\`${language}\n${code}\`\`\``,
+      mdxComponents
+    )
+    const html = renderToStaticMarkup(content)
+    assert.match(html, /class="[^"]*shiki/)
+    assert.match(html, /--shiki-light:/)
+    assert.match(html, /--shiki-dark:/)
+    assert.match(html, new RegExp(`language-${language}`))
+    assert.equal(renderedCodeText(html), code)
+    assert.doesNotMatch(html, /<main title="RDX">/)
+  }
+})
+
+test('unknown, text and unlabelled fences remain readable; inline code stays unchanged', async () => {
+  for (const language of ['not-an-rdx-language', 'text', '']) {
+    const code = '  <script>notExecutable()</script>\n\n\tplain text\n'
+    const { content } = await compileDocumentation(
+      `Inline \`const inline = true\`.\n\n\`\`\`${language}\n${code}\`\`\``,
+      mdxComponents
+    )
+    const html = renderToStaticMarkup(content)
+    assert.equal(renderedCodeText(html), code)
+    assert.match(html, />const inline = true<\/code>/)
+    assert.doesNotMatch(html, /<script>/)
+  }
+})
+
 test('all starter documents compile with their real filesystem link context', async () => {
   const { getDocsIndex, getDocument } = await jiti.import(
     '../../rdx-core/src/index.ts'
@@ -164,7 +218,7 @@ test('MDX links, references and literal anchors resolve without rewriting images
   )
   assert.match(html, /src="\.\/missing\.mdx"/)
   assert.match(html, /src="\.\/missing-image\.mdx"/)
-  assert.match(html, /\[Example\]\(\.\/missing\.mdx\)/)
+  assert.match(html.replace(/<[^>]*>/g, ''), /\[Example\]\(\.\/missing\.mdx\)/)
   assert.match(html, /href="https:\/\/example.com\/guide.mdx"/)
   assert.match(html, /href="#setup"/)
   assert.match(html, /id="setup"/)
@@ -282,7 +336,7 @@ pnpm install
   assert.equal((html.match(/role="tabpanel"/g) ?? []).length, 1)
   assert.match(html, /aria-selected="true"/)
   assert.match(html, /<strong>Selected panel<\/strong>/)
-  assert.match(html, /pnpm install/)
+  assert.match(html.replace(/<[^>]*>/g, ''), /pnpm install/)
   assert.match(html, /data-rdx-code-block/)
   assert.match(html, /Shared components work here/)
   assert.doesNotMatch(html, /Inactive npm panel/)
@@ -531,7 +585,7 @@ test('code blocks preserve text and language while inline code has no copy butto
   }
   assert.match(html, /language-ts/)
   assert.match(
-    html,
+    html.replace(/<[^>]*>/g, ''),
     / {2}const text = &quot;&lt;tag&gt; &amp; RDX&quot;\n\tconsole.log\(text\)\n/
   )
   assert.match(html, />Code<\/span>/)
@@ -551,7 +605,7 @@ test('MDX keeps Markdown, links, images, fenced code and registered JSX componen
   assert.match(html, /href="\/docs\/init\/intro"/)
   assert.match(html, /src="\/images\/rdx.svg"/)
   assert.match(html, /<aside title="Note">Custom component<\/aside>/)
-  assert.match(html, /const value = \{ example: true \}/)
+  assert.match(renderedCodeText(html), /const value = \{ example: true \}/)
 })
 
 test('MDX expressions and JSX expression attributes cannot execute project-server JavaScript', async () => {

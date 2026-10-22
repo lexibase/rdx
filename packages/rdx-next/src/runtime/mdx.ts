@@ -3,6 +3,7 @@ import remarkGfm from 'remark-gfm'
 import {
   remarkDocumentLinks,
   rehypeDocumentationHeadings,
+  rehypeDocumentationCode,
   type DocumentLinkOptions,
 } from '@lexibase/rdx-core/mdx'
 
@@ -19,7 +20,7 @@ export function compileDocumentation(
       blockDangerousJS: true,
       mdxOptions: {
         remarkPlugins: [remarkGfm, [remarkDocumentLinks, links]],
-        rehypePlugins: [rehypeDocumentationHeadings],
+        rehypePlugins: [rehypeDocumentationHeadings, rehypeDocumentationCode],
       },
     },
   })

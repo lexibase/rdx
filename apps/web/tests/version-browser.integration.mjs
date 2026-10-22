@@ -163,6 +163,11 @@ test(
             { origin: running.base }
           )
           const code = page.locator('[data-rdx-code-block]').first()
+          assert.ok(
+            (await code
+              .locator('pre.shiki code span[style*="--shiki-light"]')
+              .count()) > 0
+          )
           const expectedCode = await code.locator('pre').textContent()
           await code.getByRole('button', { name: 'Copy code' }).click()
           await code.locator('button[data-status="copied"]').waitFor()
