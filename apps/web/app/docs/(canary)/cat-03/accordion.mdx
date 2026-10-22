@@ -1,0 +1,63 @@
+---
+title: Accordion
+description: Optional explanations, without crowding your documentation.
+link_position: 5
+---
+
+## Frequently asked questions
+
+Expand a question to read its answer. Use Enter or Space to toggle and Tab to
+move between questions and links.
+
+<Accordion>
+  <AccordionItem value="content">
+    <AccordionTrigger>Where do I write my documentation?</AccordionTrigger>
+    <AccordionContent>
+
+Create folders and `.mdx` files inside **docs/**. Each folder becomes a category
+and each file becomes a page.
+
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="preview">
+    <AccordionTrigger>How do I preview my changes?</AccordionTrigger>
+    <AccordionContent>
+
+Run the development server:
+
+```bash
+pnpm dev
+```
+
+<Callout variant="tip" title="Live updates">
+
+Keep the server running while editing your documentation.
+
+</Callout>
+
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+
+## Production checklist
+
+Opening an answer closes the previous one in the same group.
+
+<Accordion>
+  <AccordionItem value="build">
+    <AccordionTrigger>Build for production</AccordionTrigger>
+    <AccordionContent>
+
+Run `pnpm build` to generate the production site.
+
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="start">
+    <AccordionTrigger>Check the production site</AccordionTrigger>
+    <AccordionContent>
+
+Run `pnpm start` after a successful build.
+
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>

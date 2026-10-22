@@ -19,6 +19,162 @@ const { Blockquote } = await jiti.import(
   '../../rdx-ui/src/components/blockquote.tsx'
 )
 
+test('MDX accordion accepts literal attributes and starts closed with native heading buttons', async () => {
+  const { content } = await compileDocumentation(
+    `<Accordion multiple>
+<AccordionItem value="guide">
+<AccordionTrigger>Read the guide</AccordionTrigger>
+<AccordionContent>
+
+**Optional explanation**
+
+</AccordionContent>
+</AccordionItem>
+<AccordionItem value="disabled" disabled>
+<AccordionTrigger>Not ready</AccordionTrigger>
+<AccordionContent>Unavailable.</AccordionContent>
+</AccordionItem>
+</Accordion>`,
+    mdxComponents
+  )
+  const html = renderToStaticMarkup(content)
+  assert.match(html, /data-slot="accordion"/)
+  assert.equal((html.match(/aria-expanded="false"/g) ?? []).length, 2)
+  assert.match(html, /<h3\b[^>]*><button\b/)
+  assert.match(html, /disabled=""/)
+  assert.doesNotMatch(html, /Optional explanation|Unavailable\./)
+})
+
+test('React accordion preserves initial expansion, mounted panels, state classes and native props', async () => {
+  const { Accordion, AccordionItem, AccordionTrigger, AccordionContent } =
+    await jiti.import('../../rdx-ui/src/components/accordion.tsx')
+  const html = renderToStaticMarkup(
+    createElement(
+      Accordion,
+      {
+        defaultValue: ['guide'],
+        id: 'custom-accordion',
+        className: () => 'my-2',
+      },
+      createElement(
+        AccordionItem,
+        { value: 'guide' },
+        createElement(
+          AccordionTrigger,
+          { className: (state) => (state.open ? 'text-blue-600' : undefined) },
+          'Guide'
+        ),
+        createElement(
+          AccordionContent,
+          null,
+          createElement(Callout, { title: 'Tip' }, 'Rich content')
+        )
+      ),
+      createElement(
+        AccordionItem,
+        { value: 'other' },
+        createElement(AccordionTrigger, null, 'Other'),
+        createElement(
+          AccordionContent,
+          { keepMounted: true },
+          'Preserved answer'
+        )
+      )
+    )
+  )
+  assert.match(html, /id="custom-accordion"/)
+  assert.match(html, /my-2/)
+  assert.doesNotMatch(html, /my-4/)
+  assert.match(html, /text-blue-600/)
+  assert.match(html, /aria-expanded="true"/)
+  assert.match(html, /role="region"/)
+  assert.match(html, /Rich content/)
+  assert.match(html, /Preserved answer/)
+  assert.match(html, /hidden=""/)
+})
+
+test('MDX tabs render the explicit default panel with rich content and no author JavaScript', async () => {
+  const { content } = await compileDocumentation(
+    `<Tabs defaultValue="pnpm">
+<TabsList aria-label="Package manager">
+<TabsTrigger value="npm">npm</TabsTrigger>
+<TabsTrigger value="pnpm">pnpm</TabsTrigger>
+</TabsList>
+<TabsContent value="npm">
+
+Inactive npm panel.
+
+</TabsContent>
+<TabsContent value="pnpm">
+
+**Selected panel**
+
+\`\`\`bash
+pnpm install
+\`\`\`
+
+<Callout title="Tip">Shared components work here.</Callout>
+
+</TabsContent>
+</Tabs>`,
+    mdxComponents
+  )
+  const html = renderToStaticMarkup(content)
+  assert.match(html, /role="tablist"/)
+  assert.match(html, /aria-label="Package manager"/)
+  assert.equal((html.match(/role="tab"/g) ?? []).length, 2)
+  assert.equal((html.match(/role="tabpanel"/g) ?? []).length, 1)
+  assert.match(html, /aria-selected="true"/)
+  assert.match(html, /<strong>Selected panel<\/strong>/)
+  assert.match(html, /pnpm install/)
+  assert.match(html, /data-rdx-code-block/)
+  assert.match(html, /Shared components work here/)
+  assert.doesNotMatch(html, /Inactive npm panel/)
+})
+
+test('React tabs preserve Base UI state classes, native props and opt-in mounted panels', async () => {
+  const { Tabs, TabsList, TabsTrigger, TabsContent } = await jiti.import(
+    '../../rdx-ui/src/components/tabs.tsx'
+  )
+  const html = renderToStaticMarkup(
+    createElement(
+      Tabs,
+      { defaultValue: 'first', className: () => 'my-2', id: 'custom-tabs' },
+      createElement(
+        TabsList,
+        { 'aria-label': 'Examples' },
+        createElement(
+          TabsTrigger,
+          {
+            value: 'first',
+            className: (state) => (state.active ? 'text-blue-600' : undefined),
+          },
+          'First'
+        ),
+        createElement(
+          TabsTrigger,
+          { value: 'second', disabled: true },
+          'Second'
+        )
+      ),
+      createElement(TabsContent, { value: 'first' }, 'Selected content'),
+      createElement(
+        TabsContent,
+        { value: 'second', keepMounted: true },
+        'Preserved content'
+      )
+    )
+  )
+  assert.match(html, /id="custom-tabs"/)
+  assert.match(html, /my-2/)
+  assert.doesNotMatch(html, /my-6/)
+  assert.match(html, /text-blue-600/)
+  assert.match(html, /aria-disabled="true"/)
+  assert.equal((html.match(/role="tabpanel"/g) ?? []).length, 2)
+  assert.match(html, /hidden=""/)
+  assert.match(html, /Preserved content/)
+})
+
 test('tables keep native structure, column alignment and rich content with rounded striped styling', async () => {
   const { content } = await compileDocumentation(
     '| Feature | Status | Count |\n| :--- | :---: | ---: |\n| **Markdown** | Ready | 1 |\n| [Guide](/docs/init/intro) | `code` | 2 |',

@@ -1,9 +1,16 @@
 import type { ComponentProps } from 'react'
 
 import { cn } from '../lib/utils'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from './accordion'
 import { Blockquote } from './blockquote'
 import { Callout } from './callout'
 import { CodeBlock } from './code-block'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs'
 import { Separator } from '@lexibase/rdx-ui/components/separator'
 
 export const mdxComponents = {
@@ -111,6 +118,14 @@ export const mdxComponents = {
     />
   ),
   Callout,
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
   Separator: ({ className, ...props }: ComponentProps<typeof Separator>) => (
     <Separator
       className={

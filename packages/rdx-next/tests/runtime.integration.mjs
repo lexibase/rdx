@@ -196,6 +196,26 @@ test(
         )
       ).replace('link_position: 1', 'link_position: 10')
     )
+    await writeFile(
+      path.join(rootDir, 'docs/init/tabs.mdx'),
+      await readFile(
+        new URL(
+          '../../create-rdx/templates/default/docs/examples/tabs.mdx',
+          import.meta.url
+        ),
+        'utf8'
+      )
+    )
+    await writeFile(
+      path.join(rootDir, 'docs/init/accordion.mdx'),
+      await readFile(
+        new URL(
+          '../../create-rdx/templates/default/docs/examples/accordion.mdx',
+          import.meta.url
+        ),
+        'utf8'
+      )
+    )
     const copySample =
       '  const message = \'<tag> & "RDX"\';\n\tconsole.log(message)\n'
     await writeFile(
@@ -578,9 +598,409 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
           .grantPermissions(['clipboard-read', 'clipboard-write'], {
             origin: running.base,
           })
+        await page.goto(`${running.base}/docs/init/accordion`)
+        await page.evaluate(() => {
+          window.accordionAnimations = []
+          document.addEventListener('animationstart', (event) => {
+            if (!event.target.matches('[data-slot="accordion-content"]')) return
+            const animation = event.target
+              .getAnimations()
+              .find((item) => item.animationName === event.animationName)
+            window.accordionAnimations.push({
+              name: event.animationName,
+              heights:
+                animation?.effect.getKeyframes().map((frame) => frame.height) ??
+                [],
+            })
+          })
+        })
+        const accordion = page.locator('[data-slot="accordion"]').first()
+        const question = accordion.getByRole('button', {
+          name: 'Where do I write my documentation?',
+        })
+        const preview = accordion.getByRole('button', {
+          name: 'How do I preview my changes?',
+        })
+        assert.equal(await question.getAttribute('aria-expanded'), 'false')
+        await question.focus()
+        await page.keyboard.press('Enter')
+        const answer = accordion.getByRole('region', {
+          name: 'Where do I write my documentation?',
+        })
+        await answer.waitFor()
+        assert.equal(
+          await question.getAttribute('aria-controls'),
+          await answer.getAttribute('id')
+        )
+        assert.equal(
+          await answer.getAttribute('aria-labelledby'),
+          await question.getAttribute('id')
+        )
+        assert.equal(
+          await question.evaluate((element) => element.parentElement.tagName),
+          'H3'
+        )
+        assert.match(await answer.innerText(), /Each folder becomes a category/)
+        await page.keyboard.press('Tab')
+        assert.equal(
+          await answer
+            .getByRole('link', { name: 'introduction' })
+            .evaluate((element) => element === document.activeElement),
+          true
+        )
+        await page.keyboard.press('Tab')
+        assert.equal(
+          await preview.evaluate(
+            (element) => element === document.activeElement
+          ),
+          true
+        )
+        await page.keyboard.press('Space')
+        const previewPanel = accordion.getByRole('region', {
+          name: 'How do I preview my changes?',
+        })
+        await previewPanel.waitFor()
+        await answer.waitFor({ state: 'hidden' })
+        const accordionAnimations = await page.evaluate(
+          () => window.accordionAnimations
+        )
+        assert.ok(
+          accordionAnimations.some(
+            (animation) => animation.name === 'accordion-up'
+          )
+        )
+        const opening = accordionAnimations.find(
+          (animation) => animation.name === 'accordion-down'
+        )
+        assert.ok(opening)
+        assert.equal(opening.heights[0], '0px')
+        assert.ok(Number.parseFloat(opening.heights.at(-1)) > 0)
+        assert.equal(await question.getAttribute('aria-expanded'), 'false')
+        assert.equal(
+          await accordion
+            .getByRole('button', { name: 'More examples (soon)' })
+            .isDisabled(),
+          true
+        )
+        await previewPanel.getByRole('button', { name: 'Copy code' }).click()
+        await page.waitForFunction(async () =>
+          (await navigator.clipboard.readText()).includes('pnpm dev')
+        )
+        assert.equal(
+          (await page.evaluate(() => navigator.clipboard.readText())).replace(
+            /\r\n/g,
+            '\n'
+          ),
+          'pnpm dev\n'
+        )
+        assert.equal(
+          await previewPanel
+            .getByRole('note', { name: 'Live updates' })
+            .isVisible(),
+          true
+        )
+        const multiple = page.locator('[data-slot="accordion"]').nth(1)
+        await multiple
+          .getByRole('button', { name: 'Build for production' })
+          .click()
+        await multiple
+          .getByRole('button', { name: 'Check the production site' })
+          .click()
+        await multiple
+          .getByRole('region', { name: 'Build for production' })
+          .waitFor({ state: 'hidden' })
+        await multiple
+          .getByRole('region', { name: 'Check the production site' })
+          .waitFor()
+        await preview.focus()
+        await page.keyboard.press('Enter')
+        await previewPanel.waitFor({ state: 'hidden' })
+        await preview.click()
+        await previewPanel.waitFor()
+        await page.emulateMedia({ reducedMotion: 'reduce' })
+        assert.equal(
+          await previewPanel.evaluate(
+            (element) => getComputedStyle(element).animationName
+          ),
+          'none'
+        )
+        await preview.click()
+        await previewPanel.waitFor({ state: 'hidden' })
+        await preview.click()
+        await previewPanel.waitFor()
+        await page.emulateMedia({ reducedMotion: 'no-preference' })
+        await page.setViewportSize({ width: 390, height: 844 })
+        assert.equal(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= window.innerWidth
+          ),
+          true
+        )
+        if (process.env.RDX_THEME_SCREENSHOTS) {
+          await mkdir(process.env.RDX_THEME_SCREENSHOTS, { recursive: true })
+          for (const theme of ['dark', 'light']) {
+            await page.evaluate(
+              (value) =>
+                document.documentElement.classList.toggle(
+                  'dark',
+                  value === 'dark'
+                ),
+              theme
+            )
+            await accordion.screenshot({
+              path: path.join(
+                process.env.RDX_THEME_SCREENSHOTS,
+                `accordion-${theme}-mobile.png`
+              ),
+              animations: 'disabled',
+            })
+          }
+        }
+        await page.setViewportSize({ width: 1872, height: 955 })
+        await page.goto(`${running.base}/docs/init/tabs`)
+        const managers = page.getByRole('tablist', { name: 'Package manager' })
+        const environments = page.getByRole('tablist', { name: 'Environment' })
+        const npmTab = managers.getByRole('tab', { name: 'npm', exact: true })
+        const pnpmTab = managers.getByRole('tab', { name: 'pnpm', exact: true })
+        const yarnTab = managers.getByRole('tab', { name: 'yarn', exact: true })
+        const selectedValue = (tab) => tab.getAttribute('aria-selected')
+        assert.equal(await selectedValue(pnpmTab), 'true')
+        await page
+          .getByRole('tabpanel', { name: 'pnpm', exact: true })
+          .waitFor()
+        await pnpmTab.focus()
+        await page.keyboard.press('ArrowRight')
+        assert.equal(
+          await yarnTab.evaluate(
+            (element) => element === document.activeElement
+          ),
+          true
+        )
+        assert.equal(await selectedValue(pnpmTab), 'true')
+        await page.keyboard.press('Enter')
+        await page
+          .getByRole('tabpanel', { name: 'yarn', exact: true })
+          .waitFor()
+        await page.keyboard.press('Home')
+        assert.equal(
+          await npmTab.evaluate(
+            (element) => element === document.activeElement
+          ),
+          true
+        )
+        await page.keyboard.press('Space')
+        const npmPanel = page.getByRole('tabpanel', {
+          name: 'npm',
+          exact: true,
+        })
+        await npmPanel.waitFor()
+        const panelId = await npmPanel.getAttribute('id')
+        assert.equal(await npmTab.getAttribute('aria-controls'), panelId)
+        assert.equal(
+          await npmPanel.getAttribute('aria-labelledby'),
+          await npmTab.getAttribute('id')
+        )
+        await page.keyboard.press('Tab')
+        const copyTab = page
+          .locator('[data-slot="tabs"]')
+          .first()
+          .getByRole('button', { name: 'Copy active tab' })
+        assert.equal(
+          await copyTab.evaluate(
+            (element) => element === document.activeElement
+          ),
+          true
+        )
+        await page.keyboard.press('Enter')
+        await page.waitForFunction(
+          () =>
+            document
+              .querySelector('[aria-label="Copy active tab"]')
+              ?.getAttribute('data-status') === 'copied'
+        )
+        assert.equal(
+          (await page.evaluate(() => navigator.clipboard.readText())).replace(
+            /\r\n/g,
+            '\n'
+          ),
+          'Install dependencies with npm:\n\nnpm install'
+        )
+        assert.equal(await copyTab.innerText(), '')
+        await page.keyboard.press('Tab')
+        assert.equal(
+          await npmPanel.evaluate(
+            (element) => element === document.activeElement
+          ),
+          true
+        )
+        await npmPanel.getByRole('button', { name: 'Copy code' }).click()
+        await npmPanel
+          .getByRole('button', { name: 'Copy code' })
+          .filter({ hasText: 'Copied' })
+          .waitFor()
+        assert.equal(
+          (await page.evaluate(() => navigator.clipboard.readText())).replace(
+            /\r\n/g,
+            '\n'
+          ),
+          'npm install\n'
+        )
+        assert.equal(
+          await selectedValue(
+            environments.getByRole('tab', { name: 'Development', exact: true })
+          ),
+          'true'
+        )
+        await environments
+          .getByRole('tab', { name: 'Production', exact: true })
+          .focus()
+        await page.keyboard.press('End')
+        assert.equal(
+          await environments
+            .getByRole('tab', { name: 'Preview (soon)', exact: true })
+            .evaluate((element) => element === document.activeElement),
+          true
+        )
+        assert.equal(
+          await environments
+            .getByRole('tab', { name: 'Preview (soon)', exact: true })
+            .isDisabled(),
+          true
+        )
+        await page.keyboard.press('Enter')
+        assert.equal(
+          await selectedValue(
+            environments.getByRole('tab', { name: 'Development', exact: true })
+          ),
+          'true'
+        )
+        await page.keyboard.press('ArrowLeft')
+        await page.keyboard.press('Space')
+        await page
+          .getByRole('tabpanel', { name: 'Production', exact: true })
+          .waitFor()
+        const environmentCopy = page
+          .locator('[data-slot="tabs"]')
+          .nth(1)
+          .getByRole('button', { name: 'Copy active tab' })
+        await environmentCopy.click()
+        await page.waitForFunction(async () =>
+          (await navigator.clipboard.readText()).includes('Run pnpm build.')
+        )
+        const environmentText = await page.evaluate(() =>
+          navigator.clipboard.readText()
+        )
+        assert.match(environmentText, /Run pnpm start/)
+        assert.doesNotMatch(
+          environmentText,
+          /install|Live updates|Development|Production/
+        )
+        assert.equal(await selectedValue(npmTab), 'true')
+        if (process.env.RDX_THEME_SCREENSHOTS) {
+          for (const theme of ['dark', 'light']) {
+            await page.evaluate(
+              (value) =>
+                document.documentElement.classList.toggle(
+                  'dark',
+                  value === 'dark'
+                ),
+              theme
+            )
+            await page
+              .locator('[data-slot="tabs"]')
+              .first()
+              .screenshot({
+                path: path.join(
+                  process.env.RDX_THEME_SCREENSHOTS,
+                  `tabs-${theme}-desktop.png`
+                ),
+                animations: 'disabled',
+              })
+          }
+        }
+        await page.setViewportSize({ width: 390, height: 844 })
+        await page.evaluate(() => {
+          for (const tab of document.querySelectorAll(
+            '[data-slot="tabs-trigger"]'
+          )) {
+            tab.textContent += ' — long label'
+          }
+        })
+        assert.equal(
+          await managers.evaluate(
+            (element) => element.scrollWidth > element.clientWidth
+          ),
+          true
+        )
+        await managers.getByRole('tab').first().focus()
+        await page.keyboard.press('End')
+        await page.keyboard.press('Enter')
+        await page.getByRole('tabpanel', { name: /yarn/ }).waitFor()
+        await copyTab.click()
+        await page.waitForFunction(async () =>
+          (await navigator.clipboard.readText()).includes('yarn install')
+        )
+        const copiedTab = (
+          await page.evaluate(() => navigator.clipboard.readText())
+        ).replace(/\r\n/g, '\n')
+        assert.equal(
+          copiedTab,
+          'Install dependencies with yarn:\n\nyarn install'
+        )
+        const copyBounds = await copyTab.boundingBox()
+        assert.ok(copyBounds.x >= 0 && copyBounds.x + copyBounds.width <= 390)
+        assert.equal(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= window.innerWidth
+          ),
+          true
+        )
+        if (process.env.RDX_THEME_SCREENSHOTS) {
+          for (const theme of ['dark', 'light']) {
+            await page.evaluate(
+              (value) =>
+                document.documentElement.classList.toggle(
+                  'dark',
+                  value === 'dark'
+                ),
+              theme
+            )
+            await page
+              .locator('[data-slot="tabs"]')
+              .first()
+              .screenshot({
+                path: path.join(
+                  process.env.RDX_THEME_SCREENSHOTS,
+                  `tabs-${theme}-mobile.png`
+                ),
+                animations: 'disabled',
+              })
+          }
+        }
+        await page.setViewportSize({ width: 1872, height: 955 })
         await page.goto(`${running.base}/docs/init/code`)
         const blocks = page.locator('[data-rdx-code-block]')
         assert.equal(await blocks.count(), 2)
+        const codeMetrics = await blocks
+          .nth(1)
+          .locator('pre')
+          .evaluate((element) => {
+            const style = getComputedStyle(element)
+            return {
+              padding: style.padding,
+              fontSize: style.fontSize,
+              lineHeight: style.lineHeight,
+            }
+          })
+        assert.deepEqual(codeMetrics, {
+          padding: '12px',
+          fontSize: '13px',
+          lineHeight: '24px',
+        })
+        assert.ok(
+          (await blocks.nth(1).boundingBox()).height <= 96,
+          'A single-line code block should remain compact'
+        )
         const copy = blocks.first().getByRole('button', { name: 'Copy code' })
         await copy.focus()
         await page.keyboard.press('Enter')
@@ -681,6 +1101,23 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
             retryBounds.x >= 0 &&
             retryBounds.x + retryBounds.width <= 390
         )
+        await rejected.goto(`${running.base}/docs/init/tabs`)
+        const rejectedCopyTab = rejected
+          .locator('[data-slot="tabs"]')
+          .first()
+          .getByRole('button', { name: 'Copy active tab' })
+        await rejectedCopyTab.click()
+        await rejected.waitForFunction(
+          () =>
+            document
+              .querySelector('[aria-label="Copy active tab"]')
+              ?.getAttribute('data-status') === 'error'
+        )
+        assert.match(
+          await rejectedCopyTab.getAttribute('title'),
+          /Could not copy/
+        )
+        assert.equal(await rejectedCopyTab.innerText(), '')
         await rejected.close()
         await page.goto(`${running.base}/docs/init/components`)
         await page.getByRole('note', { name: 'Before updating' }).waitFor()
