@@ -111,11 +111,11 @@ pnpm --config.minimumReleaseAge=0 start
 ```
 
 For normal use after the age cutoff, omit `--config.minimumReleaseAge=0`.
-The first activation must add the import and plugin, save a `.bak` config backup,
-and initialize `versions.json`. The repeat must not add another plugin, backup,
-or installation. The snapshot must load at `/docs/1.0.0/init/intro` in production.
+The first activation must add the import and plugin and initialize `versions.json`,
+without leaving backup or temporary config files. The repeat must not add another
+plugin or installation. The snapshot must load at `/docs/1.0.0/init/intro` in production.
 Review `rdx.config.ts`, `package.json` and the lockfile before committing the
-generated project; remove the backup once satisfied. If the child package manager
+generated project. If the child package manager
 still rejects a fresh version, approve only the exact trusted RDX versions in
 `minimumReleaseAgeExclude`; the CLI intentionally does not change this policy.
 

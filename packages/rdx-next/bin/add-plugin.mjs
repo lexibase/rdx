@@ -197,7 +197,6 @@ export async function addVersioning(rootDir, options = {}) {
     log(`${versioningPackage} is already installed; preserving its version.`)
 
   const temporary = path.join(rootDir, `rdx.config.add-${randomUUID()}.ts`)
-  let backup
   try {
     await writeFile(temporary, updated, { flag: 'wx', mode: info.mode })
     try {
@@ -217,12 +216,8 @@ export async function addVersioning(rootDir, options = {}) {
         'rdx.config.ts was replaced during installation. No configuration was overwritten.'
       )
     if (updated !== original) {
-      backup = path.join(rootDir, `rdx.config.ts.${randomUUID()}.bak`)
-      await writeFile(backup, original, { flag: 'wx', mode: info.mode })
       await rename(temporary, filename)
-      log(
-        `Versioning activated. Original configuration saved to ${path.basename(backup)}.`
-      )
+      log('Versioning activated in rdx.config.ts.')
     } else
       log('Versioning is already configured; no configuration changes needed.')
   } finally {
@@ -230,5 +225,5 @@ export async function addVersioning(rootDir, options = {}) {
       if (error.code !== 'ENOENT') throw error
     })
   }
-  return { backup, changed: updated !== original }
+  return { changed: updated !== original }
 }

@@ -8,7 +8,7 @@ internal `.rdx` application and run Next.js.
 Run `pnpm rdx add versioning` (or `npm exec -- rdx add versioning`) from a
 documentation project to install and activate the official optional plugin.
 The command detects the package manager, preserves config and plugin options,
-creates a config backup when changing it, validates the result and prepares
+validates the result before saving it without creating backups, and prepares
 the runtime. Repeating it does not duplicate or upgrade an installed plugin.
 Use `--package-manager npm|pnpm|yarn` to resolve ambiguous lockfiles. Dynamic
 configurations receive manual instructions and are not automatically edited.
