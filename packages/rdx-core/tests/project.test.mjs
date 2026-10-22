@@ -289,6 +289,12 @@ test('duplicate plugins, unsupported APIs, reserved commands, unsafe paths and s
     [
       {
         ...plugin,
+        commands: [{ name: 'add', description: 'reserved', run() {} }],
+      },
+    ],
+    [
+      {
+        ...plugin,
         setup: () => ({
           sources: [
             {

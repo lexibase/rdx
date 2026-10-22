@@ -192,12 +192,18 @@ importers:
       '@lexibase/rdx-ui':
         specifier: workspace:*
         version: link:../rdx-ui
+      cross-spawn:
+        specifier: ^7.0.6
+        version: 7.0.6
       jiti:
         specifier: ^2.6.1
         version: 2.7.0
       next-mdx-remote:
         specifier: ^5.0.0
         version: 5.0.0(@types/react@19.1.0)(react@19.1.0)
+      typescript:
+        specifier: 5.9.2
+        version: 5.9.2
     devDependencies:
       '@rdx/eslint-config':
         specifier: workspace:*
@@ -226,9 +232,6 @@ importers:
       react-dom:
         specifier: 19.1.0
         version: 19.1.0(react@19.1.0)
-      typescript:
-        specifier: 5.9.2
-        version: 5.9.2
 
   packages/rdx-plugin-versioning:
     dependencies:

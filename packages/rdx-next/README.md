@@ -5,6 +5,15 @@ The official Next.js runtime for RDX documentation projects.
 It exposes the `rdx` command used by generated projects to create their
 internal `.rdx` application and run Next.js.
 
+Run `pnpm exec rdx add versioning` (or `npm exec -- rdx add versioning`) from a
+documentation project to install and activate the official optional plugin.
+The command detects the package manager, preserves config and plugin options,
+creates a config backup when changing it, validates the result and prepares
+the runtime. Repeating it does not duplicate or upgrade an installed plugin.
+Use `--package-manager npm|pnpm|yarn` to resolve ambiguous lockfiles. Dynamic
+configurations receive manual instructions and are not automatically edited.
+Installing a package with npm/pnpm/yarn alone never edits `rdx.config.ts`.
+
 Generated sites use the same theme and components as the development website,
 through `@lexibase/rdx-ui`: logo, navbar, Radix version dropdown, mobile/desktop
 sidebar, landing page, MDX styles and theme provider. The adapter owns content

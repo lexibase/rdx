@@ -13,7 +13,7 @@ import { createJiti } from 'jiti'
 import { preparePublicAssets } from './public-assets.mjs'
 
 const supportedCommands = new Set(['dev', 'build', 'start'])
-const command = process.argv[2]
+let command = process.argv[2]
 const commandArgs = process.argv.slice(3)
 const projectRoot = process.cwd()
 const packageRoot = path.resolve(
@@ -31,11 +31,21 @@ async function prepareRuntime() {
 
 async function main() {
   if (!command || command === 'help' || command === '--help') {
-    console.log('Usage: rdx <dev|build|start|prepare|plugin-command>')
+    console.log('Usage: rdx <dev|build|start|prepare|add|plugin-command>')
+    console.log('  rdx add versioning [--package-manager npm|pnpm|yarn]')
     console.log(
       'Plugin commands are registered through plugins in rdx.config.ts.'
     )
     return
+  }
+
+  if (command === 'add') {
+    const { addVersioning, parseAddArguments } = await import(
+      './add-plugin.mjs'
+    )
+    const options = parseAddArguments(commandArgs)
+    await addVersioning(projectRoot, options)
+    command = 'prepare'
   }
 
   const configPath = path.join(projectRoot, 'rdx.config.ts')
@@ -78,7 +88,7 @@ async function main() {
     )
     if (!pluginCommand)
       throw new Error(
-        `Unknown command "${command}". Available: dev, build, start, prepare${project.commands.map((entry) => `, ${entry.name}`).join('')}. Install and configure the plugin that provides this command.`
+        `Unknown command "${command}". Available: dev, build, start, prepare, add${project.commands.map((entry) => `, ${entry.name}`).join('')}. Install and configure the plugin that provides this command.`
       )
     await pluginCommand.run({
       rootDir: projectRoot,

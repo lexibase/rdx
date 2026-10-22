@@ -163,8 +163,47 @@ The versioning plugin continues snapshotting documentation only.
 
 ## Activating versioning
 
-Install the matching beta of `@lexibase/rdx-versioning` and explicitly configure
-it. Installing the package alone does not activate it.
+From the documentation project root, run:
+
+```sh
+pnpm exec rdx add versioning
+# npm alternative: npm exec -- rdx add versioning
+# Yarn alternative: yarn rdx add versioning
+```
+
+This explicit command installs the official `@lexibase/rdx-versioning@beta`,
+adds its import and `plugins: [versioning()]`, validates the resulting config,
+then runs preparation to initialize `versions.json` and `.rdx/`. Restart a running
+development server afterward. Installing a package with npm/pnpm/yarn alone still
+does not activate it or modify configuration.
+
+The manager is selected from `packageManager` in `package.json`, the local
+lockfile, then the invoking manager (npm is the fallback). Conflicting lockfiles
+require an explicit choice: `rdx add versioning --package-manager pnpm`.
+No release-age or security policy is disabled automatically.
+
+Repeated calls preserve the installed version, plugin options and other plugins.
+A declared but missing package is installed again. An installed but disabled
+plugin is activated without reinstalling it. No upgrades are performed when
+the declared package is already available.
+
+Automatic editing supports a literal default-exported object, optionally inside
+the imported `defineConfig(...)`, including `as`/`satisfies` wrappers. Imports,
+aliases, existing array entries, comments and unrelated options are retained.
+Dynamic config exports, spreads or computed options are refused before installing:
+follow the manual instructions instead. Only `versioning` is currently supported;
+arbitrary package names and additional install flags are not accepted.
+
+Before saving a changed config, the command creates an exact backup named
+`rdx.config.ts.<unique-id>.bak` in the project root. Once you have verified the
+result, you may remove that backup. If installation or config validation fails,
+the original config is left unchanged; package-manager changes to dependencies
+and lockfiles are retained for inspection, not rolled back. If preparation fails
+after activation, the valid edited config and its backup remain: fix the reported
+problem and run `rdx prepare` again. Custom plugin factories are trusted code and
+are evaluated during validation, but setup hooks run only during preparation.
+
+Manual installation/configuration remains supported:
 
 ```ts
 import { defineConfig } from '@lexibase/rdx-next'

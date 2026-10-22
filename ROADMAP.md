@@ -10,20 +10,22 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
 - [x] Explicitar `homepage: { enabled: false }` no mesmo arquivo.
 - [x] Manter `plugins` ausente no template: nenhum plugin é ativado por padrão.
 - [x] Corrigir o marcador do nome do projeto no README para resistir à formatação.
-- [ ] Publicar os ajustes do gerador em uma nova beta após validação e revisão.
+- [x] Publicar os ajustes do gerador em uma nova beta após validação e revisão.
 
 ## Próximas prioridades
 
 - [x] Suporte completo a `public/` na raiz do projeto: criar a pasta no template,
       disponibilizar imagens, favicon e downloads em desenvolvimento e produção,
       sem exigir alterações manuais em `.rdx/`.
-- [ ] Instalação e ativação assistidas de plugins pela CLI. O primeiro plugin
+- [x] Instalação e ativação assistidas do versionamento pela CLI, com
+      `rdx add versioning`. O primeiro plugin
       deve poder adicionar o import e `plugins: [plugin()]` à configuração, sem
-      apagar opções ou plugins existentes. Um comando como `rdx add versioning` é
-      uma proposta, ainda não uma API implementada. Deve validar o resultado,
-      evitar duplicações e pedir orientação se a configuração não puder ser
+      apagar opções ou plugins existentes. A implementação valida o resultado,
+      evita duplicações e fornece orientação se a configuração não puder ser
       editada com segurança. Não usar hooks de instalação para modificar o projeto
       silenciosamente ao executar `npm/pnpm add`.
+- [ ] Expandir o catálogo de instalação assistida à medida que surgirem novos
+      plugins oficiais. A implementação inicial suporta apenas `versioning`.
 - [ ] Categorias aninhadas — adiado por decisão do projeto; não alterar a sidebar
       nesta etapa. Categorias por pastas do primeiro nível já funcionam. A lacuna
       é representar, por exemplo, `docs/guias/avancado/` como subcategoria de Guias,
