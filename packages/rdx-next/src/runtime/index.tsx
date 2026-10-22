@@ -160,7 +160,13 @@ export async function DocsPage({
   if (!document) notFound()
   const { content } = await compileDocumentation(
     document.content,
-    mdxComponents
+    mdxComponents,
+    {
+      sourceRoot: getSourceOptions(project, source).docsDir,
+      sourcePath: document.sourcePath,
+      routePrefix: source.routePrefix,
+      documents: categories.flatMap((category) => category.pages),
+    }
   )
   const title =
     typeof document.frontmatter.title === 'string'

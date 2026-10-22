@@ -14,6 +14,10 @@
     "./config": {
       "types": "./dist/config/index.d.ts",
       "import": "./dist/config/index.js"
+    },
+    "./mdx": {
+      "types": "./dist/mdx/index.d.ts",
+      "import": "./dist/mdx/index.js"
     }
   },
   "files": [
@@ -21,7 +25,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup src/index.ts src/config/index.ts --format esm --dts --clean --external @lexibase/rdx-types --external gray-matter",
+    "build": "tsup src/index.ts src/config/index.ts src/mdx/index.ts --format esm --dts --clean --external @lexibase/rdx-types --external gray-matter",
     "check-types": "tsc --noEmit",
     "test": "node --test tests/*.test.mjs"
   },
@@ -38,8 +42,10 @@
   },
   "homepage": "https://github.com/lexibase/rdx#readme",
   "dependencies": {
+    "@shikijs/rehype": "^4.5.0",
     "@lexibase/rdx-types": "workspace:*",
-    "gray-matter": "^4.0.3"
+    "gray-matter": "^4.0.3",
+    "rehype-slug": "^6.0.0"
   },
   "devDependencies": {
     "@rdx/eslint-config": "workspace:*",

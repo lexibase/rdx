@@ -163,9 +163,18 @@ test(
             { origin: running.base }
           )
           const code = page.locator('[data-rdx-code-block]').first()
+          assert.ok(
+            (await code
+              .locator('pre.shiki code span[style*="--shiki-light"]')
+              .count()) > 0
+          )
           const expectedCode = await code.locator('pre').textContent()
           await code.getByRole('button', { name: 'Copy code' }).click()
-          await code.getByText('Copied', { exact: true }).waitFor()
+          await code.locator('button[data-status="copied"]').waitFor()
+          assert.equal(
+            await code.getByRole('button', { name: 'Copy code' }).innerText(),
+            ''
+          )
           assert.equal(
             (await page.evaluate(() => navigator.clipboard.readText())).replace(
               /\r\n/g,

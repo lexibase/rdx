@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import path from 'node:path'
+import process from 'node:process'
+import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
 
 import { createJiti } from 'jiti'
 import { createElement } from 'react'
@@ -18,6 +22,212 @@ const { Callout } = await jiti.import('../../rdx-ui/src/components/callout.tsx')
 const { Blockquote } = await jiti.import(
   '../../rdx-ui/src/components/blockquote.tsx'
 )
+
+function renderedCodeText(html) {
+  const body =
+    html.match(/<pre\b[^>]*><code\b[^>]*>([\s\S]*?)<\/code><\/pre>/)?.[1] ?? ''
+  const entities = {
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#x27;': "'",
+  }
+  return body
+    .replace(/<[^>]*>/g, '')
+    .replace(/&(?:amp|lt|gt|quot|#x27);/g, (entity) => entities[entity])
+}
+
+test('language fences use server-rendered dual-theme tokens while preserving exact code', async () => {
+  for (const [language, code] of [
+    ['ts', '  const text: string = "<tag> & RDX";\n\n\tconsole.log(text)\n'],
+    ['tsx', 'export const Home = () => <main title="RDX">Hello</main>\n'],
+    ['py', 'def hello(name):\n    return f"Hello {name}"\n'],
+    ['json', '{ "framework": "RDX", "ready": true }\n'],
+    ['sql', 'SELECT name FROM docs WHERE active = true;\n'],
+    ['css', '.docs { color: red; }\n'],
+    ['bash', 'pnpm dev\n'],
+    ['rust', 'fn main() { println!("RDX"); }\n'],
+  ]) {
+    const { content } = await compileDocumentation(
+      `\`\`\`${language}\n${code}\`\`\``,
+      mdxComponents
+    )
+    const html = renderToStaticMarkup(content)
+    assert.match(html, /class="[^"]*shiki/)
+    assert.match(html, /--shiki-light:/)
+    assert.match(html, /--shiki-dark:/)
+    assert.match(html, new RegExp(`language-${language}`))
+    assert.equal(renderedCodeText(html), code)
+    assert.doesNotMatch(html, /<main title="RDX">/)
+  }
+})
+
+test('unknown, text and unlabelled fences remain readable; inline code stays unchanged', async () => {
+  for (const language of ['not-an-rdx-language', 'text', '']) {
+    const code = '  <script>notExecutable()</script>\n\n\tplain text\n'
+    const { content } = await compileDocumentation(
+      `Inline \`const inline = true\`.\n\n\`\`\`${language}\n${code}\`\`\``,
+      mdxComponents
+    )
+    const html = renderToStaticMarkup(content)
+    assert.equal(renderedCodeText(html), code)
+    assert.match(html, />const inline = true<\/code>/)
+    assert.doesNotMatch(html, /<script>/)
+  }
+})
+
+test('all starter documents compile with their real filesystem link context', async () => {
+  const { getDocsIndex, getDocument } = await jiti.import(
+    '../../rdx-core/src/index.ts'
+  )
+  const sourceRoot = fileURLToPath(
+    new URL('../../create-rdx/templates/default/docs/', import.meta.url)
+  )
+  const documents = getDocsIndex({ docsDir: sourceRoot }).flatMap(
+    (category) => category.pages
+  )
+  for (const page of documents) {
+    const document = getDocument(page.slug, { docsDir: sourceRoot })
+    const { content } = await compileDocumentation(
+      document.content,
+      mdxComponents,
+      { sourceRoot, sourcePath: document.sourcePath, documents }
+    )
+    assert.ok(renderToStaticMarkup(content))
+  }
+})
+
+test('development website resolves filesystem links to its legacy versioned filename routes', async (t) => {
+  const root = await mkdtemp(path.join(process.cwd(), '.legacy-links-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  for (const folder of ['(canary)', '(versioned)/version-1.0.0']) {
+    await mkdir(path.join(root, folder, 'guides'), { recursive: true })
+    await mkdir(path.join(root, folder, 'api'), { recursive: true })
+    await writeFile(
+      path.join(root, folder, 'guides/source.mdx'),
+      '[API](../api/target.mdx#configuration)'
+    )
+    await writeFile(
+      path.join(root, folder, 'api/target.mdx'),
+      '## Configuration'
+    )
+  }
+  const { mdxLoader, RdxDocumentNotFoundError } = await jiti.import(
+    '../../rdx-legacy-core/src/loaders/mdx-loader/index.ts'
+  )
+  for (const version of ['canary', '1.0.0']) {
+    const result = await mdxLoader({
+      filename: 'source',
+      version,
+      versionsRaw: { active: ['1.0.0'], archived: [] },
+      mdxComponents,
+      docsRoot: path.relative(process.cwd(), root),
+    })
+    assert.match(
+      renderToStaticMarkup(result.content),
+      new RegExp(`href="/docs/${version}/target#configuration"`)
+    )
+  }
+  await writeFile(
+    path.join(root, '(canary)/guides/source.mdx'),
+    '[Broken](./missing.mdx)'
+  )
+  await assert.rejects(
+    () =>
+      mdxLoader({
+        filename: 'source',
+        version: 'canary',
+        versionsRaw: { active: ['1.0.0'], archived: [] },
+        mdxComponents,
+        docsRoot: path.relative(process.cwd(), root),
+      }),
+    /Invalid document link.*missing\.mdx/
+  )
+  await assert.rejects(
+    () =>
+      mdxLoader({
+        filename: 'unknown',
+        version: 'canary',
+        versionsRaw: { active: ['1.0.0'], archived: [] },
+        mdxComponents,
+        docsRoot: path.relative(process.cwd(), root),
+      }),
+    RdxDocumentNotFoundError
+  )
+})
+
+test('MDX links, references and literal anchors resolve without rewriting images or code samples', async () => {
+  const sourceRoot = path.resolve('fixtures/document-links')
+  const links = {
+    sourceRoot,
+    sourcePath: path.join(sourceRoot, 'guides/intro.mdx'),
+    routePrefix: '1.0.0',
+    documents: [
+      {
+        sourcePath: path.join(sourceRoot, 'guides/install.mdx'),
+        slug: 'guides/install',
+      },
+    ],
+  }
+  const { content } = await compileDocumentation(
+    `## Setup
+
+## Setup
+
+[Install](./install.mdx?lang=pt#setup)
+
+[Reference][install]
+
+[install]: ./install.mdx#setup "A guide"
+
+<Callout title="Tip">
+
+[Read the guide](./install.mdx)
+
+</Callout>
+
+<a href="./install.mdx">Literal link</a>
+
+![Image](./missing.mdx)
+
+![Reference image][image]
+
+[image]: ./missing-image.mdx
+
+\`\`\`md
+[Example](./missing.mdx)
+\`\`\`
+
+[External](https://example.com/guide.mdx)
+
+[Anchor](#setup)
+`,
+    mdxComponents,
+    links
+  )
+  const html = renderToStaticMarkup(content)
+  assert.match(html, /href="\/docs\/1\.0\.0\/guides\/install\?lang=pt#setup"/)
+  assert.match(
+    html,
+    /href="\/docs\/1\.0\.0\/guides\/install#setup" title="A guide"/
+  )
+  assert.equal(
+    (html.match(/href="\/docs\/1\.0\.0\/guides\/install"/g) ?? []).length,
+    2
+  )
+  assert.match(html, /src="\.\/missing\.mdx"/)
+  assert.match(html, /src="\.\/missing-image\.mdx"/)
+  assert.match(html.replace(/<[^>]*>/g, ''), /\[Example\]\(\.\/missing\.mdx\)/)
+  assert.match(html, /href="https:\/\/example.com\/guide.mdx"/)
+  assert.match(html, /href="#setup"/)
+  assert.match(html, /id="setup"/)
+  assert.match(html, /id="setup-1"/)
+  await assert.rejects(
+    () => compileDocumentation('[Broken](./missing.mdx)', mdxComponents, links),
+    /Invalid document link.*missing\.mdx/
+  )
+})
 
 test('MDX accordion accepts literal attributes and starts closed with native heading buttons', async () => {
   const { content } = await compileDocumentation(
@@ -126,7 +336,7 @@ pnpm install
   assert.equal((html.match(/role="tabpanel"/g) ?? []).length, 1)
   assert.match(html, /aria-selected="true"/)
   assert.match(html, /<strong>Selected panel<\/strong>/)
-  assert.match(html, /pnpm install/)
+  assert.match(html.replace(/<[^>]*>/g, ''), /pnpm install/)
   assert.match(html, /data-rdx-code-block/)
   assert.match(html, /Shared components work here/)
   assert.doesNotMatch(html, /Inactive npm panel/)
@@ -369,9 +579,13 @@ test('code blocks preserve text and language while inline code has no copy butto
   const html = renderToStaticMarkup(content)
   assert.equal((html.match(/data-rdx-code-block/g) ?? []).length, 2)
   assert.equal((html.match(/aria-label="Copy code"/g) ?? []).length, 2)
+  for (const button of html.matchAll(/<button\b[^>]*>([\s\S]*?)<\/button>/g)) {
+    assert.match(button[1], /<svg\b/)
+    assert.equal(button[1].replace(/<[^>]*>/g, '').trim(), '')
+  }
   assert.match(html, /language-ts/)
   assert.match(
-    html,
+    html.replace(/<[^>]*>/g, ''),
     / {2}const text = &quot;&lt;tag&gt; &amp; RDX&quot;\n\tconsole.log\(text\)\n/
   )
   assert.match(html, />Code<\/span>/)
@@ -387,11 +601,11 @@ test('MDX keeps Markdown, links, images, fenced code and registered JSX componen
     }
   )
   const html = renderToStaticMarkup(content)
-  assert.match(html, /<h1>Documentation<\/h1>/)
+  assert.match(html, /<h1 id="documentation">Documentation<\/h1>/)
   assert.match(html, /href="\/docs\/init\/intro"/)
   assert.match(html, /src="\/images\/rdx.svg"/)
   assert.match(html, /<aside title="Note">Custom component<\/aside>/)
-  assert.match(html, /const value = \{ example: true \}/)
+  assert.match(renderedCodeText(html), /const value = \{ example: true \}/)
 })
 
 test('MDX expressions and JSX expression attributes cannot execute project-server JavaScript', async () => {

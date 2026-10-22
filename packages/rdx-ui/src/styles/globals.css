@@ -145,3 +145,15 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Shiki uses the same GitHub light/dark palette as shadcn's highlighter.
+   Keep the approved RDX surface and apply only token foreground colors. */
+[data-rdx-code-block] pre.shiki,
+[data-rdx-code-block] pre.shiki span {
+  color: var(--shiki-light, inherit);
+}
+
+.dark [data-rdx-code-block] pre.shiki,
+.dark [data-rdx-code-block] pre.shiki span {
+  color: var(--shiki-dark, inherit);
+}

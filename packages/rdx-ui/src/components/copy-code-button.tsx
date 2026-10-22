@@ -58,14 +58,20 @@ export function CopyCodeButton() {
       <Button
         type="button"
         variant="outline"
-        size="sm"
+        size="icon"
         data-status={status}
-        className="h-7 shrink-0 gap-1.5 border-border/70 bg-background/60 px-2.5 text-xs text-muted-foreground shadow-none hover:text-foreground data-[status=copied]:border-emerald-500/30 data-[status=copied]:bg-emerald-500/10 data-[status=copied]:text-emerald-700 dark:data-[status=copied]:text-emerald-400 data-[status=error]:border-amber-500/30 [&>svg]:size-3.5"
+        className="size-7 shrink-0 border-border/70 bg-background/60 p-0 text-muted-foreground shadow-none hover:text-foreground data-[status=copied]:border-emerald-500/30 data-[status=copied]:bg-emerald-500/10 data-[status=copied]:text-emerald-700 dark:data-[status=copied]:text-emerald-400 data-[status=error]:border-amber-500/30 [&>svg]:size-3.5"
         aria-label="Copy code"
+        title={
+          status === 'copied'
+            ? 'Copied!'
+            : status === 'error'
+              ? 'Could not copy. Try again or copy manually.'
+              : 'Copy code'
+        }
         onClick={(event) => copy(event.currentTarget)}
       >
         <Icon aria-hidden="true" className="size-4" />
-        {status === 'copied' ? 'Copied' : status === 'error' ? 'Retry' : 'Copy'}
       </Button>
     </div>
   )

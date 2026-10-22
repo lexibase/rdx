@@ -17,14 +17,55 @@ Table cells have a minimum width so wider comparisons remain readable on mobile
 instead of compressing every sentence into a narrow column.
 Images retain their aspect ratio and cannot exceed the content width. Existing
 classes are merged with custom `className` values rather than discarded.
-Fenced code displays its language (or "Code" when omitted) and a copy button.
+Fenced code displays its language (or "Code" when omitted) and an icon-only copy
+button with an accessible name, a tooltip and a checkmark on success.
 Copying preserves the code's indentation, line breaks and trailing newline,
 without copying the header. Success is announced only after the clipboard write
 finishes (the operating system may normalize LF/CRLF line endings),
 then resets after two seconds. If clipboard access is unavailable or
 denied, a visible message offers manual copying; the code remains selectable.
 Clipboard access requires HTTPS or localhost and the browser's permission.
-Syntax highlighting and relative document-link rewriting remain future tasks.
+Fenced code is highlighted automatically with Shiki, using the language after
+the opening fence (for example `ts`, `tsx`, `js`, `json`, `bash`, `py`, `css` or
+`sql`). This follows shadcn's Shiki/GitHub light and dark palette, adapted to the
+server-side MDX pipeline. Colors follow the existing theme toggle without
+changing the code-block surface or spacing. No extra configuration is required.
+Grammars load on demand on the server; the highlighter is not a client component.
+Unknown languages fall back to plain text; unlabelled fences stay plain. Inline
+code is not highlighted. Token markup preserves code whitespace and the trailing
+newline for both block copying and copying a complete tab.
+
+## Links between documents
+
+Write relative `.mdx` file paths; RDX resolves them against the current file:
+
+```md
+[Next page](./getting-started.mdx)
+[API reference](../api/reference.mdx#authentication)
+[Guide](./guide.mdx?lang=pt#setup)
+```
+
+Generated sites preserve full document slugs and the current content source's
+route prefix, including archived snapshots. There is no fallback to Current
+when a target is absent from a snapshot. The development website uses the same
+resolver with its existing filename-only routes. Custom `docsDir` works too.
+
+Inline links, reference-style Markdown links and literal `<a href="...">` links
+are supported, including Markdown inside Callouts, Tabs and Accordion panels.
+Queries and fragments are preserved. Filenames with spaces or accents can use
+URL encoding. Use `/` separators and exact file capitalization for portability.
+Only explicit relative `.mdx` destinations are resolved; external URLs,
+root-relative URLs, image sources, downloads, same-page anchors, and code samples
+are left unchanged. Paths without `.mdx` retain normal browser URL behavior.
+
+Missing document destinations, ambiguous legacy routes, malformed encoded MDX
+paths and paths escaping the current source fail compilation with the referring
+file and URL. Missing assets, arbitrary site URLs and fragment existence are not
+validated by this document-link check. This is not a site-wide link crawler.
+
+Markdown headings receive IDs through `rehype-slug` (GitHub-style slugs), including
+duplicate suffixes such as `setup-1`. Explicit existing IDs are preserved. This
+does not add automatic heading anchor buttons or a table of contents.
 
 ## Callout
 
