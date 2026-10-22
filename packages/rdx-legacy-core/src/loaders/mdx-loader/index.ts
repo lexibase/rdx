@@ -43,7 +43,10 @@ export async function mdxLoader({
   }
 
   const findFile = (dir: string): string | null => {
-    const entries = fs.readdirSync(dir, { withFileTypes: true })
+    // apps/web traces the documentation tree explicitly in next.config.js.
+    const entries = fs.readdirSync(/* turbopackIgnore: true */ dir, {
+      withFileTypes: true,
+    })
 
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name)
@@ -64,7 +67,7 @@ export async function mdxLoader({
     throw new Error(`MDX File not found: ${filename}`)
   }
 
-  const source = fs.readFileSync(filePath, 'utf8')
+  const source = fs.readFileSync(/* turbopackIgnore: true */ filePath, 'utf8')
 
   const { content, frontmatter } = await compileMDX({
     source,

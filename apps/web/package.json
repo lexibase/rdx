@@ -7,11 +7,11 @@
     "node": ">=20.9"
   },
   "scripts": {
-    "dev": "npm run prepare && next dev --turbopack --port 3000",
+    "dev": "npm run prepare && next dev --port 3000",
     "build": "npm run prepare && next build",
     "start": "next start",
-    "lint": "next lint",
-    "check-types": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "next typegen && tsc --noEmit",
     "prepare": "npm exec rdx-generate-versions"
   },
   "dependencies": {
@@ -21,7 +21,7 @@
     "gray-matter": "^4.0.3",
     "lucide-react": "^0.542.0",
     "motion": "^12.23.13",
-    "next": "^15.5.28",
+    "next": "^16.4.2",
     "next-mdx-remote": "^6.0.0",
     "react": "19.3.1",
     "react-dom": "19.3.1"

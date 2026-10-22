@@ -310,7 +310,16 @@ unavailable.
 
 The current runtime and generated projects require Node.js 20.9 or newer.
 The development workspace, generated template, React/React DOM and React types
-are kept aligned; this maintenance step stays on Next.js 15.
+are kept aligned on Next.js 16.4.2 or a compatible newer 16.x release.
+Development and production builds use Turbopack. The internal `.rdx/` application
+uses the project directory as its bundler root, including project-owned
+`rdx.config.ts` and optional `home.tsx` files. The existing shared UI remains
+the default theme; no layout replacement is involved in this migration.
+
+The development workspace runs ESLint separately (`pnpm lint`); Next.js 16 no
+longer provides `next lint` or runs lint during `next build`. `pnpm check` still
+validates lint, types, builds and tests. `apps/web` also generates route types
+before standalone type checking.
 
 The MDX renderer uses `next-mdx-remote` 6 with `blockJS` and `blockDangerousJS`
 enabled explicitly. Markdown, fenced code and registered JSX components remain

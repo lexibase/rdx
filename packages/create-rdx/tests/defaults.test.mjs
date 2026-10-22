@@ -42,7 +42,7 @@ test('generated projects expose homepage and navbar defaults without activating 
   assert.ok(pkg.dependencies['@lexibase/rdx-next'])
   assert.ok(pkg.dependencies['@lexibase/rdx-ui'])
   assert.equal(pkg.dependencies['@lexibase/rdx-versioning'], undefined)
-  assert.equal(pkg.dependencies.next, '^15.5.28')
+  assert.equal(pkg.dependencies.next, '^16.4.2')
   assert.equal(pkg.dependencies.react, '19.3.1')
   assert.equal(pkg.dependencies['react-dom'], pkg.dependencies.react)
   assert.equal(pkg.devDependencies['@types/react'], '19.3.0')
