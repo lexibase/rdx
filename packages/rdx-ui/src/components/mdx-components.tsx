@@ -80,10 +80,13 @@ export const mdxComponents = {
       role="region"
       aria-label="Table"
       tabIndex={0}
-      className="my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-ring"
+      className="my-6 min-w-0 max-w-full overflow-x-auto rounded-lg border border-border bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
     >
       <table
-        className={cn('w-full border-collapse text-sm', className)}
+        className={cn(
+          'w-full border-separate border-spacing-0 text-sm [&_tbody>tr]:transition-colors motion-reduce:[&_tbody>tr]:transition-none [&_tbody>tr:nth-child(even)]:bg-muted/20 [&_tbody>tr:hover]:bg-muted/40 [&_tbody>tr:last-child>td]:border-b-0',
+          className
+        )}
         {...props}
       />
     </div>
@@ -92,7 +95,7 @@ export const mdxComponents = {
     <th
       scope={scope}
       className={cn(
-        'border border-border bg-muted/40 px-3 py-2 text-left font-semibold',
+        'border-b border-r border-border bg-muted/40 px-4 py-3 text-left text-xs font-semibold tracking-wide text-foreground/90 last:border-r-0',
         className
       )}
       {...props}
@@ -100,7 +103,10 @@ export const mdxComponents = {
   ),
   td: ({ className, ...props }: ComponentProps<'td'>) => (
     <td
-      className={cn('border border-border px-3 py-2 align-top', className)}
+      className={cn(
+        'border-b border-r border-border/70 px-4 py-3 align-top leading-6 last:border-r-0',
+        className
+      )}
       {...props}
     />
   ),

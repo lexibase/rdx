@@ -19,6 +19,26 @@ const { Blockquote } = await jiti.import(
   '../../rdx-ui/src/components/blockquote.tsx'
 )
 
+test('tables keep native structure, column alignment and rich content with rounded striped styling', async () => {
+  const { content } = await compileDocumentation(
+    '| Feature | Status | Count |\n| :--- | :---: | ---: |\n| **Markdown** | Ready | 1 |\n| [Guide](/docs/init/intro) | `code` | 2 |',
+    mdxComponents
+  )
+  const html = renderToStaticMarkup(content)
+  assert.match(html, /data-slot="mdx-table-scroll"/)
+  assert.match(html, /rounded-lg border/)
+  assert.match(html, /border-separate border-spacing-0/)
+  assert.match(html, /nth-child\(even\)/)
+  assert.match(html, /<thead>/)
+  assert.match(html, /<tbody>/)
+  assert.equal((html.match(/scope="col"/g) ?? []).length, 3)
+  for (const alignment of ['left', 'center', 'right'])
+    assert.match(html, new RegExp(`text-align:${alignment}`))
+  assert.match(html, /<strong>Markdown<\/strong>/)
+  assert.match(html, /href="\/docs\/init\/intro"/)
+  assert.match(html, />code<\/code>/)
+})
+
 test('blockquotes preserve Markdown, native citation semantics and class overrides', async () => {
   const { content } = await compileDocumentation(
     '> A **quotation** with [a link](/docs/init/intro) and `code`.\n>\n> Another paragraph.\n>\n> - A list item\n>\n> > A nested quotation.',

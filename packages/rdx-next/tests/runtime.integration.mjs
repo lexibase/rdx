@@ -430,6 +430,42 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
           await quote.getByRole('link').getAttribute('href'),
           '/docs/init/intro'
         )
+        const tableRegion = page
+          .locator('[data-slot="mdx-table-scroll"]')
+          .first()
+        const tableColors = await tableRegion
+          .locator('tbody > tr')
+          .evaluateAll((rows) =>
+            rows.map((row) => getComputedStyle(row).backgroundColor)
+          )
+        assert.equal(tableColors.length, 4)
+        assert.notEqual(tableColors[0], tableColors[1])
+        assert.equal(tableColors[0], tableColors[2])
+        assert.equal(tableColors[1], tableColors[3])
+        for (const selector of ['thead tr', 'tbody tr:first-child']) {
+          const borders = await tableRegion
+            .locator(`${selector} > *`)
+            .evaluateAll((cells) =>
+              cells.map((cell) =>
+                parseFloat(getComputedStyle(cell).borderRightWidth)
+              )
+            )
+          assert.ok(borders.slice(0, -1).every((width) => width > 0))
+          assert.equal(borders.at(-1), 0)
+        }
+        assert.ok(
+          await tableRegion.evaluate(
+            (element) =>
+              parseFloat(getComputedStyle(element).borderTopLeftRadius) > 0
+          )
+        )
+        assert.equal(
+          await tableRegion
+            .locator('th')
+            .last()
+            .evaluate((element) => getComputedStyle(element).textAlign),
+          'right'
+        )
         if (process.env.RDX_THEME_SCREENSHOTS) {
           await mkdir(process.env.RDX_THEME_SCREENSHOTS, { recursive: true })
           for (const theme of ['dark', 'light']) {
@@ -445,6 +481,13 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
               path: path.join(
                 process.env.RDX_THEME_SCREENSHOTS,
                 `blockquote-${theme}.png`
+              ),
+              animations: 'disabled',
+            })
+            await tableRegion.screenshot({
+              path: path.join(
+                process.env.RDX_THEME_SCREENSHOTS,
+                `table-${theme}.png`
               ),
               animations: 'disabled',
             })
@@ -469,6 +512,17 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
             animations: 'disabled',
           })
         await page.setViewportSize({ width: 1872, height: 955 })
+        if (process.env.RDX_THEME_SCREENSHOTS) {
+          await page.setViewportSize({ width: 390, height: 844 })
+          await tableRegion.screenshot({
+            path: path.join(
+              process.env.RDX_THEME_SCREENSHOTS,
+              'table-mobile.png'
+            ),
+            animations: 'disabled',
+          })
+          await page.setViewportSize({ width: 1872, height: 955 })
+        }
         await page
           .context()
           .grantPermissions(['clipboard-read', 'clipboard-write'], {
