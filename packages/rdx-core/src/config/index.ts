@@ -256,7 +256,14 @@ export async function createRdxProject(
     },
   ]
   const commands: RdxPluginCommand[] = []
-  const commandNames = new Set(['dev', 'build', 'start', 'prepare', 'help'])
+  const commandNames = new Set([
+    'dev',
+    'build',
+    'start',
+    'prepare',
+    'help',
+    'add',
+  ])
 
   for (const plugin of config.plugins) {
     for (const value of plugin.commands ?? []) {

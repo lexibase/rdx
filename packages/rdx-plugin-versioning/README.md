@@ -3,6 +3,10 @@
 Optional version snapshots for RDX. Installing this package has no effect until
 `versioning()` is added to `plugins` in `rdx.config.ts`.
 
+For assisted installation, use `pnpm exec rdx add versioning` or
+`npm exec -- rdx add versioning`. The RDX CLI installs the package, safely adds
+the configuration and runs preparation. Manual configuration is also supported:
+
 ```ts
 import { defineConfig } from '@lexibase/rdx-next'
 import { versioning } from '@lexibase/rdx-versioning'
