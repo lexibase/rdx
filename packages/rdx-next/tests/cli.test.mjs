@@ -32,6 +32,9 @@ test('prepare loads typed config with defineConfig without loading a Next server
     await readFile(path.join(rootDir, '.rdx/tsconfig.json'))
   )
   assert.equal(config.compilerOptions.isolatedModules, true)
+  assert.equal(config.compilerOptions.allowArbitraryExtensions, true)
+  assert.equal(config.compilerOptions.noUncheckedSideEffectImports, true)
+  await access(path.join(rootDir, '.rdx/app/globals.d.css.ts'))
   assert.ok(config.exclude.includes('public'))
 })
 

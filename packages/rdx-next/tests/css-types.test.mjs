@@ -1,0 +1,111 @@
+import assert from 'node:assert/strict'
+import {
+  mkdtemp,
+  mkdir,
+  readFile,
+  writeFile,
+  rm,
+  symlink,
+  copyFile,
+} from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import process from 'node:process'
+import test from 'node:test'
+
+import ts from 'typescript'
+
+async function fixture(t) {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'rdx-css-types-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const scope = path.join(root, 'node_modules/@lexibase')
+  await mkdir(scope, { recursive: true })
+  for (const [name, relative] of [
+    ['rdx-ui', '../../rdx-ui'],
+    ['rdx-next', '..'],
+  ]) {
+    await symlink(
+      fileURLToPath(new URL(relative, import.meta.url)),
+      path.join(scope, name),
+      process.platform === 'win32' ? 'junction' : 'dir'
+    )
+  }
+  await writeFile(path.join(root, 'package.json'), '{ "type": "module" }')
+  await copyFile(
+    new URL('../templates/runtime/app/globals.css', import.meta.url),
+    path.join(root, 'globals.css')
+  )
+  await copyFile(
+    new URL('../templates/runtime/app/globals.d.css.ts', import.meta.url),
+    path.join(root, 'globals.d.css.ts')
+  )
+  return root
+}
+
+async function check(root, source, paths) {
+  const filename = path.join(root, 'index.ts')
+  await writeFile(filename, source)
+  const program = ts.createProgram([filename], {
+    module: ts.ModuleKind.ESNext,
+    moduleResolution: ts.ModuleResolutionKind.Bundler,
+    target: ts.ScriptTarget.ES2022,
+    noEmit: true,
+    strict: true,
+    types: [],
+    skipLibCheck: true,
+    noUncheckedSideEffectImports: true,
+    allowArbitraryExtensions: true,
+    paths,
+  })
+  return ts.getPreEmitDiagnostics(program)
+}
+
+test('public package CSS exports and generated global stylesheet have specific type declarations without baseUrl', async (t) => {
+  const root = await fixture(t)
+  const source = `import '@lexibase/rdx-ui/globals.css'; import '@lexibase/rdx-next/styles.css'; import './globals.css';`
+  const paths = {
+    '@lexibase/rdx-ui/*': [
+      fileURLToPath(new URL('../../rdx-ui/src/*', import.meta.url)),
+    ],
+  }
+  for (const aliases of [undefined, paths]) {
+    const diagnostics = await check(root, source, aliases)
+    assert.equal(
+      diagnostics.length,
+      0,
+      ts.formatDiagnosticsWithColorAndContext(diagnostics, {
+        getCanonicalFileName: (filename) => filename,
+        getCurrentDirectory: () => root,
+        getNewLine: () => '\n',
+      })
+    )
+  }
+  const ui = JSON.parse(
+    await readFile(
+      new URL('../../rdx-ui/package.json', import.meta.url),
+      'utf8'
+    )
+  )
+  const runtime = JSON.parse(
+    await readFile(new URL('../package.json', import.meta.url), 'utf8')
+  )
+  assert.equal(ui.exports['./globals.css'].default, './src/styles/globals.css')
+  assert.equal(
+    runtime.exports['./styles.css'].default,
+    './src/runtime/styles.css'
+  )
+  assert.ok(
+    runtime.files.includes(runtime.exports['./styles.css'].types.slice(2))
+  )
+})
+
+test('CSS declarations do not silently accept misspelled paths or pretend styles export JavaScript values', async (t) => {
+  const root = await fixture(t)
+  const diagnostics = await check(
+    root,
+    `import '@lexibase/rdx-ui/missing.css'; import './missing.css'; import { missing } from '@lexibase/rdx-ui/globals.css';`
+  )
+  assert.equal(diagnostics.filter((entry) => entry.code === 2307).length, 2)
+  assert.ok(diagnostics.some((entry) => entry.code === 2305))
+})
