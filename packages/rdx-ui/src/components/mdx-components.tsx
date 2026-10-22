@@ -1,6 +1,7 @@
 import type { ComponentProps } from 'react'
 
 import { cn } from '../lib/utils'
+import { Blockquote } from './blockquote'
 import { Callout } from './callout'
 import { CodeBlock } from './code-block'
 import { Separator } from '@lexibase/rdx-ui/components/separator'
@@ -42,15 +43,7 @@ export const mdxComponents = {
   a: ({ className, ...props }: ComponentProps<'a'>) => (
     <a className={cn('underline text-chart-1', className)} {...props} />
   ),
-  blockquote: ({ className, ...props }: ComponentProps<'blockquote'>) => (
-    <blockquote
-      className={cn(
-        'bg-secondary text-muted-foreground border-l-2 pl-4 py-px my-2',
-        className
-      )}
-      {...props}
-    />
-  ),
+  blockquote: Blockquote,
   pre: CodeBlock,
   code: ({ className, ...props }: ComponentProps<'code'>) => (
     <code

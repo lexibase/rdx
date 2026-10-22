@@ -15,6 +15,41 @@ const { mdxComponents } = await jiti.import(
   '../../rdx-ui/src/components/mdx-components.tsx'
 )
 const { Callout } = await jiti.import('../../rdx-ui/src/components/callout.tsx')
+const { Blockquote } = await jiti.import(
+  '../../rdx-ui/src/components/blockquote.tsx'
+)
+
+test('blockquotes preserve Markdown, native citation semantics and class overrides', async () => {
+  const { content } = await compileDocumentation(
+    '> A **quotation** with [a link](/docs/init/intro) and `code`.\n>\n> Another paragraph.\n>\n> - A list item\n>\n> > A nested quotation.',
+    mdxComponents
+  )
+  const html = renderToStaticMarkup(content)
+  assert.equal((html.match(/<blockquote\b/g) ?? []).length, 2)
+  assert.match(html, /data-rdx-blockquote/)
+  assert.match(html, /<strong>quotation<\/strong>/)
+  assert.match(html, /href="\/docs\/init\/intro"/)
+  assert.match(html, />code<\/code>/)
+  assert.match(html, /Another paragraph/)
+  assert.match(html, /<li\b/)
+  assert.match(html, /A list item/)
+  assert.doesNotMatch(
+    html,
+    /role="alert"|role="note"|aria-live=|data-rdx-callout/
+  )
+  const custom = renderToStaticMarkup(
+    createElement(
+      Blockquote,
+      { cite: 'https://example.com/source', id: 'quote', className: 'my-2' },
+      'Quoted text'
+    )
+  )
+  assert.match(custom, /cite="https:\/\/example.com\/source"/)
+  assert.match(custom, /id="quote"/)
+  assert.match(custom, /my-2/)
+  assert.doesNotMatch(custom, /my-6/)
+  assert.match(custom, /aria-hidden="true"/)
+})
 const { VersionBanner } = await jiti.import(
   '../../../apps/web/components/Page/version-banner.tsx'
 )

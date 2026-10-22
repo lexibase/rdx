@@ -184,6 +184,18 @@ test(
       '---\ntitle: Introduction\nlink_position: 1\n---\nOriginal snapshot body\n\n![Public asset](/images/public%20logo.svg)'
     )
     const configPath = path.join(rootDir, 'rdx.config.ts')
+    await writeFile(
+      path.join(rootDir, 'docs/init/quotes.mdx'),
+      (
+        await readFile(
+          new URL(
+            '../../create-rdx/templates/default/docs/examples/markdown.mdx',
+            import.meta.url
+          ),
+          'utf8'
+        )
+      ).replace('link_position: 1', 'link_position: 10')
+    )
     const copySample =
       '  const message = \'<tag> & "RDX"\';\n\tconsole.log(message)\n'
     await writeFile(
@@ -401,6 +413,62 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         const errors = []
         page.on('pageerror', (error) => errors.push(error.message))
         await page.addInitScript(() => localStorage.setItem('theme', 'dark'))
+        await page.goto(`${running.base}/docs/init/quotes`)
+        const quote = page.locator('blockquote').first()
+        await quote.waitFor()
+        assert.equal(
+          await quote.evaluate((element) =>
+            element.hasAttribute('data-rdx-blockquote')
+          ),
+          true
+        )
+        assert.equal(
+          await quote.locator('strong').innerText(),
+          'formatted text'
+        )
+        assert.equal(
+          await quote.getByRole('link').getAttribute('href'),
+          '/docs/init/intro'
+        )
+        if (process.env.RDX_THEME_SCREENSHOTS) {
+          await mkdir(process.env.RDX_THEME_SCREENSHOTS, { recursive: true })
+          for (const theme of ['dark', 'light']) {
+            await page.evaluate(
+              (theme) =>
+                document.documentElement.classList.toggle(
+                  'dark',
+                  theme === 'dark'
+                ),
+              theme
+            )
+            await quote.screenshot({
+              path: path.join(
+                process.env.RDX_THEME_SCREENSHOTS,
+                `blockquote-${theme}.png`
+              ),
+              animations: 'disabled',
+            })
+          }
+          await page.evaluate(() =>
+            document.documentElement.classList.add('dark')
+          )
+        }
+        await page.setViewportSize({ width: 390, height: 844 })
+        assert.equal(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= innerWidth
+          ),
+          true
+        )
+        if (process.env.RDX_THEME_SCREENSHOTS)
+          await quote.screenshot({
+            path: path.join(
+              process.env.RDX_THEME_SCREENSHOTS,
+              'blockquote-mobile.png'
+            ),
+            animations: 'disabled',
+          })
+        await page.setViewportSize({ width: 1872, height: 955 })
         await page
           .context()
           .grantPermissions(['clipboard-read', 'clipboard-write'], {
