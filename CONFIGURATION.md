@@ -306,6 +306,24 @@ Plugins may also return a `commands` array on the plugin object. Each command ha
 the versioning package registers `version`; without the plugin, that command is
 unavailable.
 
+## MDX content and runtime requirements
+
+The current runtime and generated projects require Node.js 20.9 or newer.
+The development workspace, generated template, React/React DOM and React types
+are kept aligned; this maintenance step stays on Next.js 15.
+
+The MDX renderer uses `next-mdx-remote` 6 with `blockJS` and `blockDangerousJS`
+enabled explicitly. Markdown, fenced code and registered JSX components remain
+available, including literal props such as `<Notice title="Note" />`.
+JavaScript expressions such as `{variable}`, `{calculate()}` and JSX expression
+attributes are removed rather than evaluated. Code examples inside fenced blocks
+are unchanged. This is an intentional compatibility change from version 5.
+
+Documentation is still trusted project-owned content. These options are not a
+sandbox for arbitrary uploads or untrusted remote MDX, and component registration
+does not make untrusted content safe. There is no config switch to turn these
+protections off in this release.
+
 ## Legacy development website
 
 `apps/web` still uses its original routes and private `@rdx/rdx-versioning`

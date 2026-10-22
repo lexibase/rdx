@@ -69,7 +69,7 @@ export async function mdxLoader({
   const { content, frontmatter } = await compileMDX({
     source,
     components: mdxComponents,
-    options: { parseFrontmatter: true },
+    options: { parseFrontmatter: true, blockJS: true, blockDangerousJS: true },
   })
 
   return { content, frontmatter }

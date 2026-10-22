@@ -18,9 +18,10 @@ import {
   type VersionOption,
 } from '@lexibase/rdx-ui/components/version-dropdown'
 import { ThemeProvider } from '@lexibase/rdx-ui/providers/theme-provider'
-import { compileMDX } from 'next-mdx-remote/rsc'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
+
+import { compileDocumentation } from './mdx'
 
 export { createRdxProject, getProjectDocsPaths } from '@lexibase/rdx-core'
 
@@ -157,10 +158,10 @@ export async function DocsPage({
       </>
     )
   if (!document) notFound()
-  const { content } = await compileMDX({
-    source: document.content,
-    components: mdxComponents,
-  })
+  const { content } = await compileDocumentation(
+    document.content,
+    mdxComponents
+  )
   const title =
     typeof document.frontmatter.title === 'string'
       ? document.frontmatter.title
