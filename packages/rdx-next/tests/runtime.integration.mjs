@@ -376,6 +376,7 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         if (process.env.RDX_THEME_SCREENSHOTS) {
           await mkdir(process.env.RDX_THEME_SCREENSHOTS, { recursive: true })
           await page.screenshot({
+            animations: 'disabled',
             path: path.join(
               process.env.RDX_THEME_SCREENSHOTS,
               'homepage-dropdown.png'
@@ -386,8 +387,8 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         assert.equal(
           await page
             .getByRole('button', { name: 'Documentation version: Current' })
-            .getAttribute('data-state'),
-          'closed'
+            .getAttribute('aria-expanded'),
+          'false'
         )
         await page.goto(`${running.base}/docs/init/new`)
         await page
@@ -454,8 +455,10 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
     running = undefined
     await writeFile(
       path.join(rootDir, 'home.tsx'),
-      `import { Home } from '@lexibase/rdx-ui/components/home'
-export default function MyHome() { return <Home title="Project owned homepage" /> }`
+      await readFile(
+        new URL('./fixtures/base-ui-home.tsx', import.meta.url),
+        'utf8'
+      )
     )
     await writeFile(
       configPath,
@@ -466,5 +469,101 @@ export default { title: 'Custom site', homepage: { enabled: true, component: MyH
     running = await server(rootDir, 'dev')
     const custom = await (await fetch(running.base)).text()
     assert.match(custom, /Project owned homepage/)
+    if (process.env.RDX_PLAYWRIGHT_MODULE) {
+      const { chromium } = require(process.env.RDX_PLAYWRIGHT_MODULE)
+      const browser = await chromium.launch({
+        headless: true,
+        executablePath: process.env.RDX_BROWSER_EXECUTABLE,
+      })
+      try {
+        const page = await browser.newPage()
+        const errors = []
+        page.on('pageerror', (error) => errors.push(error.message))
+        page.on('console', (message) => {
+          if (message.type() === 'error') errors.push(message.text())
+        })
+        await page.goto(running.base)
+        const link = page.getByRole('link', { name: 'Documentation link' })
+        assert.equal(await link.getAttribute('href'), '/docs/init/intro')
+        assert.equal(await link.getAttribute('role'), null)
+        assert.equal(
+          await page
+            .getByRole('button', { name: 'Disabled button' })
+            .isDisabled(),
+          true
+        )
+        assert.equal(
+          await page.getByRole('separator').getAttribute('aria-orientation'),
+          'vertical'
+        )
+        const trigger = page.getByRole('button', {
+          name: 'Primitive test menu',
+        })
+        assert.match(await trigger.getAttribute('class'), /fixture-trigger/)
+        await trigger.focus()
+        await page.keyboard.press('ArrowDown')
+        const checkbox = page.getByRole('menuitemcheckbox', {
+          name: 'Show details',
+        })
+        await checkbox.waitFor()
+        assert.equal(
+          await page
+            .getByRole('menuitem', { name: 'Disabled item' })
+            .getAttribute('aria-disabled'),
+          'true'
+        )
+        await checkbox.focus()
+        await page.keyboard.press('Space')
+        await page.waitForFunction(
+          () =>
+            document.querySelector('output')?.textContent === 'true:one:none'
+        )
+        assert.equal(await checkbox.getAttribute('aria-checked'), 'true')
+        const radio = page.getByRole('menuitemradio', { name: 'Second option' })
+        await radio.focus()
+        await page.keyboard.press('Space')
+        await page.waitForFunction(
+          () =>
+            document.querySelector('output')?.textContent === 'true:two:none'
+        )
+        assert.equal(await radio.getAttribute('aria-checked'), 'true')
+        const submenu = page.getByRole('menuitem', { name: 'More actions' })
+        await submenu.focus()
+        await page.keyboard.press('ArrowRight')
+        const action = page.getByRole('menuitem', { name: 'Run action' })
+        await action.waitFor()
+        await action.focus()
+        await page.keyboard.press('Enter')
+        await page.waitForFunction(
+          () =>
+            document.querySelector('output')?.textContent === 'true:two:BUTTON'
+        )
+        await page
+          .getByRole('menu', { name: 'Primitive test menu', exact: true })
+          .waitFor({ state: 'hidden' })
+        await trigger.focus()
+        await page.keyboard.press('Enter')
+        await checkbox.waitFor()
+        await page.keyboard.press('Escape')
+        await page.waitForFunction(
+          () => document.activeElement?.textContent === 'Primitive test menu'
+        )
+        await trigger.click()
+        await checkbox.waitFor()
+        // A modal menu covers the page with an invisible dismissal backdrop.
+        // Click real coordinates rather than asking Playwright to bypass it.
+        const heading = await page
+          .getByRole('heading', { name: 'Project owned homepage' })
+          .boundingBox()
+        assert.ok(heading)
+        await page.mouse.click(heading.x + 5, heading.y + 5)
+        await page
+          .getByRole('menu', { name: 'Primitive test menu', exact: true })
+          .waitFor({ state: 'hidden' })
+        assert.deepEqual(errors, [])
+      } finally {
+        await browser.close()
+      }
+    }
   }
 )

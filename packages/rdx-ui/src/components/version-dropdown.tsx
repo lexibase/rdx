@@ -10,6 +10,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLinkItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
@@ -29,7 +30,7 @@ function VersionIcon({ kind }: { kind: VersionOption['kind'] }) {
   return <Icon className="size-4" />
 }
 
-/** Uses the same Radix primitives, sizes, icons and states as the showcase. */
+/** Shared version menu for the runtime and development showcase. */
 export function VersionDropdown({
   options,
   currentId,
@@ -61,44 +62,47 @@ export function VersionDropdown({
       <DropdownMenuItem
         key={option.id}
         className={className}
-        onSelect={() => onSelect(option.id)}
+        onClick={() => onSelect(option.id)}
       >
         {content}
       </DropdownMenuItem>
     ) : (
-      <DropdownMenuItem key={option.id} className={className} asChild>
-        <Link
-          href={option.href}
-          aria-current={option.id === current.id ? 'true' : undefined}
-        >
-          {content}
-        </Link>
-      </DropdownMenuItem>
+      <DropdownMenuLinkItem
+        key={option.id}
+        className={className}
+        closeOnClick
+        render={<Link href={option.href} />}
+        aria-current={option.id === current.id ? 'true' : undefined}
+      >
+        {content}
+      </DropdownMenuLinkItem>
     )
   }
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          data-rdx-version-trigger
-          variant="outline"
-          size="sm"
-          className="min-w-[134px] capitalize"
-          aria-label={`Documentation version: ${current.label}`}
+      <DropdownMenuTrigger
+        render={
+          <Button
+            data-rdx-version-trigger
+            variant="outline"
+            size="sm"
+            className="min-w-[134px] capitalize"
+            aria-label={`Documentation version: ${current.label}`}
+          />
+        }
+      >
+        {current.label}
+        <DropdownMenuShortcut
+          className={
+            current.kind === 'live'
+              ? 'text-blue-500'
+              : current.kind === 'archived'
+                ? 'text-red-500'
+                : 'text-primary'
+          }
         >
-          {current.label}
-          <DropdownMenuShortcut
-            className={
-              current.kind === 'live'
-                ? 'text-blue-500'
-                : current.kind === 'archived'
-                  ? 'text-red-500'
-                  : 'text-primary'
-            }
-          >
-            <VersionIcon kind={current.kind} />
-          </DropdownMenuShortcut>
-        </Button>
+          <VersionIcon kind={current.kind} />
+        </DropdownMenuShortcut>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="start" collisionPadding={8}>
         {live.length > 0 && (

@@ -1,7 +1,6 @@
 'use client'
 
-import * as React from 'react'
-import { Slot } from '@radix-ui/react-slot'
+import { Button as ButtonPrimitive } from '@base-ui/react/button'
 import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@lexibase/rdx-ui/lib/utils'
@@ -49,19 +48,17 @@ function Button({
   variant,
   size,
   active,
-  asChild = false,
   ...props
-}: React.ComponentProps<'button'> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
-    active?: boolean
-  }) {
-  const Comp = asChild ? Slot : 'button'
-
+}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
   return (
-    <Comp
+    <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, active, className }))}
+      className={(state) =>
+        cn(
+          buttonVariants({ variant, size, active }),
+          typeof className === 'function' ? className(state) : className
+        )
+      }
       {...props}
     />
   )

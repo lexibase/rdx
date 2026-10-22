@@ -8,6 +8,7 @@ import {
 } from '@lexibase/rdx-core'
 import type { RdxProject, RdxRuntimeConfig } from '@lexibase/rdx-types'
 import { Button } from '@lexibase/rdx-ui/components/button'
+import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 import { DocsSidebar } from '@lexibase/rdx-ui/components/docs-sidebar'
 import { Home } from '@lexibase/rdx-ui/components/home'
 import { Logo } from '@lexibase/rdx-ui/components/logo'
@@ -18,7 +19,6 @@ import {
   type VersionOption,
 } from '@lexibase/rdx-ui/components/version-dropdown'
 import { ThemeProvider } from '@lexibase/rdx-ui/providers/theme-provider'
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { compileDocumentation } from './mdx'
@@ -224,18 +224,26 @@ export async function DocsPage({
             <footer className="flex flex-col">
               <section className="flex items-center justify-between">
                 {previous ? (
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={hrefFor(previous.slug)}>{previous.title}</Link>
-                  </Button>
+                  <ButtonLink
+                    variant="outline"
+                    size="sm"
+                    href={hrefFor(previous.slug)}
+                  >
+                    {previous.title}
+                  </ButtonLink>
                 ) : (
                   <Button variant="outline" size="sm" disabled>
                     Previous
                   </Button>
                 )}
                 {next ? (
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={hrefFor(next.slug)}>{next.title}</Link>
-                  </Button>
+                  <ButtonLink
+                    variant="outline"
+                    size="sm"
+                    href={hrefFor(next.slug)}
+                  >
+                    {next.title}
+                  </ButtonLink>
                 ) : (
                   <Button variant="outline" size="sm" disabled>
                     Next

@@ -1,6 +1,6 @@
 import type { DocCategory } from '@rdx/types/loaders'
 import { Button } from '@lexibase/rdx-ui/components/button'
-import Link from 'next/link'
+import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 import { useMemo } from 'react'
 import { docsIndexer } from '@rdx/core'
 
@@ -41,14 +41,14 @@ export function DocFooter({
     <footer className="flex flex-col">
       <section className="flex items-center justify-between">
         {prevLink ? (
-          <Button
+          <ButtonLink
             variant="outline"
             size="sm"
-            asChild
             aria-label={prevLink.label}
+            href={prevLink.href}
           >
-            <Link href={prevLink.href}>{prevLink.label}</Link>
-          </Button>
+            {prevLink.label}
+          </ButtonLink>
         ) : (
           <Button
             variant="outline"
@@ -61,14 +61,14 @@ export function DocFooter({
         )}
 
         {nextLink ? (
-          <Button
+          <ButtonLink
             variant="outline"
             size="sm"
-            asChild
             aria-label={nextLink.label}
+            href={nextLink.href}
           >
-            <Link href={nextLink.href}>{nextLink.label}</Link>
-          </Button>
+            {nextLink.label}
+          </ButtonLink>
         ) : (
           <Button variant="outline" size="sm" disabled aria-label="next link">
             Next
@@ -79,20 +79,16 @@ export function DocFooter({
       <section className="flex items-center justify-center w-full py-5">
         <p className="text-sm text-muted-foreground">
           &copy; {currentYear} <strong>RDX</strong>. Developed by{' '}
-          <Button
+          <ButtonLink
             variant="link"
             size="link"
-            asChild
             aria-label="go to github page from duhnunes"
+            href="https://github.com/duhnunes"
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            <Link
-              href="https://github.com/duhnunes"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {config.author}
-            </Link>
-          </Button>
+            {config.author}
+          </ButtonLink>
         </p>
       </section>
     </footer>

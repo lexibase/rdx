@@ -1,7 +1,6 @@
 'use client'
 
-import { Button } from '@lexibase/rdx-ui/components/button'
-import Link from 'next/link'
+import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 
 import { useVersion } from '@/hooks/use-version'
 
@@ -11,9 +10,9 @@ export function NavbarLinks() {
 
   return (
     <>
-      <Button key={href} variant="link" size="sm" asChild>
-        <Link href={href}>Docs</Link>
-      </Button>
+      <ButtonLink key={href} variant="link" size="sm" href={href}>
+        Docs
+      </ButtonLink>
     </>
   )
 }

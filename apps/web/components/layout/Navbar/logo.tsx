@@ -1,5 +1,4 @@
-import { Button } from '@lexibase/rdx-ui/components/button'
-import Link from 'next/link'
+import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 
 import config from '@/rdx.config'
 
@@ -7,21 +6,24 @@ export function NavbarLogo() {
   const LogoComponent = config.navbar.logo
 
   return config.navbar.title === '' ? (
-    <Button variant="ghost" size="icon" asChild aria-label="Logo">
-      <Link href="/" className="cursor-default">
-        <LogoComponent className="size-5" />
-      </Link>
-    </Button>
+    <ButtonLink
+      variant="ghost"
+      size="icon"
+      aria-label="Logo"
+      href="/"
+      className="cursor-default"
+    >
+      <LogoComponent className="size-5" />
+    </ButtonLink>
   ) : (
-    <Button
+    <ButtonLink
       variant="ghost"
       size="default"
-      asChild
       aria-label={`Logo from ${config.navbar.title}`}
+      href="/"
+      className="cursor-default flex items-center gap-2"
     >
-      <Link href="/" className="cursor-default flex items-center gap-2">
-        <LogoComponent className="size-5" /> <span>{config.navbar.title}</span>
-      </Link>
-    </Button>
+      <LogoComponent className="size-5" /> <span>{config.navbar.title}</span>
+    </ButtonLink>
   )
 }

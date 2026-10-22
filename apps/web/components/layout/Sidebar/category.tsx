@@ -1,7 +1,6 @@
 import type { DocCategory } from '@rdx/types/loaders'
-import { Button } from '@lexibase/rdx-ui/components/button'
+import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 import { Separator } from '@lexibase/rdx-ui/components/separator'
-import Link from 'next/link'
 
 export function SidebarCategory({
   category,
@@ -18,23 +17,18 @@ export function SidebarCategory({
         {category.title}
       </p>
       {category.links.map((link) => (
-        <Button
+        <ButtonLink
           key={link.href}
           variant="ghost"
           size="sm"
-          className="justify-start"
           active={pathname.startsWith(link.href)}
-          asChild
           aria-label={link.label}
+          href={link.href}
+          aria-current={pathname.startsWith(link.href) ? 'page' : undefined}
+          className="justify-start text-sm text-primary"
         >
-          <Link
-            className="text-sm text-primary"
-            href={link.href}
-            aria-current={pathname.startsWith(link.href) ? 'page' : undefined}
-          >
-            {link.label}
-          </Link>
-        </Button>
+          {link.label}
+        </ButtonLink>
       ))}
       {showSeparator && <Separator className="my-4" />}
     </div>

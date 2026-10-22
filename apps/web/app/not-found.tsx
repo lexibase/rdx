@@ -1,7 +1,6 @@
 'use client'
 
-import Link from 'next/link'
-import { Button } from '@lexibase/rdx-ui/components/button'
+import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 
 import { useVersion } from '@/hooks/use-version'
 
@@ -24,9 +23,9 @@ export default function NotFound() {
             Please contact the owner of the site that led you to this link and
             let them know the link is broken.
           </p>
-          <Button variant="primary" asChild>
-            <Link href={href}>Go back to documentation</Link>
-          </Button>
+          <ButtonLink variant="primary" href={href}>
+            Go back to documentation
+          </ButtonLink>
         </article>
       </div>
     </section>

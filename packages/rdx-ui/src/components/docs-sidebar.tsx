@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { SidebarClose, SidebarOpen } from 'lucide-react'
-import Link from 'next/link'
 
 import { Button } from './button'
+import { ButtonLink } from './button-link'
 import { Separator } from './separator'
 
 export type SidebarCategory = {
@@ -37,24 +37,19 @@ export function DocsSidebar({
             {category.title}
           </p>
           {category.links.map((link) => (
-            <Button
+            <ButtonLink
               key={link.href}
               variant="ghost"
               size="sm"
-              className="justify-start"
               active={pathname === link.href}
-              asChild
               aria-label={link.label}
+              href={link.href}
+              onClick={() => setOpenPath(null)}
+              aria-current={pathname === link.href ? 'page' : undefined}
+              className="justify-start text-sm text-primary"
             >
-              <Link
-                className="text-sm text-primary"
-                href={link.href}
-                onClick={() => setOpenPath(null)}
-                aria-current={pathname === link.href ? 'page' : undefined}
-              >
-                {link.label}
-              </Link>
-            </Button>
+              {link.label}
+            </ButtonLink>
           ))}
           {index < categories.length - 1 && <Separator className="my-4" />}
         </div>

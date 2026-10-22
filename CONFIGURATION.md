@@ -89,13 +89,13 @@ buttons, logo and other exports from `@lexibase/rdx-ui`. Homepage-specific
 into a custom component.
 
 The navbar uses the original logo, Docs link, optional GitHub icon/theme toggle,
-and the same Radix version dropdown as `apps/web`. The logo returns to the
+and the same Base UI version dropdown as `apps/web`. The logo returns to the
 homepage when enabled. Set `navbar.actions.showToggleMode: true` to show the
 shared theme toggle, independently of the GitHub action. Switching
 versions preserves the current page when it exists in the destination; otherwise
 it opens that edition's first page. The dropdown is absent without extra sources;
 archived versions retain their separate group, icon and muted styling.
-The Radix dropdown supports keyboard selection, Escape, focus return and outside
+The Base UI dropdown supports keyboard selection, Escape, focus return and outside
 click dismissal. The mobile sidebar uses a modal dialog with focus containment;
 desktop keeps the development site's sidebar. A skip link supports keyboard users.
 The built-in interface labels currently use English, independently of
