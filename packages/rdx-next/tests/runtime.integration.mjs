@@ -175,7 +175,16 @@ test(
       '---\ntitle: Introduction\n---\nOriginal snapshot body\n\n![Public asset](/images/public%20logo.svg)'
     )
     const configPath = path.join(rootDir, 'rdx.config.ts')
-    await writeFile(configPath, `export default { title: 'Fixture docs' }`)
+    await writeFile(
+      configPath,
+      await readFile(
+        new URL(
+          '../../create-rdx/templates/default/rdx.config.ts',
+          import.meta.url
+        ),
+        'utf8'
+      )
+    )
     await command(rootDir, cli, ['prepare'])
     running = await server(rootDir, 'dev')
     const redirect = await fetch(running.base, { redirect: 'manual' })
@@ -186,6 +195,13 @@ test(
     assert.match(plain, /data-rdx-navbar/)
     assert.match(plain, />Docs</)
     assert.match(plain, /data-rdx-sidebar/)
+    assert.match(plain, /Mode Toggle/)
+    const githubPlaceholder = plain.match(
+      /<a\b[^>]*aria-label="GitHub"[^>]*>/
+    )?.[0]
+    assert.ok(githubPlaceholder, 'The default GitHub action must be rendered')
+    assert.match(githubPlaceholder, /href="#"/)
+    assert.doesNotMatch(githubPlaceholder, /target="_blank"/)
     await assertPublicFile(
       running.base,
       '/downloads/example.ts',

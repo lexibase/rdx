@@ -71,8 +71,8 @@ export function Navbar({
               <Link
                 className="cursor-default"
                 href={github.url}
-                target="_blank"
-                rel="noopener noreferrer"
+                target={github.url === '#' ? undefined : '_blank'}
+                rel={github.url === '#' ? undefined : 'noopener noreferrer'}
               >
                 <Github className="h-[1.2rem] w-[1.2rem]" />
                 <span className="sr-only">GitHub</span>
