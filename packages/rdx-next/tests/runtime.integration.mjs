@@ -181,9 +181,24 @@ test(
     await writeFile(path.join(publicRoot, 'favicon.ico'), favicon)
     await writeFile(
       path.join(rootDir, 'docs/init/intro.mdx'),
-      '---\ntitle: Introduction\n---\nOriginal snapshot body\n\n![Public asset](/images/public%20logo.svg)'
+      '---\ntitle: Introduction\nlink_position: 1\n---\nOriginal snapshot body\n\n![Public asset](/images/public%20logo.svg)'
     )
     const configPath = path.join(rootDir, 'rdx.config.ts')
+    await writeFile(
+      path.join(rootDir, 'docs/init/components.mdx'),
+      (await readFile(
+        new URL(
+          '../../create-rdx/templates/default/docs/examples/callouts.mdx',
+          import.meta.url
+        ),
+        'utf8'
+      )) +
+        '\n\n| Wide column | Status |\n| --- | --- |\n| ' +
+        'LongTableValue'.repeat(30) +
+        ' | Ready |\n\n```text\n' +
+        'long-code-value-'.repeat(30) +
+        '\n```\n'
+    )
     await writeFile(
       configPath,
       await readFile(
@@ -205,6 +220,11 @@ test(
     assert.match(plain, />Docs</)
     assert.match(plain, /data-rdx-sidebar/)
     assert.match(plain, /Mode Toggle/)
+    const components = await (
+      await fetch(`${running.base}/docs/init/components`)
+    ).text()
+    assert.match(components, /data-rdx-callout="warning"/)
+    assert.match(components, /data-slot="mdx-table-scroll"/)
     const githubPlaceholder = plain.match(
       /<a\b[^>]*aria-label="GitHub"[^>]*>/
     )?.[0]
@@ -288,7 +308,7 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
     await command(rootDir, cli, ['version', '1.1.0'])
     await writeFile(
       path.join(rootDir, 'docs/init/intro.mdx'),
-      '---\ntitle: Introduction\n---\nChanged live body'
+      '---\ntitle: Introduction\nlink_position: 1\n---\nChanged live body'
     )
     await writeFile(
       path.join(rootDir, 'docs/init/new.mdx'),
@@ -322,6 +342,11 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
     )
     await assertPublicFile(running.base, '/favicon.ico', favicon, /image\//)
     const live = await (await fetch(`${running.base}/docs/init/intro`)).text()
+    const productionComponents = await (
+      await fetch(`${running.base}/docs/init/components`)
+    ).text()
+    assert.match(productionComponents, /data-rdx-callout="danger"/)
+    assert.match(productionComponents, /data-slot="mdx-table-scroll"/)
     assert.match(live, /Changed live body/)
     assert.match(live, /data-rdx-version-trigger/)
     assert.match(live, /Version 1.0.0/)
@@ -368,6 +393,57 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         const errors = []
         page.on('pageerror', (error) => errors.push(error.message))
         await page.addInitScript(() => localStorage.setItem('theme', 'dark'))
+        await page.goto(`${running.base}/docs/init/components`)
+        await page.getByRole('note', { name: 'Before updating' }).waitFor()
+        assert.equal(await page.locator('[data-rdx-callout]').count(), 6)
+        if (process.env.RDX_THEME_SCREENSHOTS) {
+          await mkdir(process.env.RDX_THEME_SCREENSHOTS, { recursive: true })
+          for (const theme of ['dark', 'light']) {
+            await page.evaluate(
+              (theme) =>
+                document.documentElement.classList.toggle(
+                  'dark',
+                  theme === 'dark'
+                ),
+              theme
+            )
+            await page.screenshot({
+              path: path.join(
+                process.env.RDX_THEME_SCREENSHOTS,
+                `callouts-${theme}.png`
+              ),
+              animations: 'disabled',
+            })
+          }
+          await page.evaluate(() =>
+            document.documentElement.classList.add('dark')
+          )
+        }
+        await page.setViewportSize({ width: 390, height: 844 })
+        assert.equal(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= window.innerWidth
+          ),
+          true
+        )
+        for (const selector of ['[data-slot="mdx-table-scroll"]', 'pre']) {
+          const wide = page.locator(selector).last()
+          assert.equal(
+            await wide.evaluate(
+              (element) => element.scrollWidth > element.clientWidth
+            ),
+            true,
+            `Expected horizontal scrolling for ${selector}`
+          )
+          await wide.focus()
+          await page.keyboard.press('ArrowRight')
+          await page.waitForFunction(
+            (selector) =>
+              [...document.querySelectorAll(selector)].at(-1).scrollLeft > 0,
+            selector
+          )
+        }
+        await page.setViewportSize({ width: 1872, height: 955 })
         await page.goto(running.base)
         await page
           .getByRole('button', { name: 'Documentation version: Current' })

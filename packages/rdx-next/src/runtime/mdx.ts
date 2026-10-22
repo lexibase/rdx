@@ -1,4 +1,5 @@
 import { compileMDX } from 'next-mdx-remote/rsc'
+import remarkGfm from 'remark-gfm'
 
 export function compileDocumentation(
   source: string,
@@ -7,6 +8,10 @@ export function compileDocumentation(
   return compileMDX({
     source,
     components,
-    options: { blockJS: true, blockDangerousJS: true },
+    options: {
+      blockJS: true,
+      blockDangerousJS: true,
+      mdxOptions: { remarkPlugins: [remarkGfm] },
+    },
   })
 }

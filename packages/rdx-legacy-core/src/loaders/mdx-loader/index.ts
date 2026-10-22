@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { compileMDX } from 'next-mdx-remote/rsc'
+import remarkGfm from 'remark-gfm'
 import type { MDXLoader } from '@lexibase/rdx-types'
 
 export async function mdxLoader({
@@ -72,7 +73,12 @@ export async function mdxLoader({
   const { content, frontmatter } = await compileMDX({
     source,
     components: mdxComponents,
-    options: { parseFrontmatter: true, blockJS: true, blockDangerousJS: true },
+    options: {
+      parseFrontmatter: true,
+      blockJS: true,
+      blockDangerousJS: true,
+      mdxOptions: { remarkPlugins: [remarkGfm] },
+    },
   })
 
   return { content, frontmatter }

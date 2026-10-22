@@ -75,6 +75,13 @@ test(
       for (const mode of ['dev', 'start']) {
         const running = await server(mode)
         try {
+          const example = await fetch(
+            `${running.base}/docs/canary/mdx-components`
+          )
+          assert.equal(example.status, 200, `${mode}: showcase MDX example`)
+          const exampleHtml = await example.text()
+          assert.match(exampleHtml, /data-rdx-callout="warning"/)
+          assert.match(exampleHtml, /data-slot="mdx-table-scroll"/)
           const context = await browser.newContext()
           await context.addInitScript(() => {
             if (!localStorage.getItem('rdx-version'))
@@ -130,6 +137,11 @@ test(
             })
             .waitFor()
           assert.deepEqual(errors, [], `${mode}: hydration and navigation`)
+          await page.goto(`${running.base}/docs/canary/mdx-components`)
+          await page.getByRole('note', { name: 'Before updating' }).waitFor()
+          assert.equal(await page.locator('[data-rdx-callout]').count(), 6)
+          await page.getByRole('table').waitFor()
+          assert.deepEqual(errors, [], `${mode}: shared Callout and Markdown`)
           await context.close()
 
           const restricted = await browser.newContext()
