@@ -48,7 +48,10 @@ export const mdxComponents = {
     />
   ),
   a: ({ className, ...props }: ComponentProps<'a'>) => (
-    <a className={cn('underline text-chart-1', className)} {...props} />
+    <a
+      className={cn('underline text-chart-1 text-blue-500', className)}
+      {...props}
+    />
   ),
   blockquote: Blockquote,
   pre: CodeBlock,

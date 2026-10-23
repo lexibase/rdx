@@ -36,12 +36,10 @@ function HeadingLinks({
   nodes,
   baseDepth,
   activeId,
-  onNavigate,
 }: {
   nodes: HeadingNode[]
   baseDepth: number
   activeId: string
-  onNavigate: (id: string) => void
 }) {
   return (
     <ol className="space-y-0.5">
@@ -56,7 +54,6 @@ function HeadingLinks({
               heading.id === activeId &&
                 'bg-accent/60 font-medium text-foreground'
             )}
-            onClick={() => onNavigate(heading.id)}
           >
             {heading.title}
           </a>
@@ -65,7 +62,6 @@ function HeadingLinks({
               nodes={heading.children}
               baseDepth={baseDepth}
               activeId={activeId}
-              onNavigate={onNavigate}
             />
           )}
         </li>
@@ -84,7 +80,6 @@ function PageToc({ contentId }: { contentId: string }) {
   const [headings, setHeadings] = useState<Heading[]>([])
   const [activeId, setActiveId] = useState('')
   const actions = useRef<PopoverActions | null>(null)
-  const destination = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     const content = document.getElementById(contentId)
@@ -188,11 +183,16 @@ function PageToc({ contentId }: { contentId: string }) {
         </PopoverTrigger>
         <PopoverContent
           side="left"
-          sideOffset={4}
-          finalFocus={() => {
-            const heading = destination.current
-            destination.current = null
-            return heading ?? true
+          sideOffset={0}
+          onMouseLeave={(event) => {
+            // Base UI keeps click-opened popovers pinned; the TOC instead
+            // stays open only while the pointer is over its popup or marks.
+            if (
+              event.relatedTarget instanceof Element &&
+              event.relatedTarget.closest('[data-rdx-toc]')
+            )
+              return
+            actions.current?.close()
           }}
           className="hidden max-h-[min(60vh,var(--available-height))] w-64 overflow-y-auto xl:flex"
         >
@@ -204,12 +204,6 @@ function PageToc({ contentId }: { contentId: string }) {
               nodes={headingTree(headings)}
               baseDepth={baseDepth}
               activeId={activeId}
-              onNavigate={(id) => {
-                const heading = document.getElementById(id)
-                if (heading) heading.tabIndex = -1
-                destination.current = heading
-                actions.current?.close()
-              }}
             />
           </nav>
         </PopoverContent>

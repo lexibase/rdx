@@ -518,11 +518,21 @@ export default { title: 'RDX', TOC: true, homepage: { enabled: true }, navbar: {
         await tocTrigger.focus()
         await page.keyboard.press('Enter')
         await tocNav.waitFor()
+        await page.keyboard.press('Escape')
+        await tocNav.waitFor({ state: 'hidden' })
+        await page.mouse.move(700, 100)
+        await tocTrigger.hover()
+        await tocNav.waitFor()
         await tocNav
           .getByRole('link', { name: 'Last section', exact: true })
           .click()
         await page.waitForURL('**/docs/init/toc#last-section')
-        await tocNav.waitFor({ state: 'hidden' })
+        await page.waitForTimeout(250)
+        assert.equal(
+          await tocNav.isVisible(),
+          true,
+          'Following a TOC link must keep the hovered popup open'
+        )
         await page.waitForFunction(
           () =>
             Math.abs(
@@ -535,15 +545,23 @@ export default { title: 'RDX', TOC: true, homepage: { enabled: true }, navbar: {
             ) < 120
         )
         assert.equal(
-          await page.evaluate(() => document.activeElement?.id),
-          'last-section'
-        )
-        await tocTrigger.hover()
-        await tocNav.waitFor()
-        assert.equal(
           await tocNav.locator('[aria-current="location"]').textContent(),
           'Last section'
         )
+        await tocNav
+          .getByRole('link', { name: 'First section', exact: true })
+          .click()
+        await page.waitForURL('**/docs/init/toc#first-section')
+        await page.waitForTimeout(250)
+        assert.equal(
+          await tocNav.isVisible(),
+          true,
+          'Multiple section jumps must keep the popup open'
+        )
+        await page.mouse.move(700, 100)
+        await tocNav.waitFor({ state: 'hidden' })
+        await tocTrigger.hover()
+        await tocNav.waitFor()
         await page.keyboard.press('Escape')
         await page.setViewportSize({ width: 390, height: 844 })
         assert.equal(await tocTrigger.isVisible(), false)
