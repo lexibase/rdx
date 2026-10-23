@@ -34,10 +34,10 @@ export default async function DocPage({
 
   return (
     <section
-      className={`w-full h-full overflow-y-auto px-7 flex flex-col gap-5 pb-8 md:py-8 ${config.TOC ? 'xl:pr-20' : ''}`}
+      className={`w-full min-h-full px-7 flex flex-col gap-5 pb-8 md:py-8 ${config.TOC ? 'xl:pr-20' : ''}`}
     >
       {config.TOC && <DocsToc key={`${version}/${doc.join('/')}`} />}
-      <div className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0">
+      <div className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1">
         <header className="mb-6">
           <VersionBanner version={version} versionsRaw={versionsRaw} />
           <DocHeader version={version} filename={filename} />

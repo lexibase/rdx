@@ -189,6 +189,12 @@ test(
     )
     const configPath = path.join(rootDir, 'rdx.config.ts')
     await writeFile(
+      path.join(rootDir, 'docs/init/short-end.mdx'),
+      '---\ntitle: Short ending\n---\n## Start\n\n' +
+        'Long documentation content before the final section.\n\n'.repeat(35) +
+        '```ts\nconst test = true\n```\n\n## Final short section\n\nJust one sentence.\n'
+    )
+    await writeFile(
       path.join(rootDir, 'docs/init/toc.mdx'),
       '---\ntitle: Contents\n---\n## First section\n\n' +
         'A paragraph to make the documentation scroll.\n\n'.repeat(35) +
@@ -474,6 +480,37 @@ export default { title: 'RDX', TOC: true, homepage: { enabled: true }, navbar: {
         const errors = []
         page.on('pageerror', (error) => errors.push(error.message))
         await page.addInitScript(() => localStorage.setItem('theme', 'dark'))
+        await page.goto(`${running.base}/docs/init/short-end`)
+        await page
+          .getByRole('button', { name: 'On this page', exact: true })
+          .hover()
+        const shortToc = page.getByRole('navigation', {
+          name: 'On this page',
+          exact: true,
+        })
+        await shortToc
+          .getByRole('link', { name: 'Final short section', exact: true })
+          .click()
+        await page.waitForFunction(() => {
+          const root = document.querySelector('[data-rdx-docs-scroll]')
+          return root.scrollHeight - root.clientHeight - root.scrollTop < 2
+        })
+        await shortToc
+          .locator('a[href="#final-short-section"][aria-current="location"]')
+          .waitFor()
+        assert.equal(await shortToc.isVisible(), true)
+        assert.equal(
+          await page.locator('[data-rdx-docs-scroll]').evaluate((root) => {
+            let ancestor = root.parentElement
+            while (ancestor) {
+              if (ancestor.scrollTop !== 0) return false
+              ancestor = ancestor.parentElement
+            }
+            return root.getBoundingClientRect().top >= 0
+          }),
+          true,
+          'Fragment navigation must never scroll hidden layout ancestors'
+        )
         await page.goto(`${running.base}/docs/init/toc`)
         const tocTrigger = page.getByRole('button', {
           name: 'On this page',

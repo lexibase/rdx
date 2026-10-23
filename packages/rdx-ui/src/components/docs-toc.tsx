@@ -109,6 +109,15 @@ function PageToc({ contentId }: { contentId: string }) {
         if (heading.getBoundingClientRect().top > top) break
         current = heading.id
       }
+      // A short final section cannot reach the top: there is no content left
+      // to scroll. Reaching the document's bottom must still activate it.
+      if (
+        elements.length &&
+        scrollElement.scrollHeight > scrollElement.clientHeight + 2 &&
+        scrollElement.scrollTop + scrollElement.clientHeight >=
+          scrollElement.scrollHeight - 2
+      )
+        current = elements[elements.length - 1]!.id
       setActiveId(current)
     }
     function schedule() {

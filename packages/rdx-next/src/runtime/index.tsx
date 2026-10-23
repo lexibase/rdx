@@ -201,7 +201,10 @@ export async function DocsPage({
           categories={sidebarCategories}
           pathname={hrefFor(currentSlug)}
         />
-        <div className="flex-1 min-w-0 h-full overflow-y-auto pt-12 md:pt-0 outline-none">
+        <div
+          data-rdx-docs-scroll
+          className="relative flex-1 min-w-0 h-full overflow-y-auto pt-12 md:pt-0 outline-none"
+        >
           {project.config.TOC && <DocsToc key={hrefFor(currentSlug)} />}
           <section
             className={`w-full min-h-full px-7 flex flex-col gap-5 pb-8 md:py-8 ${project.config.TOC ? 'xl:pr-20' : ''}`}

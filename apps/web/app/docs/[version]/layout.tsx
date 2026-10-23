@@ -14,9 +14,12 @@ export default async function DocsLayout({
   const categories = docsIndexer(resolvedParams)
 
   return (
-    <div className="flex flex-1 overflow-hidden relative">
+    <div className="flex flex-1 min-h-0 overflow-hidden relative">
       <Sidebar categories={categories} />
-      <div className="flex-1 h-full overflow-y-auto pt-12 md:pt-0 outline-none">
+      <div
+        data-rdx-docs-scroll
+        className="relative flex-1 min-w-0 h-full overflow-y-auto pt-12 md:pt-0 outline-none"
+      >
         {children}
       </div>
     </div>
