@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
+import { createRequire } from 'node:module'
 import { mkdir, mkdtemp, readFile, realpath, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
@@ -150,95 +151,115 @@ async function request(base, route, expectedStatus = 200) {
 
 async function verifySite(
   project,
-  { original, current, versioned = false, search = true }
+  { original, current, versioned = false, search = true, runtimeCwd = false }
 ) {
-  const entry = path.join(
-    project,
-    'node_modules/@lexibase/rdx-next/bin/rdx.mjs'
-  )
-  await withProductionServer(entry, project, async (base) => {
-    const redirect = await request(base, '/', 307)
-    assert.equal(redirect.headers.get('location'), '/docs')
-    await redirect.arrayBuffer()
-    await (await request(base, '/docs')).arrayBuffer()
-    const html = await (await request(base, '/docs/init/intro')).text()
-    assert.ok(
-      html.includes(current),
-      'Current page must contain the current documentation'
-    )
-    if (versioned)
+  const entry = runtimeCwd
+    ? createRequire(path.join(project, 'package.json')).resolve(
+        'next/dist/bin/next'
+      )
+    : path.join(project, 'node_modules/@lexibase/rdx-next/bin/rdx.mjs')
+  await withProductionServer(
+    entry,
+    runtimeCwd ? path.join(project, '.rdx') : project,
+    async (base) => {
+      const redirect = await request(base, '/', 307)
+      assert.equal(redirect.headers.get('location'), '/docs')
+      await redirect.arrayBuffer()
+      const docsRoot = await (await request(base, '/docs')).text()
       assert.ok(
-        !html.includes(original),
-        'Current page must not contain snapshot-only text'
+        docsRoot.includes(current),
+        'Dynamic /docs must read live project content'
       )
-    await (await request(base, '/docs/rdx-missing-page', 404)).arrayBuffer()
-    await (
-      await request(base, '/rdx-search/rdx-missing-source', 404)
-    ).arrayBuffer()
-    for (const route of ['/images/rdx.svg', '/downloads/example.txt']) {
-      const response = await request(base, route)
-      assert.deepEqual(
-        new Uint8Array(await response.arrayBuffer()),
-        new Uint8Array(
-          await readFile(path.join(project, 'public', route.slice(1)))
-        )
-      )
-    }
-    const stylesheet = [...html.matchAll(/<link\b[^>]*>/g)]
-      .map(([tag]) =>
-        /\brel="stylesheet"/.test(tag)
-          ? /\bhref="([^"]+)"/.exec(tag)?.[1]
-          : undefined
-      )
-      .find((href) => href?.startsWith('/_next/'))
-    const script = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)]
-      .map(([, src]) => src)
-      .find((src) => src.startsWith('/_next/'))
-    assert.ok(stylesheet, 'The page must reference its generated CSS')
-    assert.ok(script, 'The page must reference its generated JavaScript')
-    const css = await request(base, stylesheet)
-    assert.match(css.headers.get('content-type'), /text\/css/)
-    assert.ok((await css.text()).length)
-    const js = await request(base, script)
-    assert.match(js.headers.get('content-type'), /javascript/)
-    assert.ok((await js.text()).length)
-    if (search) {
-      const response = await request(base, '/rdx-search/_')
-      assert.match(response.headers.get('content-type'), /application\/json/)
-      const index = await response.json()
-      assert.equal(index.schemaVersion, 1)
-      assert.ok(index.entries.some((entry) => entry.text.includes(current)))
+      const html = await (await request(base, '/docs/init/intro')).text()
       assert.ok(
-        index.entries.every(
-          (entry) =>
-            entry.href.startsWith('/docs/') &&
-            !entry.href.startsWith('/docs/1.0.0/')
-        )
+        html.includes(current),
+        'Current page must contain the current documentation'
       )
-      if (versioned) assert.ok(!JSON.stringify(index).includes(original))
-    } else await (await request(base, '/rdx-search/_', 404)).arrayBuffer()
-    if (versioned) {
-      const snapshot = await (
-        await request(base, '/docs/1.0.0/init/intro')
-      ).text()
-      assert.ok(snapshot.includes(original))
-      assert.ok(!snapshot.includes(current))
-      if (search) {
-        const index = await (await request(base, '/rdx-search/1.0.0')).json()
-        assert.equal(index.schemaVersion, 1)
-        assert.ok(index.entries.some((entry) => entry.text.includes(original)))
-        assert.ok(!JSON.stringify(index).includes(current))
+      if (versioned)
         assert.ok(
-          index.entries.every((entry) => entry.href.startsWith('/docs/1.0.0/'))
+          !html.includes(original),
+          'Current page must not contain snapshot-only text'
         )
-      } else await (await request(base, '/rdx-search/1.0.0', 404)).arrayBuffer()
-    } else {
-      await (await request(base, '/docs/1.0.0/init/intro', 404)).arrayBuffer()
-      await (await request(base, '/rdx-search/1.0.0', 404)).arrayBuffer()
+      await (await request(base, '/docs/rdx-missing-page', 404)).arrayBuffer()
+      await (
+        await request(base, '/rdx-search/rdx-missing-source', 404)
+      ).arrayBuffer()
+      for (const route of ['/images/rdx.svg', '/downloads/example.txt']) {
+        const response = await request(base, route)
+        assert.deepEqual(
+          new Uint8Array(await response.arrayBuffer()),
+          new Uint8Array(
+            await readFile(path.join(project, 'public', route.slice(1)))
+          )
+        )
+      }
+      const stylesheet = [...html.matchAll(/<link\b[^>]*>/g)]
+        .map(([tag]) =>
+          /\brel="stylesheet"/.test(tag)
+            ? /\bhref="([^"]+)"/.exec(tag)?.[1]
+            : undefined
+        )
+        .find((href) => href?.startsWith('/_next/'))
+      const script = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)]
+        .map(([, src]) => src)
+        .find((src) => src.startsWith('/_next/'))
+      assert.ok(stylesheet, 'The page must reference its generated CSS')
+      assert.ok(script, 'The page must reference its generated JavaScript')
+      const css = await request(base, stylesheet)
+      assert.match(css.headers.get('content-type'), /text\/css/)
+      assert.ok((await css.text()).length)
+      const js = await request(base, script)
+      assert.match(js.headers.get('content-type'), /javascript/)
+      assert.ok((await js.text()).length)
+      if (search) {
+        const response = await request(base, '/rdx-search/_')
+        assert.match(response.headers.get('content-type'), /application\/json/)
+        const index = await response.json()
+        assert.equal(index.schemaVersion, 1)
+        assert.ok(index.entries.some((entry) => entry.text.includes(current)))
+        assert.ok(
+          index.entries.every(
+            (entry) =>
+              entry.href.startsWith('/docs/') &&
+              !entry.href.startsWith('/docs/1.0.0/')
+          )
+        )
+        if (versioned) assert.ok(!JSON.stringify(index).includes(original))
+      } else await (await request(base, '/rdx-search/_', 404)).arrayBuffer()
+      if (versioned) {
+        assert.ok(
+          (await (await request(base, '/docs/1.0.0')).text()).includes(
+            original
+          ),
+          'Dynamic version root must read its snapshot'
+        )
+        const snapshot = await (
+          await request(base, '/docs/1.0.0/init/intro')
+        ).text()
+        assert.ok(snapshot.includes(original))
+        assert.ok(!snapshot.includes(current))
+        if (search) {
+          const index = await (await request(base, '/rdx-search/1.0.0')).json()
+          assert.equal(index.schemaVersion, 1)
+          assert.ok(
+            index.entries.some((entry) => entry.text.includes(original))
+          )
+          assert.ok(!JSON.stringify(index).includes(current))
+          assert.ok(
+            index.entries.every((entry) =>
+              entry.href.startsWith('/docs/1.0.0/')
+            )
+          )
+        } else
+          await (await request(base, '/rdx-search/1.0.0', 404)).arrayBuffer()
+      } else {
+        await (await request(base, '/docs/1.0.0/init/intro', 404)).arrayBuffer()
+        await (await request(base, '/rdx-search/1.0.0', 404)).arrayBuffer()
+      }
     }
-  })
+  )
   console.log(
-    `OK production HTTP: ${versioned ? 'versioned' : 'plain'} project, search ${search ? 'enabled' : 'disabled'}, pages, assets, bundles and 404s`
+    `OK production HTTP: ${versioned ? 'versioned' : 'plain'} project, search ${search ? 'enabled' : 'disabled'}, cwd ${runtimeCwd ? '.rdx' : 'project root'}, pages, assets, bundles and 404s`
   )
 }
 const releases = new Map()
@@ -364,6 +385,7 @@ if (process.argv.includes('--install')) {
   buildProject(project)
   await verifyDeploymentTrace(project, false)
   await verifySite(project, { original, current: original })
+  await verifySite(project, { original, current: original, runtimeCwd: true })
   // This fixture's isolated workspace contains only the generated project.
   pnpm(project, [
     'add',
@@ -383,6 +405,12 @@ if (process.argv.includes('--install')) {
   buildProject(project)
   await verifyDeploymentTrace(project, true)
   await verifySite(project, { original, current, versioned: true })
+  await verifySite(project, {
+    original,
+    current,
+    versioned: true,
+    runtimeCwd: true,
+  })
   await writeFile(
     configPath,
     (await readFile(configPath, 'utf8')).replace(
@@ -397,6 +425,13 @@ if (process.argv.includes('--install')) {
     current,
     versioned: true,
     search: false,
+  })
+  await verifySite(project, {
+    original,
+    current,
+    versioned: true,
+    search: false,
+    runtimeCwd: true,
   })
   console.log(
     'OK installed archives: standalone project, optional plugin, snapshot, production builds and HTTP servers'

@@ -40,6 +40,12 @@ explicitly configured plugins enable the shared navbar dropdown.
 `.rdx/` is generated. Configure the site or edit a project-owned `home.tsx`
 instead of modifying files inside `.rdx/`.
 
+The generated project loader supports both the documentation project root and
+the internal `.rdx/` application as the server working directory. This matters
+for serverless Next workers, which can start inside `.rdx/`. Content and version
+manifests stay in the project root; do not copy them into the generated folder
+or initialize versioning again to work around a runtime path error.
+
 Place images, favicon and downloads in the project-root `public/` directory.
 The CLI links `.rdx/public` to it using a junction on Windows or a directory
 symlink elsewhere. `/images/logo.svg` serves `public/images/logo.svg` in dev and
