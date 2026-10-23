@@ -17,6 +17,13 @@
     "test": {
       "dependsOn": ["build"]
     },
+    "web#test": {
+      "dependsOn": ["build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/scripts/production-server.mjs"
+      ]
+    },
     "@lexibase/rdx-next#test": {
       "dependsOn": ["build", "@lexibase/rdx-versioning#build"]
     },
@@ -36,6 +43,33 @@
       "dependsOn": ["^check-types", "@lexibase/rdx-core#build"]
     },
     "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "web#dev": {
+      "dependsOn": ["^build"],
+      "with": ["@lexibase/rdx-core#dev", "@lexibase/rdx-types#dev"],
+      "passThroughEnv": ["PORT"],
+      "cache": false,
+      "persistent": true
+    },
+    "@lexibase/rdx-core#dev": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
+    "@lexibase/rdx-next#dev": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
+    "@lexibase/rdx-versioning#dev": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
+    "@lexibase/rdx-types#dev": {
+      "dependsOn": ["build"],
       "cache": false,
       "persistent": true
     }

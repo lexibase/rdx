@@ -1,5 +1,4 @@
-import { docsIndexer } from '@rdx/core'
-
+import { docsIndexer } from '@/lib/docs'
 import { Sidebar } from '@/components/layout/Sidebar'
 
 export default async function DocsLayout({

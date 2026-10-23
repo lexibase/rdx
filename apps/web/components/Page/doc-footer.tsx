@@ -2,8 +2,8 @@ import type { DocCategory } from '@rdx/types/loaders'
 import { Button } from '@lexibase/rdx-ui/components/button'
 import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 import { useMemo } from 'react'
-import { docsIndexer } from '@rdx/core'
 
+import { docsIndexer } from '@/lib/docs'
 import config from '@/rdx.config'
 
 export function DocFooter({

@@ -11,7 +11,7 @@ export function useVersionNavigation() {
   const navigateToVersion = useCallback(
     (label: string) => {
       const targetVersion = label === 'canary' ? 'canary' : label
-      const match = pathname.match(/^\/docs\/([^/]+)\/([^/]+)$/)
+      const match = pathname.match(/^\/docs\/([^/]+)\/(.+)$/)
       const currentFileName = match?.[2] || 'intro'
 
       setVersion(targetVersion)

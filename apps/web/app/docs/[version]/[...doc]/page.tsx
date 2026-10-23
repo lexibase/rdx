@@ -1,13 +1,14 @@
 import { mdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
-import { notFound } from 'next/navigation'
-import { mdxLoader, RdxDocumentNotFoundError } from '@rdx/core'
+import { notFound, redirect } from 'next/navigation'
 
 import versionsRaw from '@/versions.json'
 import config from '@/rdx.config'
 import { VersionBanner } from '@/components/Page/version-banner'
 import { DocHeader } from '@/components/Page/doc-header'
 import { DocFooter } from '@/components/Page/doc-footer'
+import { compileDocument } from '@/lib/compile-documentation'
+import { documentation } from '@/lib/docs'
 
 export default async function DocPage({
   params,
@@ -15,22 +16,17 @@ export default async function DocPage({
   params: Promise<{ version: string; doc: string[] }>
 }) {
   const { version, doc } = await params
-  const filename = doc.at(-1)
-  if (!filename) return notFound()
+  const slug = doc.join('/')
+  const document = documentation.document(version, slug)
+  if (!document) return notFound()
+  const filename = documentation
+    .pages(version)
+    .find((page) => page.sourcePath === document.sourcePath)!.slug
+  if (slug !== filename) redirect(`/docs/${version}/${filename}`)
 
-  let content
-  try {
-    const result = await mdxLoader({
-      filename,
-      version,
-      versionsRaw,
-      mdxComponents,
-    })
-    content = result.content
-  } catch (error) {
-    if (error instanceof RdxDocumentNotFoundError) return notFound()
-    throw error
-  }
+  const result = await compileDocument(version, slug, mdxComponents)
+  if (!result) return notFound()
+  const { content } = result
 
   return (
     <section

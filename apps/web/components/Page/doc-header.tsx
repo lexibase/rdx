@@ -1,6 +1,7 @@
-import { docsIndexer } from '@rdx/core'
 import type { DocCategory } from '@rdx/types/loaders'
 import { useMemo } from 'react'
+
+import { docsIndexer } from '@/lib/docs'
 
 export function DocHeader({
   version,

@@ -1,0 +1,119 @@
+/* global globalThis */
+import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import test from 'node:test'
+import { fileURLToPath } from 'node:url'
+
+import { renderToStaticMarkup } from 'react-dom/server'
+
+import { createDocumentation } from '../lib/documentation.ts'
+import { compileDocument } from '../lib/compile-documentation.ts'
+
+const versions = { active: ['2.1.1', '2.1.0'], archived: ['2.0.0'] }
+const root = fileURLToPath(new URL('../', import.meta.url))
+
+test('showcase compilation preserves relative links, missing-document handling and MDX protections', async () => {
+  const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'rdx-showcase-mdx-'))
+  try {
+    for (const folder of ['(canary)', '(versioned)/version-1.0.0']) {
+      const base = path.join(temporary, 'app/docs', folder)
+      fs.mkdirSync(path.join(base, 'guides'), { recursive: true })
+      fs.mkdirSync(path.join(base, 'api'), { recursive: true })
+      fs.writeFileSync(
+        path.join(base, 'guides/source.mdx'),
+        '[API](../api/target.mdx#configuration)'
+      )
+      fs.writeFileSync(path.join(base, 'api/target.mdx'), '## Configuration')
+    }
+    const docs = createDocumentation(temporary, {
+      active: ['1.0.0'],
+      archived: [],
+    })
+    for (const version of ['canary', '1.0.0']) {
+      const result = await compileDocument(version, 'source', {}, docs)
+      assert.match(
+        renderToStaticMarkup(result.content),
+        new RegExp(`href="/docs/${version}/target#configuration"`)
+      )
+    }
+    assert.equal(await compileDocument('canary', 'unknown', {}, docs), null)
+    const source = path.join(temporary, 'app/docs/(canary)/guides/source.mdx')
+    fs.writeFileSync(source, '[Broken](./missing.mdx)')
+    await assert.rejects(
+      () => compileDocument('canary', 'source', {}, docs),
+      /Invalid document link.*missing\.mdx/
+    )
+    globalThis.__rdxShowcaseProbe = 'untouched'
+    fs.writeFileSync(
+      source,
+      '{(globalThis.__rdxShowcaseProbe = "executed")}\n\n<span title={(globalThis.__rdxShowcaseProbe = "executed")}>Safe</span>'
+    )
+    const result = await compileDocument('canary', 'source', {}, docs)
+    const html = renderToStaticMarkup(result.content)
+    assert.equal(globalThis.__rdxShowcaseProbe, 'untouched')
+    assert.match(html, /Safe/)
+    assert.doesNotMatch(html, /title="executed"/)
+  } finally {
+    delete globalThis.__rdxShowcaseProbe
+    fs.rmSync(temporary, { recursive: true, force: true })
+  }
+})
+
+test('public core reads Canary, active and archived editions without changing historical URLs', () => {
+  const docs = createDocumentation(root, versions)
+  for (const version of ['canary', ...versions.active, ...versions.archived]) {
+    const pages = docs.pages(version)
+    assert.ok(pages.length > 0, version)
+    assert.ok(docs.document(version, 'intro'), version)
+    const intro = pages.find((page) => page.slug === 'intro')
+    assert.ok(intro, version)
+    assert.equal(docs.document(version, 'intro').sourcePath, intro.sourcePath)
+    assert.ok(
+      docs
+        .categories(version)
+        .some((category) =>
+          category.links.some((link) => link.href === `/docs/${version}/intro`)
+        )
+    )
+    for (const page of pages) assert.ok(docs.document(version, page.slug))
+  }
+  assert.deepEqual(docs.index('../canary'), [])
+  assert.equal(docs.document('unknown', 'intro'), null)
+  assert.equal(docs.document('canary', '../intro'), null)
+  assert.equal(docs.document('canary', 'invented/path/intro'), null)
+})
+
+test('duplicate filenames use full paths and ambiguous short links never pick a random document', () => {
+  const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'rdx-showcase-'))
+  try {
+    const base = path.join(temporary, 'app/docs/(canary)')
+    for (const name of ['guides', 'api']) {
+      fs.mkdirSync(path.join(base, name), { recursive: true })
+      fs.writeFileSync(
+        path.join(base, name, 'intro.mdx'),
+        `---\ntitle: ${name}\n---\n# ${name}`
+      )
+    }
+    const docs = createDocumentation(temporary, { active: [], archived: [] })
+    assert.deepEqual(
+      docs
+        .pages('canary')
+        .map((page) => page.slug)
+        .sort(),
+      ['api/intro', 'guides/intro']
+    )
+    assert.equal(docs.document('canary', 'intro'), null)
+    assert.equal(docs.document('canary', 'api/intro').frontmatter.title, 'api')
+    assert.deepEqual(
+      docs
+        .categories('canary')
+        .flatMap((category) => category.links.map((link) => link.href))
+        .sort(),
+      ['/docs/canary/api/intro', '/docs/canary/guides/intro']
+    )
+  } finally {
+    fs.rmSync(temporary, { recursive: true, force: true })
+  }
+})

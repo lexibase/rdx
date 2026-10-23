@@ -14,6 +14,7 @@
     "README.md"
   ],
   "scripts": {
+    "dev": "node ./build.mjs --watch",
     "build": "node ./build.mjs",
     "check-types": "tsc --noEmit"
   },

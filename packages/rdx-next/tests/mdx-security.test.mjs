@@ -1,8 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import path from 'node:path'
-import process from 'node:process'
-import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
 import { createJiti } from 'jiti'
@@ -96,65 +94,6 @@ test('all starter documents compile with their real filesystem link context', as
     )
     assert.ok(renderToStaticMarkup(content))
   }
-})
-
-test('development website resolves filesystem links to its legacy versioned filename routes', async (t) => {
-  const root = await mkdtemp(path.join(process.cwd(), '.legacy-links-'))
-  t.after(() => rm(root, { recursive: true, force: true }))
-  for (const folder of ['(canary)', '(versioned)/version-1.0.0']) {
-    await mkdir(path.join(root, folder, 'guides'), { recursive: true })
-    await mkdir(path.join(root, folder, 'api'), { recursive: true })
-    await writeFile(
-      path.join(root, folder, 'guides/source.mdx'),
-      '[API](../api/target.mdx#configuration)'
-    )
-    await writeFile(
-      path.join(root, folder, 'api/target.mdx'),
-      '## Configuration'
-    )
-  }
-  const { mdxLoader, RdxDocumentNotFoundError } = await jiti.import(
-    '../../rdx-legacy-core/src/loaders/mdx-loader/index.ts'
-  )
-  for (const version of ['canary', '1.0.0']) {
-    const result = await mdxLoader({
-      filename: 'source',
-      version,
-      versionsRaw: { active: ['1.0.0'], archived: [] },
-      mdxComponents,
-      docsRoot: path.relative(process.cwd(), root),
-    })
-    assert.match(
-      renderToStaticMarkup(result.content),
-      new RegExp(`href="/docs/${version}/target#configuration"`)
-    )
-  }
-  await writeFile(
-    path.join(root, '(canary)/guides/source.mdx'),
-    '[Broken](./missing.mdx)'
-  )
-  await assert.rejects(
-    () =>
-      mdxLoader({
-        filename: 'source',
-        version: 'canary',
-        versionsRaw: { active: ['1.0.0'], archived: [] },
-        mdxComponents,
-        docsRoot: path.relative(process.cwd(), root),
-      }),
-    /Invalid document link.*missing\.mdx/
-  )
-  await assert.rejects(
-    () =>
-      mdxLoader({
-        filename: 'unknown',
-        version: 'canary',
-        versionsRaw: { active: ['1.0.0'], archived: [] },
-        mdxComponents,
-        docsRoot: path.relative(process.cwd(), root),
-      }),
-    RdxDocumentNotFoundError
-  )
 })
 
 test('MDX links, references and literal anchors resolve without rewriting images or code samples', async () => {

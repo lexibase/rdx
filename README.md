@@ -16,6 +16,12 @@ Crafted with **Next.js**, **TailwindCSS**, and **shadcn/ui**, it delivers a slee
 
 ## Development
 
+Run `pnpm install` and then `pnpm dev` from the repository root. This starts the
+development website with local workspace packages, initial dependency builds and
+automatic recompilation of compiled packages. UI components are consumed directly
+from source. No npm publication is needed to preview package changes.
+See [apps/web/README.md](./apps/web/README.md) for the local workflow and migration status.
+
 See [CI.md](./CI.md) for local checks and automatic pull request validation.
 Publishing remains a manual process documented in [PUBLISHING.md](./PUBLISHING.md).
 The first stable release is being prepared using [RELEASE_READINESS.md](./RELEASE_READINESS.md).
