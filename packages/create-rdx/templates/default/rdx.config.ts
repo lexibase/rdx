@@ -4,6 +4,7 @@ export default defineConfig({
   title: 'My documentation',
   description: 'Documentation built with RDX.',
   TOC: false,
+  search: false,
   navbar: {
     title: '',
     actions: {

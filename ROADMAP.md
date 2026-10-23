@@ -41,7 +41,32 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
 - [ ] Evoluir Markdown/MDX e componentes próprios: tabelas, listas de tarefas,
       código com destaque/cópia, Callout, Tabs, Steps e Cards.
 - [ ] Documentar a extensão e substituição de componentes MDX pelo usuário.
-- [ ] Links entre documentos, âncoras e índice de títulos; busca em etapa posterior.
+- [x] Links entre documentos, âncoras e TOC flutuante opcional (`TOC: false`
+      por padrão).
+- [x] Busca local opcional, desativada por padrão no `rdx.config.ts`. Implementação
+      inicial: acesso pela navbar e por Ctrl+K/Command+K, modal com o Command
+      oficial do shadcn/ui e Dialog na variante Base UI, navegação por teclado,
+      resultados por título/conteúdo da versão consultada e carregamento sob
+      demanda do índice. Sem serviço externo obrigatório. Não carregar índices
+      de todas as versões na abertura de uma página nem gerar o índice quando
+      a busca estiver desativada.
+- [ ] Internacionalização (i18n) dos textos internos da interface, guiada pelo
+      `lang` já existente no `rdx.config.ts`, por exemplo `lang: 'pt-BR'`.
+      Traduzir rótulos como “On this page”, “Developed by”, os futuros
+      “Powered by RDX”, textos da busca, botões, estados vazios e nomes
+      acessíveis. Usar catálogos internos compartilhados e fallback previsível
+      (localidade exata, idioma base, inglês), sem exigir configuração por texto.
+      Não traduzir automaticamente os documentos MDX nem introduzir rotas
+      multilíngues nesta etapa; o autor continua escrevendo o conteúdo no próprio
+      idioma. A ideia está registrada para uma atualização futura, não implementada.
+      Avaliar também perguntar o idioma durante a criação pela CLI, preenchendo
+      `lang` automaticamente.
+- [ ] Documentação multilíngue e seletor opcional na navbar: planejar uma
+      estrutura simples por idioma (por exemplo `lang/en/` e `lang/pt-BR/`, nomes
+      ainda não definidos), preservação da página ao trocar de idioma e a
+      interação entre idiomas e versões. Conteúdo traduzido é fornecido pelo
+      autor. Recurso futuro separado da i18n dos rótulos; não definir rotas ou
+      migrar pastas existentes durante a implementação da busca.
 
 ## Final da lista
 

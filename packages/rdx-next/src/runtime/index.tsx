@@ -11,6 +11,7 @@ import { Button } from '@lexibase/rdx-ui/components/button'
 import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 import { DocsSidebar } from '@lexibase/rdx-ui/components/docs-sidebar'
 import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
+import { DocsSearch } from '@lexibase/rdx-ui/components/docs-search'
 import { Home } from '@lexibase/rdx-ui/components/home'
 import { Logo } from '@lexibase/rdx-ui/components/logo'
 import { mdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
@@ -25,6 +26,7 @@ import { notFound, redirect } from 'next/navigation'
 import { compileDocumentation } from './mdx'
 
 export { createRdxProject, getProjectDocsPaths } from '@lexibase/rdx-core'
+export { getSearchResponse, getSearchSources } from './search'
 
 export function RdxLayout({
   children,
@@ -87,6 +89,14 @@ function RdxHeader({
   return (
     <Navbar
       title={config.navbar?.title ?? ''}
+      search={
+        config.search ? (
+          <DocsSearch
+            indexUrl={`/rdx-search/${encodeURIComponent(source.routePrefix || '_')}`}
+            version={source.label}
+          />
+        ) : undefined
+      }
       siteTitle={config.title}
       logo={<BrandLogo className="size-5" />}
       homeHref={config.homepage?.enabled ? '/' : '/docs'}

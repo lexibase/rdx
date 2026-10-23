@@ -27,6 +27,8 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@lexibase/rdx-types": "workspace:*",
+    "cmdk": "^1.1.1",
     "@base-ui/react": "^1.9.0",
     "@tailwindcss/postcss": "^4.3.3",
     "class-variance-authority": "^0.7.1",
