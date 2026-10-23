@@ -186,12 +186,21 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
               `Version "${version}" conflicts with live documentation.`
             )
           fs.mkdirSync(versionsDir, { recursive: true })
+          // Reserve the snapshot exclusively, then copy into absent children.
+          // Newer Node releases reject cpSync onto an existing directory when
+          // errorOnExist is enabled, including the root we just reserved.
           fs.mkdirSync(snapshotDir)
-          fs.cpSync(docsDir, snapshotDir, {
-            recursive: true,
-            force: false,
-            errorOnExist: true,
-          })
+          for (const entry of fs.readdirSync(docsDir)) {
+            fs.cpSync(
+              path.join(docsDir, entry),
+              path.join(snapshotDir, entry),
+              {
+                recursive: true,
+                force: false,
+                errorOnExist: true,
+              }
+            )
+          }
           const temporaryFile = `${versionsFile}.${randomUUID()}.tmp`
           fs.writeFileSync(
             temporaryFile,

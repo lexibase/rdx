@@ -14,6 +14,11 @@
 **RDX** is a tool for building documentation with **MDX** in a friendly and focused way — fast, easy, and built for clarity.  
 Crafted with **Next.js**, **TailwindCSS**, and **shadcn/ui**, it delivers a sleek and modern design out of the box.
 
+## Development
+
+See [CI.md](./CI.md) for local checks and automatic pull request validation.
+Publishing remains a manual process documented in [PUBLISHING.md](./PUBLISHING.md).
+
 ## License
 
 RDX is [MIT licensed](./LICENSE)

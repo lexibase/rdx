@@ -148,13 +148,18 @@ for (const name of ['@lexibase/rdx-next', '@lexibase/rdx-ui'])
   assert.equal(template.dependencies[name], releases.get(name).manifest.version)
 
 if (process.argv.includes('--install')) {
+  const generatorRoot = path.join(temporary, 'generator')
+  await mkdir(generatorRoot)
+  execFileSync('tar', ['-xf', generator.archive, '-C', generatorRoot])
+  const generatorPackage = path.join(generatorRoot, 'package')
+  await writeFile(
+    path.join(generatorPackage, 'pnpm-workspace.yaml'),
+    "packages:\n  - '.'\n"
+  )
+  pnpm(generatorPackage, ['install', '--ignore-scripts'])
   execFileSync(
     process.execPath,
-    [
-      path.join(root, 'packages/create-rdx/bin/index.js'),
-      'project',
-      '--skip-install',
-    ],
+    [path.join(generatorPackage, 'bin/index.js'), 'project', '--skip-install'],
     { cwd: temporary, stdio: 'inherit' }
   )
   const project = path.join(temporary, 'project')

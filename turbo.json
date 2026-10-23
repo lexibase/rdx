@@ -11,6 +11,9 @@
     "lint": {
       "dependsOn": ["^lint"]
     },
+    "web#lint": {
+      "dependsOn": ["^lint", "@lexibase/rdx-core#build"]
+    },
     "test": {
       "dependsOn": ["build"]
     },
