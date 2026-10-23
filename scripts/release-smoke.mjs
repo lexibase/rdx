@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
+import { randomUUID } from 'node:crypto'
 import { mkdir, mkdtemp, readFile, realpath, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+
+import { withProductionServer } from './production-server.mjs'
 
 // Test the publishable archives, not workspace source links. Nothing publishes.
 const root = fileURLToPath(new URL('../', import.meta.url))
@@ -77,6 +80,113 @@ function pnpm(cwd, args, capture = false) {
     encoding: 'utf8',
     stdio: capture ? 'pipe' : 'inherit',
   })
+}
+
+async function request(base, route, expectedStatus = 200) {
+  const response = await fetch(`${base}${route}`, {
+    redirect: 'manual',
+    signal: AbortSignal.timeout(15_000),
+  })
+  assert.equal(
+    response.status,
+    expectedStatus,
+    `${route}: unexpected HTTP status`
+  )
+  return response
+}
+
+async function verifySite(
+  project,
+  { original, current, versioned = false, search = true }
+) {
+  const entry = path.join(
+    project,
+    'node_modules/@lexibase/rdx-next/bin/rdx.mjs'
+  )
+  await withProductionServer(entry, project, async (base) => {
+    const redirect = await request(base, '/', 307)
+    assert.equal(redirect.headers.get('location'), '/docs')
+    await redirect.arrayBuffer()
+    await (await request(base, '/docs')).arrayBuffer()
+    const html = await (await request(base, '/docs/init/intro')).text()
+    assert.ok(
+      html.includes(current),
+      'Current page must contain the current documentation'
+    )
+    if (versioned)
+      assert.ok(
+        !html.includes(original),
+        'Current page must not contain snapshot-only text'
+      )
+    await (await request(base, '/docs/rdx-missing-page', 404)).arrayBuffer()
+    await (
+      await request(base, '/rdx-search/rdx-missing-source', 404)
+    ).arrayBuffer()
+    for (const route of ['/images/rdx.svg', '/downloads/example.txt']) {
+      const response = await request(base, route)
+      assert.deepEqual(
+        new Uint8Array(await response.arrayBuffer()),
+        new Uint8Array(
+          await readFile(path.join(project, 'public', route.slice(1)))
+        )
+      )
+    }
+    const stylesheet = [...html.matchAll(/<link\b[^>]*>/g)]
+      .map(([tag]) =>
+        /\brel="stylesheet"/.test(tag)
+          ? /\bhref="([^"]+)"/.exec(tag)?.[1]
+          : undefined
+      )
+      .find((href) => href?.startsWith('/_next/'))
+    const script = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)]
+      .map(([, src]) => src)
+      .find((src) => src.startsWith('/_next/'))
+    assert.ok(stylesheet, 'The page must reference its generated CSS')
+    assert.ok(script, 'The page must reference its generated JavaScript')
+    const css = await request(base, stylesheet)
+    assert.match(css.headers.get('content-type'), /text\/css/)
+    assert.ok((await css.text()).length)
+    const js = await request(base, script)
+    assert.match(js.headers.get('content-type'), /javascript/)
+    assert.ok((await js.text()).length)
+    if (search) {
+      const response = await request(base, '/rdx-search/_')
+      assert.match(response.headers.get('content-type'), /application\/json/)
+      const index = await response.json()
+      assert.equal(index.schemaVersion, 1)
+      assert.ok(index.entries.some((entry) => entry.text.includes(current)))
+      assert.ok(
+        index.entries.every(
+          (entry) =>
+            entry.href.startsWith('/docs/') &&
+            !entry.href.startsWith('/docs/1.0.0/')
+        )
+      )
+      if (versioned) assert.ok(!JSON.stringify(index).includes(original))
+    } else await (await request(base, '/rdx-search/_', 404)).arrayBuffer()
+    if (versioned) {
+      const snapshot = await (
+        await request(base, '/docs/1.0.0/init/intro')
+      ).text()
+      assert.ok(snapshot.includes(original))
+      assert.ok(!snapshot.includes(current))
+      if (search) {
+        const index = await (await request(base, '/rdx-search/1.0.0')).json()
+        assert.equal(index.schemaVersion, 1)
+        assert.ok(index.entries.some((entry) => entry.text.includes(original)))
+        assert.ok(!JSON.stringify(index).includes(current))
+        assert.ok(
+          index.entries.every((entry) => entry.href.startsWith('/docs/1.0.0/'))
+        )
+      } else await (await request(base, '/rdx-search/1.0.0', 404)).arrayBuffer()
+    } else {
+      await (await request(base, '/docs/1.0.0/init/intro', 404)).arrayBuffer()
+      await (await request(base, '/rdx-search/1.0.0', 404)).arrayBuffer()
+    }
+  })
+  console.log(
+    `OK production HTTP: ${versioned ? 'versioned' : 'plain'} project, search ${search ? 'enabled' : 'disabled'}, pages, assets, bundles and 404s`
+  )
 }
 const releases = new Map()
 for (const directory of directories) {
@@ -166,6 +276,7 @@ if (process.argv.includes('--install')) {
   const project = path.join(temporary, 'project')
   const pkgPath = path.join(project, 'package.json')
   const pkg = JSON.parse(await readFile(pkgPath, 'utf8'))
+  assert.equal(pkg.scripts.start, 'rdx start')
   const overrides = Object.fromEntries(
     [...releases]
       .filter(([name]) => name !== '@lexibase/create-rdx')
@@ -192,7 +303,13 @@ if (process.argv.includes('--install')) {
       .replace('TOC: false', 'TOC: true')
       .replace('search: false', 'search: true')
   )
+  const original = `SnapshotSentinel${randomUUID().replaceAll('-', '')}`
+  const current = `CurrentSentinel${randomUUID().replaceAll('-', '')}`
+  const introPath = path.join(project, 'docs/init/intro.mdx')
+  const intro = `${await readFile(introPath, 'utf8')}\n\n${original}\n`
+  await writeFile(introPath, intro)
   pnpm(project, ['build'])
+  await verifySite(project, { original, current: original })
   // This fixture's isolated workspace contains only the generated project.
   pnpm(project, [
     'add',
@@ -208,9 +325,25 @@ if (process.argv.includes('--install')) {
     'pnpm',
   ])
   pnpm(project, ['exec', 'rdx', 'version', '1.0.0'])
+  await writeFile(introPath, intro.replace(original, current))
   pnpm(project, ['build'])
+  await verifySite(project, { original, current, versioned: true })
+  await writeFile(
+    configPath,
+    (await readFile(configPath, 'utf8')).replace(
+      'search: true',
+      'search: false'
+    )
+  )
+  pnpm(project, ['build'])
+  await verifySite(project, {
+    original,
+    current,
+    versioned: true,
+    search: false,
+  })
   console.log(
-    'OK installed archives: standalone project, opt-in search/TOC, optional plugin, snapshot and production builds'
+    'OK installed archives: standalone project, optional plugin, snapshot, production builds and HTTP servers'
   )
 }
 console.log(`Release artifacts retained for inspection: ${temporary}`)

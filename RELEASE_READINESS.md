@@ -34,11 +34,14 @@ lançar, nem adicionar recursos novos durante a estabilização.
 
 ### 2. Contrato público e canais de distribuição
 
+- [x] Consolidar a superfície existente em `PUBLIC_API.md` e adicionar regressões
+      para entradas compiladas, padrões de configuração, aliases e tipos de plugins.
 - [ ] Revisar e congelar o contrato de configuração, comandos, exports públicos,
       componentes MDX e API de plugins v1; documentar limitações e compatibilidade.
-- [ ] Remover o `@beta` fixo de `rdx add versioning` antes de publicar o runtime
+- [x] Remover o `@beta` fixo de `rdx add versioning` antes de publicar o runtime
       estável. Definir o canal pela distribuição do runtime e testar stable,
       beta e RC, sem atualizar silenciosamente plugins já instalados.
+      Restaurar dependências declaradas por `install`, preservando range e seção.
 - [ ] Alinhar os seis pacotes públicos, dependências internas e template para a
       candidata a lançamento. Não enviar um gerador estável que crie um projeto
       com dependências RDX ainda em beta.
@@ -49,12 +52,18 @@ lançar, nem adicionar recursos novos durante a estabilização.
 
 - [x] CI base validada na PR #42 em Linux/Node 22 e Windows/Node 24: workspace,
       pacotes reais, builds com busca/TOC e plugin opcional de versionamento.
-- [ ] Ampliar o teste dos pacotes para iniciar a produção e verificar respostas
+- [x] Ampliar o teste dos pacotes para iniciar a produção e verificar respostas
       HTTP, arquivos públicos, busca, 404 e isolamento entre versões. Builds
       passando não são, sozinhos, uma prova de servidor funcionando.
-- [ ] Documentar e validar uma implantação reproduzível com servidor Node,
-      incluindo diretório de execução, portas, dependências e dados necessários.
-      Testar sem depender de arquivos ou links do monorepo de desenvolvimento.
+      Inclui CSS/JS e remoção dos índices após desativar busca e refazer o build.
+      Validação local Windows concluída; a CI executará esses testes novos nos
+      dois sistemas após o push. Não confundir com deploy público validado.
+- [x] Documentar o caminho base com servidor Node em `DEPLOYMENT.md`, incluindo
+      raiz de execução, portas, dependências, dados e permissões necessários.
+      A instalação local usa pacotes reais, não links de fontes do workspace.
+- [ ] Validar esse roteiro em uma hospedagem escolhida para a release, sem
+      arquivos ou links do monorepo de desenvolvimento e sem mudanças manuais
+      em `.rdx/`. A validação HTTP local não conclui esse item.
 - [ ] Definir o destino de hospedagem da validação pública com o mantenedor.
       Não prometer export estático, standalone, Vercel ou subdiretórios antes de
       testar essas modalidades. Não fazer deploy em contas externas sem autorização.

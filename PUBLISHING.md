@@ -65,6 +65,11 @@ RDX dependencies point to this release. It does not publish. For the full
 pre-publication smoke test, use `pnpm test:release --install`: it installs the
 archives into an isolated generated project, builds it with search/TOC enabled,
 activates the optional versioning package, creates a snapshot and builds again.
+It also starts the installed production CLI on temporary local ports and checks
+pages, public assets, CSS/JS bundles, redirects, 404s and version-isolated search.
+A third build disables search and checks that previously generated indexes
+are no longer served. See [DEPLOYMENT.md](./DEPLOYMENT.md) for the Node-server
+deployment baseline and its limits.
 The fixture and archives are retained for inspection; no user project is changed.
 
 Commit and merge the release preparation before uploading to npm. Package
@@ -176,5 +181,11 @@ Stable-release preparation is tracked in [RELEASE_READINESS.md](./RELEASE_READIN
 Do not promote these beta packages to `latest` while its launch blockers remain open.
 The generator, runtime, UI, shared types/core and optional plugin must be aligned;
 in particular, assisted plugin installation must not request `@beta` from a stable runtime.
+
+For stable/RC publication, publish the optional versioning plugin in its matching
+channel before exposing the corresponding runtime and generator. A safe order is
+types → core → UI → versioning → Next runtime → generator. The installer selects
+`latest`, `beta` or `rc` from its installed runtime version; missing tags do not
+fall back. Do not point `latest` at a prerelease while preparing this launch.
 
 Only promote after validating the beta in a clean directory. Publish the framework packages with stable versions and without `--tag beta`; npm then assigns the `latest` tag. The optional plugin has its own release cycle. The `workspace:*` dependencies between RDX packages are converted to their matching published versions by pnpm during publication.

@@ -10,14 +10,11 @@ import {
 import path from 'node:path'
 import process from 'node:process'
 
-assert.deepEqual(process.argv.slice(2), [
-  'install',
-  '@lexibase/rdx-versioning@beta',
-])
-await appendFile('installer-calls.txt', 'install\n')
-const { pluginRoot, fail } = JSON.parse(
+const { pluginRoot, fail, expectedArgs } = JSON.parse(
   await readFile('installer-fixture.json', 'utf8')
 )
+assert.deepEqual(process.argv.slice(2), expectedArgs)
+await appendFile('installer-calls.txt', 'install\n')
 if (fail) process.exit(42)
 const location = path.resolve('node_modules/@lexibase/rdx-versioning')
 await mkdir(path.dirname(location), { recursive: true })
@@ -27,8 +24,13 @@ await symlink(
   process.platform === 'win32' ? 'junction' : 'dir'
 )
 const pkg = JSON.parse(await readFile('package.json', 'utf8'))
-pkg.dependencies = {
-  ...pkg.dependencies,
-  '@lexibase/rdx-versioning': '1.0.0-beta.2',
+if (expectedArgs.length > 1) {
+  const plugin = JSON.parse(
+    await readFile(path.join(pluginRoot, 'package.json'), 'utf8')
+  )
+  pkg.dependencies = {
+    ...pkg.dependencies,
+    '@lexibase/rdx-versioning': plugin.version,
+  }
+  await writeFile('package.json', JSON.stringify(pkg, null, 2))
 }
-await writeFile('package.json', JSON.stringify(pkg, null, 2))

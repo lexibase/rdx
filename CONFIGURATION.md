@@ -176,11 +176,17 @@ pnpm rdx add versioning
 # Yarn alternative: yarn rdx add versioning
 ```
 
-This explicit command installs the official `@lexibase/rdx-versioning@beta`,
+This explicit command installs the official `@lexibase/rdx-versioning`,
 adds its import and `plugins: [versioning()]`, validates the resulting config,
 then runs preparation to initialize `versions.json` and `.rdx/`. Restart a running
 development server afterward. Installing a package with npm/pnpm/yarn alone still
 does not activate it or modify configuration.
+
+First installation follows the installed runtime's release channel: stable
+versions request `@latest`, beta versions request `@beta`, and release candidates
+request `@rc`. Other prerelease channels require manual installation. Missing
+registry tags fail without silently selecting another channel. This policy does
+not change any package's version or npm tag by itself.
 
 The manager is selected from `packageManager` in `package.json`, the local
 lockfile, then the invoking manager (npm is the fallback). Conflicting lockfiles
@@ -191,6 +197,12 @@ Repeated calls preserve the installed version, plugin options and other plugins.
 A declared but missing package is installed again. An installed but disabled
 plugin is activated without reinstalling it. No upgrades are performed when
 the declared package is already available.
+When restoring a declared package, RDX runs the manager's `install` command
+without a new package specification, retaining its range and dependency section.
+The manager can still update lockfiles according to its normal rules; this is
+not a frozen installation. The documentation's snapshot labels do not choose the
+package release channel. The candidate public contract is listed in
+[PUBLIC_API.md](./PUBLIC_API.md).
 
 Automatic editing supports a literal default-exported object, optionally inside
 the imported `defineConfig(...)`, including `as`/`satisfies` wrappers. Imports,

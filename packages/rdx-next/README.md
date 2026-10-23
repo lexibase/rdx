@@ -20,6 +20,13 @@ Use `--package-manager npm|pnpm|yarn` to resolve ambiguous lockfiles. Dynamic
 configurations receive manual instructions and are not automatically edited.
 Installing a package with npm/pnpm/yarn alone never edits `rdx.config.ts`.
 
+First plugin installation follows the installed runtime: stable releases use
+`latest`, betas use `beta`, and release candidates use `rc`. Unknown prerelease
+channels require manual installation; missing tags do not fall back to another
+channel. A missing but declared plugin is restored with the manager's `install`
+command, without replacing its dependency range or section. Package-manager
+lockfile rules and security policies still apply normally.
+
 Generated sites use the same theme and components as the development website,
 through `@lexibase/rdx-ui`: logo, navbar, Base UI version dropdown, mobile/desktop
 sidebar, landing page, MDX styles and theme provider. The adapter owns content

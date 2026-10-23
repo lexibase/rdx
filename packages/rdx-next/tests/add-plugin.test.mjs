@@ -18,11 +18,20 @@ import test from 'node:test'
 import {
   addVersioning,
   detectPackageManager,
+  installPackage,
   parseAddArguments,
+  versioningInstallRequest,
 } from '../bin/add-plugin.mjs'
 import { activateVersioning, versioningPackage } from '../bin/plugin-config.mjs'
 
 const cli = fileURLToPath(new URL('../bin/rdx.mjs', import.meta.url))
+const runtimePackage = JSON.parse(
+  await readFile(new URL('../package.json', import.meta.url), 'utf8')
+)
+const expectedInstallArgs = [
+  'install',
+  versioningInstallRequest(runtimePackage.version).specifier,
+]
 const basic = `// Project documentation\nexport default { title: 'Docs', navbar: { title: 'Custom' } }\n`
 async function fixture(t, source = basic) {
   const root = await mkdtemp(path.join(os.tmpdir(), 'rdx-add-'))
@@ -113,15 +122,95 @@ test('manager detection uses declaration, locks, then invoking manager; ambiguit
   )
 })
 
+test('release channels follow stable/beta/RC runtime versions and never silently fall back', () => {
+  for (const [version, channel] of [
+    ['1.0.0', 'latest'],
+    ['2.1.3+build.7', 'latest'],
+    ['1.0.0-beta.10', 'beta'],
+    ['1.0.0-beta', 'beta'],
+    ['1.0.0-rc.1', 'rc'],
+    ['1.0.0-rc.1+build.7', 'rc'],
+  ])
+    assert.deepEqual(versioningInstallRequest(version), {
+      kind: 'add',
+      specifier: `${versioningPackage}@${channel}`,
+    })
+  for (const version of [
+    '1.0',
+    'v1.0.0',
+    '01.0.0',
+    '1.0.0-beta.01',
+    '',
+    undefined,
+  ])
+    assert.throws(
+      () => versioningInstallRequest(version),
+      /runtime version is invalid/
+    )
+  for (const version of ['1.0.0-alpha.1', '1.0.0-canary.1', '1.0.0-1'])
+    assert.throws(
+      () => versioningInstallRequest(version),
+      /Unsupported.*channel.*no channel fallback/
+    )
+  for (const declared of ['1.0.0-beta.2', '^1.0.0', 'file:./plugin.tgz'])
+    assert.deepEqual(versioningInstallRequest('1.0.0', declared), {
+      kind: 'restore',
+    })
+  for (const declared of ['', ' ', 1, false])
+    assert.throws(
+      () => versioningInstallRequest('1.0.0', declared),
+      /non-empty string/
+    )
+})
+
+test('offline npm/pnpm/yarn execution installs the chosen channel or restores without replacing dependency specs', async (t) => {
+  const root = await fixture(t)
+  for (const manager of ['npm', 'pnpm', 'yarn']) {
+    const env = {
+      ...process.env,
+      npm_config_user_agent: `${manager}/1`,
+      npm_execpath: fileURLToPath(
+        new URL('./fixtures/record-installer.mjs', import.meta.url)
+      ),
+    }
+    for (const version of ['1.0.0', '1.0.0-beta.10', '1.0.0-rc.1']) {
+      const request = versioningInstallRequest(version)
+      await installPackage(manager, root, env, request)
+      assert.deepEqual(
+        JSON.parse(
+          await readFile(path.join(root, 'installer-args.json'), 'utf8')
+        ),
+        [manager === 'npm' ? 'install' : 'add', request.specifier]
+      )
+    }
+    await installPackage(
+      manager,
+      root,
+      env,
+      versioningInstallRequest('1.0.0', '^1.0.0-beta.2')
+    )
+    assert.deepEqual(
+      JSON.parse(
+        await readFile(path.join(root, 'installer-args.json'), 'utf8')
+      ),
+      ['install']
+    )
+  }
+})
+
 test('first activation installs and validates without leaving backups or temporary files', async (t) => {
   const root = await fixture(t)
   let calls = 0
   const options = {
     log: silent,
     env: {},
-    install: async (manager, cwd) => {
+    install: async (manager, cwd, env, request) => {
       assert.equal(manager, 'npm')
       assert.equal(cwd, root)
+      assert.deepEqual(
+        request,
+        versioningInstallRequest(runtimePackage.version)
+      )
       calls++
       await installStub(root)
     },
@@ -164,7 +253,8 @@ test('installed-but-disabled and configured-but-missing packages are repaired wi
   const result = await addVersioning(root, {
     log: silent,
     env: {},
-    install: async () => {
+    install: async (manager, cwd, env, request) => {
+      assert.deepEqual(request, { kind: 'restore' })
       installs++
       await installStub(root)
     },
@@ -292,6 +382,7 @@ test('real CLI executes an offline installer through Node, activates the real pl
   await writeFile(
     path.join(root, 'installer-fixture.json'),
     JSON.stringify({
+      expectedArgs: expectedInstallArgs,
       pluginRoot: fileURLToPath(
         new URL('../../rdx-plugin-versioning', import.meta.url)
       ),
@@ -338,11 +429,59 @@ test('real CLI executes an offline installer through Node, activates the real pl
   )
 })
 
+test('real CLI restores a missing declared plugin without changing its range or dependency section', async (t) => {
+  const root = await fixture(t, activateVersioning(basic))
+  const pluginRoot = fileURLToPath(
+    new URL('../../rdx-plugin-versioning', import.meta.url)
+  )
+  const plugin = JSON.parse(
+    await readFile(path.join(pluginRoot, 'package.json'), 'utf8')
+  )
+  const original = JSON.stringify(
+    {
+      name: 'fixture',
+      private: true,
+      type: 'module',
+      devDependencies: { [versioningPackage]: `^${plugin.version}` },
+    },
+    null,
+    2
+  )
+  await writeFile(path.join(root, 'package.json'), original)
+  await writeFile(
+    path.join(root, 'installer-fixture.json'),
+    JSON.stringify({ pluginRoot, expectedArgs: ['install'] })
+  )
+  const result = spawnSync(process.execPath, [cli, 'add', 'versioning'], {
+    cwd: root,
+    encoding: 'utf8',
+    timeout: 30_000,
+    env: {
+      ...process.env,
+      npm_config_user_agent: 'npm/12',
+      npm_execpath: fileURLToPath(
+        new URL('./fixtures/package-manager.mjs', import.meta.url)
+      ),
+    },
+  })
+  assert.equal(result.status, 0, result.stderr)
+  assert.match(result.stdout, /Restoring the declared/)
+  assert.match(result.stdout, /already configured/)
+  assert.equal(
+    await readFile(path.join(root, 'package.json'), 'utf8'),
+    original
+  )
+  assert.equal(
+    await readFile(path.join(root, 'rdx.config.ts'), 'utf8'),
+    activateVersioning(basic)
+  )
+})
+
 test('real CLI installer failure leaves the config and runtime untouched', async (t) => {
   const root = await fixture(t)
   await writeFile(
     path.join(root, 'installer-fixture.json'),
-    JSON.stringify({ fail: true })
+    JSON.stringify({ fail: true, expectedArgs: expectedInstallArgs })
   )
   const result = spawnSync(process.execPath, [cli, 'add', 'versioning'], {
     cwd: root,
