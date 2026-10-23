@@ -31,8 +31,10 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       é representar, por exemplo, `docs/guias/avancado/` como subcategoria de Guias,
       em vez de agrupar todas as suas páginas diretamente em Guias. Preservar o
       layout e o comportamento que já funcionam para pastas simples.
-- [ ] Testes automáticos nos PRs, incluindo verificação do workspace e testes
+- [x] Testes automáticos nos PRs, incluindo verificação do workspace e testes
       de projetos gerados a partir dos pacotes empacotados.
+      Workflow em Linux/Node 22 e Windows/Node 24, sem publicação automática.
+      A execução remota começa após enviar a PR; detalhes em `CI.md`.
 - [ ] Melhorar erros e validação dos argumentos da CLI e a documentação de uso.
 - [ ] Metadados por página, sitemap e documentação de deploy na framework.
 
