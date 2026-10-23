@@ -5,8 +5,10 @@ const nextConfig = {
   // explicitly instead of letting dynamic filesystem calls include the repo.
   outputFileTracingIncludes: {
     '/docs/**': [
-      './app/docs/**/*.mdx',
-      './app/docs/**/_category.json',
+      './docs/**/*.mdx',
+      './docs/**/_category.json',
+      './versioned_docs/**/*.mdx',
+      './versioned_docs/**/_category.json',
       './versions.json',
     ],
   },

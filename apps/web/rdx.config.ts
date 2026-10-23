@@ -1,17 +1,25 @@
-import type { RDXConfig } from '@rdx/types/config'
+import { defineConfig } from '@lexibase/rdx-core/config'
+import type { RdxConfig } from '@lexibase/rdx-types'
+import { versioning } from '@lexibase/rdx-versioning'
 import { Logo } from '@lexibase/rdx-ui/components/logo'
 
-const config: RDXConfig = {
+// Site-specific metadata stays outside the portable framework configuration.
+export const siteMetadata = {
+  author: 'DuHNunes',
+  favicon: '/favicon.ico',
+  url: 'https://rdx-tool.vercel.app',
+}
+
+const config = {
   title: 'RDX',
+  lang: 'pt-BR',
+  docsDir: 'docs',
+  homepage: { enabled: true },
+  plugins: [versioning()],
   TOC: true,
   search: true,
   description:
     'A tool for building documentation with MDX in a friendly and focused way — fast, easy, and built for clarity',
-  author: 'DuHNunes',
-  favicon: '/favicon.ico',
-
-  // Set the production url of your site here
-  url: 'https://rdx-tool.vercel.app',
 
   theme: {
     defaultTheme: 'system',
@@ -32,6 +40,8 @@ const config: RDXConfig = {
       showToggleMode: false,
     },
   },
-}
+} satisfies RdxConfig
+
+defineConfig(config)
 
 export default config

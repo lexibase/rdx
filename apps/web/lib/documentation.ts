@@ -1,29 +1,28 @@
 import path from 'node:path'
 
-import { getDocument, getDocsIndex } from '@lexibase/rdx-core'
+import { getDocument, getDocsIndex, getSourceOptions } from '@lexibase/rdx-core'
+import type { RdxProject } from '@lexibase/rdx-types'
 
-type Versions = { active: string[]; archived: string[] }
-
-/** The showcase keeps its historical storage and URLs, not its own indexer. */
-export function createDocumentation(rootDir: string, versions: Versions) {
+/** Only the official site's historical URL aliases differ from installed sites. */
+export function createDocumentation(project: RdxProject) {
+  const editions = project.sources.map((source) => ({
+    id: source.id === 'current' ? 'canary' : source.routePrefix,
+    label: source.id === 'current' ? 'Canary' : `Version ${source.label}`,
+    kind:
+      source.id === 'current'
+        ? ('live' as const)
+        : source.badge === 'Archived'
+          ? ('archived' as const)
+          : ('version' as const),
+    href: `/docs/${source.id === 'current' ? 'canary' : source.routePrefix}`,
+  }))
   function source(version: string) {
-    const folder =
+    const entry = project.sources.find((entry) =>
       version === 'canary'
-        ? '(canary)'
-        : versions.active.includes(version)
-          ? '(versioned)'
-          : versions.archived.includes(version)
-            ? '(archived)'
-            : null
-    if (!folder) return null
-    return {
-      docsDir: path.join(
-        rootDir,
-        'app/docs',
-        folder,
-        version === 'canary' ? '' : `version-${version}`
-      ),
-    }
+        ? entry.id === 'current'
+        : entry.id !== 'current' && entry.routePrefix === version
+    )
+    return entry ? getSourceOptions(project, entry) : null
   }
 
   function index(version: string) {
@@ -75,5 +74,5 @@ export function createDocumentation(rootDir: string, versions: Versions) {
     }))
   }
 
-  return { source, index, pages: routePages, document, categories }
+  return { source, index, pages: routePages, document, categories, editions }
 }

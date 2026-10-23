@@ -8,13 +8,12 @@ import {
   useSyncExternalStore,
 } from 'react'
 import { usePathname } from 'next/navigation'
-import { getParsedVersions } from '@rdx/rdx-versioning'
-
-import versionsRaw from '../versions.json'
+import type { VersionOption } from '@lexibase/rdx-ui/components/version-dropdown'
 
 type VersionContextType = {
   version: string
   setVersion: (v: string) => void
+  editions: VersionOption[]
 }
 
 export const VersionContext = createContext<VersionContextType | undefined>(
@@ -53,9 +52,15 @@ function storeVersion(version: string) {
   }
 }
 
-export function VersionProvider({ children }: { children: React.ReactNode }) {
-  const parsedVersions = useMemo(() => getParsedVersions(versionsRaw), [])
-  const defaultVersion = parsedVersions.active[0]?.label || 'canary'
+export function VersionProvider({
+  children,
+  editions,
+}: {
+  children: React.ReactNode
+  editions: VersionOption[]
+}) {
+  const defaultVersion =
+    editions.find((edition) => edition.kind === 'version')?.id || 'canary'
   const savedVersion = useSyncExternalStore(
     subscribeToVersion,
     readStoredVersion,
@@ -68,14 +73,19 @@ export function VersionProvider({ children }: { children: React.ReactNode }) {
     return match?.[1]
   }, [pathname])
 
-  const version = versionFromUrl || savedVersion || defaultVersion
+  const version =
+    versionFromUrl ||
+    (editions.some((edition) => edition.id === savedVersion)
+      ? savedVersion
+      : null) ||
+    defaultVersion
   const setVersion = useCallback((value: string) => storeVersion(value), [])
   useEffect(() => {
     if (versionFromUrl) storeVersion(versionFromUrl)
   }, [versionFromUrl])
 
   return (
-    <VersionContext.Provider value={{ version, setVersion }}>
+    <VersionContext.Provider value={{ version, setVersion, editions }}>
       {children}
     </VersionContext.Provider>
   )

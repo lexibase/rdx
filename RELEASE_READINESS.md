@@ -70,8 +70,8 @@ lançar, nem adicionar recursos novos durante a estabilização.
 - [ ] Reduzir o rastreamento amplo de arquivos avisado pelo Turbopack ao usar o
       core público em `apps/web`. A migração inicial preserva páginas, versões e
       busca e passa os testes HTTP, mas esse aviso não equivale a um deploy
-      otimizado ou validado. Continuar o alinhamento de configuração e versões
-      descrito em `apps/web/README.md`, sem apagar documentação histórica.
+      otimizado ou validado. Configuração, plugin e armazenamento do site já estão
+      alinhados, conforme `apps/web/README.md`; preservar os documentos históricos.
 - [ ] Revisar metadados essenciais e decisões sobre indexação/sitemap; registrar
       claramente o que entra na 1.0 e o que fica como evolução compatível.
 

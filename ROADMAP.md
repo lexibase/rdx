@@ -46,11 +46,11 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
 
 ## Depois da consolidação da base
 
-- [ ] Convergir o site oficial e o runtime instalado sem perder Canary, URLs ou
-      documentação histórica. Primeira etapa: `apps/web` usa o indexador e leitor
-      públicos de `@lexibase/rdx-core`, com compatibilidade para suas pastas e URLs
-      existentes. Ainda falta alinhar configuração, gerenciamento de versões e
-      estrutura física ao runtime/plugin atual; não confundir com migração completa.
+- [x] Alinhar configuração, leitura de conteúdo e versionamento do site oficial ao
+      motor dos projetos instalados. `apps/web` usa `RdxConfig`, `createRdxProject`
+      e o plugin atual via `workspace:*`, com `docs/` e `versioned_docs/`. Preservar
+      Canary, URLs e snapshots. O adaptador de URLs do site é intencional; ele
+      mantém os endereços antigos sem duplicar o motor ou mudar o visual.
 
 - [ ] Personalização das cores de destaque (highlighting) da documentação.
       Oferecer paletas prontas e avaliar cores personalizadas pelo autor via

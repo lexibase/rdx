@@ -10,7 +10,7 @@ export default async function DocsLayout({
 }) {
   const { version } = await params
   const resolvedParams = version || 'canary'
-  const categories = docsIndexer(resolvedParams)
+  const categories = await docsIndexer(resolvedParams)
 
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden relative">

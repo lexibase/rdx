@@ -43,7 +43,7 @@ async function server(mode) {
           (await fetch(base, { signal: AbortSignal.timeout(10_000) }))
             .status === 200
         ) {
-          return { base, close }
+          return { base, close, logs: () => logs.slice(-12_000) }
         }
       } catch {
         /* The server may still be starting. */
@@ -183,13 +183,45 @@ test(
             })
             .waitFor()
           assert.deepEqual(errors, [], `${mode}: hydration and navigation`)
+          await page
+            .getByRole('button', {
+              name: 'Documentation version: Version 2.1.1',
+            })
+            .click()
+          await page.getByText('Archived', { exact: true }).waitFor()
+          await page
+            .getByRole('menuitem', { name: 'Version 2.0.0', exact: true })
+            .click()
+          await page.waitForURL('**/docs/2.0.0/intro')
+          await page
+            .getByRole('button', {
+              name: 'Documentation version: Version 2.0.0',
+            })
+            .waitFor()
+          await page.locator('[data-rdx-version-notice="outdated"]').waitFor()
+          const archivedIndex = page.waitForResponse(
+            (response) =>
+              new URL(response.url()).pathname === '/rdx-search/2.0.0'
+          )
+          await page
+            .getByRole('button', { name: 'Search documentation', exact: true })
+            .click()
+          assert.equal(
+            (await archivedIndex).status(),
+            200,
+            `${mode}: archived search\n${running.logs()}`
+          )
+          await page
+            .getByRole('dialog', { name: 'Search documentation' })
+            .waitFor()
+          await page.keyboard.press('Escape')
           await page.goto(`${running.base}/docs/canary/mdx-components`)
           await page.getByRole('note', { name: 'Before updating' }).waitFor()
           assert.equal(await page.locator('main [data-rdx-callout]').count(), 6)
           await page
             .getByRole('note', { name: 'Pre-release documentation' })
             .waitFor()
-          await page.getByRole('table').waitFor()
+          await page.getByRole('table').first().waitFor()
           await context.grantPermissions(
             ['clipboard-read', 'clipboard-write'],
             { origin: running.base }

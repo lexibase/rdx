@@ -5,7 +5,8 @@ import { ThemeProvider } from '@lexibase/rdx-ui/providers/theme-provider'
 
 import { Navbar } from '@/components/layout/Navbar'
 import { VersionProvider } from '@/contexts/version-docs'
-import config from '@/rdx.config'
+import config, { siteMetadata } from '@/rdx.config'
+import { getDocumentation } from '@/lib/docs'
 
 const bebas = Bebas_Neue({
   variable: '--font-bebas',
@@ -23,11 +24,13 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   ),
   icons: {
-    icon: config.favicon,
+    icon: siteMetadata.favicon,
   },
   title: config.title,
   description: config.description,
-  authors: [{ name: config.author, url: config.navbar.actions?.github?.url }],
+  authors: [
+    { name: siteMetadata.author, url: config.navbar.actions?.github?.url },
+  ],
   keywords: [
     'duhnunes',
     'RDX',
@@ -44,7 +47,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: config.title,
     description: config.description,
-    url: config.url,
+    url: siteMetadata.url,
     images: [
       {
         url: '/icons/favicon-96x96.png',
@@ -62,13 +65,14 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const { editions } = await getDocumentation()
   return (
-    <html suppressHydrationWarning lang="pt-BR">
+    <html suppressHydrationWarning lang={config.lang}>
       <head>
         {/* FAVICON */}
         <link
@@ -78,7 +82,7 @@ export default function RootLayout({
           type="image/png"
         />
         <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml" />
-        <link href={config.favicon} rel="shortcut icon" />
+        <link href={siteMetadata.favicon} rel="shortcut icon" />
         <meta content={config.title} name="apple-mobile-web-app-title" />
         <link href="/site.webmanifest" rel="manifest" />
 
@@ -92,7 +96,7 @@ export default function RootLayout({
           attribute="class"
           defaultTheme={config.theme?.defaultTheme ?? 'system'}
         >
-          <VersionProvider>
+          <VersionProvider editions={editions}>
             <div className="flex flex-col h-screen">
               <Navbar />
               {children}

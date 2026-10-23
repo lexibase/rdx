@@ -8,7 +8,7 @@ export default async function VersionRoot({
   params: Promise<{ version: string }>
 }) {
   const { version } = await params
-  const categories = docsIndexer(version)
+  const categories = await docsIndexer(version)
   const firstHref = categories.flatMap((c) => c.links)[0]?.href
 
   if (firstHref) {

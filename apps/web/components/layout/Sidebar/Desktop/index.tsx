@@ -1,4 +1,4 @@
-import type { DocCategory } from '@rdx/types/loaders'
+import type { DocCategory } from '@lexibase/rdx-types'
 
 import { SidebarCategory } from '../category'
 

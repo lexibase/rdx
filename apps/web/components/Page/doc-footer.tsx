@@ -1,32 +1,21 @@
-import type { DocCategory } from '@rdx/types/loaders'
 import { Button } from '@lexibase/rdx-ui/components/button'
 import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
-import { useMemo } from 'react'
 
 import { docsIndexer } from '@/lib/docs'
-import config from '@/rdx.config'
+import { siteMetadata } from '@/rdx.config'
 
-export function DocFooter({
+export async function DocFooter({
   version,
   filename,
 }: {
   version: string
   filename: string
 }) {
-  const sidebarLinks: DocCategory[] = useMemo(
-    () => docsIndexer(version),
-    [version]
-  )
+  const sidebarLinks = await docsIndexer(version)
   const slug = `/docs/${version}/${filename}`
 
-  const flatLinks = useMemo(
-    () => sidebarLinks.flatMap((cat) => cat.links),
-    [sidebarLinks]
-  )
-  const currentIndex = useMemo(
-    () => flatLinks.findIndex((link) => link.href === slug),
-    [flatLinks, slug]
-  )
+  const flatLinks = sidebarLinks.flatMap((cat) => cat.links)
+  const currentIndex = flatLinks.findIndex((link) => link.href === slug)
 
   const prevLink =
     currentIndex > 0 ? (flatLinks[currentIndex - 1] ?? null) : null
@@ -35,7 +24,7 @@ export function DocFooter({
       ? (flatLinks[currentIndex + 1] ?? null)
       : null
 
-  const currentYear = useMemo(() => new Date().getFullYear(), [])
+  const currentYear = new Date().getFullYear()
 
   return (
     <footer className="flex flex-col">
@@ -87,7 +76,7 @@ export function DocFooter({
             target="_blank"
             rel="noopener noreferrer"
           >
-            {config.author}
+            {siteMetadata.author}
           </ButtonLink>
         </p>
       </section>

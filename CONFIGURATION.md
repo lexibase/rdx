@@ -350,11 +350,16 @@ sandbox for arbitrary uploads or untrusted remote MDX, and component registratio
 does not make untrusted content safe. There is no config switch to turn these
 protections off in this release.
 
-## Legacy development website
+## Official development website
 
-`apps/web` still uses its original routes and private `@rdx/rdx-versioning`
-helper. Content indexing and loading now use the local workspace package
-`@lexibase/rdx-core`; the redundant private core package has been removed. The new plugin
-uses the existing active/archived manifest format but has an independent snapshot
-layout, so migrating old content requires copying the appropriate version trees.
-This keeps the old showcase usable without making new projects depend on it.
+`apps/web` uses the current `RdxConfig` contract, `createRdxProject` and the same
+`@lexibase/rdx-versioning` plugin as generated projects, all linked locally through
+`workspace:*`. Live content is in `docs/`; all snapshots are in `versioned_docs/`,
+with active/archived status maintained in `versions.json`. The private versioning
+helper and its automatic directory-to-manifest generator have been removed.
+
+Only the official site's URL adapter is site-specific: live documentation keeps
+`/docs/canary`, and existing unambiguous filename routes remain valid. The layout
+and shared UI components are unchanged. The native Next application does not
+create a redundant `.rdx/` application. See [apps/web/README.md](./apps/web/README.md)
+for snapshot commands, local development and the remaining tracing limitation.

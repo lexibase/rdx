@@ -5,26 +5,48 @@ arquivada. Os componentes compartilhados ficam em `packages/rdx-ui`; o motor de
 conteúdo fica em `packages/rdx-core`. Uma melhoria destinada aos usuários deve
 chegar aos pacotes, não existir somente nos componentes locais do site.
 
-## Migração incremental
+## Conteúdo, configuração e versões
 
-O site já usa `getDocsIndex` e `getDocument` de `@lexibase/rdx-core` para páginas,
-sidebar e busca. `lib/documentation.ts` mantém somente a compatibilidade com as
-pastas históricas e URLs do site; não é outro indexador Markdown.
+O site usa `RdxConfig`, `createRdxProject`, o core e o plugin público de
+versionamento por vínculos locais `workspace:*`, assim como os projetos gerados.
+`lib/documentation.ts` mantém apenas as URLs históricas do site; não reimplementa
+o indexador, a leitura do manifest ou a criação de snapshots.
 
-- Canary: `app/docs/(canary)`.
-- Publicadas: `app/docs/(versioned)/version-<versão>`.
-- Arquivadas: `app/docs/(archived)/version-<versão>`.
+- Canary: `docs/` (a fonte `current` do motor recebe o nome Canary no site).
+- Publicadas e arquivadas: `versioned_docs/version-<versão>/`.
+- `versions.json`: a ordem de `active` determina a versão publicada atual;
+  `archived` identifica os snapshots arquivados sem mover seus arquivos.
 - Links antigos como `/docs/canary/intro` continuam funcionando.
 - Arquivos com nomes repetidos usam o caminho completo da categoria, sem escolher
   arbitrariamente qual documento abrir.
 - Links relativos MDX e busca usam as mesmas rotas da sidebar.
 
-Nenhuma pasta histórica foi movida nesta etapa. O pacote redundante
-`packages/rdx-legacy-core` foi removido após migrar seus consumidores e testes.
-O helper de apresentação das
-versões e o comando de geração de `versions.json` ainda vêm do pacote privado
-`@rdx/rdx-versioning`. Alinhar esses pontos, configuração e armazenamento ao plugin
-atual é uma etapa posterior, com preservação dos arquivos e URLs.
+Os arquivos das antigas pastas `(canary)`, `(versioned)` e `(archived)` foram
+movidos sem alterar seu conteúdo. Os pacotes privados de core e versionamento
+redundantes foram removidos. Os componentes e estilos aprovados continuam os mesmos.
+
+`rdx.config.ts` é validado pelo contrato atual e ativa `versioning()` em `plugins`.
+O export nomeado `siteMetadata` contém apenas metadados específicos deste site
+(autor, favicon e endereço), que não são opções do contrato público atual.
+Os componentes de navegador recebem somente opções serializáveis do servidor;
+não importam o plugin nem código de sistema de arquivos.
+
+Para criar uma versão do site, na raiz do monorepo:
+
+```powershell
+pnpm --filter web docs:version 3.0.0
+```
+
+O comando usa a implementação registrada pelo próprio plugin e não sobrescreve
+snapshots existentes. Ele copia `docs/` e atualiza `versions.json`; não publicar nem
+criar uma versão automaticamente a cada commit. Para arquivar uma versão, mova
+somente seu identificador de `active` para `archived` no manifest. Não existe um
+comando de arquivamento nesta etapa.
+
+O site continua uma aplicação Next nativa para desenvolvimento; não gera uma
+segunda aplicação `.rdx/` dentro de si. `docs:prepare` valida o projeto com o plugin,
+sem reconstruir o manifest a partir de nomes de pastas. Não há hook `prepare` na
+instalação que exija pacotes compilados antes do primeiro build do monorepo.
 
 O build com Turbopack ainda avisa sobre rastreamento amplo de arquivos nas funções
 dinâmicas do core público. Os documentos do site estão incluídos explicitamente em
@@ -54,7 +76,7 @@ Não é necessário publicar no npm para testar. Os vínculos continuam sendo
 
 Para trabalhar somente no site e nos pacotes compilados que ele consome, execute
 `pnpm exec turbo run dev --filter=web` na raiz. Esse comando também inicia os
-observadores de core e tipos. Já `pnpm --filter web dev` inicia diretamente o
+observadores de core, tipos e plugin de versionamento. Já `pnpm --filter web dev` inicia diretamente o
 Next, sem a orquestração do Turbo, e não inicia os observadores.
 
 A porta padrão continua sendo 3000. É possível definir `PORT` no ambiente para
