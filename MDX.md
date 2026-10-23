@@ -196,7 +196,7 @@ are not an authoring API. This is not a general HTML sanitizer: only compile
 documentation from trusted project sources, and review externally supplied MDX.
 
 The custom RDX shorthand syntax remains separate future work.
-Examples live in `apps/web/app/docs/(canary)/cat-03/mdx-components.mdx` and the
+Examples live in `apps/web/docs/cat-03/mdx-components.mdx` and the
 generated project's `docs/examples/callouts.mdx`.
 
 ## Floating table of contents

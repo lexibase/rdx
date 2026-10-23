@@ -1,14 +1,12 @@
-import type { VersionsRaw } from '@rdx/types/loaders'
 import { VersionNotice } from '@lexibase/rdx-ui/components/version-notice'
 
 export function VersionBanner({
   version,
-  versionsRaw,
+  currentVersion,
 }: {
   version: string
-  versionsRaw: VersionsRaw
+  currentVersion?: string
 }) {
-  const currentVersion = versionsRaw.active[0]
   const isCanary = version === 'canary'
   const isOutdated = version !== currentVersion && !isCanary
 

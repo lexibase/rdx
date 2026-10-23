@@ -28,3 +28,7 @@ snapshots are never overwritten. Removing the plugin does not delete content.
 
 Options: `versionsFile` (default `versions.json`) and `versionsDir` (default
 `versioned_docs`). Keep snapshots outside the live docs directory.
+
+The plugin declares its manifest through `runtimeFiles` so the Next adapter
+includes custom manifest paths in production deployments together with active
+and archived documentation snapshots.

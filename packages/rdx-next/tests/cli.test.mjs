@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdtemp, readFile, writeFile, rm, access } from 'node:fs/promises'
+import {
+  mkdtemp,
+  readFile,
+  writeFile,
+  rm,
+  access,
+  mkdir,
+  symlink,
+} from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
@@ -40,6 +48,16 @@ test('prepare loads typed config with defineConfig without loading a Next server
   assert.equal(config.compilerOptions.baseUrl, undefined)
   assert.equal(config.compilerOptions.ignoreDeprecations, undefined)
   assert.ok(config.include.includes('.next/dev/types/**/*.ts'))
+  // Simulate the installed adapter for the generated Next configuration.
+  const scope = path.join(rootDir, 'node_modules/@lexibase')
+  await mkdir(scope, { recursive: true })
+  const adapterLink = path.join(scope, 'rdx-next')
+  await symlink(
+    fileURLToPath(new URL('../', import.meta.url)),
+    adapterLink,
+    process.platform === 'win32' ? 'junction' : 'dir'
+  )
+  t.after(() => rm(adapterLink, { force: true }))
   const nextConfig = (
     await import(pathToFileURL(path.join(rootDir, '.rdx/next.config.mjs')).href)
   ).default

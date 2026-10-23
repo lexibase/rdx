@@ -48,6 +48,7 @@ test('enabled versioning initializes on prepare, snapshots docs, and preserves a
     rootDir,
     command: 'prepare',
   })
+  assert.deepEqual(project.runtimeFiles, ['versions.json'])
   assert.deepEqual(
     JSON.parse(await readFile(path.join(rootDir, 'versions.json'))),
     { active: [], archived: [] }

@@ -46,11 +46,11 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
 
 ## Depois da consolidação da base
 
-- [ ] Convergir o site oficial e o runtime instalado sem perder Canary, URLs ou
-      documentação histórica. Primeira etapa: `apps/web` usa o indexador e leitor
-      públicos de `@lexibase/rdx-core`, com compatibilidade para suas pastas e URLs
-      existentes. Ainda falta alinhar configuração, gerenciamento de versões e
-      estrutura física ao runtime/plugin atual; não confundir com migração completa.
+- [x] Alinhar configuração, leitura de conteúdo e versionamento do site oficial ao
+      motor dos projetos instalados. `apps/web` usa `RdxConfig`, `createRdxProject`
+      e o plugin atual via `workspace:*`, com `docs/` e `versioned_docs/`. Preservar
+      Canary, URLs e snapshots. O adaptador de URLs do site é intencional; ele
+      mantém os endereços antigos sem duplicar o motor ou mudar o visual.
 
 - [ ] Personalização das cores de destaque (highlighting) da documentação.
       Oferecer paletas prontas e avaliar cores personalizadas pelo autor via
@@ -62,6 +62,11 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       da configuração ainda serão definidos; melhoria futura, fora da 1.0.0.
 - [ ] Evoluir Markdown/MDX e componentes próprios: tabelas, listas de tarefas,
       código com destaque/cópia, Callout, Tabs, Steps e Cards.
+- [ ] Adicionar um modo `FOLDER` aos code blocks para apresentar estruturas de
+      diretórios com pastas, arquivos, indentação e linhas de conexão alinhadas.
+      Priorizar autoria simples em um bloco Markdown e visual compacto, mantendo
+      a base shadcn/ui + Tailwind. Definir a sintaxe e o comportamento da cópia
+      quando o componente for implementado; melhoria futura, não implementada.
 - [ ] Documentar a extensão e substituição de componentes MDX pelo usuário.
 - [x] Links entre documentos, âncoras e TOC flutuante opcional (`TOC: false`
       por padrão).

@@ -1,24 +1,24 @@
 import { buildSearchIndex } from '@lexibase/rdx-core/search'
 
 import config from '@/rdx.config'
-import versions from '@/versions.json'
 
-import { documentation } from './docs'
+import { getDocumentation } from './docs'
 
-export function searchVersions() {
+export async function searchVersions() {
   return config.search
-    ? ['canary', ...versions.active, ...versions.archived].map((source) => ({
-        source,
+    ? (await getDocumentation()).editions.map((edition) => ({
+        source: edition.id,
       }))
     : []
 }
 
-export function showcaseSearchResponse(source: string) {
+export async function showcaseSearchResponse(source: string) {
   if (
     !config.search ||
-    !searchVersions().some((entry) => entry.source === source)
+    !(await searchVersions()).some((entry) => entry.source === source)
   )
     return new Response(null, { status: 404 })
+  const documentation = await getDocumentation()
   const routes = new Map(
     documentation.pages(source).map((page) => [page.sourcePath, page.slug])
   )

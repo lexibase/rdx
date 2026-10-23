@@ -1,4 +1,4 @@
-import type { DocCategory } from '@rdx/types/loaders'
+import type { DocCategory } from '@lexibase/rdx-types'
 import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 import { Separator } from '@lexibase/rdx-ui/components/separator'
 

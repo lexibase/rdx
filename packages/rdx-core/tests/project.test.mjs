@@ -213,6 +213,39 @@ test('plain projects ignore versions.json and use configured docsDir', async (t)
   )
   assert.equal(project.commands.length, 0)
   assert.equal(project.sources.length, 1)
+  assert.deepEqual(project.runtimeFiles, [])
+})
+
+test('plugins declare project-relative runtime files without needing to add a content source', async (t) => {
+  const rootDir = await fixture(t)
+  const plugin = (runtimeFiles) => ({
+    name: 'files',
+    apiVersion: 1,
+    setup: () => ({ runtimeFiles }),
+  })
+  const project = await createRdxProject(
+    {
+      title: 'Files',
+      plugins: [plugin(['meta/manifest.json', 'meta/manifest.json'])],
+    },
+    { rootDir }
+  )
+  assert.deepEqual(project.runtimeFiles, [path.join('meta', 'manifest.json')])
+  for (const runtimeFiles of [
+    'manifest.json',
+    [null],
+    ['../outside.json'],
+    ['.'],
+    [rootDir],
+  ]) {
+    await assert.rejects(
+      createRdxProject(
+        { title: 'Files', plugins: [plugin(runtimeFiles)] },
+        { rootDir }
+      ),
+      /runtimeFiles/
+    )
+  }
 })
 
 test('plugin hooks run in order and contribute generic content sources', async (t) => {

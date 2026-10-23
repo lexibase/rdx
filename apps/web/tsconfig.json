@@ -4,8 +4,7 @@
     "rootDir": "../..",
     "paths": {
       "@/*": ["./*"],
-      "@lexibase/rdx-ui/*": ["../../packages/rdx-ui/src/*"],
-      "@rdx/types/*": ["../../packages/rdx-types/src/*"],
+      "@lexibase/rdx-ui/*": ["../../packages/rdx-ui/src/*"]
     },
     "plugins": [
       {
@@ -21,7 +20,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

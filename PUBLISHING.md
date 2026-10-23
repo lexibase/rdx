@@ -10,9 +10,9 @@ This repository publishes the framework and an optional versioning plugin:
 | `@lexibase/rdx-next`   | Lexibase | Next.js runtime and `rdx` command                        |
 | `@lexibase/create-rdx` | Lexibase | The project generator used by `npm create @lexibase/rdx` |
 
-`@lexibase/rdx-versioning` is the new optional plugin. The old
-`@rdx/rdx-versioning` helper and compatibility packages remain private for the
-development website; do not publish them. Configuration and plugin usage are
+`@lexibase/rdx-versioning` is the optional plugin used by generated projects and
+the development website. Redundant private core/versioning helpers have been
+removed; do not recreate or publish them. Configuration and plugin usage are
 documented in [CONFIGURATION.md](./CONFIGURATION.md).
 
 ## One-time npm setup

@@ -4,7 +4,7 @@ import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 
 import { withProductionServer } from '../../../scripts/production-server.mjs'
-import { createDocumentation } from '../lib/documentation.ts'
+import { getDocumentation } from '../lib/docs.ts'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const require = createRequire(import.meta.url)
@@ -14,7 +14,7 @@ test(
   'showcase serves historical URLs, shared MDX and version-scoped search through the public core',
   { timeout: 120_000 },
   async () => {
-    const docs = createDocumentation(root, versions)
+    const docs = await getDocumentation()
     await withProductionServer(
       require.resolve('next/dist/bin/next'),
       root,

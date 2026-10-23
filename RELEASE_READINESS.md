@@ -67,11 +67,13 @@ lançar, nem adicionar recursos novos durante a estabilização.
 - [ ] Definir o destino de hospedagem da validação pública com o mantenedor.
       Não prometer export estático, standalone, Vercel ou subdiretórios antes de
       testar essas modalidades. Não fazer deploy em contas externas sem autorização.
-- [ ] Reduzir o rastreamento amplo de arquivos avisado pelo Turbopack ao usar o
-      core público em `apps/web`. A migração inicial preserva páginas, versões e
-      busca e passa os testes HTTP, mas esse aviso não equivale a um deploy
-      otimizado ou validado. Continuar o alinhamento de configuração e versões
-      descrito em `apps/web/README.md`, sem apagar documentação histórica.
+- [x] Delimitar o rastreamento de arquivos do core e do versionamento no Turbopack.
+      O adaptador inclui explicitamente `.mdx`, `_category.json` e `runtimeFiles`
+      dos plugins, com suporte a caminhos personalizados. Builds locais do site
+      e dos pacotes instalados sem avisos de rastreamento amplo; regressões
+      verificam arquivos efetivamente listados, páginas, versões, busca e 404.
+      Validação Windows concluída; Linux será verificado pela CI após o push.
+      Isso não conclui o item de hospedagem pública nem valida standalone/serverless.
 - [ ] Revisar metadados essenciais e decisões sobre indexação/sitemap; registrar
       claramente o que entra na 1.0 e o que fica como evolução compatível.
 

@@ -121,11 +121,16 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
       }
       const versions = parseVersions(versionsFile)
       return {
+        runtimeFiles: [path.relative(context.rootDir, versionsFile)],
         sources: [...versions.active, ...versions.archived].map((version) => {
-          const snapshotDir = path.join(versionsDir, `version-${version}`)
+          const snapshotDir = path.join(
+            /* turbopackIgnore: true */ versionsDir,
+            `version-${version}`
+          )
           if (
-            !fs.existsSync(snapshotDir) ||
-            !fs.statSync(snapshotDir).isDirectory()
+            // Snapshot trees are explicitly traced from the contributed sources.
+            !fs.existsSync(/* turbopackIgnore: true */ snapshotDir) ||
+            !fs.statSync(/* turbopackIgnore: true */ snapshotDir).isDirectory()
           ) {
             throw new Error(
               `Snapshot for "${version}" is missing at ${snapshotDir}. Restore the snapshot or remove its entry from ${versionsFile}.`
@@ -167,11 +172,14 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
             options
           )
           const versions = parseVersions(versionsFile)
-          const snapshotDir = path.join(versionsDir, `version-${version}`)
+          const snapshotDir = path.join(
+            /* turbopackIgnore: true */ versionsDir,
+            `version-${version}`
+          )
           if (
             versions.active.includes(version) ||
             versions.archived.includes(version) ||
-            fs.existsSync(snapshotDir)
+            fs.existsSync(/* turbopackIgnore: true */ snapshotDir)
           ) {
             throw new Error(
               `Version "${version}" already exists. Existing snapshots are never overwritten.`

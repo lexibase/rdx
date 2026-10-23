@@ -1,6 +1,17 @@
-import versions from '../versions.json'
+import { createRdxProject } from '@lexibase/rdx-core'
+
+import config from '../rdx.config'
 
 import { createDocumentation } from './documentation'
 
-export const documentation = createDocumentation(process.cwd(), versions)
-export const docsIndexer = documentation.categories
+export async function getDocumentation(rootDir = process.cwd()) {
+  return createDocumentation(
+    await createRdxProject(config, {
+      rootDir,
+    })
+  )
+}
+
+export async function docsIndexer(version: string) {
+  return (await getDocumentation()).categories(version)
+}

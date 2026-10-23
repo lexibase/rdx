@@ -53,6 +53,8 @@ const required = {
     'src/lib/docs-search.ts',
   ],
   'rdx-next': [
+    'config.mjs',
+    'config.d.mts',
     'bin/rdx.mjs',
     'bin/add-plugin.mjs',
     'bin/public-assets.mjs',
@@ -80,6 +82,52 @@ function pnpm(cwd, args, capture = false) {
     encoding: 'utf8',
     stdio: capture ? 'pipe' : 'inherit',
   })
+}
+
+function buildProject(project) {
+  const output = pnpm(project, ['build'], true)
+  process.stdout.write(output)
+  assert.doesNotMatch(
+    output,
+    /Dynamic filesystem access causes tracing of the whole project/,
+    'An installed RDX build must not trace the whole project'
+  )
+}
+
+async function verifyDeploymentTrace(project, versioned) {
+  const tracePath = path.join(
+    project,
+    '.rdx/.next/server/app/docs/[[...slug]]/page.js.nft.json'
+  )
+  const trace = JSON.parse(await readFile(tracePath, 'utf8'))
+  const files = new Set(
+    trace.files.map((file) => path.resolve(path.dirname(tracePath), file))
+  )
+  for (const file of [
+    'docs/init/intro.mdx',
+    'docs/init/_category.json',
+    ...(versioned
+      ? ['versions.json', 'versioned_docs/version-1.0.0/init/intro.mdx']
+      : []),
+  ])
+    assert.ok(
+      files.has(path.resolve(project, file)),
+      `Deployment is missing ${file}`
+    )
+  for (const file of [
+    'rdx.config.ts',
+    'README.md',
+    '.env.local',
+    'public/images/rdx.svg',
+  ])
+    assert.equal(
+      files.has(path.resolve(project, file)),
+      false,
+      `Unexpected server asset: ${file}`
+    )
+  console.log(
+    'OK deployment trace: configured content retained, unrelated project files excluded'
+  )
 }
 
 async function request(base, route, expectedStatus = 200) {
@@ -308,7 +356,8 @@ if (process.argv.includes('--install')) {
   const introPath = path.join(project, 'docs/init/intro.mdx')
   const intro = `${await readFile(introPath, 'utf8')}\n\n${original}\n`
   await writeFile(introPath, intro)
-  pnpm(project, ['build'])
+  buildProject(project)
+  await verifyDeploymentTrace(project, false)
   await verifySite(project, { original, current: original })
   // This fixture's isolated workspace contains only the generated project.
   pnpm(project, [
@@ -326,7 +375,8 @@ if (process.argv.includes('--install')) {
   ])
   pnpm(project, ['exec', 'rdx', 'version', '1.0.0'])
   await writeFile(introPath, intro.replace(original, current))
-  pnpm(project, ['build'])
+  buildProject(project)
+  await verifyDeploymentTrace(project, true)
   await verifySite(project, { original, current, versioned: true })
   await writeFile(
     configPath,
@@ -335,7 +385,8 @@ if (process.argv.includes('--install')) {
       'search: false'
     )
   )
-  pnpm(project, ['build'])
+  buildProject(project)
+  await verifyDeploymentTrace(project, true)
   await verifySite(project, {
     original,
     current,

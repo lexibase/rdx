@@ -46,3 +46,18 @@ symlink elsewhere. `/images/logo.svg` serves `public/images/logo.svg` in dev and
 production. No asset copies are cached and original files are never removed.
 Restart/redeploy production after adding/removing assets. Documentation versions
 share this directory; snapshots do not copy its contents.
+
+Production builds trace only configured documentation (`.mdx` and
+`_category.json`) and runtime files declared by configured plugins. The versioning
+plugin declares its manifest, including a custom `versionsFile`; current, active
+and archived content sources are included. Custom `docsDir` and `versionsDir`
+are supported without copying the whole project into the server deployment.
+Rebuild/redeploy after changing production content or version manifests.
+
+Native Next.js applications using the RDX core (such as `apps/web`) must spread
+`await getRdxTracingConfig({ rootDir })` from `@lexibase/rdx-next/config` into
+their Next configuration. If Next runs in a subdirectory, also pass `appDir` and
+set `outputFileTracingRoot` to include the documentation project root. Generated
+`.rdx/next.config.mjs` already does this. Do not remove the explicit tracing
+configuration: the core intentionally does not ask Turbopack to trace arbitrary
+project-relative filesystem paths.

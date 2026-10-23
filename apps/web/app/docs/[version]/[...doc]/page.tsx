@@ -2,13 +2,12 @@ import { mdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
 import { notFound, redirect } from 'next/navigation'
 
-import versionsRaw from '@/versions.json'
 import config from '@/rdx.config'
 import { VersionBanner } from '@/components/Page/version-banner'
 import { DocHeader } from '@/components/Page/doc-header'
 import { DocFooter } from '@/components/Page/doc-footer'
 import { compileDocument } from '@/lib/compile-documentation'
-import { documentation } from '@/lib/docs'
+import { getDocumentation } from '@/lib/docs'
 
 export default async function DocPage({
   params,
@@ -16,6 +15,7 @@ export default async function DocPage({
   params: Promise<{ version: string; doc: string[] }>
 }) {
   const { version, doc } = await params
+  const documentation = await getDocumentation()
   const slug = doc.join('/')
   const document = documentation.document(version, slug)
   if (!document) return notFound()
@@ -24,7 +24,12 @@ export default async function DocPage({
     .find((page) => page.sourcePath === document.sourcePath)!.slug
   if (slug !== filename) redirect(`/docs/${version}/${filename}`)
 
-  const result = await compileDocument(version, slug, mdxComponents)
+  const result = await compileDocument(
+    version,
+    slug,
+    mdxComponents,
+    documentation
+  )
   if (!result) return notFound()
   const { content } = result
 
@@ -35,7 +40,14 @@ export default async function DocPage({
       {config.TOC && <DocsToc key={`${version}/${doc.join('/')}`} />}
       <div className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1">
         <header className="mb-6">
-          <VersionBanner version={version} versionsRaw={versionsRaw} />
+          <VersionBanner
+            version={version}
+            currentVersion={
+              documentation.editions.find(
+                (edition) => edition.kind === 'version'
+              )?.id
+            }
+          />
           <DocHeader version={version} filename={filename} />
         </header>
         <main id="rdx-main" className="h-full w-full flex-1 max-w-[960px]">

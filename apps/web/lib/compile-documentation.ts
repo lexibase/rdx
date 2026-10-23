@@ -6,14 +6,15 @@ import {
   rehypeDocumentationCode,
 } from '@lexibase/rdx-core/mdx'
 
-import { documentation } from './docs'
+import { getDocumentation } from './docs'
 
 export async function compileDocument(
   version: string,
   slug: string,
   components: Parameters<typeof compileMDX>[0]['components'],
-  docs = documentation
+  docs?: Awaited<ReturnType<typeof getDocumentation>>
 ) {
+  docs ??= await getDocumentation()
   const document = docs.document(version, slug)
   const source = docs.source(version)
   if (!document || !source) return null

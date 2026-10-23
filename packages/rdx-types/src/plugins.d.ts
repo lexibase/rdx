@@ -28,9 +28,9 @@ export type RdxPlugin = {
   setup?: (
     context: RdxPluginContext
   ) =>
-    | { sources?: RdxContentSource[] }
+    | { sources?: RdxContentSource[]; runtimeFiles?: string[] }
     | void
-    | Promise<{ sources?: RdxContentSource[] } | void>
+    | Promise<{ sources?: RdxContentSource[]; runtimeFiles?: string[] } | void>
   commands?: RdxPluginCommand[]
 }
 
@@ -39,4 +39,6 @@ export type RdxProject = {
   config: ResolvedRdxConfig
   sources: RdxContentSource[]
   commands: RdxPluginCommand[]
+  /** Project-relative files plugins need when serving deployed documentation. */
+  runtimeFiles: string[]
 }

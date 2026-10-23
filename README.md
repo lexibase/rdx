@@ -20,6 +20,9 @@ Run `pnpm install` and then `pnpm dev` from the repository root. This starts the
 development website with local workspace packages, initial dependency builds and
 automatic recompilation of compiled packages. UI components are consumed directly
 from source. No npm publication is needed to preview package changes.
+Press Ctrl+C once to stop the development server and its owned watchers. The local
+Node coordinator keeps initial builds cached through Turbo and avoids Windows
+package-manager batch prompts for long-running tasks; real failures remain nonzero.
 See [apps/web/README.md](./apps/web/README.md) for the local workflow and migration status.
 
 See [CI.md](./CI.md) for local checks and automatic pull request validation.

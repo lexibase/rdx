@@ -380,14 +380,14 @@ const { VersionBanner } = await jiti.import(
 )
 
 test('version notices share Callout styling and preserve current-version navigation', () => {
-  const versionsRaw = { active: ['2.1.1', '2.1.0'], archived: ['2.0.0'] }
+  const currentVersion = '2.1.1'
   for (const [version, kind, message] of [
     ['canary', 'canary', 'This is a pre-release version of the documentation.'],
     ['2.1.0', 'outdated', 'This is an outdated version of the documentation.'],
     ['2.0.0', 'outdated', 'This is an outdated version of the documentation.'],
   ]) {
     const html = renderToStaticMarkup(
-      createElement(VersionBanner, { version, versionsRaw })
+      createElement(VersionBanner, { version, currentVersion })
     )
     assert.ok(html.includes(message))
     assert.match(html, new RegExp(`data-rdx-version-notice="${kind}"`))
@@ -398,7 +398,7 @@ test('version notices share Callout styling and preserve current-version navigat
   }
   assert.equal(
     renderToStaticMarkup(
-      createElement(VersionBanner, { version: '2.1.1', versionsRaw })
+      createElement(VersionBanner, { version: '2.1.1', currentVersion })
     ),
     ''
   )
@@ -406,7 +406,7 @@ test('version notices share Callout styling and preserve current-version navigat
     renderToStaticMarkup(
       createElement(VersionBanner, {
         version: 'canary',
-        versionsRaw: { active: [], archived: [] },
+        currentVersion: undefined,
       })
     ),
     ''

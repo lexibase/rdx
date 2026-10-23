@@ -5,31 +5,55 @@ arquivada. Os componentes compartilhados ficam em `packages/rdx-ui`; o motor de
 conteúdo fica em `packages/rdx-core`. Uma melhoria destinada aos usuários deve
 chegar aos pacotes, não existir somente nos componentes locais do site.
 
-## Migração incremental
+## Conteúdo, configuração e versões
 
-O site já usa `getDocsIndex` e `getDocument` de `@lexibase/rdx-core` para páginas,
-sidebar e busca. `lib/documentation.ts` mantém somente a compatibilidade com as
-pastas históricas e URLs do site; não é outro indexador Markdown.
+O site usa `RdxConfig`, `createRdxProject`, o core e o plugin público de
+versionamento por vínculos locais `workspace:*`, assim como os projetos gerados.
+`lib/documentation.ts` mantém apenas as URLs históricas do site; não reimplementa
+o indexador, a leitura do manifest ou a criação de snapshots.
 
-- Canary: `app/docs/(canary)`.
-- Publicadas: `app/docs/(versioned)/version-<versão>`.
-- Arquivadas: `app/docs/(archived)/version-<versão>`.
+- Canary: `docs/` (a fonte `current` do motor recebe o nome Canary no site).
+- Publicadas e arquivadas: `versioned_docs/version-<versão>/`.
+- `versions.json`: a ordem de `active` determina a versão publicada atual;
+  `archived` identifica os snapshots arquivados sem mover seus arquivos.
 - Links antigos como `/docs/canary/intro` continuam funcionando.
 - Arquivos com nomes repetidos usam o caminho completo da categoria, sem escolher
   arbitrariamente qual documento abrir.
 - Links relativos MDX e busca usam as mesmas rotas da sidebar.
 
-Nenhuma pasta histórica foi movida nesta etapa. O pacote redundante
-`packages/rdx-legacy-core` foi removido após migrar seus consumidores e testes.
-O helper de apresentação das
-versões e o comando de geração de `versions.json` ainda vêm do pacote privado
-`@rdx/rdx-versioning`. Alinhar esses pontos, configuração e armazenamento ao plugin
-atual é uma etapa posterior, com preservação dos arquivos e URLs.
+Os arquivos das antigas pastas `(canary)`, `(versioned)` e `(archived)` foram
+movidos sem alterar seu conteúdo. Os pacotes privados de core e versionamento
+redundantes foram removidos. Os componentes e estilos aprovados continuam os mesmos.
 
-O build com Turbopack ainda avisa sobre rastreamento amplo de arquivos nas funções
-dinâmicas do core público. Os documentos do site estão incluídos explicitamente em
-`next.config.js`, mas a redução desse rastreamento é uma pendência antes de validar
-o deploy público; não esconder o aviso nem considerar a migração concluída.
+`rdx.config.ts` é validado pelo contrato atual e ativa `versioning()` em `plugins`.
+O export nomeado `siteMetadata` contém apenas metadados específicos deste site
+(autor, favicon e endereço), que não são opções do contrato público atual.
+Os componentes de navegador recebem somente opções serializáveis do servidor;
+não importam o plugin nem código de sistema de arquivos.
+
+Para criar uma versão do site, na raiz do monorepo:
+
+```powershell
+pnpm --filter web docs:version 3.0.0
+```
+
+O comando usa a implementação registrada pelo próprio plugin e não sobrescreve
+snapshots existentes. Ele copia `docs/` e atualiza `versions.json`; não publicar nem
+criar uma versão automaticamente a cada commit. Para arquivar uma versão, mova
+somente seu identificador de `active` para `archived` no manifest. Não existe um
+comando de arquivamento nesta etapa.
+
+O site continua uma aplicação Next nativa para desenvolvimento; não gera uma
+segunda aplicação `.rdx/` dentro de si. `docs:prepare` valida o projeto com o plugin,
+sem reconstruir o manifest a partir de nomes de pastas. Não há hook `prepare` na
+instalação que exija pacotes compilados antes do primeiro build do monorepo.
+
+O `next.config.js` usa `getRdxTracingConfig` do adaptador compartilhado. Ele inclui
+explicitamente os documentos e `_category.json` de cada fonte configurada, além
+dos arquivos de runtime declarados pelos plugins (como o manifest de versões).
+As leituras dinâmicas do core não rastreiam mais a árvore inteira do projeto.
+Há testes dos arquivos efetivamente listados para o deploy e das páginas em
+produção. Isso não substitui a validação de uma hospedagem pública.
 
 ## Validação
 
@@ -40,8 +64,9 @@ Não ocupam nem encerram o servidor de desenvolvimento da porta 3000.
 
 ## Desenvolvimento local
 
-Na raiz, basta executar `pnpm dev`. O Turbo prepara os builds das dependências
-antes de iniciar o site e mantém os pacotes compilados em modo de observação:
+Na raiz, basta executar `pnpm dev`. O coordenador local em Node prepara os builds
+das dependências pelo Turbo e inicia os processos contínuos diretamente, sem
+camadas de `pnpm.CMD` para cada observador no Windows:
 
 - Core, runtime Next e plugin de versões recompilam os arquivos locais de `src/`
   para `dist/` quando são alterados.
@@ -52,10 +77,19 @@ antes de iniciar o site e mantém os pacotes compilados em modo de observação:
 Não é necessário publicar no npm para testar. Os vínculos continuam sendo
 `workspace:*`. O modo de observação não limpa `dist/` a cada alteração.
 
-Para trabalhar somente no site e nos pacotes compilados que ele consome, execute
-`pnpm exec turbo run dev --filter=web` na raiz. Esse comando também inicia os
-observadores de core e tipos. Já `pnpm --filter web dev` inicia diretamente o
-Next, sem a orquestração do Turbo, e não inicia os observadores.
+Use um único `Ctrl+C` para encerrar o servidor e seus observadores. No terminal
+interativo, o coordenador captura essa tecla antes que ela seja propagada aos
+arquivos batch do gerenciador e restaura o modo original do terminal ao terminar.
+No Windows, os processos compartilham a sessão do terminal original, inclusive
+os workers internos do Next, sem abrir uma janela separada de `next-server`.
+Somente as árvores de processos iniciadas por essa execução são encerradas; não
+há comandos que matem todos os processos Node. Cancelamento intencional retorna
+sucesso, mas uma falha real de build ou processo mantém saída diferente de zero.
+
+`pnpm --filter web dev` e `pnpm exec turbo run dev --filter=web` continuam sendo
+atalhos avançados, mas não passam pelo coordenador e não oferecem esse tratamento
+de encerramento. O primeiro também não inicia os observadores dos pacotes. Para
+o fluxo completo e o encerramento coordenado, prefira `pnpm dev` na raiz.
 
 A porta padrão continua sendo 3000. É possível definir `PORT` no ambiente para
 usar outra porta, sem encerrar um servidor de desenvolvimento existente.

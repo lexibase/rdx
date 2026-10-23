@@ -14,7 +14,8 @@ const MDX_EXTENSION = '.mdx'
 const DEFAULT_POSITION = Number.MAX_SAFE_INTEGER
 
 function getDocsRoot(docsDir = 'docs') {
-  return path.resolve(process.cwd(), docsDir)
+  // The Next adapter includes configured content explicitly in server traces.
+  return path.resolve(/* turbopackIgnore: true */ process.cwd(), docsDir)
 }
 
 function toTitle(value: string) {
