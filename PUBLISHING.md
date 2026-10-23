@@ -172,4 +172,9 @@ still rejects a fresh version, approve only the exact trusted RDX versions in
 
 ## Promote to stable
 
+Stable-release preparation is tracked in [RELEASE_READINESS.md](./RELEASE_READINESS.md).
+Do not promote these beta packages to `latest` while its launch blockers remain open.
+The generator, runtime, UI, shared types/core and optional plugin must be aligned;
+in particular, assisted plugin installation must not request `@beta` from a stable runtime.
+
 Only promote after validating the beta in a clean directory. Publish the framework packages with stable versions and without `--tag beta`; npm then assigns the `latest` tag. The optional plugin has its own release cycle. The `workspace:*` dependencies between RDX packages are converted to their matching published versions by pnpm during publication.

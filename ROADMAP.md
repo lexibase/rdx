@@ -14,6 +14,9 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
 
 ## Próximas prioridades
 
+- [ ] Preparar a primeira versão estável **antes da tradução da interface**.
+      Seguir o checklist e os bloqueadores de `RELEASE_READINESS.md`. Estabilizar
+      a experiência atual sem adicionar recursos ou alterar versões a cada ajuste.
 - [x] Suporte completo a `public/` na raiz do projeto: criar a pasta no template,
       disponibilizar imagens, favicon e downloads em desenvolvimento e produção,
       sem exigir alterações manuais em `.rdx/`.
@@ -36,10 +39,21 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       Workflow em Linux/Node 22 e Windows/Node 24, sem publicação automática.
       A execução remota começa após enviar a PR; detalhes em `CI.md`.
 - [ ] Melhorar erros e validação dos argumentos da CLI e a documentação de uso.
+      Primeira etapa: validação compartilhada do gerador, ajuda, proteção de
+      destinos existentes e recuperação de falhas; conclusão completa depende
+      das validações interativas e documentação da release.
 - [ ] Metadados por página, sitemap e documentação de deploy na framework.
 
 ## Depois da consolidação da base
 
+- [ ] Personalização das cores de destaque (highlighting) da documentação.
+      Oferecer paletas prontas e avaliar cores personalizadas pelo autor via
+      `rdx.config.ts`, com escolha opcional durante a criação pela CLI. Definir
+      quais elementos acompanham a cor (links, estados ativos, realces etc.) e
+      se os temas de syntax highlighting dos code blocks serão uma opção
+      separada. Preservar contraste, foco acessível, modos claro/escuro e a base
+      shadcn/ui + Tailwind, sem exigir edição de `.rdx/`. A interface e o formato
+      da configuração ainda serão definidos; melhoria futura, fora da 1.0.0.
 - [ ] Evoluir Markdown/MDX e componentes próprios: tabelas, listas de tarefas,
       código com destaque/cópia, Callout, Tabs, Steps e Cards.
 - [ ] Documentar a extensão e substituição de componentes MDX pelo usuário.

@@ -64,6 +64,7 @@ const required = {
   'rdx-plugin-versioning': ['dist/index.js', 'dist/index.d.ts'],
   'create-rdx': [
     'bin/index.js',
+    'bin/options.mjs',
     'templates/default/package.json',
     'templates/default/rdx.config.ts',
     'templates/default/gitignore.template',
