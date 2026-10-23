@@ -22,7 +22,12 @@ assert.equal(
   '.rdx-package-smoke',
   'The smoke-test directory must stay inside this workspace.'
 )
-const temporary = await mkdtemp(path.join(base, 'release-'))
+const timestamp = new Date()
+  .toISOString()
+  .replaceAll(':', '-')
+  .replace('T', '_')
+  .replace('Z', 'UTC')
+const temporary = await mkdtemp(path.join(base, `release-${timestamp}-`))
 const directories = [
   'rdx-types',
   'rdx-core',
