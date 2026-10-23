@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import fs from 'node:fs'
 import {
   mkdtemp,
   mkdir,
@@ -90,6 +91,68 @@ test('enabled versioning initializes on prepare, snapshots docs, and preserves a
   assert.equal(
     resolveDocsRoute(archived, ['1.0.0', 'guides', 'intro']).document.content,
     'Original documentation'
+  )
+})
+
+test('snapshots reserve the root and copy only into absent destinations on newer Node releases', async (t) => {
+  const rootDir = await fixture(t)
+  await mkdir(path.join(rootDir, 'docs/empty'))
+  const project = await createRdxProject(config(), {
+    rootDir,
+    command: 'prepare',
+  })
+  const snapshotDir = path.join(rootDir, 'versioned_docs/version-1.0.0')
+  const originalCopy = fs.cpSync
+  const destinations = []
+  t.mock.method(fs, 'cpSync', (source, destination, options) => {
+    assert.ok(fs.statSync(snapshotDir).isDirectory())
+    assert.equal(fs.existsSync(destination), false)
+    assert.equal(options.force, false)
+    assert.equal(options.errorOnExist, true)
+    destinations.push(path.relative(snapshotDir, destination))
+    return originalCopy(source, destination, options)
+  })
+  await project.commands[0].run({
+    rootDir,
+    config: project.config,
+    command: 'version',
+    args: ['1.0.0'],
+  })
+  assert.deepEqual(destinations.sort(), ['empty', 'guides'])
+  assert.ok(fs.statSync(path.join(snapshotDir, 'empty')).isDirectory())
+  assert.equal(
+    await readFile(path.join(snapshotDir, 'guides/intro.mdx'), 'utf8'),
+    'Original documentation'
+  )
+})
+
+test('snapshot directories missing from the manifest are still never overwritten', async (t) => {
+  const rootDir = await fixture(t)
+  const project = await createRdxProject(config(), {
+    rootDir,
+    command: 'prepare',
+  })
+  const snapshotDir = path.join(rootDir, 'versioned_docs/version-1.0.0')
+  await mkdir(snapshotDir, { recursive: true })
+  await writeFile(path.join(snapshotDir, 'keep.txt'), 'Existing snapshot')
+  await assert.rejects(
+    async () =>
+      project.commands[0].run({
+        rootDir,
+        config: project.config,
+        command: 'version',
+        args: ['1.0.0'],
+      }),
+    /never overwritten/
+  )
+  assert.deepEqual(fs.readdirSync(snapshotDir), ['keep.txt'])
+  assert.equal(
+    await readFile(path.join(snapshotDir, 'keep.txt'), 'utf8'),
+    'Existing snapshot'
+  )
+  assert.deepEqual(
+    JSON.parse(await readFile(path.join(rootDir, 'versions.json'))),
+    { active: [], archived: [] }
   )
 })
 
