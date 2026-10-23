@@ -62,8 +62,9 @@ Não ocupam nem encerram o servidor de desenvolvimento da porta 3000.
 
 ## Desenvolvimento local
 
-Na raiz, basta executar `pnpm dev`. O Turbo prepara os builds das dependências
-antes de iniciar o site e mantém os pacotes compilados em modo de observação:
+Na raiz, basta executar `pnpm dev`. O coordenador local em Node prepara os builds
+das dependências pelo Turbo e inicia os processos contínuos diretamente, sem
+camadas de `pnpm.CMD` para cada observador no Windows:
 
 - Core, runtime Next e plugin de versões recompilam os arquivos locais de `src/`
   para `dist/` quando são alterados.
@@ -74,10 +75,17 @@ antes de iniciar o site e mantém os pacotes compilados em modo de observação:
 Não é necessário publicar no npm para testar. Os vínculos continuam sendo
 `workspace:*`. O modo de observação não limpa `dist/` a cada alteração.
 
-Para trabalhar somente no site e nos pacotes compilados que ele consome, execute
-`pnpm exec turbo run dev --filter=web` na raiz. Esse comando também inicia os
-observadores de core, tipos e plugin de versionamento. Já `pnpm --filter web dev` inicia diretamente o
-Next, sem a orquestração do Turbo, e não inicia os observadores.
+Use um único `Ctrl+C` para encerrar o servidor e seus observadores. No terminal
+interativo, o coordenador captura essa tecla antes que ela seja propagada aos
+arquivos batch do gerenciador e restaura o modo original do terminal ao terminar.
+Somente as árvores de processos iniciadas por essa execução são encerradas; não
+há comandos que matem todos os processos Node. Cancelamento intencional retorna
+sucesso, mas uma falha real de build ou processo mantém saída diferente de zero.
+
+`pnpm --filter web dev` e `pnpm exec turbo run dev --filter=web` continuam sendo
+atalhos avançados, mas não passam pelo coordenador e não oferecem esse tratamento
+de encerramento. O primeiro também não inicia os observadores dos pacotes. Para
+o fluxo completo e o encerramento coordenado, prefira `pnpm dev` na raiz.
 
 A porta padrão continua sendo 3000. É possível definir `PORT` no ambiente para
 usar outra porta, sem encerrar um servidor de desenvolvimento existente.
