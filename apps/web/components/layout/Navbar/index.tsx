@@ -4,12 +4,14 @@ import { DropdownVersion } from '@/components/Dropdown'
 import config from '@/rdx.config'
 
 import { NavbarLinks } from './links'
+import { NavbarSearch } from './search'
 
 export function Navbar() {
   const BrandLogo = config.navbar.logo
   return (
     <SharedNavbar
       title={config.navbar.title ?? ''}
+      search={config.search ? <NavbarSearch /> : undefined}
       siteTitle={config.title}
       logo={<BrandLogo className="size-5" />}
       versionMenu={<DropdownVersion />}

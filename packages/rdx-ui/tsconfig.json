@@ -1,6 +1,7 @@
 {
   "extends": "@rdx/typescript-config/react-library.json",
   "compilerOptions": {
+    "types": ["node", "react", "react-dom"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "outDir": "dist",

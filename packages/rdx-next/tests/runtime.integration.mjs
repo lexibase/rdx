@@ -281,6 +281,8 @@ test(
     assert.equal(redirect.status, 307, running.logs())
     assert.equal(redirect.headers.get('location'), '/docs')
     const plain = await (await fetch(`${running.base}/docs/init/intro`)).text()
+    assert.doesNotMatch(plain, /data-rdx-search-trigger/)
+    assert.equal((await fetch(`${running.base}/rdx-search/_`)).status, 404)
     assert.doesNotMatch(plain, /data-rdx-version-trigger/)
     assert.match(plain, /data-rdx-navbar/)
     assert.match(plain, />Docs</)
@@ -359,7 +361,7 @@ test(
 
     await writeFile(
       configPath,
-      `export default { title: 'Fixture docs', homepage: { enabled: true } }`
+      `export default { title: 'Fixture docs', search: true, homepage: { enabled: true } }`
     )
     await command(rootDir, cli, ['prepare'])
     running = await server(rootDir, 'dev')
@@ -367,13 +369,43 @@ test(
     assert.match(defaultHome, /data-rdx-home/)
     assert.match(defaultHome, /viewBox="0 0 681 606"/)
     assert.doesNotMatch(defaultHome, /data-rdx-version-trigger/)
+    assert.match(defaultHome, /data-rdx-search-trigger/)
+    const devIndex = await (await fetch(`${running.base}/rdx-search/_`)).json()
+    assert.equal(devIndex.schemaVersion, 1)
+    const liveProbe = path.join(rootDir, 'docs/init/search-probe.mdx')
+    await writeFile(
+      liveProbe,
+      '---\ntitle: Search probe\n---\nFirstSearchMarker'
+    )
+    assert.match(
+      JSON.stringify(
+        await (await fetch(`${running.base}/rdx-search/_`)).json()
+      ),
+      /FirstSearchMarker/
+    )
+    await writeFile(
+      liveProbe,
+      '---\ntitle: Search probe\n---\nSecondSearchMarker'
+    )
+    const editedIndex = JSON.stringify(
+      await (await fetch(`${running.base}/rdx-search/_`)).json()
+    )
+    assert.match(editedIndex, /SecondSearchMarker/)
+    assert.doesNotMatch(editedIndex, /FirstSearchMarker/)
+    await rm(liveProbe)
+    assert.doesNotMatch(
+      JSON.stringify(
+        await (await fetch(`${running.base}/rdx-search/_`)).json()
+      ),
+      /SecondSearchMarker/
+    )
     running.close()
     running = undefined
 
     await writeFile(
       configPath,
       `import { versioning } from '@lexibase/rdx-versioning'
-export default { title: 'RDX', TOC: true, homepage: { enabled: true }, navbar: { title: '', actions: { github: { visible: true, url: 'https://github.com/lexibase/rdx' } } }, plugins: [versioning()] }`
+export default { title: 'RDX', TOC: true, search: true, homepage: { enabled: true }, navbar: { title: '', actions: { github: { visible: true, url: 'https://github.com/lexibase/rdx' } } }, plugins: [versioning()] }`
     )
     await command(rootDir, cli, ['prepare'])
     await command(rootDir, cli, ['version', '1.0.0'])
@@ -393,6 +425,28 @@ export default { title: 'RDX', TOC: true, homepage: { enabled: true }, navbar: {
     await command(rootDir, nextCli, ['build', path.join(rootDir, '.rdx')])
     running = await server(rootDir, 'start')
     const home = await fetch(running.base)
+    const currentSearch = await (
+      await fetch(`${running.base}/rdx-search/_`)
+    ).json()
+    const archivedSearch = await (
+      await fetch(`${running.base}/rdx-search/1.0.0`)
+    ).json()
+    assert.match(JSON.stringify(currentSearch), /Changed live body/)
+    assert.doesNotMatch(JSON.stringify(currentSearch), /Original snapshot body/)
+    assert.match(JSON.stringify(archivedSearch), /Original snapshot body/)
+    assert.doesNotMatch(
+      JSON.stringify(archivedSearch),
+      /Changed live body|sourcePath|frontmatter/
+    )
+    assert.ok(
+      archivedSearch.entries.every((entry) =>
+        entry.href.startsWith('/docs/1.0.0/')
+      )
+    )
+    assert.equal(
+      (await fetch(`${running.base}/rdx-search/missing`)).status,
+      404
+    )
     assert.equal(home.status, 200)
     assert.match(await home.text(), /data-rdx-home/)
     await assertPublicFile(
@@ -480,6 +534,109 @@ export default { title: 'RDX', TOC: true, homepage: { enabled: true }, navbar: {
         const errors = []
         page.on('pageerror', (error) => errors.push(error.message))
         await page.addInitScript(() => localStorage.setItem('theme', 'dark'))
+        let indexRequests = 0
+        page.on('request', (request) => {
+          if (new URL(request.url()).pathname.startsWith('/rdx-search/'))
+            indexRequests++
+        })
+        await page.goto(`${running.base}/docs/init/intro`)
+        const searchTrigger = page.getByRole('button', {
+          name: 'Search documentation',
+          exact: true,
+        })
+        await searchTrigger.waitFor()
+        await page.waitForTimeout(200)
+        assert.equal(
+          indexRequests,
+          0,
+          'The index must not download before opening search'
+        )
+        await page.keyboard.press('Control+k')
+        const searchDialog = page.getByRole('dialog', {
+          name: 'Search documentation',
+          exact: true,
+        })
+        const searchInput = searchDialog.getByRole('combobox', {
+          name: 'Search documentation',
+          exact: true,
+        })
+        await searchInput.waitFor()
+        await searchInput.fill('changed live')
+        await searchDialog.getByRole('option').first().waitFor()
+        assert.ok(indexRequests > 0)
+        assert.equal(
+          await searchInput.evaluate(
+            (element) => element === document.activeElement
+          ),
+          true
+        )
+        await searchInput.fill('not-a-real-search-result-zzzz')
+        await searchDialog
+          .getByText('No results found.', { exact: true })
+          .waitFor()
+        await searchInput.fill('configuration')
+        await searchDialog.getByRole('option').first().waitFor()
+        await page.keyboard.press('ArrowDown')
+        await page.keyboard.press('Enter')
+        await searchDialog.waitFor({ state: 'hidden' })
+        await page.waitForURL(/\/docs\/api\/target#configuration/)
+        await page.goto(`${running.base}/docs/1.0.0/init/intro`)
+        await searchTrigger.click()
+        await searchInput.waitFor()
+        await searchInput.fill('changed live')
+        await searchDialog
+          .getByText('No results found.', { exact: true })
+          .waitFor()
+        await searchInput.fill('original snapshot')
+        await searchDialog.getByRole('option').first().waitFor()
+        await page.keyboard.press('Escape')
+        await searchDialog.waitFor({ state: 'hidden' })
+        await searchTrigger.focus()
+        await page.keyboard.press('Meta+k')
+        await searchInput.waitFor()
+        await page.keyboard.press('Escape')
+        await searchDialog.waitFor({ state: 'hidden' })
+        assert.equal(
+          await searchTrigger.evaluate(
+            (element) => element === document.activeElement
+          ),
+          true
+        )
+        await page.setViewportSize({ width: 390, height: 844 })
+        await searchTrigger.click()
+        await searchInput.waitFor()
+        const searchBounds = await searchDialog.boundingBox()
+        assert.ok(
+          searchBounds.x >= 0 && searchBounds.x + searchBounds.width <= 390
+        )
+        await page.keyboard.press('Escape')
+        await searchDialog.waitFor({ state: 'hidden' })
+        await page.setViewportSize({ width: 1872, height: 955 })
+        const unavailable = await browser.newPage()
+        let rejectedSearch = false
+        await unavailable.route('**/rdx-search/_', (route) => {
+          if (!rejectedSearch) {
+            rejectedSearch = true
+            return route.abort()
+          }
+          return route.continue()
+        })
+        await unavailable.goto(`${running.base}/docs/init/intro`)
+        await unavailable
+          .getByRole('button', { name: 'Search documentation', exact: true })
+          .click()
+        const failedSearch = unavailable.getByRole('dialog', {
+          name: 'Search documentation',
+          exact: true,
+        })
+        await failedSearch
+          .getByRole('button', { name: 'Try again', exact: true })
+          .click()
+        await failedSearch
+          .getByRole('combobox', { name: 'Search documentation', exact: true })
+          .fill('changed live')
+        await failedSearch.getByRole('option').first().waitFor()
+        await unavailable.close()
         await page.goto(`${running.base}/docs/init/short-end`)
         await page
           .getByRole('button', { name: 'On this page', exact: true })

@@ -3,6 +3,7 @@ import { defineConfig } from '../src/config/index'
 defineConfig({
   title: 'Typed docs',
   TOC: true,
+  search: true,
   docsDir: 'content',
   navbar: { logo: () => null, actions: { showToggleMode: true } },
   homepage: { enabled: true, buttons: [{ label: 'Docs', href: '/docs' }] },
@@ -11,6 +12,9 @@ defineConfig({
 
 // @ts-expect-error TOC activation must be boolean, not a string.
 defineConfig({ title: 'Typed docs', TOC: 'false' })
+
+// @ts-expect-error Search activation must be boolean.
+defineConfig({ title: 'Typed docs', search: 'true' })
 
 // @ts-expect-error Homepage activation must be boolean.
 defineConfig({ title: 'Typed docs', homepage: { enabled: 'yes' } })

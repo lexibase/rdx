@@ -29,6 +29,7 @@ test('configuration defaults and legacy runtime config objects remain usable', (
   assert.deepEqual(resolveConfig(input), {
     title: 'RDX',
     TOC: false,
+    search: false,
     description: '',
     docsDir: 'docs',
     lang: 'en',
@@ -45,6 +46,17 @@ test('TOC is opt-in and accepts only booleans', () => {
     assert.throws(
       () => resolveConfig({ title: 'Docs', TOC }),
       /TOC must be a boolean/
+    )
+})
+
+test('search is opt-in and accepts only booleans', () => {
+  assert.equal(resolveConfig({ title: 'Docs' }).search, false)
+  for (const search of [true, false])
+    assert.equal(resolveConfig({ title: 'Docs', search }).search, search)
+  for (const search of ['true', 1, null, {}, []])
+    assert.throws(
+      () => resolveConfig({ title: 'Docs', search }),
+      /search must be a boolean/
     )
 })
 

@@ -100,10 +100,13 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
       'plugins',
       'homepage',
       'TOC',
+      'search',
     ],
     ''
   )
   text(config.title, 'title')
+  if (config.search !== undefined && typeof config.search !== 'boolean')
+    throw new RdxConfigError('search must be a boolean.')
   if (config.TOC !== undefined && typeof config.TOC !== 'boolean')
     throw new RdxConfigError('TOC must be a boolean.')
   if (config.description !== undefined)
@@ -228,6 +231,7 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
   return {
     ...typed,
     TOC: typed.TOC ?? false,
+    search: typed.search ?? false,
     description: typed.description ?? '',
     lang: typed.lang ?? 'en',
     docsDir: typed.docsDir ?? 'docs',

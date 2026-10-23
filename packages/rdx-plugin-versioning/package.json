@@ -1,6 +1,6 @@
 {
   "name": "@lexibase/rdx-versioning",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "description": "Optional documentation snapshots and version navigation for RDX.",
   "license": "MIT",
   "type": "module",
@@ -23,7 +23,7 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=18.18"
+    "node": ">=20.9"
   },
   "repository": {
     "type": "git",
