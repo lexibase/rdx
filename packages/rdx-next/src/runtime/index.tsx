@@ -10,6 +10,7 @@ import type { RdxProject, RdxRuntimeConfig } from '@lexibase/rdx-types'
 import { Button } from '@lexibase/rdx-ui/components/button'
 import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 import { DocsSidebar } from '@lexibase/rdx-ui/components/docs-sidebar'
+import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
 import { Home } from '@lexibase/rdx-ui/components/home'
 import { Logo } from '@lexibase/rdx-ui/components/logo'
 import { mdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
@@ -201,7 +202,10 @@ export async function DocsPage({
           pathname={hrefFor(currentSlug)}
         />
         <div className="flex-1 min-w-0 h-full overflow-y-auto pt-12 md:pt-0 outline-none">
-          <section className="w-full min-h-full px-7 flex flex-col gap-5 pb-8 md:py-8">
+          {project.config.TOC && <DocsToc key={hrefFor(currentSlug)} />}
+          <section
+            className={`w-full min-h-full px-7 flex flex-col gap-5 pb-8 md:py-8 ${project.config.TOC ? 'xl:pr-20' : ''}`}
+          >
             <div className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1">
               <header className="mb-6">
                 {source.badge && (

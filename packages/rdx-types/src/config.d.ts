@@ -3,6 +3,7 @@ import type { RdxPlugin } from './plugins'
 
 /** @deprecated Legacy development website config. New projects use RdxConfig. */
 export type RDXConfig = {
+  TOC?: boolean
   /**
    * The title of the documentation site.
    * Displayed in the navbar and browser tab.
@@ -116,6 +117,8 @@ export type RdxHomepage = {
 }
 
 export type RdxConfig = {
+  /** Floating table of contents for documentation pages. Defaults to false. */
+  TOC?: boolean
   title: string
   description?: string
   lang?: string
@@ -143,8 +146,9 @@ export type RdxRuntimeConfig = RdxConfig
 
 export type ResolvedRdxConfig = Omit<
   RdxConfig,
-  'description' | 'lang' | 'docsDir' | 'theme' | 'plugins'
+  'description' | 'lang' | 'docsDir' | 'theme' | 'plugins' | 'TOC'
 > & {
+  TOC: boolean
   description: string
   lang: string
   docsDir: string

@@ -1,8 +1,10 @@
 import { mdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
+import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
 import { notFound } from 'next/navigation'
 import { mdxLoader, RdxDocumentNotFoundError } from '@rdx/core'
 
 import versionsRaw from '@/versions.json'
+import config from '@/rdx.config'
 import { VersionBanner } from '@/components/Page/version-banner'
 import { DocHeader } from '@/components/Page/doc-header'
 import { DocFooter } from '@/components/Page/doc-footer'
@@ -31,13 +33,18 @@ export default async function DocPage({
   }
 
   return (
-    <section className="w-full h-full overflow-y-auto px-7 flex flex-col gap-5 pb-8 md:py-8">
+    <section
+      className={`w-full h-full overflow-y-auto px-7 flex flex-col gap-5 pb-8 md:py-8 ${config.TOC ? 'xl:pr-20' : ''}`}
+    >
+      {config.TOC && <DocsToc key={`${version}/${doc.join('/')}`} />}
       <div className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0">
         <header className="mb-6">
           <VersionBanner version={version} versionsRaw={versionsRaw} />
           <DocHeader version={version} filename={filename} />
         </header>
-        <main className="h-full w-full flex-1 max-w-[960px]">{content}</main>
+        <main id="rdx-main" className="h-full w-full flex-1 max-w-[960px]">
+          {content}
+        </main>
       </div>
       <DocFooter version={version} filename={filename} />
     </section>

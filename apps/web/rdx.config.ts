@@ -3,6 +3,7 @@ import { Logo } from '@lexibase/rdx-ui/components/logo'
 
 const config: RDXConfig = {
   title: 'RDX',
+  TOC: true,
   description:
     'A tool for building documentation with MDX in a friendly and focused way — fast, easy, and built for clarity',
   author: 'DuHNunes',
