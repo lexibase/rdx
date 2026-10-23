@@ -26,6 +26,8 @@ test('generated projects expose homepage and navbar defaults without activating 
   assert.match(config, /homepage:\s*\{\s*enabled:\s*false/)
   assert.match(config, /TOC:\s*false/)
   assert.match(config, /search:\s*false/)
+  assert.match(config, /metadata:\s*\{/)
+  assert.doesNotMatch(config, /metadataBase:\s*['"]/)
   assert.doesNotMatch(config, /plugins\s*:/)
   await access(path.join(projectDir, 'docs/init/intro.mdx'))
   await access(path.join(projectDir, '.gitignore'))

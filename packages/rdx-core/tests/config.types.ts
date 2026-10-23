@@ -43,6 +43,13 @@ defineConfig({
   TOC: true,
   search: true,
   docsDir: 'content',
+  metadata: {
+    metadataBase: 'https://docs.example.com',
+    authors: [{ name: 'Team' }],
+    robots: { index: false },
+    openGraph: { type: 'website', images: [{ url: '/og.png', width: 1200 }] },
+    twitter: { card: 'summary_large_image' },
+  },
   navbar: { logo: () => null, actions: { showToggleMode: true } },
   homepage: { enabled: true, buttons: [{ label: 'Docs', href: '/docs' }] },
   theme: { defaultTheme: 'dark' },
@@ -50,6 +57,12 @@ defineConfig({
 
 // @ts-expect-error TOC activation must be boolean, not a string.
 defineConfig({ title: 'Typed docs', TOC: 'false' })
+
+// @ts-expect-error Robots configuration uses booleans.
+defineConfig({ title: 'Typed docs', metadata: { robots: { index: 'no' } } })
+
+// @ts-expect-error Only the supported portable metadata fields are accepted.
+defineConfig({ title: 'Typed docs', metadata: { favicon: '/favicon.ico' } })
 
 // @ts-expect-error Search activation must be boolean.
 defineConfig({ title: 'Typed docs', search: 'true' })

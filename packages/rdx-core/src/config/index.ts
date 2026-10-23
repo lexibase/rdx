@@ -1,6 +1,9 @@
 import path from 'node:path'
 import { existsSync } from 'node:fs'
 
+import { validateMetadata } from './metadata.js'
+import { RdxConfigError } from './error.js'
+
 import type {
   RdxConfig,
   RdxContentSource,
@@ -10,12 +13,7 @@ import type {
   ResolvedRdxConfig,
 } from '@lexibase/rdx-types'
 
-export class RdxConfigError extends Error {
-  constructor(message: string) {
-    super(`Invalid rdx.config.ts: ${message}`)
-    this.name = 'RdxConfigError'
-  }
-}
+export { RdxConfigError } from './error.js'
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -93,6 +91,7 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
     [
       'title',
       'description',
+      'metadata',
       'lang',
       'docsDir',
       'theme',
@@ -113,6 +112,7 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
     text(config.description, 'description', true)
   if (config.lang !== undefined) text(config.lang, 'lang')
   if (config.docsDir !== undefined) text(config.docsDir, 'docsDir')
+  if (config.metadata !== undefined) validateMetadata(config.metadata)
 
   if (config.homepage !== undefined) {
     const homepage = object(config.homepage, 'homepage')

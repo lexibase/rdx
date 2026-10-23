@@ -2,10 +2,11 @@ import type { Metadata } from 'next'
 import { Bebas_Neue, Space_Mono } from 'next/font/google'
 import '@lexibase/rdx-ui/globals.css'
 import { ThemeProvider } from '@lexibase/rdx-ui/providers/theme-provider'
+import { getRdxMetadata } from '@lexibase/rdx-next/runtime'
 
 import { Navbar } from '@/components/layout/Navbar'
 import { VersionProvider } from '@/contexts/version-docs'
-import config, { siteMetadata } from '@/rdx.config'
+import config from '@/rdx.config'
 import { getDocumentation } from '@/lib/docs'
 
 const bebas = Bebas_Neue({
@@ -19,51 +20,7 @@ const spaceMono = Space_Mono({
   weight: '400',
 })
 
-export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  ),
-  icons: {
-    icon: siteMetadata.favicon,
-  },
-  title: config.title,
-  description: config.description,
-  authors: [
-    { name: siteMetadata.author, url: config.navbar.actions?.github?.url },
-  ],
-  keywords: [
-    'duhnunes',
-    'RDX',
-    'documentation',
-    'documento',
-    'padrão',
-    'pt-br',
-    'ptbr',
-    'nextjs',
-    'mdx',
-    'rdx',
-  ],
-  robots: 'index, follow',
-  openGraph: {
-    title: config.title,
-    description: config.description,
-    url: siteMetadata.url,
-    images: [
-      {
-        url: '/icons/favicon-96x96.png',
-        width: 1200,
-        height: 630,
-        alt: 'RDX Open Graph Image TEMPORARY',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: config.title,
-    description: config.description,
-    images: ['/icons/favicon-96x96.png'],
-  },
-}
+export const metadata: Metadata = getRdxMetadata(config)
 
 export default async function RootLayout({
   children,
@@ -74,17 +31,7 @@ export default async function RootLayout({
   return (
     <html suppressHydrationWarning lang={config.lang}>
       <head>
-        {/* FAVICON */}
-        <link
-          href="/icons/favicon-96x96.png"
-          rel="icon"
-          sizes="96x96"
-          type="image/png"
-        />
-        <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml" />
-        <link href={siteMetadata.favicon} rel="shortcut icon" />
         <meta content={config.title} name="apple-mobile-web-app-title" />
-        <link href="/site.webmanifest" rel="manifest" />
 
         {/* MOBILE BAR COLOR */}
         <meta name="theme-color" content="#0a0a0a" />

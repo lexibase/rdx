@@ -67,3 +67,40 @@ set `outputFileTracingRoot` to include the documentation project root. Generated
 `.rdx/next.config.mjs` already does this. Do not remove the explicit tracing
 configuration: the core intentionally does not ask Turbopack to trace arbitrary
 project-relative filesystem paths.
+
+## Site metadata
+
+Configure SEO in `rdx.config.ts`; the generated layout uses Next.js's native
+Metadata API. Existing `title` and `description` remain at the top level.
+
+```ts
+export default defineConfig({
+  title: 'My documentation',
+  description: 'Learn how to use our project.',
+  metadata: {
+    metadataBase: 'https://docs.example.com',
+    authors: [{ name: 'My team', url: 'https://example.com' }],
+    keywords: ['documentation', 'my-project'],
+    icons: { icon: '/favicon.ico' },
+    robots: { index: true, follow: true },
+    openGraph: {
+      type: 'website',
+      images: [{ url: '/og.png', width: 1200, height: 630, alt: 'My project' }],
+    },
+    twitter: { card: 'summary_large_image', images: ['/og.png'] },
+  },
+})
+```
+
+`metadata` is optional and the starter provides an empty object. Set
+`metadataBase` to your real public URL when deploying; RDX does not invent a
+production domain or force localhost. Image, favicon and manifest paths refer
+to files you create in `public/`. Nothing creates those assets automatically.
+
+Supported fields are `metadataBase` (an absolute http(s) string),
+`applicationName`, `authors`, `keywords`, `icons`, `manifest`, `robots`,
+`openGraph` and `twitter`. TypeScript describes the supported nested options,
+and invalid fields fail during configuration validation. This is a portable
+subset, not an unrestricted pass-through of all Next.js metadata options.
+Open Graph and Twitter inherit the site title/description unless overridden.
+No site-wide canonical or fixed Open Graph URL is emitted for every document.

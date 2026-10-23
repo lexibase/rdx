@@ -117,6 +117,38 @@ export type RdxHomepage = {
   buttons?: { label: string; href: string }[]
 }
 
+/** Portable subset of Next.js metadata. Asset paths refer to public/. */
+export type RdxMetadata = {
+  /** Absolute http(s) deployment URL. No localhost or example URL is assumed. */
+  metadataBase?: string
+  applicationName?: string
+  authors?: { name: string; url?: string }[]
+  keywords?: string[]
+  icons?: {
+    icon?: string | { url: string; sizes?: string; type?: string }[]
+    shortcut?: string
+    apple?: string
+  }
+  manifest?: string
+  robots?: { index?: boolean; follow?: boolean }
+  openGraph?: {
+    title?: string
+    description?: string
+    siteName?: string
+    locale?: string
+    type?: 'website'
+    images?: { url: string; width?: number; height?: number; alt?: string }[]
+  }
+  twitter?: {
+    card?: 'summary' | 'summary_large_image'
+    title?: string
+    description?: string
+    site?: string
+    creator?: string
+    images?: string[]
+  }
+}
+
 export type RdxConfig = {
   /** Local documentation search. Defaults to false. */
   search?: boolean
@@ -125,6 +157,7 @@ export type RdxConfig = {
   title: string
   description?: string
   lang?: string
+  metadata?: RdxMetadata
   docsDir?: string
   homepage?: RdxHomepage
   plugins?: RdxPlugin[]

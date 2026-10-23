@@ -26,8 +26,10 @@ movidos sem alterar seu conteúdo. Os pacotes privados de core e versionamento
 redundantes foram removidos. Os componentes e estilos aprovados continuam os mesmos.
 
 `rdx.config.ts` é validado pelo contrato atual e ativa `versioning()` em `plugins`.
-O export nomeado `siteMetadata` contém apenas metadados específicos deste site
-(autor, favicon e endereço), que não são opções do contrato público atual.
+Site SEO is configured in `metadata` inside `defineConfig`, using the same
+validated public contract and Next.js metadata adapter as CLI-generated projects.
+There is no separate `siteMetadata` export. Set `metadata.metadataBase` to the
+public deployment URL and keep referenced icons and share images in `public/`.
 Os componentes de navegador recebem somente opções serializáveis do servidor;
 não importam o plugin nem código de sistema de arquivos.
 

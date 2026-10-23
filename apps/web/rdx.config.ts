@@ -3,15 +3,50 @@ import type { RdxConfig } from '@lexibase/rdx-types'
 import { versioning } from '@lexibase/rdx-versioning'
 import { Logo } from '@lexibase/rdx-ui/components/logo'
 
-// Site-specific metadata stays outside the portable framework configuration.
-export const siteMetadata = {
-  author: 'DuHNunes',
-  favicon: '/favicon.ico',
-  url: 'https://rdx-tool.vercel.app',
-}
-
 const config = {
   title: 'RDX',
+  metadata: {
+    metadataBase:
+      process.env.NEXT_PUBLIC_SITE_URL || 'https://rdx-tool.vercel.app',
+    applicationName: 'RDX',
+    authors: [{ name: 'DuHNunes', url: 'https://github.com/lexibase/rdx' }],
+    keywords: [
+      'duhnunes',
+      'RDX',
+      'documentation',
+      'documento',
+      'padrão',
+      'pt-br',
+      'ptbr',
+      'nextjs',
+      'mdx',
+      'rdx',
+    ],
+    icons: {
+      icon: [
+        { url: '/icons/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+        { url: '/icons/favicon.svg', type: 'image/svg+xml' },
+      ],
+      shortcut: '/favicon.ico',
+    },
+    manifest: '/site.webmanifest',
+    robots: { index: true, follow: true },
+    openGraph: {
+      type: 'website',
+      images: [
+        {
+          url: '/icons/favicon-96x96.png',
+          width: 1200,
+          height: 630,
+          alt: 'RDX Open Graph Image TEMPORARY',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      images: ['/icons/favicon-96x96.png'],
+    },
+  },
   lang: 'pt-BR',
   docsDir: 'docs',
   homepage: { enabled: true },

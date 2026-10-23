@@ -27,6 +27,7 @@ import { compileDocumentation } from './mdx'
 
 export { createRdxProject, getProjectDocsPaths } from '@lexibase/rdx-core'
 export { getSearchResponse, getSearchSources } from './search'
+export { getRdxMetadata } from './metadata'
 
 export function RdxLayout({
   children,

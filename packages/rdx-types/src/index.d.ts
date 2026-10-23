@@ -4,6 +4,7 @@ export {
   RDXConfig,
   RdxConfig,
   RdxHomepage,
+  RdxMetadata,
   RdxRuntimeConfig,
   ResolvedRdxConfig,
 } from './config'
