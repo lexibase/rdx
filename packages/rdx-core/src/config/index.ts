@@ -70,7 +70,7 @@ export function resolveProjectPath(
   field: string
 ) {
   text(value, field)
-  const resolved = path.resolve(rootDir, value)
+  const resolved = path.resolve(/* turbopackIgnore: true */ rootDir, value)
   const relative = path.relative(rootDir, resolved)
   if (
     path.isAbsolute(value) ||
@@ -252,7 +252,7 @@ export async function createRdxProject(
     command = 'runtime',
   }: { rootDir?: string; command?: string } = {}
 ): Promise<RdxProject> {
-  rootDir = path.resolve(rootDir)
+  rootDir = path.resolve(/* turbopackIgnore: true */ rootDir)
   const config = resolveConfig(input)
   const docsRoot = resolveProjectPath(rootDir, config.docsDir, 'docsDir')
   const sources: RdxContentSource[] = [
@@ -264,6 +264,7 @@ export async function createRdxProject(
     },
   ]
   const commands: RdxPluginCommand[] = []
+  const runtimeFiles = new Set<string>()
   const commandNames = new Set([
     'dev',
     'build',
@@ -301,6 +302,18 @@ export async function createRdxProject(
     }
     if (result === undefined) continue
     const contribution = object(result, `plugin "${plugin.name}" setup result`)
+    if (contribution.runtimeFiles !== undefined) {
+      if (!Array.isArray(contribution.runtimeFiles))
+        throw new RdxConfigError(
+          `plugin "${plugin.name}" runtimeFiles must be an array.`
+        )
+      for (const value of contribution.runtimeFiles) {
+        const field = `plugin "${plugin.name}" runtimeFiles`
+        const filename = text(value, field)
+        const resolved = resolveProjectPath(rootDir, filename, field)
+        runtimeFiles.add(path.relative(rootDir, resolved))
+      }
+    }
     if (contribution.sources === undefined) continue
     if (!Array.isArray(contribution.sources))
       throw new RdxConfigError(
@@ -333,8 +346,18 @@ export async function createRdxProject(
         )
       }
       if (
-        existsSync(path.join(docsRoot, prefix)) ||
-        existsSync(path.join(docsRoot, `${prefix}.mdx`))
+        existsSync(
+          /* turbopackIgnore: true */ path.join(
+            /* turbopackIgnore: true */ docsRoot,
+            prefix
+          )
+        ) ||
+        existsSync(
+          /* turbopackIgnore: true */ path.join(
+            /* turbopackIgnore: true */ docsRoot,
+            `${prefix}.mdx`
+          )
+        )
       ) {
         throw new RdxConfigError(
           `content source ${id} conflicts with live documentation at /docs/${prefix}.`
@@ -345,5 +368,5 @@ export async function createRdxProject(
       sources.push(source as RdxContentSource)
     }
   }
-  return { rootDir, config, sources, commands }
+  return { rootDir, config, sources, commands, runtimeFiles: [...runtimeFiles] }
 }

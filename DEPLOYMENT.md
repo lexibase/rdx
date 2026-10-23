@@ -68,6 +68,13 @@ Se personalizou `docsDir` ou os caminhos do plugin, mantenha essas pastas em vez
 dos nomes padrão. Não copie somente `.rdx/.next`: o runtime também precisa da
 configuração, componentes locais, fontes e arquivos públicos do projeto.
 
+O build delimita os arquivos de conteúdo do servidor por meio de
+`outputFileTracingIncludes`: documentos `.mdx`, `_category.json` e arquivos
+de runtime declarados pelos plugins (incluindo manifests personalizados).
+Isso evita rastrear a árvore inteira do projeto. Não muda a receita acima:
+não significa que copiar apenas o build seja suficiente para `rdx start`, nem
+constitui validação de deploy serverless ou standalone.
+
 A receita inicial é **instalar e compilar no destino**, não transportar
 `node_modules` ou builds entre Windows/Linux ou diferentes versões de Node.
 Transferência de artefatos entre máquinas e mudança de caminho após o build

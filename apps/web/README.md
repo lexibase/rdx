@@ -48,10 +48,12 @@ segunda aplicação `.rdx/` dentro de si. `docs:prepare` valida o projeto com o 
 sem reconstruir o manifest a partir de nomes de pastas. Não há hook `prepare` na
 instalação que exija pacotes compilados antes do primeiro build do monorepo.
 
-O build com Turbopack ainda avisa sobre rastreamento amplo de arquivos nas funções
-dinâmicas do core público. Os documentos do site estão incluídos explicitamente em
-`next.config.js`, mas a redução desse rastreamento é uma pendência antes de validar
-o deploy público; não esconder o aviso nem considerar a migração concluída.
+O `next.config.js` usa `getRdxTracingConfig` do adaptador compartilhado. Ele inclui
+explicitamente os documentos e `_category.json` de cada fonte configurada, além
+dos arquivos de runtime declarados pelos plugins (como o manifest de versões).
+As leituras dinâmicas do core não rastreiam mais a árvore inteira do projeto.
+Há testes dos arquivos efetivamente listados para o deploy e das páginas em
+produção. Isso não substitui a validação de uma hospedagem pública.
 
 ## Validação
 

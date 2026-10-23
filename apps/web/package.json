@@ -18,6 +18,7 @@
     "docs:version": "tsx scripts/project.ts version"
   },
   "dependencies": {
+    "@lexibase/rdx-next": "workspace:*",
     "@lexibase/rdx-core": "workspace:*",
     "@lexibase/rdx-versioning": "workspace:*",
     "@lexibase/rdx-ui": "workspace:*",

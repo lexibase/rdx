@@ -14,6 +14,7 @@ const plugin: RdxPlugin = {
     const context: [string, string, string] = [rootDir, command, config.title]
     void context
     return {
+      runtimeFiles: ['meta/manifest.json'],
       sources: [
         {
           id: 'snapshot',

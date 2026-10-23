@@ -1,17 +1,13 @@
+import { fileURLToPath } from 'node:url'
+
+import { getRdxTracingConfig } from '@lexibase/rdx-next/config'
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  ...(await getRdxTracingConfig({
+    rootDir: fileURLToPath(new URL('.', import.meta.url)),
+  })),
   agentRules: false,
-  // Documentation sources select version folders at runtime. Trace their content
-  // explicitly instead of letting dynamic filesystem calls include the repo.
-  outputFileTracingIncludes: {
-    '/docs/**': [
-      './docs/**/*.mdx',
-      './docs/**/_category.json',
-      './versioned_docs/**/*.mdx',
-      './versioned_docs/**/_category.json',
-      './versions.json',
-    ],
-  },
   transpilePackages: ['@lexibase/rdx-ui', 'next-mdx-remote'],
 }
 

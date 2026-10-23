@@ -61,6 +61,11 @@ exato das mensagens, logs do Next.js ou localização dos caches como API estáv
   configuração e plugins. A importação da configuração não inicia o Next.js.
 - `@lexibase/rdx-next/runtime`, `/styles.css` e `/postcss.config`: integrações do
   adaptador usadas pelo runtime gerado; não importar o runtime em código client.
+- `@lexibase/rdx-next/config`: `getRdxTracingConfig({ rootDir, appDir? })`, para
+  aplicações Next nativas usando o core. Carrega `rdx.config.ts` e retorna
+  `outputFileTracingIncludes` com os arquivos de conteúdo e runtime necessários.
+  `appDir` é a pasta do `next.config`, por padrão igual a `rootDir`. O runtime
+  gerado já aplica esta configuração; ela não é uma opção de `rdx.config.ts`.
 - `@lexibase/rdx-core`: indexação (`getDocument`, `getDocsIndex`, `getDocsPaths`),
   links (`createDocumentLinkResolver`, `RdxDocumentLinkError`), configuração
   (`createRdxProject`, `defineConfig`, `resolveConfig`, `resolveProjectPath`,
@@ -95,6 +100,13 @@ Um plugin tem `name` único, `apiVersion: 1`, `setup` opcional e comandos opcion
 Cada fonte tem `id`, `label`, `docsDir`, `routePrefix` e `badge` opcional.
 IDs/prefixos são únicos; prefixos são um segmento seguro e não podem esconder
 documentação existente. Fontes não são limitadas a versões pelo core.
+
+O resultado de `setup` também pode declarar `runtimeFiles: string[]`. São arquivos
+relativos à raiz que o plugin precisa ler em produção, como seu manifest. Caminhos
+absolutos, fora da raiz ou a própria raiz são recusados. O core os normaliza e
+deduplica em `RdxProject.runtimeFiles`; o adaptador Next exige arquivos existentes
+e os inclui explicitamente no deploy. Não usar esse campo para assets públicos,
+que continuam em `public/`. Plugins existentes sem esse campo continuam válidos.
 
 Comandos têm `name`, `description` e `run(context)`, com `args: string[]` além
 do contexto de plugin. Nomes reservados ou duplicados são recusados. Hooks seguem

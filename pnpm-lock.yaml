@@ -29,6 +29,9 @@ importers:
       '@lexibase/rdx-core':
         specifier: workspace:*
         version: link:../../packages/rdx-core
+      '@lexibase/rdx-next':
+        specifier: workspace:*
+        version: link:../../packages/rdx-next
       '@lexibase/rdx-ui':
         specifier: workspace:*
         version: link:../../packages/rdx-ui

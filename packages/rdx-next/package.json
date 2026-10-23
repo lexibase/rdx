@@ -11,6 +11,10 @@
     "rdx": "./bin/rdx.mjs"
   },
   "exports": {
+    "./config": {
+      "types": "./config.d.mts",
+      "import": "./config.mjs"
+    },
     "./postcss.config": "./postcss.config.mjs",
     "./styles.css": {
       "types": "./src/runtime/styles.d.css.ts",
@@ -26,6 +30,8 @@
     }
   },
   "files": [
+    "config.mjs",
+    "config.d.mts",
     "bin",
     "dist",
     "templates",
