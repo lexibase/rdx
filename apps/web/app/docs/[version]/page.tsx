@@ -1,5 +1,6 @@
-import { docsIndexer } from '@rdx/core'
-import { redirect } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
+
+import { docsIndexer } from '@/lib/docs'
 
 export default async function VersionRoot({
   params,
@@ -14,5 +15,5 @@ export default async function VersionRoot({
     redirect(firstHref)
   }
 
-  redirect(`/404`)
+  notFound()
 }

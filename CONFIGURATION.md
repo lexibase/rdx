@@ -353,8 +353,8 @@ protections off in this release.
 ## Legacy development website
 
 `apps/web` still uses its original routes and private `@rdx/rdx-versioning`
-helper. Version-specific legacy loaders now live in private `@rdx/core`
-compatibility code. They are not shipped in `@lexibase/rdx-core`. The new plugin
+helper. Content indexing and loading now use the local workspace package
+`@lexibase/rdx-core`; the redundant private core package has been removed. The new plugin
 uses the existing active/archived manifest format but has an independent snapshot
 layout, so migrating old content requires copying the appropriate version trees.
 This keeps the old showcase usable without making new projects depend on it.

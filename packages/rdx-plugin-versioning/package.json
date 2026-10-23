@@ -15,6 +15,7 @@
     "README.md"
   ],
   "scripts": {
+    "dev": "tsup src/index.ts --format esm --dts --watch --external @lexibase/rdx-core --external @lexibase/rdx-types",
     "build": "tsup src/index.ts --format esm --dts --clean --external @lexibase/rdx-core --external @lexibase/rdx-types",
     "check-types": "tsc --noEmit",
     "test": "node --test tests/*.test.mjs"

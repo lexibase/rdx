@@ -46,6 +46,12 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
 
 ## Depois da consolidação da base
 
+- [ ] Convergir o site oficial e o runtime instalado sem perder Canary, URLs ou
+      documentação histórica. Primeira etapa: `apps/web` usa o indexador e leitor
+      públicos de `@lexibase/rdx-core`, com compatibilidade para suas pastas e URLs
+      existentes. Ainda falta alinhar configuração, gerenciamento de versões e
+      estrutura física ao runtime/plugin atual; não confundir com migração completa.
+
 - [ ] Personalização das cores de destaque (highlighting) da documentação.
       Oferecer paletas prontas e avaliar cores personalizadas pelo autor via
       `rdx.config.ts`, com escolha opcional durante a criação pela CLI. Definir

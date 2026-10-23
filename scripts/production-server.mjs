@@ -22,7 +22,7 @@ export async function withProductionServer(
   entry,
   cwd,
   verify,
-  { timeoutMs = 90_000 } = {}
+  { timeoutMs = 90_000, readyPath = '/docs/init/intro' } = {}
 ) {
   const port = await availablePort()
   const base = `http://127.0.0.1:${port}`
@@ -117,7 +117,7 @@ export async function withProductionServer(
         'Production fixture exited before becoming ready'
       )
       try {
-        const response = await fetch(`${base}/docs/init/intro`, {
+        const response = await fetch(`${base}${readyPath}`, {
           signal: AbortSignal.timeout(Math.min(3_000, timeoutMs)),
         })
         await response.arrayBuffer()
