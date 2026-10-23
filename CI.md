@@ -26,6 +26,23 @@ Os testes dos pacotes não dependem de suas versões já estarem publicadas no n
 Dependências de terceiros ainda são baixadas do registry. O projeto temporário
 tem sua própria resolução de dependências; o lockfile do monorepo não o governa.
 As pastas de teste ficam em `.rdx-package-smoke/`, ignoradas pelo Git.
+Novas execuções usam nomes com data/hora UTC antes do sufixo único, permitindo
+ordenar as pastas cronologicamente; as pastas antigas não são renomeadas.
+
+Para preparar um projeto independente com os arquivos de uma execução aprovada:
+
+```powershell
+pnpm test:deploy --from .rdx-package-smoke/release-EXEMPLO --out ../rdx-deploy-test
+```
+
+O exportador não instala nem publica nada. Ele recusa destinos existentes, copia
+somente fontes e os cinco pacotes de runtime para `vendor/`, substitui referências
+locais por caminhos relativos e não copia credenciais, caches ou lockfiles antigos.
+No destino, execute `pnpm install`, `pnpm build` e `pnpm start`. Commitar também o
+novo `pnpm-lock.yaml` e `vendor/*.tgz`; os pacotes são intencionais neste teste.
+O `vercel.json` usa Next.js e saída `.rdx/.next`, conforme a opção de
+[outputDirectory da Vercel](https://vercel.com/docs/project-configuration/vercel-json#outputdirectory).
+A configuração é candidata à validação pública, não prova de deploy concluído.
 
 Os servidores temporários usam portas livres em `127.0.0.1` e são encerrados
 após sucesso ou falha. O executor possui testes de encerramento e falhas de

@@ -11,6 +11,7 @@
     "check": "pnpm lint && pnpm check-types && pnpm build && pnpm test",
     "test": "turbo run test && node --test scripts/tests/*.test.mjs",
     "test:release": "node scripts/release-smoke.mjs",
+    "test:deploy": "node scripts/create-deploy-test.mjs",
     "prepare": "husky"
   },
   "devDependencies": {
