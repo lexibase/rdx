@@ -34,11 +34,14 @@ lançar, nem adicionar recursos novos durante a estabilização.
 
 ### 2. Contrato público e canais de distribuição
 
+- [x] Consolidar a superfície existente em `PUBLIC_API.md` e adicionar regressões
+      para entradas compiladas, padrões de configuração, aliases e tipos de plugins.
 - [ ] Revisar e congelar o contrato de configuração, comandos, exports públicos,
       componentes MDX e API de plugins v1; documentar limitações e compatibilidade.
-- [ ] Remover o `@beta` fixo de `rdx add versioning` antes de publicar o runtime
+- [x] Remover o `@beta` fixo de `rdx add versioning` antes de publicar o runtime
       estável. Definir o canal pela distribuição do runtime e testar stable,
       beta e RC, sem atualizar silenciosamente plugins já instalados.
+      Restaurar dependências declaradas por `install`, preservando range e seção.
 - [ ] Alinhar os seis pacotes públicos, dependências internas e template para a
       candidata a lançamento. Não enviar um gerador estável que crie um projeto
       com dependências RDX ainda em beta.

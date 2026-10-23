@@ -1,4 +1,41 @@
 import { defineConfig } from '../src/config/index'
+import type {
+  RdxConfig,
+  RdxRuntimeConfig,
+  RdxPlugin,
+} from '@lexibase/rdx-types'
+
+const alias: RdxRuntimeConfig = { title: 'Compatible config' }
+const publicConfig: RdxConfig = alias
+const plugin: RdxPlugin = {
+  name: 'contract-test',
+  apiVersion: 1,
+  async setup({ rootDir, command, config }) {
+    const context: [string, string, string] = [rootDir, command, config.title]
+    void context
+    return {
+      sources: [
+        {
+          id: 'snapshot',
+          label: 'Snapshot',
+          docsDir: 'history',
+          routePrefix: '1.0.0',
+        },
+      ],
+    }
+  },
+  commands: [
+    {
+      name: 'snapshot',
+      description: 'Create snapshot',
+      async run({ args }) {
+        const input: string[] = args
+        void input
+      },
+    },
+  ],
+}
+defineConfig({ ...publicConfig, plugins: [plugin] })
 
 defineConfig({
   title: 'Typed docs',

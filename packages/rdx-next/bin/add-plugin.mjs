@@ -11,6 +11,44 @@ import { createJiti } from 'jiti'
 import { activateVersioning, versioningPackage } from './plugin-config.mjs'
 
 const managers = new Set(['npm', 'pnpm', 'yarn'])
+const runtimeVersion = createRequire(import.meta.url)('../package.json').version
+
+// Internal installer policy; channels belong to the installed runtime release,
+// not the user's docs version, invoking command or dependency range.
+export function versioningInstallRequest(version, declared) {
+  if (declared !== undefined) {
+    if (typeof declared !== 'string' || !declared.trim())
+      throw new Error(
+        'The declared @lexibase/rdx-versioning dependency must be a non-empty string.'
+      )
+    return { kind: 'restore' }
+  }
+  const match =
+    typeof version === 'string' &&
+    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([\da-zA-Z-]+(?:\.[\da-zA-Z-]+)*))?(?:\+[\da-zA-Z-]+(?:\.[\da-zA-Z-]+)*)?$/.exec(
+      version
+    )
+  if (
+    !match ||
+    match[4]
+      ?.split('.')
+      .some(
+        (part) => /^\d+$/.test(part) && part.length > 1 && part.startsWith('0')
+      )
+  )
+    throw new Error(
+      'Cannot select a plugin channel: the RDX runtime version is invalid.'
+    )
+  const prerelease = match[4]?.split('.')[0]
+  if (prerelease && !['beta', 'rc'].includes(prerelease))
+    throw new Error(
+      `Unsupported RDX runtime prerelease channel "${prerelease}". Install and configure the official plugin manually; no channel fallback was attempted.`
+    )
+  return {
+    kind: 'add',
+    specifier: `${versioningPackage}@${prerelease ?? 'latest'}`,
+  }
+}
 
 export function parseAddArguments(args) {
   const [plugin, ...rest] = args
@@ -83,12 +121,17 @@ export async function detectPackageManager(
   return declared ?? locks[0] ?? (managers.has(agent) ? agent : 'npm')
 }
 
-export function installPackage(manager, rootDir, env = process.env) {
+export function installPackage(
+  manager,
+  rootDir,
+  env = process.env,
+  request = versioningInstallRequest(runtimeVersion)
+) {
   return new Promise((resolve, reject) => {
-    const args = [
-      manager === 'npm' ? 'install' : 'add',
-      `${versioningPackage}@beta`,
-    ]
+    const args =
+      request.kind === 'restore'
+        ? ['install']
+        : [manager === 'npm' ? 'install' : 'add', request.specifier]
     const nodeEntry =
       env.npm_config_user_agent?.startsWith(`${manager}/`) &&
       env.npm_execpath &&
@@ -191,8 +234,13 @@ export async function addVersioning(rootDir, options = {}) {
       throw error
   }
   if (!declared || !installed) {
-    log(`Installing ${versioningPackage}@beta with ${manager}...`)
-    await install(manager, rootDir, env)
+    const request = versioningInstallRequest(runtimeVersion, declared)
+    log(
+      request.kind === 'restore'
+        ? `Restoring the declared ${versioningPackage} dependency with ${manager}...`
+        : `Installing ${request.specifier} with ${manager}...`
+    )
+    await install(manager, rootDir, env, request)
   } else
     log(`${versioningPackage} is already installed; preserving its version.`)
 

@@ -177,4 +177,10 @@ Do not promote these beta packages to `latest` while its launch blockers remain 
 The generator, runtime, UI, shared types/core and optional plugin must be aligned;
 in particular, assisted plugin installation must not request `@beta` from a stable runtime.
 
+For stable/RC publication, publish the optional versioning plugin in its matching
+channel before exposing the corresponding runtime and generator. A safe order is
+types → core → UI → versioning → Next runtime → generator. The installer selects
+`latest`, `beta` or `rc` from its installed runtime version; missing tags do not
+fall back. Do not point `latest` at a prerelease while preparing this launch.
+
 Only promote after validating the beta in a clean directory. Publish the framework packages with stable versions and without `--tag beta`; npm then assigns the `latest` tag. The optional plugin has its own release cycle. The `workspace:*` dependencies between RDX packages are converted to their matching published versions by pnpm during publication.
