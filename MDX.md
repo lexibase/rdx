@@ -207,6 +207,7 @@ two or more visible MDX headings (`##` through `######`) produce small marks
 at the right edge. Hover, click, or use the keyboard to open their indented
 links. Following a link keeps the hovered panel open so readers can jump between
 sections; moving the pointer away dismisses it. Escape also closes the panel.
+Section navigation scrolls smoothly unless the reader prefers reduced motion.
 The active section follows the documentation's own scroll container.
 Pages with fewer than two headings and smaller screens hide the control.
 Heading links use the same generated IDs as document fragment links; hidden
