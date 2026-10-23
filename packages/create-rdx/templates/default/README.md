@@ -6,12 +6,18 @@ Requires Node.js 20.9 or newer. Use a currently supported Node.js LTS release.
 
 ## Development
 
+Use the same package manager that installed the project:
+
 ```bash
 pnpm dev
+# npm alternative: npm run dev
+# Yarn alternative: yarn dev
 ```
 
 Edit files in `docs/` to create your documentation. RDX creates and maintains
 its internal runtime in `.rdx/`.
+If installation failed during creation, keep these files, fix the reported error
+and retry `pnpm install` (or `npm install` / `yarn install`) before starting.
 
 ## Optional versioning
 

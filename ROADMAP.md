@@ -14,6 +14,9 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
 
 ## Próximas prioridades
 
+- [ ] Preparar a primeira versão estável **antes da tradução da interface**.
+      Seguir o checklist e os bloqueadores de `RELEASE_READINESS.md`. Estabilizar
+      a experiência atual sem adicionar recursos ou alterar versões a cada ajuste.
 - [x] Suporte completo a `public/` na raiz do projeto: criar a pasta no template,
       disponibilizar imagens, favicon e downloads em desenvolvimento e produção,
       sem exigir alterações manuais em `.rdx/`.
@@ -36,6 +39,9 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       Workflow em Linux/Node 22 e Windows/Node 24, sem publicação automática.
       A execução remota começa após enviar a PR; detalhes em `CI.md`.
 - [ ] Melhorar erros e validação dos argumentos da CLI e a documentação de uso.
+      Primeira etapa: validação compartilhada do gerador, ajuda, proteção de
+      destinos existentes e recuperação de falhas; conclusão completa depende
+      das validações interativas e documentação da release.
 - [ ] Metadados por página, sitemap e documentação de deploy na framework.
 
 ## Depois da consolidação da base
