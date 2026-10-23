@@ -1,0 +1,3 @@
+# Keep text checkouts consistent with Prettier on Windows and Unix.
+# Binary files retain their original bytes through automatic detection.
+* text=auto eol=lf

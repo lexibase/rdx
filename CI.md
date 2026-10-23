@@ -11,6 +11,8 @@ merge. Não exige tokens ou secrets de publicação.
 - A versão do pnpm declarada em `packageManager`, sem atualizar o gerenciador.
 - Instalação com `--frozen-lockfile`: divergências do lockfile falham o check.
 - `pnpm check`: lint, tipos, builds e testes unitários existentes.
+  O lint de `web` depende do build de `rdx-core`, pois seus imports públicos
+  apontam para `dist/`. O Turbo prepara esse pacote também em checkouts limpos.
 - `pnpm test:release --install`: empacota os seis pacotes públicos, confere
   arquivos e versões internas, instala o gerador extraído do `.tgz` e cria
   um projeto isolado. Instala os outros pacotes a partir dos arquivos `.tgz`,
@@ -37,6 +39,10 @@ PR cancelam a execução anterior. Cada combinação tem limite de 30 minutos.
 
 O cache guarda o armazenamento de dependências do pnpm, não `node_modules` nem
 os builds do Turbo. Assim, os builds e testes rodam em cada execução.
+
+O `.gitattributes` mantém arquivos de texto com quebras de linha LF também no
+checkout do Windows, alinhadas ao Prettier. Arquivos binários não são convertidos.
+Não é necessário alterar a configuração global do Git ou flexibilizar o lint.
 
 PRs de forks podem precisar de aprovação para executar Actions, conforme as
 políticas do GitHub e da organização. Não é preciso relaxar essas políticas.
