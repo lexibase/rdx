@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process'
+import { fork } from 'node:child_process'
 import { createServer } from 'node:http'
 import { fileURLToPath } from 'node:url'
 
@@ -13,14 +13,10 @@ if (mode === 'setup' || mode === 'setup-failure') {
   }, 300)
 } else {
   if (mode === 'tree') {
-    const child = spawn(
-      process.execPath,
-      [fileURLToPath(import.meta.url), 'leaf'],
-      {
-        stdio: ['ignore', 'pipe', 'pipe'],
-        windowsHide: true,
-      }
-    )
+    // Match Next dev's nested worker: fork without a windowsHide override.
+    const child = fork(fileURLToPath(import.meta.url), ['leaf'], {
+      stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+    })
     child.stdout.pipe(process.stdout)
     child.stderr.pipe(process.stderr)
   }

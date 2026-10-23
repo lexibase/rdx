@@ -78,6 +78,8 @@ Não é necessário publicar no npm para testar. Os vínculos continuam sendo
 Use um único `Ctrl+C` para encerrar o servidor e seus observadores. No terminal
 interativo, o coordenador captura essa tecla antes que ela seja propagada aos
 arquivos batch do gerenciador e restaura o modo original do terminal ao terminar.
+No Windows, os processos compartilham a sessão do terminal original, inclusive
+os workers internos do Next, sem abrir uma janela separada de `next-server`.
 Somente as árvores de processos iniciadas por essa execução são encerradas; não
 há comandos que matem todos os processos Node. Cancelamento intencional retorna
 sucesso, mas uma falha real de build ou processo mantém saída diferente de zero.

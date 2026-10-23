@@ -1,16 +1,33 @@
 import { spawn, spawnSync } from 'node:child_process'
 import { setTimeout as delay } from 'node:timers/promises'
 
-function start(task, env) {
-  const child = spawn(process.execPath, task.args, {
+export function developmentSpawnOptions(
+  task,
+  env,
+  platform = process.platform
+) {
+  return {
     cwd: task.cwd,
     env,
     stdio: ['ignore', 'pipe', 'pipe'],
-    // Separate owned groups keep terminal Ctrl+C in the coordinator on Windows.
-    detached: true,
-    windowsHide: true,
+    // Windows children must share our console: Next's workers can otherwise
+    // allocate a visible console even when their immediate parent is hidden.
+    // Raw terminal input already keeps Ctrl+C in the coordinator on Windows.
+    // POSIX still needs separate groups to stop each owned process tree.
+    detached: platform !== 'win32',
+    // windowsHide would start this piped Node child without a console on Windows,
+    // causing a subsequent Next fork to create one. Inherit the existing console.
+    windowsHide: false,
     shell: false,
-  })
+  }
+}
+
+function start(task, env) {
+  const child = spawn(
+    process.execPath,
+    task.args,
+    developmentSpawnOptions(task, env)
+  )
   const record = { child, task, exited: false }
   record.exit = new Promise((resolve) => {
     child.once('error', (error) => {

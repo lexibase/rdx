@@ -7,12 +7,27 @@ import test from 'node:test'
 import { setTimeout as delay } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
 
-import { runDevProcesses } from '../dev-processes.mjs'
+import { developmentSpawnOptions, runDevProcesses } from '../dev-processes.mjs'
 import { captureTerminalInterrupt, developmentPlan } from '../dev.mjs'
 
 const cwd = fileURLToPath(new URL('./fixtures/', import.meta.url))
 const entry = path.join(cwd, 'dev-service.mjs')
 const task = (name, mode = 'server') => ({ name, cwd, args: [entry, mode] })
+
+test('Windows services share the terminal console while POSIX keeps owned process groups', () => {
+  const service = task('server')
+  const env = { RDX_TEST: '1' }
+  const windows = developmentSpawnOptions(service, env, 'win32')
+  assert.equal(windows.detached, false)
+  assert.equal(windows.windowsHide, false)
+  assert.equal(windows.shell, false)
+  assert.equal(windows.cwd, cwd)
+  assert.equal(windows.env, env)
+  assert.deepEqual(windows.stdio, ['ignore', 'pipe', 'pipe'])
+  for (const platform of ['linux', 'darwin']) {
+    assert.equal(developmentSpawnOptions(service, env, platform).detached, true)
+  }
+})
 
 function output() {
   let value = ''
