@@ -10,6 +10,7 @@
     "check-types": "pnpm --filter @lexibase/rdx-types build && turbo run check-types",
     "check": "pnpm lint && pnpm check-types && pnpm build && pnpm test",
     "test": "turbo run test",
+    "test:release": "node scripts/release-smoke.mjs",
     "prepare": "husky"
   },
   "devDependencies": {

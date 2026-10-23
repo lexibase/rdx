@@ -9,8 +9,8 @@
     "start": "rdx start"
   },
   "dependencies": {
-    "@lexibase/rdx-ui": "^1.0.0-beta.1",
-    "@lexibase/rdx-next": "^1.0.0-beta.9",
+    "@lexibase/rdx-ui": "1.0.0-beta.2",
+    "@lexibase/rdx-next": "1.0.0-beta.10",
     "next": "^16.4.2",
     "react": "19.3.1",
     "react-dom": "19.3.1"

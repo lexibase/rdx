@@ -43,6 +43,22 @@ test('generated projects expose homepage and navbar defaults without activating 
   )
   assert.ok(pkg.dependencies['@lexibase/rdx-next'])
   assert.ok(pkg.dependencies['@lexibase/rdx-ui'])
+  for (const [name, directory] of [
+    ['@lexibase/rdx-ui', 'rdx-ui'],
+    ['@lexibase/rdx-next', 'rdx-next'],
+  ]) {
+    const release = JSON.parse(
+      await readFile(
+        new URL(`../../${directory}/package.json`, import.meta.url),
+        'utf8'
+      )
+    )
+    assert.equal(
+      pkg.dependencies[name],
+      release.version,
+      `The starter must require the exact tested ${name} release`
+    )
+  }
   assert.equal(pkg.dependencies['@lexibase/rdx-versioning'], undefined)
   assert.equal(pkg.dependencies.next, '^16.4.2')
   assert.equal(pkg.dependencies.react, '19.3.1')
