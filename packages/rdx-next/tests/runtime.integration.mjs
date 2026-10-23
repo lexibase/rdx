@@ -189,6 +189,19 @@ test(
     )
     const configPath = path.join(rootDir, 'rdx.config.ts')
     await writeFile(
+      path.join(rootDir, 'docs/init/short-end.mdx'),
+      '---\ntitle: Short ending\n---\n## Start\n\n' +
+        'Long documentation content before the final section.\n\n'.repeat(35) +
+        '```ts\nconst test = true\n```\n\n## Final short section\n\nJust one sentence.\n'
+    )
+    await writeFile(
+      path.join(rootDir, 'docs/init/toc.mdx'),
+      '---\ntitle: Contents\n---\n## First section\n\n' +
+        'A paragraph to make the documentation scroll.\n\n'.repeat(35) +
+        '### Nested section\n\nNested text.\n\n## Last section\n\n' +
+        'More text at the end of the documentation.\n\n'.repeat(35)
+    )
+    await writeFile(
       path.join(rootDir, 'docs/init/links.mdx'),
       '---\ntitle: Links\nlink_position: 20\n---\n## Links\n\n[Original page](./intro.mdx?from=links#details)\n\n[Cross category](../api/target.mdx#configuration)\n\n[External](https://example.com/guide.mdx)\n\n[Download](/downloads/manual.txt)\n'
     )
@@ -360,7 +373,7 @@ test(
     await writeFile(
       configPath,
       `import { versioning } from '@lexibase/rdx-versioning'
-export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '', actions: { github: { visible: true, url: 'https://github.com/lexibase/rdx' } } }, plugins: [versioning()] }`
+export default { title: 'RDX', TOC: true, homepage: { enabled: true }, navbar: { title: '', actions: { github: { visible: true, url: 'https://github.com/lexibase/rdx' } } }, plugins: [versioning()] }`
     )
     await command(rootDir, cli, ['prepare'])
     await command(rootDir, cli, ['version', '1.0.0'])
@@ -467,6 +480,181 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         const errors = []
         page.on('pageerror', (error) => errors.push(error.message))
         await page.addInitScript(() => localStorage.setItem('theme', 'dark'))
+        await page.goto(`${running.base}/docs/init/short-end`)
+        await page
+          .getByRole('button', { name: 'On this page', exact: true })
+          .hover()
+        const shortToc = page.getByRole('navigation', {
+          name: 'On this page',
+          exact: true,
+        })
+        await shortToc
+          .getByRole('link', { name: 'Final short section', exact: true })
+          .click()
+        await page.waitForFunction(() => {
+          const root = document.querySelector('[data-rdx-docs-scroll]')
+          return root.scrollHeight - root.clientHeight - root.scrollTop < 2
+        })
+        await shortToc
+          .locator('a[href="#final-short-section"][aria-current="location"]')
+          .waitFor()
+        assert.equal(await shortToc.isVisible(), true)
+        assert.equal(
+          await page.locator('[data-rdx-docs-scroll]').evaluate((root) => {
+            let ancestor = root.parentElement
+            while (ancestor) {
+              if (ancestor.scrollTop !== 0) return false
+              ancestor = ancestor.parentElement
+            }
+            return root.getBoundingClientRect().top >= 0
+          }),
+          true,
+          'Fragment navigation must never scroll hidden layout ancestors'
+        )
+        await page.goto(`${running.base}/docs/init/toc`)
+        const tocTrigger = page.getByRole('button', {
+          name: 'On this page',
+          exact: true,
+        })
+        await tocTrigger.waitFor()
+        assert.equal(await tocTrigger.locator('span').count(), 3)
+        await tocTrigger.hover()
+        const tocNav = page.getByRole('navigation', {
+          name: 'On this page',
+          exact: true,
+        })
+        await tocNav.waitFor()
+        assert.deepEqual(await tocNav.getByRole('link').allTextContents(), [
+          'First section',
+          'Nested section',
+          'Last section',
+        ])
+        assert.equal(
+          await tocNav.locator('[aria-current="location"]').textContent(),
+          'First section'
+        )
+        const nested = tocNav.getByRole('link', {
+          name: 'Nested section',
+          exact: true,
+        })
+        assert.equal(
+          await nested.evaluate(
+            (element) => getComputedStyle(element).paddingLeft
+          ),
+          '20px'
+        )
+        await tocNav.hover()
+        await page.waitForTimeout(250)
+        assert.equal(
+          await tocNav.isVisible(),
+          true,
+          'Moving from marks into the popup must keep it open'
+        )
+        await page.keyboard.press('Escape')
+        await tocNav.waitFor({ state: 'hidden' })
+        await tocTrigger.focus()
+        await page.keyboard.press('Enter')
+        await tocNav.waitFor()
+        await page.keyboard.press('Escape')
+        await tocNav.waitFor({ state: 'hidden' })
+        await page.mouse.move(700, 100)
+        await tocTrigger.hover()
+        await tocNav.waitFor()
+        const tocScroller = page.locator('.motion-safe\\:scroll-smooth').first()
+        assert.equal(
+          await tocScroller.evaluate(
+            (element) => getComputedStyle(element).scrollBehavior
+          ),
+          'smooth'
+        )
+        await tocScroller.evaluate((element) => {
+          window.__rdxTocScrollSamples = [element.scrollTop]
+          window.__rdxTocSampling = true
+          function sample() {
+            if (!window.__rdxTocSampling) return
+            window.__rdxTocScrollSamples.push(element.scrollTop)
+            requestAnimationFrame(sample)
+          }
+          requestAnimationFrame(sample)
+        })
+        await tocNav
+          .getByRole('link', { name: 'Last section', exact: true })
+          .click()
+        await page.waitForURL('**/docs/init/toc#last-section')
+        await page.waitForTimeout(250)
+        assert.equal(
+          await tocNav.isVisible(),
+          true,
+          'Following a TOC link must keep the hovered popup open'
+        )
+        await page.waitForFunction(
+          () =>
+            Math.abs(
+              document.getElementById('last-section').getBoundingClientRect()
+                .top -
+                document
+                  .getElementById('rdx-main')
+                  .parentElement.parentElement.parentElement.getBoundingClientRect()
+                  .top
+            ) < 120
+        )
+        await tocNav
+          .locator('a[href="#last-section"][aria-current="location"]')
+          .waitFor()
+        assert.equal(
+          await tocNav.locator('[aria-current="location"]').textContent(),
+          'Last section'
+        )
+        const scrollSamples = await page.evaluate(() => {
+          window.__rdxTocSampling = false
+          return window.__rdxTocScrollSamples
+        })
+        const scrollStart = scrollSamples[0]
+        const scrollEnd = scrollSamples.at(-1)
+        assert.ok(
+          new Set(
+            scrollSamples.filter(
+              (position) =>
+                position > scrollStart + 2 && position < scrollEnd - 2
+            )
+          ).size > 3,
+          'TOC navigation must animate through intermediate scroll positions'
+        )
+        await page.emulateMedia({ reducedMotion: 'reduce' })
+        assert.equal(
+          await tocScroller.evaluate(
+            (element) => getComputedStyle(element).scrollBehavior
+          ),
+          'auto'
+        )
+        await tocNav
+          .getByRole('link', { name: 'First section', exact: true })
+          .click()
+        await page.waitForURL('**/docs/init/toc#first-section')
+        await page.emulateMedia({ reducedMotion: 'no-preference' })
+        await page.waitForTimeout(250)
+        assert.equal(
+          await tocNav.isVisible(),
+          true,
+          'Multiple section jumps must keep the popup open'
+        )
+        await page.mouse.move(700, 100)
+        await tocNav.waitFor({ state: 'hidden' })
+        await tocTrigger.hover()
+        await tocNav.waitFor()
+        await page.keyboard.press('Escape')
+        await page.setViewportSize({ width: 390, height: 844 })
+        assert.equal(await tocTrigger.isVisible(), false)
+        await page.setViewportSize({ width: 1872, height: 955 })
+        await page.goto(`${running.base}/docs/init/intro`)
+        await page
+          .getByRole('heading', { name: 'Details', exact: true })
+          .waitFor()
+        assert.equal(
+          await page.locator('[data-rdx-toc]').count(),
+          0,
+          'One heading does not need a TOC'
+        )
         await page.goto(`${running.base}/docs/1.0.0/init/links`)
         const crossCategoryLink = page.getByRole('link', {
           name: 'Cross category',
@@ -478,6 +666,17 @@ export default { title: 'RDX', homepage: { enabled: true }, navbar: { title: '',
         )
         await page.locator('#configuration').waitFor()
         assert.equal(await page.locator('#configuration-1').count(), 1)
+        await tocTrigger.hover()
+        await tocNav.waitFor()
+        assert.deepEqual(
+          await tocNav
+            .getByRole('link')
+            .evaluateAll((links) =>
+              links.map((link) => link.getAttribute('href'))
+            ),
+          ['#configuration', '#configuration-1']
+        )
+        await page.keyboard.press('Escape')
         await page.goto(`${running.base}/docs/init/quotes`)
         const quote = page.locator('blockquote').first()
         await quote.waitFor()
@@ -1364,6 +1563,15 @@ export default { title: 'Custom site', homepage: { enabled: true, component: MyH
       })
       try {
         const page = await browser.newPage()
+        await page.goto(`${running.base}/docs/init/toc`)
+        await page
+          .getByRole('heading', { name: 'Last section', exact: true })
+          .waitFor()
+        assert.equal(
+          await page.locator('[data-rdx-toc]').count(),
+          0,
+          'TOC must stay off when omitted from config'
+        )
         const errors = []
         page.on('pageerror', (error) => errors.push(error.message))
         page.on('console', (message) => {

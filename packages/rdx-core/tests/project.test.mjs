@@ -28,12 +28,24 @@ test('configuration defaults and legacy runtime config objects remain usable', (
   assert.equal(defineConfig(input), input)
   assert.deepEqual(resolveConfig(input), {
     title: 'RDX',
+    TOC: false,
     description: '',
     docsDir: 'docs',
     lang: 'en',
     theme: { defaultTheme: 'system' },
     plugins: [],
   })
+})
+
+test('TOC is opt-in and accepts only booleans', () => {
+  assert.equal(resolveConfig({ title: 'Docs' }).TOC, false)
+  for (const TOC of [true, false])
+    assert.equal(resolveConfig({ title: 'Docs', TOC }).TOC, TOC)
+  for (const TOC of ['false', 0, 1, null, {}])
+    assert.throws(
+      () => resolveConfig({ title: 'Docs', TOC }),
+      /TOC must be a boolean/
+    )
 })
 
 test('invalid options fail with the exact configuration field', () => {

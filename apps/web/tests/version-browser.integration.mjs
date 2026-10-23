@@ -90,6 +90,38 @@ test(
           const page = await context.newPage()
           const errors = []
           page.on('pageerror', (error) => errors.push(error.message))
+          await page.setViewportSize({ width: 1872, height: 955 })
+          await page.goto(`${running.base}/docs/canary/docs`)
+          await page
+            .getByRole('button', { name: 'On this page', exact: true })
+            .hover()
+          const toc = page.getByRole('navigation', {
+            name: 'On this page',
+            exact: true,
+          })
+          await toc
+            .getByRole('link', { name: 'Versioned', exact: true })
+            .click()
+          await page.waitForFunction(() => {
+            const root = document.querySelector('[data-rdx-docs-scroll]')
+            return root.scrollHeight - root.clientHeight - root.scrollTop < 2
+          })
+          await toc
+            .locator('a[href="#versioned"][aria-current="location"]')
+            .waitFor()
+          assert.equal(
+            await page.locator('[data-rdx-docs-scroll]').evaluate((root) => {
+              for (
+                let ancestor = root.parentElement;
+                ancestor;
+                ancestor = ancestor.parentElement
+              )
+                if (ancestor.scrollTop !== 0) return false
+              return root.getBoundingClientRect().top >= 0
+            }),
+            true,
+            `${mode}: short final section keeps the documentation viewport in place`
+          )
           await page.goto(running.base)
           await page
             .getByRole('button', { name: 'Documentation version: Canary' })

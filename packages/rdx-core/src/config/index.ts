@@ -99,10 +99,13 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
       'navbar',
       'plugins',
       'homepage',
+      'TOC',
     ],
     ''
   )
   text(config.title, 'title')
+  if (config.TOC !== undefined && typeof config.TOC !== 'boolean')
+    throw new RdxConfigError('TOC must be a boolean.')
   if (config.description !== undefined)
     text(config.description, 'description', true)
   if (config.lang !== undefined) text(config.lang, 'lang')
@@ -224,6 +227,7 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
   const typed = config as RdxConfig
   return {
     ...typed,
+    TOC: typed.TOC ?? false,
     description: typed.description ?? '',
     lang: typed.lang ?? 'en',
     docsDir: typed.docsDir ?? 'docs',

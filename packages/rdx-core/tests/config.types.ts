@@ -2,11 +2,15 @@ import { defineConfig } from '../src/config/index'
 
 defineConfig({
   title: 'Typed docs',
+  TOC: true,
   docsDir: 'content',
   navbar: { logo: () => null, actions: { showToggleMode: true } },
   homepage: { enabled: true, buttons: [{ label: 'Docs', href: '/docs' }] },
   theme: { defaultTheme: 'dark' },
 })
+
+// @ts-expect-error TOC activation must be boolean, not a string.
+defineConfig({ title: 'Typed docs', TOC: 'false' })
 
 // @ts-expect-error Homepage activation must be boolean.
 defineConfig({ title: 'Typed docs', homepage: { enabled: 'yes' } })

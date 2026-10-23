@@ -65,7 +65,8 @@ validated by this document-link check. This is not a site-wide link crawler.
 
 Markdown headings receive IDs through `rehype-slug` (GitHub-style slugs), including
 duplicate suffixes such as `setup-1`. Explicit existing IDs are preserved. This
-does not add automatic heading anchor buttons or a table of contents.
+does not add automatic heading anchor buttons. The floating table of contents
+is separately opt-in through `TOC: true`.
 
 ## Callout
 
@@ -197,3 +198,17 @@ documentation from trusted project sources, and review externally supplied MDX.
 The custom RDX shorthand syntax remains separate future work.
 Examples live in `apps/web/app/docs/(canary)/cat-03/mdx-components.mdx` and the
 generated project's `docs/examples/callouts.mdx`.
+
+## Floating table of contents
+
+Set `TOC: true` in `rdx.config.ts` to enable the floating “On this page” control.
+Generated projects default to `TOC: false`. On large screens (1280px and up),
+two or more visible MDX headings (`##` through `######`) produce small marks
+at the right edge. Hover, click, or use the keyboard to open their indented
+links. Following a link keeps the hovered panel open so readers can jump between
+sections; moving the pointer away dismisses it. Escape also closes the panel.
+Section navigation scrolls smoothly unless the reader prefers reduced motion.
+The active section follows the documentation's own scroll container.
+Pages with fewer than two headings and smaller screens hide the control.
+Heading links use the same generated IDs as document fragment links; hidden
+tab/accordion content is excluded until it becomes visible.
