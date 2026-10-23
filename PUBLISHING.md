@@ -65,6 +65,11 @@ RDX dependencies point to this release. It does not publish. For the full
 pre-publication smoke test, use `pnpm test:release --install`: it installs the
 archives into an isolated generated project, builds it with search/TOC enabled,
 activates the optional versioning package, creates a snapshot and builds again.
+It also starts the installed production CLI on temporary local ports and checks
+pages, public assets, CSS/JS bundles, redirects, 404s and version-isolated search.
+A third build disables search and checks that previously generated indexes
+are no longer served. See [DEPLOYMENT.md](./DEPLOYMENT.md) for the Node-server
+deployment baseline and its limits.
 The fixture and archives are retained for inspection; no user project is changed.
 
 Commit and merge the release preparation before uploading to npm. Package

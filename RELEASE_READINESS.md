@@ -52,12 +52,18 @@ lançar, nem adicionar recursos novos durante a estabilização.
 
 - [x] CI base validada na PR #42 em Linux/Node 22 e Windows/Node 24: workspace,
       pacotes reais, builds com busca/TOC e plugin opcional de versionamento.
-- [ ] Ampliar o teste dos pacotes para iniciar a produção e verificar respostas
+- [x] Ampliar o teste dos pacotes para iniciar a produção e verificar respostas
       HTTP, arquivos públicos, busca, 404 e isolamento entre versões. Builds
       passando não são, sozinhos, uma prova de servidor funcionando.
-- [ ] Documentar e validar uma implantação reproduzível com servidor Node,
-      incluindo diretório de execução, portas, dependências e dados necessários.
-      Testar sem depender de arquivos ou links do monorepo de desenvolvimento.
+      Inclui CSS/JS e remoção dos índices após desativar busca e refazer o build.
+      Validação local Windows concluída; a CI executará esses testes novos nos
+      dois sistemas após o push. Não confundir com deploy público validado.
+- [x] Documentar o caminho base com servidor Node em `DEPLOYMENT.md`, incluindo
+      raiz de execução, portas, dependências, dados e permissões necessários.
+      A instalação local usa pacotes reais, não links de fontes do workspace.
+- [ ] Validar esse roteiro em uma hospedagem escolhida para a release, sem
+      arquivos ou links do monorepo de desenvolvimento e sem mudanças manuais
+      em `.rdx/`. A validação HTTP local não conclui esse item.
 - [ ] Definir o destino de hospedagem da validação pública com o mantenedor.
       Não prometer export estático, standalone, Vercel ou subdiretórios antes de
       testar essas modalidades. Não fazer deploy em contas externas sem autorização.

@@ -17,17 +17,23 @@ merge. Não exige tokens ou secrets de publicação.
   arquivos e versões internas, instala o gerador extraído do `.tgz` e cria
   um projeto isolado. Instala os outros pacotes a partir dos arquivos `.tgz`,
   ativa busca/TOC, faz build sem plugins, adiciona versionamento, cria um
-  snapshot e faz build novamente.
+  snapshot e altera o conteúdo atual. Faz três builds (sem plugin, com versões
+  e com busca desativada), iniciando o CLI de produção instalado após cada um.
+  Verifica HTTP, redirects, páginas, 404, CSS/JS, ativos públicos e isolamento
+  dos índices e páginas entre conteúdo atual e snapshot.
 
 Os testes dos pacotes não dependem de suas versões já estarem publicadas no npm.
 Dependências de terceiros ainda são baixadas do registry. O projeto temporário
 tem sua própria resolução de dependências; o lockfile do monorepo não o governa.
 As pastas de teste ficam em `.rdx-package-smoke/`, ignoradas pelo Git.
 
-Esta etapa não executa os testes opcionais de navegador (`test:runtime`),
-comparações de screenshots ou testes HTTP com o servidor de produção iniciado.
-Os builds dos projetos instalados validam a integração e a geração estática;
-a validação interativa continua sendo uma etapa separada.
+Os servidores temporários usam portas livres em `127.0.0.1` e são encerrados
+após sucesso ou falha. O executor possui testes de encerramento e falhas de
+startup incluídos em `pnpm test`. Não para servidores do desenvolvedor.
+Esta etapa não executa os testes opcionais de navegador (`test:runtime`) nem
+comparações de screenshots; a validação interativa continua separada.
+O caminho base de produção é documentado em [DEPLOYMENT.md](./DEPLOYMENT.md),
+sem deploy externo automático.
 
 ## Permissões e execução
 
