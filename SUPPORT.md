@@ -15,9 +15,9 @@ engine range does not itself certify RDX on those versions.
 
 ## Tested environments
 
-| Environment | Automated validation |
-| ----------- | -------------------- |
-| Ubuntu / Node 22 / pnpm 9 | Workspace checks and installed archive production tests |
+| Environment                | Automated validation                                    |
+| -------------------------- | ------------------------------------------------------- |
+| Ubuntu / Node 22 / pnpm 9  | Workspace checks and installed archive production tests |
 | Windows / Node 24 / pnpm 9 | Workspace checks and installed archive production tests |
 
 The CI uses current patches within each major. It does not exercise every OS,

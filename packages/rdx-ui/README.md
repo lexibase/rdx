@@ -43,11 +43,8 @@ manual-copy guidance instead of a false success message.
 
 ## Base UI composition
 
-The shared components use `@base-ui/react`. Existing RDX colors, variants,
-dimensions and layout are preserved; `components.json` selects `base-nova` for
-future shadcn additions, without regenerating the existing theme.
-
-This beta changes the composition API: `asChild` is no longer supported.
+The shared components use `@base-ui/react` and the RDX theme.
+`components.json` selects shadcn/ui's `base-nova` style.
 Use `render` for interactive composition and `ButtonLink` for navigation:
 
 ```tsx
@@ -80,12 +77,12 @@ import Link from 'next/link'
 
 `ButtonLink` renders a Next.js link with button styling, not `role="button"`.
 `Button` renders a native button; use `type="submit"` explicitly for form submission.
-Menu actions use `onClick` instead of Radix's `onSelect`. Labels must be inside
-`DropdownMenuGroup`. Checkbox values are boolean, not the Radix `indeterminate`
-string; checkbox/radio items remain open unless `closeOnClick` is enabled.
+Menu actions use `onClick`. Labels must be inside `DropdownMenuGroup`.
+Checkbox values are boolean; checkbox/radio items remain open unless
+`closeOnClick` is enabled.
 Navigation items use `DropdownMenuLinkItem` (with `closeOnClick` when desired).
 Components accept Base UI state-aware `className` callbacks and `render` props.
-For custom CSS, replace Radix state selectors/variables with Base UI's
+For custom CSS, use Base UI's
 `data-open`, `data-closed`, `data-highlighted`, `data-popup-open`,
 `--available-height` and `--transform-origin`. `Separator` remains decorative by
 default; set `decorative={false}` for an accessible separator role.

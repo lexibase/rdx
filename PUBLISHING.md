@@ -6,7 +6,7 @@ npm packages. Nothing in the verification scripts uploads packages.
 
 ## Before proceeding
 
-- Resolve the documentation-license clarification in `RELEASE_READINESS.md`.
+- Verify the MIT code and CC BY 4.0 documentation notices in `LICENSE` and `LICENSE-docs`.
 - Review and merge the preparation PR with successful Linux and Windows checks.
 - Follow the Node.js and package-manager policy in [SUPPORT.md](./SUPPORT.md).
 - Confirm the six public manifests are 1.0.0 and the creator template pins
@@ -143,8 +143,8 @@ Recheck a generated site's public deployment after the final package release.
 After registry and deployment checks succeed:
 
 - Change the changelog entry from Unreleased to the actual release date.
-- Update the official installation page from beta instructions to stable.
-- Remove the website's first-release pending notices.
+- Verify the official installation page's `@latest` commands against the registry.
+- Deploy the final stable instructions only after all stable packages are available.
 - Create the actual 1.0.0 documentation snapshot once, not on every build.
 - Announce the release and retain beta/RC channels separately.
 

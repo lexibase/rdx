@@ -6,21 +6,15 @@ link_position: 1
 
 ## Requirements
 
-Use Node.js **22.18+ (22.x)** or **24.11+ (24.x)** and one package manager.
-Use the latest patch of either supported Node.js line. Node 20 is not supported
-by the first stable release. The same requirement applies to the creator, runtime,
-generated projects, and framework development.
-
-The automated release matrix uses pnpm 9 on Linux/Node 22 and Windows/Node 24.
-The CLI also recognizes npm and Yarn; their installation paths are not covered
-by that complete automated matrix. Do not mix package managers or lockfiles in
-the same documentation project.
+Use Node.js **22.18+ (22.x)** or **24.11+ (24.x)**, with the latest patch of
+either line. Choose pnpm or npm and use the same package manager throughout
+your project.
 
 You do not need to create a Next.js project first.
 
 ## Create a project
 
-The currently published channel is **beta**:
+Run the creator and follow the prompt:
 
 <Tabs defaultValue="pnpm">
   <TabsList aria-label="Create a project with your package manager">
@@ -29,27 +23,18 @@ The currently published channel is **beta**:
   </TabsList>
   <TabsContent value="pnpm">
 
-pnpm create @lexibase/rdx@beta
+pnpm create @lexibase/rdx@latest
 
   </TabsContent>
   <TabsContent value="npm">
 
-npm create @lexibase/rdx@beta
+npm create @lexibase/rdx@latest
 
   </TabsContent>
 </Tabs>
 
 The prompt asks **What is your project named?** Enter a name such as `my-docs`.
 RDX creates that directory and installs its dependencies.
-
-<Callout variant="warning" title="Before the stable release">
-
-This website follows the development source. A published beta may not contain the
-latest configuration changes shown here. Use the matching package release and
-review its release notes. The stable `@latest` installation will be announced
-when it is published; it is not being published as part of this website deployment.
-
-</Callout>
 
 ## Run locally
 
@@ -68,14 +53,14 @@ preview content changes. Restart it after editing framework configuration.
 Provide the directory name directly to skip the name prompt:
 
 ```bash
-pnpm create @lexibase/rdx@beta my-docs
+pnpm create @lexibase/rdx@latest my-docs
 ```
 
 Inspect the creator without generating a project:
 
 ```bash
-pnpm dlx @lexibase/create-rdx@beta --help
-pnpm dlx @lexibase/create-rdx@beta --version
+pnpm dlx @lexibase/create-rdx@latest --help
+pnpm dlx @lexibase/create-rdx@latest --version
 ```
 
 Use `--skip-install` to generate files without installing dependencies, then

@@ -16,8 +16,7 @@ Objetos exportados diretamente continuam aceitos. `defineConfig` valida e
 devolve o mesmo objeto; não transforma componentes React em dados serializados.
 Chaves desconhecidas e tipos inválidos são erros, não opções ignoradas.
 
-Live documentation always uses the project's `docs/` folder. Its location is not
-configurable; older configurations must remove `docsDir`.
+Live documentation lives in the project's `docs/` folder.
 
 | Opção                      | Contrato e padrão                                                                                |
 | -------------------------- | ------------------------------------------------------------------------------------------------ |
@@ -32,13 +31,11 @@ configurable; older configurations must remove `docsDir`.
 
 Detalhes e exemplos de propriedades aninhadas ficam em
 [CONFIGURATION.md](./CONFIGURATION.md). The canonical public type is `RDXConfig`.
-`RdxRuntimeConfig` is only a compatibility alias for that same contract, not a
-second configuration shape. The former duplicate `RdxConfig` has been removed.
+`RdxRuntimeConfig` is an alias for `RDXConfig`.
 
 Pastas do primeiro nível formam categorias. Slugs preservam o caminho completo
-do arquivo MDX, sem a extensão. Categorias aninhadas na sidebar não são prometidas
-nesta versão. Os detalhes de frontmatter, componentes e links estão em
-[MDX.md](./MDX.md). Não há configuração nova para cores ou tradução nesta etapa.
+do arquivo MDX, sem a extensão. Os detalhes de frontmatter, componentes e links
+estão em [MDX.md](./MDX.md).
 
 ## Comandos
 

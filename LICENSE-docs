@@ -1,0 +1,34 @@
+RDX documentation — CC BY 4.0
+
+Copyright (c) 2025–2026 Lexibase and contributors.
+
+The original RDX documentation prose in apps/web/docs/**/*.mdx and the
+repository-root Markdown documentation (*.md) is licensed under the Creative
+Commons Attribution 4.0 International License (SPDX: CC-BY-4.0), except where
+otherwise noted.
+
+License and legal terms:
+https://creativecommons.org/licenses/by/4.0/
+https://creativecommons.org/licenses/by/4.0/legalcode
+
+You may share and adapt this prose, including commercially, subject to those
+terms. When reusing it, give appropriate credit, link to the license, and
+indicate changes. Do not imply endorsement by RDX or its contributors.
+
+Suggested attribution (adapt it to identify your changes):
+"RDX documentation by Lexibase and contributors, licensed under CC BY 4.0.
+Source: https://rdx-tool.vercel.app/docs"
+
+Exceptions and boundaries
+
+- Software, code examples, configuration snippets, and executable JSX/React
+  implementations are licensed under the repository's MIT License (LICENSE).
+- All CLI starter templates under packages/create-rdx/templates/, including
+  their sample MDX files, remain MIT licensed.
+- Third-party material retains its own license and attribution requirements.
+- The RDX name and logos are not licensed by this documentation notice.
+- Independent documentation authored by RDX users is not covered by this notice;
+  using RDX does not select a license for their projects or documentation.
+
+This notice identifies the covered material. The linked CC BY 4.0 legal code
+contains the governing license terms; this notice does not replace those terms.

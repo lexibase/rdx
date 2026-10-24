@@ -73,7 +73,7 @@ project-relative filesystem paths.
 
 Configure SEO in `rdx.config.ts`; the generated layout uses Next.js's native
 Metadata API. `metadata.applicationName` is the single site name, while
-`description` remains at the top level. The root `title` option has been removed.
+`description` sets the default site description at the top level.
 
 ```ts
 export default defineConfig({

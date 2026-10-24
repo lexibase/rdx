@@ -5,9 +5,7 @@ Create a documentation project using Next.js, Tailwind CSS and shadcn/ui Base UI
 Requires Node.js 22.18+ (22.x) or 24.11+ (24.x), preferably the latest patch.
 See the repository's SUPPORT.md for the automated platform/package-manager matrix.
 
-## Stable installation
-
-Use the stable channel when it is published:
+## Installation
 
 ```sh
 npm create @lexibase/rdx@latest
@@ -21,9 +19,6 @@ the current directory. You can also pass it directly:
 npm create @lexibase/rdx@latest my-docs
 pnpm create @lexibase/rdx@latest my-docs
 ```
-
-The unscoped `create-rdx` is a different project. Evaluation releases remain
-available through explicit channels such as `@beta`; they are not stable updates.
 
 Use a short name starting with a letter or number, followed by letters, numbers,
 dots, dashes or underscores. Paths, spaces, trailing dots and Windows/npm reserved

@@ -24,8 +24,7 @@ service or plugin is required. `apps/web` enables it as the development showcase
   content, including code and documentation components. It ignores case and
   accents, requires all query words, and ranks titles above body matches.
 - Results show their category, page/section title and an excerpt, capped at
-  twelve results. This first implementation does not promise typo correction,
-  stemming or semantic search.
+  twelve results. Include the words you want to find to narrow the results.
 - On documentation pages, results belong only to the current source/version,
   including archived snapshots. The homepage searches live/current documentation.
 - Sections link directly to their generated heading IDs. Text inside interactive
@@ -54,5 +53,4 @@ do not put secrets in documentation or its example code.
 
 The UI adapts the official **shadcn/ui Base Nova Command** (`cmdk`) and **Base UI
 Dialog**, with the shared RDX theme, native focus handling and reduced-motion
-styles. It does not introduce a different UI foundation. Localization of fixed
-interface text is separate future work recorded in `ROADMAP.md`.
+styles.

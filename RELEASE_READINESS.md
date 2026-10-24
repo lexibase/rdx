@@ -24,22 +24,22 @@ outside this release. See [CHANGELOG.md](./CHANGELOG.md).
 - [x] Plugin installation follows runtime channels and preserves installed versions.
 - [x] Six real package archives are installed and tested independently of source links.
 - [x] Production checks cover assets, bundles, relative links, 404s, version
-  isolation and removal of disabled search indexes.
+      isolation and removal of disabled search indexes.
 - [x] Production root and `.rdx/` working directories are covered.
 - [x] Content tracing includes required MDX/categories/plugin runtime files
-  without including unrelated project source.
+      without including unrelated project source.
 - [x] Linux/Node 22 and Windows/Node 24 CI validate workspace and installed archives.
 - [x] A standalone generated test site was deployed on Vercel and verified.
 - [x] The official native `apps/web` site is deployed at
-  [rdx-tool.vercel.app](https://rdx-tool.vercel.app/docs).
+      [rdx-tool.vercel.app](https://rdx-tool.vercel.app/docs).
 - [x] The English website covers installation, authoring, components,
-  configuration, optional features, updates and deployment.
+      configuration, optional features, updates and deployment.
 - [x] Core metadata supports indexing/robots. Automatic sitemap generation and
-  automatic global canonical URLs are not part of 1.0.
+      automatic global canonical URLs are not part of 1.0.
 - [x] Trust boundaries are documented: configuration/plugins/React are trusted
-  code; MDX protection is not a sandbox; public assets/search are public.
+      code; MDX protection is not a sandbox; public assets/search are public.
 - [x] The pre-preparation review reported no audit advisories in the workspace
-  or newly installed generated project. Repeat near the final upload.
+      or newly installed generated project. Repeat near the final upload.
 
 ## Current preparation
 
@@ -47,21 +47,20 @@ outside this release. See [CHANGELOG.md](./CHANGELOG.md).
 - [x] Pin the template's runtime and UI to the prepared 1.0.0 versions.
 - [x] Align Node engines to 22.18+ (22.x) or 24.11+ (24.x), as chosen by the maintainer.
 - [x] Document tested OS/package-manager coverage in `SUPPORT.md`, rather than
-  claiming every combination is tested.
+      claiming every combination is tested.
 - [x] Remove empty UI hook/context exports, including the misspelled `contenxts`.
 - [x] Fix the live-edition divider and cover empty/live/active/archived/footer cases.
 - [x] Write first-release notes, beta migration notes and a stable publication runbook.
 - [x] Complete fresh local workspace, installed 1.0.0 archive and production audit
-  checks on this preparation. Browser tests also verify Canary's menu has no
-  dangling divider. No audit advisories were reported in the workspace or the
-  generated versioned fixture; this is not proof of absence of vulnerabilities.
+      checks on this preparation. Browser tests also verify Canary's menu has no
+      dangling divider. No audit advisories were reported in the workspace or the
+      generated versioned fixture; this is not proof of absence of vulnerabilities.
 - [ ] Push the preparation PR and obtain successful checks on both CI environments.
 - [ ] Validate real interactive creation/cancellation with npm and pnpm on the
-  supported target environments. Direct creator prompt creation/cancellation was
-  checked locally on Windows; that alone is not the full matrix.
-- [ ] Resolve documentation licensing with the maintainer. The old README links
-  to a missing `LICENSE-docs`; do not select a CC variant or relicense text
-  implicitly. Code remains MIT.
+      supported target environments. Direct creator prompt creation/cancellation was
+      checked locally on Windows; that alone is not the full matrix.
+- [x] Maintainer approved MIT for code/examples/CLI templates and CC BY 4.0 for
+      official documentation prose. Scope and attribution are in `LICENSE-docs`.
 - [ ] Approve the public 1.0 API and migration notes as the final compatibility baseline.
 
 ## Publication gates
@@ -70,10 +69,11 @@ outside this release. See [CHANGELOG.md](./CHANGELOG.md).
 - [ ] Confirm npm identity, organization permission and two-factor authentication.
 - [ ] Publish manually in dependency order, with stable versions and `latest`.
 - [ ] Verify all registry versions and channels, including creator/runtime `latest`,
-  which historically pointed at the first beta.
+      which historically pointed at the first beta.
 - [ ] Create clean projects through actual npm and pnpm registry commands.
 - [ ] Verify optional plugin activation, snapshot isolation, build/start and deployment.
-- [ ] Update stable website instructions and release date only after availability.
+- [ ] Verify prepared `@latest` website instructions against the registry and
+      deploy them with the release date only after stable package availability.
 - [ ] Create the real 1.0.0 documentation snapshot and announce the release.
 
 A release candidate is optional, not a substitute for these gates. If chosen,

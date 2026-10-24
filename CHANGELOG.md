@@ -19,6 +19,7 @@ a separate maintainer action after the release checklist is approved.
 - Optional versioning plugin with explicit activation, snapshots and archives.
 - Public assets, production tracing and standalone installed-package tests.
 - Linux/Windows CI, local workspace watching and coordinated process shutdown.
+- MIT code/examples/starter templates and CC BY 4.0 official documentation prose.
 
 ### Changes from the betas
 
@@ -34,21 +35,12 @@ a separate maintainer action after the release checklist is approved.
 - Show the live-edition divider only when content follows, without duplicating
   the boundary before an archived group.
 
-### Outside this release
-
-Automatic interface translation, multilingual sources, nested sidebar categories,
-custom Markdown shorthand, highlight-color presets and folder-tree code blocks
-remain future work. The first release does not require finishing the roadmap.
-
 ### Upgrade
 
 Update installed runtime/UI packages rather than rerunning the creator over an
 existing site. Update the optional plugin if installed, review configuration
 changes, then build and test before deploying. Preserve your source files and
 snapshots; `.rdx/` is generated and is not a customization directory.
-
-Documentation licensing clarification is still awaiting the maintainer's choice;
-this changelog does not select or replace a documentation license.
 
 ## Historical development notes
 

@@ -8,8 +8,7 @@ in the packages so CLI-generated projects receive them too.
 
 - Live documentation: `docs/`, exposed as the **Canary** edition.
 - Released snapshots: `versioned_docs/version-<version>/`, once a real release exists.
-- `versions.json`: active and archived snapshot labels. Both arrays start empty;
-  the old 2.x demonstration releases and unrelated external version link are removed.
+- `versions.json`: active and archived snapshot labels.
 - Metadata and features: `rdx.config.ts`, using the public `RDXConfig` contract.
 - Public files: `public/`. Metadata paths refer to existing files here.
 
