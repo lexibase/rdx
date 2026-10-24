@@ -3,6 +3,7 @@ import { spawnSync } from 'node:child_process'
 import {
   mkdtemp,
   readFile,
+  realpath,
   writeFile,
   rm,
   access,
@@ -67,7 +68,9 @@ test('prepare loads typed config with defineConfig without loading a Next server
   const nextConfig = (
     await import(pathToFileURL(path.join(rootDir, '.rdx/next.config.mjs')).href)
   ).default
-  assert.equal(path.resolve(nextConfig.turbopack.root), rootDir)
+  const canonicalRoot = await realpath(rootDir)
+  assert.equal(path.resolve(nextConfig.turbopack.root), canonicalRoot)
+  assert.equal(nextConfig.outputFileTracingRoot, canonicalRoot)
   assert.equal(nextConfig.agentRules, false)
   assert.equal(nextConfig.experimental?.externalDir, undefined)
   await access(path.join(rootDir, '.rdx/app/globals.d.css.ts'))
