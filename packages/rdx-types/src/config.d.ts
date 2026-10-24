@@ -120,7 +120,7 @@ export type RdxHomepage = {
 }
 
 /**
- * Portable subset of Next.js metadata, translated by the RDX runtime.
+ * Site identity and portable Next.js metadata, translated by the RDX runtime.
  * Root-relative asset URLs refer to files the project owns in public/.
  * No asset files, deployment domain or global canonical URL are created here.
  */
@@ -137,6 +137,13 @@ export type RdxMetadata = {
    * footer, accessible logo name and built-in homepage fallback.
    */
   applicationName: string
+  /**
+   * Starting year shown in the footer. The CLI fills the project creation year;
+   * replace it with an earlier founding year when appropriate. Must be a positive
+   * integer no later than the current year. Omit to show only the current year.
+   * Equal years are displayed once, e.g. 2026; earlier years form a range.
+   */
+  since?: number
   /** Optional people or organizations credited in the document's metadata. */
   authors?: {
     /** Author or organization name; independent of the site's applicationName. */

@@ -35,6 +35,7 @@ test('configured metadata reaches Next with social defaults, explicit overrides,
     description: 'Learn',
     metadata: {
       applicationName: 'Docs',
+      since: 2004,
       metadataBase: 'https://docs.example.com',
       authors: [{ name: 'Team' }],
       keywords: ['docs'],
@@ -47,6 +48,7 @@ test('configured metadata reaches Next with social defaults, explicit overrides,
   }
   const before = structuredClone(config)
   const metadata = getRdxMetadata(config)
+  assert.equal('since' in metadata, false)
   assert.equal(metadata.metadataBase.href, 'https://docs.example.com/')
   assert.equal(metadata.openGraph.title, 'Shared Docs')
   assert.equal(metadata.openGraph.description, 'Learn')

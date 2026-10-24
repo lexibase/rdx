@@ -13,6 +13,7 @@ import { DocsSidebar } from '@lexibase/rdx-ui/components/docs-sidebar'
 import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
 import { DocsSearch } from '@lexibase/rdx-ui/components/docs-search'
 import { Home } from '@lexibase/rdx-ui/components/home'
+import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
 import { Logo } from '@lexibase/rdx-ui/components/logo'
 import { mdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { Navbar } from '@lexibase/rdx-ui/components/navbar'
@@ -274,12 +275,10 @@ export async function DocsPage({
                   </Button>
                 )}
               </section>
-              <section className="flex items-center justify-center w-full py-5">
-                <p className="text-sm text-muted-foreground">
-                  &copy; {new Date().getFullYear()}{' '}
-                  <strong>{project.config.metadata.applicationName}</strong>
-                </p>
-              </section>
+              <FooterCredit
+                name={project.config.metadata.applicationName}
+                since={project.config.metadata.since}
+              />
             </footer>
           </section>
         </div>

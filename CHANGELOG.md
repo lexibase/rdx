@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add shared footer branding with a Powered by RDX repository link.
+- Add optional `metadata.since` for footer year ranges without repeating equal years.
+- Fill generated configuration with the project creation year as an editable number.
 - Resolve the generated application's build root from the real Next.js installation
   so pnpm workspace projects can compile dependencies stored above `apps/web`.
 - Use the same root for Turbopack and dependency tracing while retaining explicit

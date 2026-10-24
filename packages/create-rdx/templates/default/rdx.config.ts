@@ -2,10 +2,12 @@ import { defineConfig } from '@lexibase/rdx'
 
 export default defineConfig({
   description: 'Documentation built with RDX.',
-  // SEO and link previews. Paths starting with '/' refer to files in public/.
+  // Site identity, SEO and link previews. '/' paths refer to files in public/.
   metadata: {
     // The single site name: browser titles, social previews and default branding.
     applicationName: 'My documentation',
+    // Footer starting year. Change it to an earlier founding year if needed.
+    since: new Date().getFullYear(),
     // Set metadataBase to your public site URL to resolve relative share images.
     // Optional examples below: uncomment only after adding the referenced files.
     // icons: {

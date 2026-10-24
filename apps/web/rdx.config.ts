@@ -4,13 +4,15 @@ import { versioning } from '@lexibase/rdx-versioning'
 import { Logo } from '@lexibase/rdx-ui/components/logo'
 
 const config = {
-  // SEO and link previews. Paths starting with '/' refer to files in public/.
+  // Site identity, SEO and link previews. '/' paths refer to files in public/.
   metadata: {
     // Public site URL used to resolve relative metadata URLs, such as share images.
     metadataBase:
       process.env.NEXT_PUBLIC_SITE_URL || 'https://rdx-tool.vercel.app',
     // The single site name: browser titles, social previews and default branding.
     applicationName: 'RDX',
+    // Starting year used in the footer; equal start/current years appear once.
+    since: 2025,
     authors: [{ name: 'DuHNunes', url: 'https://github.com/lexibase/rdx' }],
     keywords: [
       'duhnunes',
