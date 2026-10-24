@@ -7,7 +7,7 @@ in the packages so CLI-generated projects receive them too.
 ## Content and editions
 
 - Live documentation: `docs/`, exposed as the **Canary** edition.
-- Released snapshots: `versioned_docs/version-<version>/`, once a real release exists.
+- Version snapshots: `versioned_docs/version-<version>/`, including 1.0.1.
 - `versions.json`: active and archived snapshot labels.
 - Metadata and features: `rdx.config.ts`, using the public `RDXConfig` contract.
 - Public files: `public/`. Metadata paths refer to existing files here.
@@ -17,10 +17,10 @@ Repeated filenames use full category paths. Relative MDX links and search use
 the same adapter as the sidebar. Generated projects use full paths such as
 `/docs/init/intro` without the website's Canary prefix.
 
-Create the first documentation snapshot **when the actual release is ready**:
+Create a snapshot when preparing a documentation release, using its version:
 
 ```sh
-pnpm --filter web docs:version 1.0.0
+pnpm --filter web docs:version <version>
 ```
 
 This copies live docs and updates the manifest through the configured plugin.
@@ -64,6 +64,10 @@ The optional browser suite uses `RDX_PLAYWRIGHT_MODULE` and
 ```sh
 pnpm --filter web test:runtime
 ```
+
+Set `RDX_EXISTING_DEV_URL=http://localhost:3000` to reuse a local development
+server already running for this application. The test does not stop that server;
+its separate production server is still managed by the test.
 
 It checks TOC, clipboard, hydration, search, stale version preferences, and
 blocked browser storage. Framework tests cover multi-edition behavior separately.

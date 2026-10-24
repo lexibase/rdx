@@ -60,6 +60,9 @@ exato das mensagens, logs do Next.js ou localização dos caches como API estáv
   configuração e plugins. A importação da configuração não inicia o Next.js.
 - `@lexibase/rdx-next/runtime`, `/styles.css` e `/postcss.config`: integrações do
   adaptador usadas pelo runtime gerado; não importar o runtime em código client.
+  `getDocumentMetadata({ project, slug? })` reads a document's indexed title and
+  description from its content source for Next.js `generateMetadata`. Empty
+  documentation inherits site metadata; missing documents produce a 404.
 - `@lexibase/rdx-next/config`: `getRdxTracingConfig({ rootDir, appDir? })`, para
   aplicações Next nativas usando o core. Carrega `rdx.config.ts` e retorna
   `outputFileTracingIncludes` com os arquivos de conteúdo e runtime necessários.

@@ -1,5 +1,28 @@
 import type { Metadata } from 'next'
-import type { RDXConfig } from '@lexibase/rdx-types'
+import type { RdxProject, RDXConfig } from '@lexibase/rdx-types'
+import { resolveDocsRoute } from '@lexibase/rdx-core'
+import { notFound } from 'next/navigation'
+
+/** Read metadata from the same content source and index used by the page. */
+export function getDocumentMetadata({
+  project,
+  slug,
+}: {
+  project: RdxProject
+  slug?: string[]
+}): Metadata {
+  const route = resolveDocsRoute(project, slug)
+  // An empty documentation tree renders the setup page with site metadata.
+  if (!route.slug) return {}
+  if (!route.document) notFound()
+  const page = route.categories
+    .flatMap((category) => category.pages)
+    .find((page) => page.slug === route.slug)!
+  return {
+    title: page.title,
+    description: page.description || project.config.description,
+  }
+}
 
 /** Translate the shared configuration through Next's native Metadata API. */
 export function getRdxMetadata(config: RDXConfig): Metadata {

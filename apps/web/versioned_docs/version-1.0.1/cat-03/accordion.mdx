@@ -1,0 +1,82 @@
+---
+title: Accordion
+description: Optional explanations, without crowding your documentation.
+link_position: 7
+---
+
+## Frequently asked questions
+
+Expand a question to read its answer. Use Enter or Space to toggle and Tab to
+move between questions and links.
+
+<Accordion>
+  <AccordionItem value="content">
+    <AccordionTrigger>Where do I write my documentation?</AccordionTrigger>
+    <AccordionContent>
+
+Create folders and `.mdx` files inside **docs/**. Each folder becomes a category
+and each file becomes a page.
+
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="preview">
+    <AccordionTrigger>How do I preview my changes?</AccordionTrigger>
+    <AccordionContent>
+
+Run the development server:
+
+```bash
+pnpm dev
+```
+
+<Callout variant="tip" title="Live updates">
+
+Keep the server running while editing your documentation.
+
+</Callout>
+
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+
+## Write an Accordion
+
+```mdx
+<Accordion>
+  <AccordionItem value="preview">
+    <AccordionTrigger>How do I preview my docs?</AccordionTrigger>
+    <AccordionContent>
+
+Run `pnpm dev` from your documentation project root.
+
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+No import or plugin is required. Use unique item values. One item opens at a time
+by default; add the literal boolean attribute `multiple` to allow several open
+items. Keep essential steps visible rather than hiding the whole guide in panels.
+
+## Production example
+
+Opening an answer closes the previous one in the same group.
+
+<Accordion>
+  <AccordionItem value="build">
+    <AccordionTrigger>Build for production</AccordionTrigger>
+    <AccordionContent>
+
+Run `pnpm build` to generate the production site.
+
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="start">
+    <AccordionTrigger>Check the production site</AccordionTrigger>
+    <AccordionContent>
+
+Run `pnpm start` after a successful build.
+
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>

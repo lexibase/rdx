@@ -1,10 +1,28 @@
 # Changelog
 
-## 1.0.0 — Unreleased
+## 1.0.1 — Unreleased
 
-This entry describes the prepared first stable release, not a completed npm
-publication. Package manifests are staged at 1.0.0; registry publication remains
-a separate maintainer action after the release checklist is approved.
+### Fixed
+
+- Generated documentation pages now provide their title and description through
+  Next.js `generateMetadata`, including version roots and archived snapshots.
+- Browser titles use the document name with `metadata.applicationName` as the
+  suffix. Missing descriptions use the site description; missing titles use the
+  indexed filename fallback. Missing documents retain their 404 response.
+- Installed-archive HTTP tests verify document metadata instead of accepting only
+  the site name, and distinguish live metadata from snapshot metadata.
+
+### Documentation
+
+- Prepare the 1.0.1 documentation snapshot alongside the live Canary edition.
+
+Only `@lexibase/rdx-next` and `@lexibase/create-rdx` are prepared at 1.0.1.
+The creator pins the corrected runtime; other packages remain at 1.0.0.
+This patch has not been published by updating these files.
+
+## 1.0.0 — 2026-10-24
+
+First stable npm release.
 
 ### Included
 

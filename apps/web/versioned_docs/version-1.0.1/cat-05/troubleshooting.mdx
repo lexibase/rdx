@@ -1,0 +1,66 @@
+---
+title: Troubleshooting
+description: Resolve common installation, configuration, and production issues.
+link_position: 4
+---
+
+## Run commands from the project root
+
+RDX commands expect the directory containing `package.json` and
+`rdx.config.ts`. A missing manifest or configuration error often means the
+terminal is in the parent directory.
+
+For a generated project, use `pnpm dev`, `pnpm build`, and `pnpm start`.
+For framework development, use the monorepo commands in
+[Development](./development.mdx).
+
+## A package cannot be installed
+
+Use the scoped creator command `pnpm create @lexibase/rdx@latest` or
+`npm create @lexibase/rdx@latest`. Check your registry connection and the error
+reported by your package manager. Keep authentication tokens out of issue reports.
+
+## A release-age policy blocks installation
+
+Some package managers reject newly published dependencies. Read the rejected
+package names and versions, then approve only releases you trust through the
+project's package-manager policy. Do not globally disable protections or delete
+lockfiles as a first response.
+
+A failed `rdx add versioning` does not mean the plugin was activated. Inspect
+the error and any package/lockfile changes before retrying.
+
+## A document or link is missing
+
+Use exact filename capitalization and forward slashes. Links to other documents
+should use relative `.mdx` paths. A target must exist in the same edition;
+a missing snapshot page does not fall back to Current.
+
+Page URLs include the path inside `docs/`; for example,
+`docs/guides/setup.mdx` is served at `/docs/guides/setup`.
+
+## Configuration fails validation
+
+Check the named field in the error. `metadata.applicationName` is required,
+`TOC` is uppercase, and live files always belong in `docs/`. Restart the
+development server after changing configuration.
+
+If a configured plugin cannot be resolved, install its package in this project.
+Do not add unknown options to silence errors.
+
+## A production page returns 500
+
+Check deployment logs. Confirm that documentation, the versions manifest, and
+snapshots were included during the build. Use the generated project's RDX
+commands and the correct Next.js output directory.
+
+Do not solve missing runtime content by creating snapshots on every request.
+See [Build and deployment](./deployment.mdx).
+
+## Copy or search is unavailable
+
+Copying requires HTTPS or localhost and clipboard permission. The source remains
+selectable when permission is denied.
+
+Search must be explicitly enabled. Rebuild after changing its setting or content.
+A disabled search endpoint returning 404 is expected.

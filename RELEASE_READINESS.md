@@ -1,8 +1,24 @@
 # RDX 1.0 — release readiness
 
-Status: **prepared locally, not published**. The six public manifests and creator
-template are staged for 1.0.0. This is not an announcement or authorization to
-upload packages. The maintainer handles commits, PRs, merges and publication.
+Status: **1.0.0 published**. The maintainer published all six public packages,
+and their registry `latest` tags were verified at 1.0.0 on 2026-10-24.
+The maintainer handles commits, PRs, merges and publication.
+
+## 1.0.1 follow-up
+
+- [x] Prepare corrected document metadata in the Next.js runtime at 1.0.1.
+- [x] Prepare creator 1.0.1, pinning runtime 1.0.1 and UI 1.0.0.
+- [x] Create the official 1.0.1 documentation snapshot alongside Canary.
+- [x] Complete `pnpm check`, installed-archive production/HTTP tests and native
+      browser checks in development and production, including edition switching.
+- [ ] Merge the patch PR and publish the two changed packages.
+- [ ] Verify registry installation, record the patch release date and deploy the snapshot.
+
+Public-registry validation of 1.0.0 confirmed npm creation, installation, build,
+production pages, public assets and 404s. It revealed the document-title bug fixed
+in this patch. pnpm creation/installation completed, but later policy verification
+and npm plugin installation hit DNS failures (`ENOTFOUND registry.npmjs.org`).
+Do not mark those network-blocked checks as successful or disable security policy.
 
 ## Scope
 
@@ -55,7 +71,7 @@ outside this release. See [CHANGELOG.md](./CHANGELOG.md).
       checks on this preparation. Browser tests also verify Canary's menu has no
       dangling divider. No audit advisories were reported in the workspace or the
       generated versioned fixture; this is not proof of absence of vulnerabilities.
-- [ ] Push the preparation PR and obtain successful checks on both CI environments.
+- [x] Push the preparation PR and obtain successful checks on both CI environments (#50).
 - [ ] Validate real interactive creation/cancellation with npm and pnpm on the
       supported target environments. Direct creator prompt creation/cancellation was
       checked locally on Windows; that alone is not the full matrix.
@@ -65,16 +81,16 @@ outside this release. See [CHANGELOG.md](./CHANGELOG.md).
 
 ## Publication gates
 
-- [ ] Inspect final archives and confirm no target version is already published.
-- [ ] Confirm npm identity, organization permission and two-factor authentication.
-- [ ] Publish manually in dependency order, with stable versions and `latest`.
-- [ ] Verify all registry versions and channels, including creator/runtime `latest`,
+- [x] Inspect final archives and confirm no target version is already published.
+- [x] Confirm npm identity, organization permission and two-factor authentication.
+- [x] Publish manually in dependency order, with stable versions and `latest`.
+- [x] Verify all registry versions and channels, including creator/runtime `latest`,
       which historically pointed at the first beta.
-- [ ] Create clean projects through actual npm and pnpm registry commands.
+- [x] Create clean projects through actual npm and pnpm registry commands.
 - [ ] Verify optional plugin activation, snapshot isolation, build/start and deployment.
 - [ ] Verify prepared `@latest` website instructions against the registry and
       deploy them with the release date only after stable package availability.
-- [ ] Create the real 1.0.0 documentation snapshot and announce the release.
+- [ ] Announce the release after the metadata patch and remaining registry checks.
 
 A release candidate is optional, not a substitute for these gates. If chosen,
 prepare matching prerelease manifests/template and validate them before uploading;

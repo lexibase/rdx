@@ -1,0 +1,54 @@
+---
+title: Search
+description: Local, version-aware documentation search with no external service.
+link_position: 2
+---
+
+## Enable search
+
+Set `search: true` in `rdx.config.ts`:
+
+```ts
+import { defineConfig } from '@lexibase/rdx-next'
+
+export default defineConfig({
+  metadata: { applicationName: 'My documentation' },
+  search: true,
+})
+```
+
+New projects default to `false`. Search does not need an account, API key,
+plugin, or versioning package.
+
+## Try it here
+
+Use the search button in this site's navbar or press **Ctrl+K** / **⌘K**.
+Try searching for `homepage`, `code blocks`, or `snapshot`.
+
+Arrow keys select a result, Enter opens it, and Escape closes the dialog.
+Results include titles, sections, excerpts, and the page's category.
+
+## What gets searched?
+
+RDX indexes page titles, descriptions, headings, and readable content, including
+code examples. Matches ignore case and accents and require all query words.
+Titles rank above body matches, with up to twelve results.
+
+Use words from your page titles, headings, and content to find matching results.
+
+## With and without versions
+
+Without versioning, search covers your current `docs/`. With versioning, a
+documentation page searches only its own edition, including archived editions.
+The homepage searches the live documentation.
+
+Indexes load when the dialog is first opened. Queries stay in the browser;
+they are not sent to an external search provider.
+
+## Production and privacy
+
+Rebuild and redeploy to publish changed search content. Disabling search and
+rebuilding removes the search UI and makes index endpoints return 404.
+
+Documentation and its search indexes are public. Never put secrets in your
+content or code examples. Disabling search is not access control.

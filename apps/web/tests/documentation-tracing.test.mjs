@@ -15,7 +15,7 @@ test('production traces contain configured content without copying the showcase 
   assert.ok(expected.some((file) => file.startsWith('docs/')))
   assert.equal(
     expected.some((file) => file.startsWith('versioned_docs/')),
-    false
+    true
   )
   for (const route of [
     'docs/[version]/page.js',

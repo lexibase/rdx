@@ -1,0 +1,43 @@
+---
+title: Table of contents
+description: Quiet heading navigation that stays out of the reading flow.
+link_position: 3
+---
+
+## Enable the TOC
+
+Use the uppercase configuration key `TOC`:
+
+```ts
+export default defineConfig({
+  metadata: { applicationName: 'My documentation' },
+  TOC: true,
+})
+```
+
+Import `defineConfig` from `@lexibase/rdx-next`. The default is `false`.
+
+## Reader experience
+
+On large screens, small marks appear at the right edge of pages with at least
+two visible section headings. Hover, click, or use the keyboard to open the
+**On this page** panel.
+
+Links follow the heading hierarchy and highlight the section being read.
+Selecting a heading scrolls smoothly and keeps the hovered panel open.
+Move the pointer away or press Escape to close it.
+
+## Headings and anchors
+
+Write headings from `##` through `######`. RDX generates IDs, so a heading
+such as `## Getting started` can be linked with `#getting-started`.
+Repeated headings receive distinct IDs.
+
+Headings inside hidden Tabs or Accordion panels are excluded until visible.
+The page title is already shown in the document header; it is not a TOC section.
+
+## Small screens and reduced motion
+
+The floating control is hidden below 1280px and when there are too few headings.
+Readers who prefer reduced motion receive immediate section navigation instead
+of smooth scrolling. Ordinary anchor links still work without the floating UI.
