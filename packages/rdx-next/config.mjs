@@ -1,8 +1,34 @@
-import { readdir, stat } from 'node:fs/promises'
+import { readdir, realpath, stat } from 'node:fs/promises'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 
 import { createRdxProject, resolveProjectPath } from '@lexibase/rdx-core/config'
 import { createJiti } from 'jiti'
+
+/** Include the project and the real Next.js installation in Turbopack's root. */
+export async function getRdxBuildRoot(rootDir) {
+  const projectRoot = await realpath(path.resolve(rootDir))
+  const require = createRequire(path.join(projectRoot, 'package.json'))
+  const nextRoot = path.dirname(
+    await realpath(require.resolve('next/package.json'))
+  )
+  let root = projectRoot
+  while (true) {
+    const relative = path.relative(root, nextRoot)
+    if (
+      !path.isAbsolute(relative) &&
+      relative !== '..' &&
+      !relative.startsWith(`..${path.sep}`)
+    )
+      return root
+    const parent = path.dirname(root)
+    if (parent === root || parent === path.parse(parent).root)
+      throw new Error(
+        'RDX could not determine a bounded build root. Install Next.js inside the project or its workspace.'
+      )
+    root = parent
+  }
+}
 
 // These files are enumerated by Next's configuration loader, not by a server
 // bundle. The core's dynamic readers deliberately leave tracing to this adapter.

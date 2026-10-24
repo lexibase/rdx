@@ -49,16 +49,6 @@ async function command(cwd, entry, args) {
       child.on('exit', resolve)
     })
     assert.equal(code, 0, output)
-    if (entry === cli && args[0] === 'prepare') {
-      // Only this harness links packages outside the generated project. Turbopack
-      // must see their common ancestor; installed projects keep their own root.
-      const configPath = path.join(cwd, '.rdx/next.config.mjs')
-      const config = await readFile(configPath, 'utf8')
-      await writeFile(
-        configPath,
-        `${config}\nnextConfig.turbopack.root = ${JSON.stringify(path.resolve(packageRoot, '../..'))}\n`
-      )
-    }
   } finally {
     clearTimeout(timer)
   }
@@ -144,6 +134,7 @@ test(
     ])
       await link(name, path.dirname(require.resolve(`${name}/package.json`)))
     for (const [name, folder] of [
+      ['rdx', 'rdx'],
       ['rdx-next', 'rdx-next'],
       ['rdx-core', 'rdx-core'],
       ['rdx-types', 'rdx-types'],
