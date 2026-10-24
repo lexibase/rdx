@@ -8,11 +8,11 @@ This release has not been published by preparing these files.
 
 The three changed packages are prepared at 1.1.0:
 
-| Package | Role | Selected RDX dependencies in its archive |
-| --- | --- | --- |
-| `@lexibase/rdx-next` | Runtime and CLI implementation | Core/types 1.0.0; compatible UI peer `^1.0.0` |
-| `@lexibase/rdx` | Main framework entry | Runtime 1.1.0 and UI 1.0.0 |
-| `@lexibase/create-rdx` | Project generator | Generated projects pin main framework 1.1.0 |
+| Package                | Role                           | Selected RDX dependencies in its archive      |
+| ---------------------- | ------------------------------ | --------------------------------------------- |
+| `@lexibase/rdx-next`   | Runtime and CLI implementation | Core/types 1.0.0; compatible UI peer `^1.0.0` |
+| `@lexibase/rdx`        | Main framework entry           | Runtime 1.1.0 and UI 1.0.0                    |
+| `@lexibase/create-rdx` | Project generator              | Generated projects pin main framework 1.1.0   |
 
 The runtime and creator versions 1.0.1 are already published. Do not overwrite
 them or republish unchanged core, types, UI or versioning packages. Workspace
