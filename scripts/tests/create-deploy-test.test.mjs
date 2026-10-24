@@ -156,6 +156,43 @@ test('deploy exporter creates relative vendor references and copies only source 
   assert.equal(vercel.installCommand, 'pnpm install --frozen-lockfile')
 })
 
+test('deploy exporter preserves a single framework entry and its selected UI archive', async (t) => {
+  const { release, source, target } = await fixture(t)
+  const archiveRoot = path.join(release, 'main-archive')
+  await mkdir(path.join(archiveRoot, 'package'), { recursive: true })
+  await writeFile(
+    path.join(archiveRoot, 'package/package.json'),
+    JSON.stringify({
+      name: '@lexibase/rdx',
+      version: '1.0.0',
+      dependencies: {
+        '@lexibase/rdx-next': '1.0.0-beta.1',
+        '@lexibase/rdx-ui': `file:${path.join(release, 'rdx-ui.tgz').replaceAll('\\', '/')}`,
+      },
+    })
+  )
+  const archive = path.join(release, 'rdx.tgz')
+  execFileSync('tar', ['-czf', archive, '-C', archiveRoot, 'package'])
+  const pkgPath = path.join(source, 'package.json')
+  const pkg = JSON.parse(await readFile(pkgPath, 'utf8'))
+  delete pkg.dependencies['@lexibase/rdx-next']
+  pkg.dependencies['@lexibase/rdx'] = `file:${archive.replaceAll('\\', '/')}`
+  delete pkg.pnpm.overrides['@lexibase/rdx-ui']
+  await writeFile(pkgPath, JSON.stringify(pkg))
+  await createDeployTest({ from: release, out: target })
+  const exported = JSON.parse(
+    await readFile(path.join(target, 'package.json'), 'utf8')
+  )
+  assert.equal(exported.dependencies['@lexibase/rdx'], 'file:vendor/rdx.tgz')
+  assert.equal(exported.dependencies['@lexibase/rdx-next'], undefined)
+  assert.equal(exported.dependencies['@lexibase/rdx-ui'], undefined)
+  assert.equal(
+    exported.pnpm.overrides['@lexibase/rdx>@lexibase/rdx-ui'],
+    'file:vendor/rdx-ui.tgz'
+  )
+  assert.equal((await readdir(path.join(target, 'vendor'))).length, 6)
+})
+
 test('deploy exporter refuses existing destinations and source overlap', async (t) => {
   const { release, source, target } = await fixture(t)
   await mkdir(target)

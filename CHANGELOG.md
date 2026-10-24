@@ -1,6 +1,17 @@
 # Changelog
 
-## 1.0.1 — Unreleased
+## Unreleased
+
+- Add `@lexibase/rdx` as the main framework entry, with configuration, CLI,
+  runtime, styles and typed per-module UI exports.
+- Generate projects with one direct framework dependency; updates select the
+  compatible internal runtime and UI through the main package.
+- Keep optional versioning separate and preserve direct runtime/UI integrations.
+- Add installed-archive tests for a main-package update that introduces a new UI
+  component without changing the runtime implementation.
+- Package version changes and npm publication are not part of this preparation.
+
+## 1.0.1 — 2026-10-24
 
 ### Fixed
 

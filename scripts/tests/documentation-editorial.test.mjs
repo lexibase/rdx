@@ -62,6 +62,7 @@ test('documentation licensing distinguishes official prose from MIT code and use
     'rdx-core',
     'rdx-ui',
     'rdx-next',
+    'rdx',
     'rdx-plugin-versioning',
     'create-rdx',
   ]) {

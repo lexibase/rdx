@@ -2,7 +2,14 @@ import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { createRequire } from 'node:module'
-import { mkdir, mkdtemp, readFile, realpath, writeFile } from 'node:fs/promises'
+import {
+  cp,
+  mkdir,
+  mkdtemp,
+  readFile,
+  realpath,
+  writeFile,
+} from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -34,10 +41,23 @@ const directories = [
   'rdx-core',
   'rdx-ui',
   'rdx-next',
+  'rdx',
   'rdx-plugin-versioning',
   'create-rdx',
 ]
 const required = {
+  rdx: [
+    'bin/rdx.mjs',
+    'dist/index.js',
+    'dist/index.d.ts',
+    'dist/runtime.js',
+    'dist/runtime.d.ts',
+    'dist/ui/components/home.js',
+    'dist/ui/components/home.d.ts',
+    'dist/styles.css',
+    'dist/styles.d.css.ts',
+    'dist/templates/app/docs/[[...slug]]/page.tsx',
+  ],
   'rdx-types': ['dist/index.d.ts', 'dist/config.d.ts', 'dist/search.d.ts'],
   'rdx-core': [
     'dist/index.js',
@@ -149,15 +169,222 @@ async function request(base, route, expectedStatus = 200) {
   return response
 }
 
+function providerRequire(project) {
+  // Installations can change symlink targets mid-test. Resolve in a fresh process
+  // so Node's module-resolution cache cannot retain the previous framework.
+  const manifest = execFileSync(
+    process.execPath,
+    [
+      '--input-type=module',
+      '-e',
+      `import { createRequire } from 'node:module';
+const host = createRequire(process.argv[1]);
+try { process.stdout.write(host.resolve('@lexibase/rdx/package.json')) }
+catch (error) {
+  if (error.code !== 'MODULE_NOT_FOUND') throw error;
+  process.stdout.write(process.argv[1]);
+}`,
+      path.join(project, 'package.json'),
+    ],
+    { encoding: 'utf8' }
+  )
+  return createRequire(manifest)
+}
+
+function runtimeFile(project) {
+  return path.join(
+    path.dirname(
+      providerRequire(project).resolve('@lexibase/rdx-next/package.json')
+    ),
+    'dist/runtime/index.js'
+  )
+}
+
+async function verifySharedUi(project, expectedVersion) {
+  const hostRequire = providerRequire(project)
+  const runtimeRequire = createRequire(await realpath(runtimeFile(project)))
+  for (const entry of [
+    'components/mdx-components',
+    'globals.css',
+    'postcss.config',
+  ]) {
+    const specifier = `@lexibase/rdx-ui/${entry}`
+    assert.equal(
+      await realpath(runtimeRequire.resolve(specifier)),
+      await realpath(hostRequire.resolve(specifier)),
+      `Runtime and project must share ${specifier}`
+    )
+  }
+  const uiRoot = path.resolve(
+    path.dirname(hostRequire.resolve('@lexibase/rdx-ui/globals.css')),
+    '../..'
+  )
+  const ui = JSON.parse(
+    await readFile(path.join(uiRoot, 'package.json'), 'utf8')
+  )
+  assert.equal(ui.version, expectedVersion)
+}
+
+async function verifyFrameworkUpgrade(project) {
+  const runtime = runtimeFile(project)
+  const before = await readFile(runtime, 'utf8')
+  const runtimeManifestPath = providerRequire(project).resolve(
+    '@lexibase/rdx-next/package.json'
+  )
+  const runtimeVersion = JSON.parse(
+    await readFile(runtimeManifestPath, 'utf8')
+  ).version
+  const fixture = path.join(temporary, 'ui-only-upgrade')
+  await mkdir(fixture)
+  execFileSync('tar', [
+    '-xf',
+    releases.get('@lexibase/rdx-ui').archive,
+    '-C',
+    fixture,
+  ])
+  const uiRoot = path.join(fixture, 'package')
+  const uiManifest = JSON.parse(
+    await readFile(path.join(uiRoot, 'package.json'), 'utf8')
+  )
+  const [major, minor] = uiManifest.version.split('.').map(Number)
+  // A synthetic minor exists only in this retained test archive; nothing is published.
+  uiManifest.version = `${major}.${minor + 1}.0`
+  await writeFile(
+    path.join(uiRoot, 'package.json'),
+    JSON.stringify(uiManifest, null, 2) + '\n'
+  )
+  await writeFile(
+    path.join(uiRoot, 'pnpm-workspace.yaml'),
+    "packages:\n  - '.'\n"
+  )
+  const mapFile = path.join(uiRoot, 'src/components/mdx-components.tsx')
+  const map = await readFile(mapFile, 'utf8')
+  assert.ok(map.includes('export const mdxComponents = {'))
+  await writeFile(
+    mapFile,
+    map.replace(
+      'export const mdxComponents = {',
+      'export const mdxComponents = {\n  UiUpgradeProbe: () => <p data-rdx-ui-upgrade="true">UiOnlyUpgradeMarker</p>,'
+    )
+  )
+  pnpm(uiRoot, ['pack', '--pack-destination', fixture], true)
+  const archive = path.join(
+    fixture,
+    `lexibase-rdx-ui-${uiManifest.version}.tgz`
+  )
+  const mainFixture = path.join(fixture, 'framework')
+  await mkdir(mainFixture)
+  execFileSync('tar', [
+    '-xf',
+    releases.get('@lexibase/rdx').archive,
+    '-C',
+    mainFixture,
+  ])
+  const mainRoot = path.join(mainFixture, 'package')
+  const mainManifestPath = path.join(mainRoot, 'package.json')
+  const mainManifest = JSON.parse(await readFile(mainManifestPath, 'utf8'))
+  const [mainMajor, mainMinor] = mainManifest.version.split('.').map(Number)
+  mainManifest.version = `${mainMajor}.${mainMinor + 1}.0`
+  mainManifest.dependencies['@lexibase/rdx-ui'] =
+    `file:${archive.replaceAll('\\', '/')}`
+  await writeFile(
+    mainManifestPath,
+    JSON.stringify(mainManifest, null, 2) + '\n'
+  )
+  await writeFile(
+    path.join(mainRoot, 'pnpm-workspace.yaml'),
+    "packages:\n  - '.'\n"
+  )
+  pnpm(mainRoot, ['pack', '--pack-destination', mainFixture], true)
+  const mainArchive = path.join(
+    mainFixture,
+    `lexibase-rdx-${mainManifest.version}.tgz`
+  )
+  const pkgPath = path.join(project, 'package.json')
+  const pkg = JSON.parse(await readFile(pkgPath, 'utf8'))
+  delete pkg.pnpm.overrides['@lexibase/rdx>@lexibase/rdx-ui']
+  await writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n')
+  pnpm(project, [
+    'add',
+    '--workspace-root',
+    '--strict-peer-dependencies',
+    `file:${mainArchive.replaceAll('\\', '/')}`,
+  ])
+  const updated = JSON.parse(await readFile(pkgPath, 'utf8'))
+  assert.equal(updated.dependencies['@lexibase/rdx-next'], undefined)
+  assert.equal(updated.dependencies['@lexibase/rdx-ui'], undefined)
+  assert.equal(
+    await readFile(runtimeFile(project), 'utf8'),
+    before,
+    'UI update must not replace the runtime implementation'
+  )
+  assert.equal(
+    JSON.parse(
+      await readFile(
+        providerRequire(project).resolve('@lexibase/rdx-next/package.json'),
+        'utf8'
+      )
+    ).version,
+    runtimeVersion
+  )
+  await verifySharedUi(project, uiManifest.version)
+  await writeFile(
+    path.join(project, 'docs/examples/ui-upgrade.mdx'),
+    '---\ntitle: UI upgrade\n---\n\n<UiUpgradeProbe />\n'
+  )
+  await writeFile(
+    path.join(project, 'home.tsx'),
+    "import { Home } from '@lexibase/rdx/ui/components/home'\nexport default function HomePage() { return <Home title='FrameworkHomepageMarker' /> }\n"
+  )
+  const configPath = path.join(project, 'rdx.config.ts')
+  const config = await readFile(configPath, 'utf8')
+  await writeFile(
+    configPath,
+    "import HomePage from './home'\n" +
+      config.replace('enabled: false', 'enabled: true, component: HomePage')
+  )
+  buildProject(project)
+  await withProductionServer(
+    path.join(project, 'node_modules/@lexibase/rdx/bin/rdx.mjs'),
+    project,
+    async (base) => {
+      const html = await (
+        await request(base, '/docs/examples/ui-upgrade')
+      ).text()
+      assert.match(html, /data-rdx-ui-upgrade="true"/)
+      assert.match(html, /UiOnlyUpgradeMarker/)
+      assert.match(
+        await (await request(base, '/')).text(),
+        /FrameworkHomepageMarker/
+      )
+    }
+  )
+  await writeFile(configPath, config)
+  console.log(
+    'OK framework-only upgrade: newer UI, public homepage imports, shared CSS/PostCSS resolution and unchanged runtime'
+  )
+  return archive
+}
+
 async function verifySite(
   project,
-  { original, current, versioned = false, search = true, runtimeCwd = false }
+  {
+    original,
+    current,
+    versioned = false,
+    search = true,
+    runtimeCwd = false,
+    framework = true,
+  }
 ) {
   const entry = runtimeCwd
     ? createRequire(path.join(project, 'package.json')).resolve(
         'next/dist/bin/next'
       )
-    : path.join(project, 'node_modules/@lexibase/rdx-next/bin/rdx.mjs')
+    : path.join(
+        project,
+        `node_modules/@lexibase/${framework ? 'rdx' : 'rdx-next'}/bin/rdx.mjs`
+      )
   await withProductionServer(
     entry,
     runtimeCwd ? path.join(project, '.rdx') : project,
@@ -339,13 +566,26 @@ for (const [name, release] of releases) {
     'peerDependencies',
   ]) {
     for (const [dependency, version] of Object.entries(packed[field] ?? {})) {
-      if (releases.has(dependency))
+      if (releases.has(dependency)) {
+        if (field === 'peerDependencies') {
+          assert.equal(
+            version,
+            manifest.peerDependencies[dependency],
+            `${name} must retain its compatible ${dependency} peer range`
+          )
+          continue
+        }
         assert.equal(
           version,
           releases.get(dependency).manifest.version,
           `${name} must use this release's ${dependency}`
         )
+      }
     }
+  }
+  if (name === '@lexibase/rdx-next') {
+    assert.equal(packed.dependencies?.['@lexibase/rdx-ui'], undefined)
+    assert.equal(packed.peerDependencies['@lexibase/rdx-ui'], '^1.0.0')
   }
   const files = new Set(
     execFileSync('tar', ['-tf', archive], { encoding: 'utf8' })
@@ -368,7 +608,7 @@ const template = JSON.parse(
     { encoding: 'utf8' }
   )
 )
-for (const name of ['@lexibase/rdx-next', '@lexibase/rdx-ui'])
+for (const name of ['@lexibase/rdx'])
   assert.equal(template.dependencies[name], releases.get(name).manifest.version)
 
 if (process.argv.includes('--install')) {
@@ -392,14 +632,24 @@ if (process.argv.includes('--install')) {
   assert.equal(pkg.scripts.start, 'rdx start')
   const overrides = Object.fromEntries(
     [...releases]
-      .filter(([name]) => name !== '@lexibase/create-rdx')
+      .filter(
+        ([name]) =>
+          ![
+            '@lexibase/create-rdx',
+            '@lexibase/rdx',
+            '@lexibase/rdx-ui',
+          ].includes(name)
+      )
       .map(([name, release]) => [
         name,
         `file:${release.archive.replaceAll('\\', '/')}`,
       ])
   )
-  for (const name of ['@lexibase/rdx-next', '@lexibase/rdx-ui'])
-    pkg.dependencies[name] = overrides[name]
+  for (const name of ['@lexibase/rdx'])
+    pkg.dependencies[name] =
+      `file:${releases.get(name).archive.replaceAll('\\', '/')}`
+  overrides['@lexibase/rdx>@lexibase/rdx-ui'] =
+    `file:${releases.get('@lexibase/rdx-ui').archive.replaceAll('\\', '/')}`
   pkg.pnpm = { overrides }
   await writeFile(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`)
   // Isolate this fixture from the enclosing monorepo workspace.
@@ -407,7 +657,11 @@ if (process.argv.includes('--install')) {
     path.join(project, 'pnpm-workspace.yaml'),
     "packages:\n  - '.'\n"
   )
-  pnpm(project, ['install'])
+  pnpm(project, ['install', '--strict-peer-dependencies'])
+  await verifySharedUi(
+    project,
+    releases.get('@lexibase/rdx-ui').manifest.version
+  )
   const configPath = path.join(project, 'rdx.config.ts')
   const config = await readFile(configPath, 'utf8')
   await writeFile(
@@ -495,5 +749,56 @@ if (process.argv.includes('--install')) {
   console.log(
     'OK installed archives: standalone project, optional plugin, snapshot, production builds and HTTP servers'
   )
+  const upgradedUi = await verifyFrameworkUpgrade(project)
+  // Existing projects can keep their lower-level runtime/UI dependency layout.
+  const legacyProject = path.join(temporary, 'legacy-project')
+  await mkdir(legacyProject)
+  for (const name of [
+    'docs',
+    'public',
+    'versioned_docs',
+    'versions.json',
+    'rdx.config.ts',
+    'home.tsx',
+    'package.json',
+    'pnpm-workspace.yaml',
+  ]) {
+    await cp(path.join(project, name), path.join(legacyProject, name), {
+      recursive: true,
+    })
+  }
+  const legacyPkgPath = path.join(legacyProject, 'package.json')
+  const legacyConfigPath = path.join(legacyProject, 'rdx.config.ts')
+  const legacyPkg = JSON.parse(await readFile(legacyPkgPath, 'utf8'))
+  delete legacyPkg.dependencies['@lexibase/rdx']
+  legacyPkg.dependencies['@lexibase/rdx-next'] = overrides['@lexibase/rdx-next']
+  legacyPkg.dependencies['@lexibase/rdx-ui'] =
+    `file:${upgradedUi.replaceAll('\\', '/')}`
+  await writeFile(legacyPkgPath, JSON.stringify(legacyPkg, null, 2) + '\n')
+  await writeFile(
+    legacyConfigPath,
+    (await readFile(legacyConfigPath, 'utf8')).replace(
+      "from '@lexibase/rdx'",
+      "from '@lexibase/rdx-next'"
+    )
+  )
+  const homePath = path.join(legacyProject, 'home.tsx')
+  await writeFile(
+    homePath,
+    (await readFile(homePath, 'utf8')).replace(
+      '@lexibase/rdx/ui/components/home',
+      '@lexibase/rdx-ui/components/home'
+    )
+  )
+  pnpm(legacyProject, ['install', '--strict-peer-dependencies'])
+  buildProject(legacyProject)
+  await verifySite(legacyProject, {
+    original,
+    current,
+    versioned: true,
+    search: false,
+    framework: false,
+  })
+  console.log('OK existing runtime/UI projects remain supported')
 }
 console.log(`Release artifacts retained for inspection: ${temporary}`)

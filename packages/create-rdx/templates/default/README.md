@@ -19,6 +19,12 @@ its internal runtime in `.rdx/`.
 If installation failed during creation, keep these files, fix the reported error
 and retry `pnpm install` (or `npm install` / `yarn install`) before starting.
 
+## Updating RDX
+
+Update the framework with `pnpm add @lexibase/rdx@latest` (or `npm install`
+/ `yarn add` with the same package). Review release notes for migrations, restart
+development, and rebuild production. Optional plugins are updated separately.
+
 ## Optional versioning
 
 ```bash

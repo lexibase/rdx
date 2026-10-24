@@ -10,6 +10,7 @@ const directories = [
   'rdx-core',
   'rdx-ui',
   'rdx-next',
+  'rdx',
   'rdx-plugin-versioning',
   'create-rdx',
 ]
@@ -28,18 +29,25 @@ test('public packages, development and generated projects share the tested Node 
   }
 })
 
-test('the creator template pins the matching public runtime and UI releases', async () => {
+test('the creator template pins the main framework without exposing internal packages', async () => {
   const creator = await manifest('packages/create-rdx/package.json')
   const template = await manifest(
     'packages/create-rdx/templates/default/package.json'
   )
-  for (const directory of ['rdx-next', 'rdx-ui']) {
+  for (const directory of ['rdx']) {
     const pkg = await manifest(`packages/${directory}/package.json`)
     assert.equal(template.dependencies[pkg.name], pkg.version)
     if (!creator.version.includes('-')) {
       assert.match(pkg.version, /^\d+\.\d+\.\d+$/)
     }
   }
+  assert.equal(template.dependencies['@lexibase/rdx-next'], undefined)
+  assert.equal(template.dependencies['@lexibase/rdx-ui'], undefined)
+  const framework = await manifest('packages/rdx/package.json')
+  for (const name of ['rdx-next', 'rdx-ui']) {
+    assert.equal(framework.dependencies[`@lexibase/${name}`], 'workspace:*')
+  }
+  assert.equal(framework.dependencies['@lexibase/rdx-versioning'], undefined)
 })
 
 test('UI wildcard exports name actual modules, not empty placeholder directories', async () => {
@@ -55,6 +63,24 @@ test('UI wildcard exports name actual modules, not empty placeholder directories
     assert.ok(
       entries.some((entry) => entry.isFile() && entry.name.endsWith(suffix)),
       `${subpath} must expose at least one module`
+    )
+  }
+})
+
+test('the runtime consumes a compatible project-owned UI while workspace development stays local', async () => {
+  const runtime = await manifest('packages/rdx-next/package.json')
+  assert.equal(runtime.dependencies['@lexibase/rdx-ui'], undefined)
+  assert.equal(runtime.optionalDependencies?.['@lexibase/rdx-ui'], undefined)
+  assert.equal(runtime.peerDependencies['@lexibase/rdx-ui'], '^1.0.0')
+  assert.equal(runtime.devDependencies['@lexibase/rdx-ui'], 'workspace:*')
+  assert.notEqual(
+    runtime.peerDependenciesMeta?.['@lexibase/rdx-ui']?.optional,
+    true
+  )
+  for (const command of ['dev', 'build']) {
+    assert.match(
+      runtime.scripts[command],
+      /--external @lexibase\/rdx-ui(?: |$)/
     )
   }
 })

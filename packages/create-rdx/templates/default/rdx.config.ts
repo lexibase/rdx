@@ -1,4 +1,4 @@
-import { defineConfig } from '@lexibase/rdx-next'
+import { defineConfig } from '@lexibase/rdx'
 
 export default defineConfig({
   description: 'Documentation built with RDX.',

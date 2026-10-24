@@ -4,6 +4,7 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 const runtimePackages = [
+  'rdx',
   'rdx-types',
   'rdx-core',
   'rdx-ui',
@@ -69,9 +70,15 @@ export async function createDeployTest({ from, out }) {
     await readFile(path.join(source, 'package.json'), 'utf8')
   )
   const archives = []
+  const selectedDependencies = {}
   for (const shortName of runtimePackages) {
     const name = `@lexibase/${shortName}`
-    const reference = pkg.pnpm?.overrides?.[name]
+    const reference =
+      pkg.dependencies?.[name] ??
+      pkg.pnpm?.overrides?.[name] ??
+      pkg.pnpm?.overrides?.[`@lexibase/rdx>${name}`] ??
+      selectedDependencies[name]
+    if (shortName === 'rdx' && reference === undefined) continue
     if (typeof reference !== 'string' || !reference.startsWith('file:'))
       throw new Error(
         `Missing local release archive for ${name}. Run test:release --install first.`
@@ -86,6 +93,8 @@ export async function createDeployTest({ from, out }) {
     )
     if (manifest.name !== name)
       throw new Error(`Archive identity mismatch for ${name}.`)
+    if (shortName === 'rdx')
+      Object.assign(selectedDependencies, manifest.dependencies)
     archives.push({
       name,
       archive,

@@ -14,6 +14,13 @@
 **RDX** is a tool for building documentation with **MDX** in a friendly and focused way — fast, easy, and built for clarity.  
 Crafted with **Next.js**, **TailwindCSS**, and **shadcn/ui**, it delivers a sleek and modern design out of the box.
 
+## Using RDX
+
+Create a documentation project with `pnpm create @lexibase/rdx@latest`.
+Generated projects use `@lexibase/rdx` as their framework dependency. Update an
+existing project with `pnpm add @lexibase/rdx@latest`, then review release notes
+and rebuild. Optional plugins are installed and updated separately.
+
 ## Development
 
 Run `pnpm install` and then `pnpm dev` from the repository root. This starts the

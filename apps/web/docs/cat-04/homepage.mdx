@@ -40,7 +40,7 @@ your own page paths.
 Place the file at your project root, beside `rdx.config.ts`:
 
 ```tsx
-import { Home } from '@lexibase/rdx-ui/components/home'
+import { Home } from '@lexibase/rdx/ui/components/home'
 
 export default function MyHome() {
   return (
@@ -56,7 +56,7 @@ export default function MyHome() {
 Then import the component into your configuration:
 
 ```ts
-import { defineConfig } from '@lexibase/rdx-next'
+import { defineConfig } from '@lexibase/rdx'
 import MyHome from './home'
 
 export default defineConfig({

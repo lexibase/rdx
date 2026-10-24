@@ -2,6 +2,11 @@
 
 The official Next.js runtime for RDX documentation projects.
 
+Generated projects use the main `@lexibase/rdx` package. This adapter remains
+available for advanced integrations. It declares the shared UI as a compatible
+peer dependency rather than owning a fixed UI copy. The main package supplies
+the selected UI; direct adapter consumers must install a compatible UI themselves.
+
 Requires Node.js 22.18+ (22.x) or 24.11+ (24.x). Use the latest patch of either line.
 The MDX renderer keeps JavaScript expression blocking enabled. Markdown, fenced
 code and registered JSX components with literal props remain supported, but
