@@ -1,191 +1,152 @@
-# Publishing the RDX beta
+# Publishing RDX 1.0
 
-This repository publishes the framework and an optional versioning plugin:
+This is the maintainer runbook for the prepared first stable release.
+Changing manifests, merging a PR and deploying documentation do **not** publish
+npm packages. Nothing in the verification scripts uploads packages.
 
-| Package                | Owner    | Purpose                                                  |
-| ---------------------- | -------- | -------------------------------------------------------- |
-| `@lexibase/rdx-types`  | Lexibase | Shared TypeScript types                                  |
-| `@lexibase/rdx-core`   | Lexibase | Documentation indexing and content utilities             |
-| `@lexibase/rdx-ui`     | Lexibase | Shared development and generated-site theme              |
-| `@lexibase/rdx-next`   | Lexibase | Next.js runtime and `rdx` command                        |
-| `@lexibase/create-rdx` | Lexibase | The project generator used by `npm create @lexibase/rdx` |
+## Before proceeding
 
-`@lexibase/rdx-versioning` is the optional plugin used by generated projects and
-the development website. Redundant private core/versioning helpers have been
-removed; do not recreate or publish them. Configuration and plugin usage are
-documented in [CONFIGURATION.md](./CONFIGURATION.md).
+- Verify the MIT code and CC BY 4.0 documentation notices in `LICENSE` and `LICENSE-docs`.
+- Review and merge the preparation PR with successful Linux and Windows checks.
+- Follow the Node.js and package-manager policy in [SUPPORT.md](./SUPPORT.md).
+- Confirm the six public manifests are 1.0.0 and the creator template pins
+  `@lexibase/rdx-next@1.0.0` and `@lexibase/rdx-ui@1.0.0`.
+- Do not change npm tags or announce availability before actual publication.
 
-## One-time npm setup
+The unscoped `create-rdx` belongs to another project. Our package is
+`@lexibase/create-rdx`; the stable creation commands are
+`npm create @lexibase/rdx@latest` and `pnpm create @lexibase/rdx@latest`.
 
-1. Enable two-factor authentication for publishing in the npm account that owns `duhnunes` and in the Lexibase organization.
-2. Make sure `duhnunes` is an owner of the Lexibase npm organization.
-3. Confirm the session with `npm whoami`.
-4. Check the scoped generator with `npm view @lexibase/create-rdx`.
+## Validate the exact source
 
-The unscoped `create-rdx` name belongs to another project. RDX uses `@lexibase/create-rdx`, owned by the Lexibase organization. The corresponding creation command is `npm create @lexibase/rdx@beta` or `pnpm create @lexibase/rdx@beta`.
-
-## Publish a beta
-
-This release consolidates dependency maintenance, Markdown components, syntax
-highlighting, version-aware document links, the floating TOC and optional local
-search. Publish all six packages in dependency order; the optional plugin also
-needs a new version so it consumes this release's core/types instead of the old
-core `1.0.0-beta.4`.
-
-| Package                    | Version         |
-| -------------------------- | --------------- |
-| `@lexibase/rdx-types`      | `1.0.0-beta.5`  |
-| `@lexibase/rdx-core`       | `1.0.0-beta.7`  |
-| `@lexibase/rdx-ui`         | `1.0.0-beta.2`  |
-| `@lexibase/rdx-next`       | `1.0.0-beta.10` |
-| `@lexibase/rdx-versioning` | `1.0.0-beta.3`  |
-| `@lexibase/create-rdx`     | `1.0.0-beta.9`  |
-
-The runtime ships the TypeScript parser and Windows-compatible process runner
-as production dependencies. Its `bin/` includes the config editor and installer.
-No install hook modifies user configuration; activation requires the explicit
-`rdx add` command. Existing plugin options and installed versions are preserved.
-
-The generator pins the exact tested UI/runtime releases. Internal `workspace:*`
-dependencies are rewritten to exact published versions by `pnpm pack/publish`.
-Never try to overwrite a version already published. The private compatibility
-packages stay private, and versioning stays optional in generated projects.
-
-From the repository root, install the workspace dependencies and run the checks:
+From the repository root, using the declared pnpm version:
 
 ```powershell
-pnpm install
+pnpm install --frozen-lockfile
 pnpm check
-pnpm test:release
+pnpm test:release --install
+pnpm audit --prod
 ```
 
-`test:release` creates real `.tgz` archives under the ignored
-`.rdx-package-smoke/`, validates their required files and checks that all public
-RDX dependencies point to this release. It does not publish. For the full
-pre-publication smoke test, use `pnpm test:release --install`: it installs the
-archives into an isolated generated project, builds it with search/TOC enabled,
-activates the optional versioning package, creates a snapshot and builds again.
-It also starts the installed production CLI on temporary local ports and checks
-pages, public assets, CSS/JS bundles, redirects, 404s and version-isolated search.
-A third build disables search and checks that previously generated indexes
-are no longer served. See [DEPLOYMENT.md](./DEPLOYMENT.md) for the Node-server
-deployment baseline and its limits.
-The fixture and archives are retained for inspection; no user project is changed.
+The release test packs all six packages and installs their actual archives in an
+isolated generated project. It verifies production builds/HTTP with search on,
+versioning on, and search off, including execution from the project root and
+the generated app directory. Third-party dependencies are resolved independently
+of the workspace lockfile. Inspect the final retained path printed by the test.
 
-Commit and merge the release preparation before uploading to npm. Package
-publishing and GitHub merging are separate operations. Recheck `npm whoami` and
-the current registry versions before publishing if significant time has passed.
+Optional browser tests cover interactions beyond HTTP. A successful native
+`apps/web` deployment alone does not prove a generated project deploys correctly.
+The separate generated Vercel test project exercises that deployment path.
 
-Inspect exactly what each package would upload before publishing:
+Review [CHANGELOG.md](./CHANGELOG.md), public examples and the configuration
+migration before publishing. MDX expression blocking, Node support, removed beta
+configuration fields and generated-runtime boundaries must remain explicit.
+
+## Confirm identity and registry state
 
 ```powershell
-pnpm --filter @lexibase/rdx-types exec npm pack --dry-run
-pnpm --filter @lexibase/rdx-core exec npm pack --dry-run
-pnpm --filter @lexibase/rdx-ui exec npm pack --dry-run
-pnpm --filter @lexibase/rdx-next exec npm pack --dry-run
-pnpm --filter @lexibase/rdx-versioning exec npm pack --dry-run
-pnpm --filter @lexibase/create-rdx exec npm pack --dry-run
+npm whoami --registry=https://registry.npmjs.org/
+npm org ls lexibase --registry=https://registry.npmjs.org/
+npm view @lexibase/create-rdx dist-tags --json
+npm view @lexibase/rdx-next dist-tags --json
 ```
 
-Publish in dependency order. The `beta` tag keeps this pre-release separate from `latest`:
+Check the exact target version of **each** package before uploading:
+`npm view @lexibase/rdx-types@1.0.0 version`, and likewise for the others.
+An absent version may return 404. Stop if authentication fails or a target
+version already exists; do not try to overwrite it.
+
+Historical `latest` tags may still point at the first beta. The stable publication
+must replace them with actual stable versions. Do not fix this by promoting an
+old beta to `latest`.
+
+Authentication and two-factor prompts belong only in the terminal/browser.
+Never put tokens, one-time passwords or credentials in source files or chat.
+
+## Inspect archives
+
+`pnpm test:release` verifies required files, rewritten workspace dependencies
+and matching template references. Review its retained archives when needed.
+Plain `npm pack --dry-run` is only a preview, not a publication.
+
+Use pnpm to publish workspace packages: it rewrites internal `workspace:*`
+dependencies to their matching public versions. The UI intentionally ships
+React/Next.js source to preserve component boundaries.
+
+## Publish manually, in order
+
+Run one command at a time and stop on the first error:
 
 ```powershell
-pnpm --filter @lexibase/rdx-types publish --tag beta --access public --no-git-checks
-pnpm --filter @lexibase/rdx-core publish --tag beta --access public --no-git-checks
-pnpm --filter @lexibase/rdx-ui publish --tag beta --access public --no-git-checks
-pnpm --filter @lexibase/rdx-next publish --tag beta --access public --no-git-checks
-pnpm --filter @lexibase/rdx-versioning publish --tag beta --access public --no-git-checks
-pnpm --filter @lexibase/create-rdx publish --tag beta --access public --no-git-checks
+pnpm --filter @lexibase/rdx-types publish --tag latest --access public
+pnpm --filter @lexibase/rdx-core publish --tag latest --access public
+pnpm --filter @lexibase/rdx-ui publish --tag latest --access public
+pnpm --filter @lexibase/rdx-versioning publish --tag latest --access public
+pnpm --filter @lexibase/rdx-next publish --tag latest --access public
+pnpm --filter @lexibase/create-rdx publish --tag latest --access public
 ```
 
-npm may ask for a one-time password from the authenticator app. Enter it only in the terminal; never put it in this repository or send it in chat.
+The optional plugin is published before exposing the stable runtime and creator.
+A stable `rdx add versioning` asks for the plugin's `latest` channel, not `beta`.
+Installing the plugin remains optional in generated projects.
 
-Run the publish commands one at a time and stop on the first error. A successful
-`+ @lexibase/package@version` means the upload was accepted; do not repeat it
-because registry propagation takes a little time. Confirm with
-`npm view @lexibase/create-rdx@beta version` after the last publication.
+A successful `+ @lexibase/package@1.0.0` means the upload was accepted.
+Allow registry propagation and verify it; do not repeat a successful upload.
+If publication stops midway, inspect all six registry versions/tags before resuming.
+Do not publish private configuration packages or the development website.
 
-## Validate the released generator
+If a release candidate is desired instead, prepare proper prerelease versions,
+update the template and rerun validation first. Publishing 1.0.0 under `rc`
+does not reserve an editable candidate: npm versions cannot be overwritten later.
 
-In an empty directory outside the repository, a complete npm-only validation is:
+## Verify the registry, not only local archives
+
+Check each package's 1.0.0 version and `latest` tag, then use separate empty
+directories outside the monorepo for npm and pnpm:
 
 ```powershell
-npm create @lexibase/rdx@1.0.0-beta.9
-# Answer the project name prompt, for example docs-release-test.
-Set-Location docs-release-test
+npm create @lexibase/rdx@latest
+# Answer the name prompt, then enter the generated folder.
 npm run dev
-```
-
-First validate without plugins: open `/docs/init/intro`, check the navbar and
-Markdown examples, then set `TOC: true` and `search: true` in `rdx.config.ts`.
-Restart development after changing configuration. Verify the TOC, Ctrl+K/Command+K,
-and search results from live documentation. `public/` must serve images/downloads.
-No `versions.json` or `versioned_docs/` should exist yet.
-
-Stop development and validate production without versioning, then activate it:
-
-```powershell
+# Stop development before the production commands.
 npm run build
 npm run start
-# Stop with Ctrl+C before the next commands.
-npm exec -- rdx add versioning --package-manager npm
-npm exec -- rdx version 1.0.0
 ```
 
-Edit a page in `docs/`, then build and start again. The live page must show the
-edit; `/docs/1.0.0/init/intro` must retain the snapshot. Search results must stay
-inside the version being viewed. Use one package manager per test project.
+Repeat creation with `pnpm create @lexibase/rdx@latest` in another directory,
+using `pnpm dev`, `pnpm build` and `pnpm start`.
 
-For pnpm, the regular creation command remains:
+Check the generated configuration, sidebar, components and public images.
+Enable search/TOC and a custom homepage, restart development, and rebuild.
+Initially there must be no version manifest or snapshot directory.
 
-```powershell
-pnpm create @lexibase/rdx@beta rdx-beta-test
-Set-Location rdx-beta-test
-pnpm dev
-```
-
-If `pnpm create` still resolves an older cached generator, select the release
-explicitly with `pnpm dlx @lexibase/create-rdx@1.0.0-beta.9`.
-
-pnpm 11 may delay installing newly published versions according to its
-`minimumReleaseAge` policy. Keep that protection enabled. After reviewing a
-trusted release, approve only the exact RDX versions being tested through
-`minimumReleaseAgeExclude` in the test workspace's `pnpm-workspace.yaml`,
-preserving any existing entries. Do not remove lockfiles or disable the policy
-globally to get past an error; unrelated dependencies still need review. The
-npm-only flow above is also supported, in a separate fresh test project.
-
-Open `http://localhost:3000/docs/init/intro`. The generated project should have a `docs/` directory, `.gitignore`, `rdx.config.ts`, and a generated `.rdx/` runtime directory.
-
-Stop development before validating assisted activation:
+Stop the server, then activate and validate versioning with the same manager:
 
 ```powershell
 pnpm rdx add versioning
 pnpm rdx add versioning
 pnpm rdx version 1.0.0
-pnpm build
-pnpm start
 ```
 
-The first activation must add the import and plugin and initialize `versions.json`,
-without leaving backup or temporary config files. The repeat must not add another
-plugin or installation. The snapshot must load at `/docs/1.0.0/init/intro` in production.
-Review `rdx.config.ts`, `package.json` and the lockfile before committing the
-generated project. If the child package manager
-still rejects a fresh version, approve only the exact trusted RDX versions in
-`minimumReleaseAgeExclude`; the CLI intentionally does not change this policy.
+The repeat must not duplicate configuration or upgrade an installed plugin.
+Change a live page, build and start: Current must show the edit while the
+snapshot retains its content. Search must stay within the selected edition.
 
-## Promote to stable
+If a package-manager release-age policy rejects new releases, approve only
+the exact versions you trust using the project's policy. Do not globally disable
+protections, delete lockfiles reflexively or mix package managers.
 
-Stable-release preparation is tracked in [RELEASE_READINESS.md](./RELEASE_READINESS.md).
-Do not promote these beta packages to `latest` while its launch blockers remain open.
-The generator, runtime, UI, shared types/core and optional plugin must be aligned;
-in particular, assisted plugin installation must not request `@beta` from a stable runtime.
+Recheck a generated site's public deployment after the final package release.
 
-For stable/RC publication, publish the optional versioning plugin in its matching
-channel before exposing the corresponding runtime and generator. A safe order is
-types → core → UI → versioning → Next runtime → generator. The installer selects
-`latest`, `beta` or `rc` from its installed runtime version; missing tags do not
-fall back. Do not point `latest` at a prerelease while preparing this launch.
+## Finish the launch
 
-Only promote after validating the beta in a clean directory. Publish the framework packages with stable versions and without `--tag beta`; npm then assigns the `latest` tag. The optional plugin has its own release cycle. The `workspace:*` dependencies between RDX packages are converted to their matching published versions by pnpm during publication.
+After registry and deployment checks succeed:
+
+- Change the changelog entry from Unreleased to the actual release date.
+- Verify the official installation page's `@latest` commands against the registry.
+- Deploy the final stable instructions only after all stable packages are available.
+- Create the actual 1.0.0 documentation snapshot once, not on every build.
+- Announce the release and retain beta/RC channels separately.
+
+Git commits, merges, release tags and publication remain explicit maintainer
+actions. This document does not execute them.

@@ -47,8 +47,15 @@ export function Welcome() {
 Long blocks scroll horizontally inside their container. Keep examples focused;
 use [Tabs](./tabs.mdx) for related alternatives.
 
-## Current scope
+## Directory trees
 
-Copy buttons are icon-only and have accessible names. Custom syntax themes,
-highlight-color configuration, and a special folder-tree language are not part of
-the current release. You can show a directory tree in an ordinary `text` fence.
+Use a `text` fence to display a directory structure:
+
+```text
+my-docs/
+├── docs/
+│   └── guides/
+│       └── introduction.mdx
+├── public/
+└── rdx.config.ts
+```

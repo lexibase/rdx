@@ -2,8 +2,8 @@
 
 RDX loads `rdx.config.ts` from the documentation project root. The CLI validates
 it before preparing `.rdx/` or launching Next.js. The runtime uses the same
-validation and defaults. Existing plain-object exports and the first beta's
-`RdxRuntimeConfig` type remain supported.
+validation and defaults. Export a plain configuration object or use `defineConfig`
+for typed configuration.
 
 ```ts
 import { defineConfig } from '@lexibase/rdx-next'
@@ -18,15 +18,13 @@ export default defineConfig({
 
 Only `metadata.applicationName` is required. It is the single site name used for
 browser titles and their suffix, social preview defaults, accessible logo labels,
-the footer, and the built-in homepage fallback. The root `title` option has been
-removed; move its value into `metadata.applicationName` when upgrading. Do not
-add a separate `metadata.title`. `navbar.title` remains independent and optional.
+the footer, and the built-in homepage fallback. `navbar.title` is independent
+and optional.
 Defaults are `description: ''`, `lang: 'en'`,
 `theme.defaultTheme: 'system'`, and `plugins: []`.
 Live documentation always lives in the project's `docs/` folder and is served
 under `/docs`. This folder is an RDX convention, not a configuration option.
-Remove `docsDir` from older configurations; move any custom live content folder
-to `docs/` before upgrading. Theme values are `system`, `light`, and `dark`.
+Theme values are `system`, `light`, and `dark`.
 
 `navbar.title` adds text beside the logo; absent or empty means logo-only, as in
 the development website. `navbar.logo` accepts a React component with an optional
@@ -109,15 +107,14 @@ the HTML `lang` setting.
 
 Restart development after configuration changes and rebuild for production.
 Edit the project-owned `rdx.config.ts`, not generated files inside `.rdx/`, which
-are refreshed by the CLI. `apps/web` and generated sites now import the same
+are refreshed by the CLI. `apps/web` and generated sites import the same
 navbar, dropdown, Home, sidebar, MDX components and theme from `packages/rdx-ui`,
 published as `@lexibase/rdx-ui`. Only their content/version adapters differ.
 Tailwind scanning, PostCSS and Next's transpilation are configured by the runtime;
 there are no monorepo paths or private UI dependencies in generated projects.
 
 For contributors, use a supported Node.js version matching
-`^22.18.0 || ^24.11.0 || >=26.0.0` for the monorepo build tools.
-Generated projects retain Node >=20.9 support.
+`^22.18.0 || ^24.11.0` for both the monorepo and generated projects.
 
 Run `pnpm check`, then `pnpm --filter @lexibase/rdx-next test:runtime` to exercise
 a disposable generated site in development and production. This integration test requires the workspace
@@ -126,7 +123,7 @@ Optional browser checks use an installed Playwright module and browser via
 `RDX_PLAYWRIGHT_MODULE` and `RDX_BROWSER_EXECUTABLE`. Set `RDX_THEME_SCREENSHOTS`
 to a disposable output directory to save desktop/mobile screenshots.
 With those browser variables configured, `pnpm --filter web test:runtime`
-also checks hydration and version persistence in the legacy development website.
+also checks hydration and version persistence in the development website.
 
 ## Public files: images, favicon and downloads
 
@@ -156,8 +153,7 @@ the original directory with a directory link (a junction on Windows). There is
 no copied cache of assets to become stale. Additions, edits and removals are
 available during development without rerunning preparation. In production,
 restart/redeploy after adding or removing files, and deploy the project-root
-`public/` alongside the application. Standalone/static-export deployment is not
-introduced by this feature.
+`public/` alongside the application. See [DEPLOYMENT.md](./DEPLOYMENT.md) for the Node.js deployment setup.
 
 Both `public/` and `.rdx/` must be real directories. The filesystem must support
 directory links. RDX refuses a conflicting regular `.rdx/public` directory/file
@@ -170,7 +166,7 @@ Everything in `public/` is public: never store credentials or private documents
 there. Avoid URL names reserved by Next/RDX routes, such as `/docs` and `/_next`.
 Documentation snapshots share public assets; keep distinct filenames such as
 `/images/1.0.0/diagram.png` if a historical version must retain an older image.
-The versioning plugin continues snapshotting documentation only.
+The versioning plugin snapshots documentation only.
 
 ## Activating versioning
 
@@ -207,7 +203,7 @@ When restoring a declared package, RDX runs the manager's `install` command
 without a new package specification, retaining its range and dependency section.
 The manager can still update lockfiles according to its normal rules; this is
 not a frozen installation. The documentation's snapshot labels do not choose the
-package release channel. The candidate public contract is listed in
+package release channel. The public contract is listed in
 [PUBLIC_API.md](./PUBLIC_API.md).
 
 Automatic editing supports a literal default-exported object, optionally inside
@@ -217,8 +213,7 @@ Dynamic config exports, spreads or computed options are refused before installin
 follow the manual instructions instead. Only `versioning` is currently supported;
 arbitrary package names and additional install flags are not accepted.
 
-The command validates the new config before replacing the original file and
-does not create backups. Its temporary validation file is removed afterward.
+The command validates the new config before replacing the original file.
 If installation or config validation fails,
 the original config is left unchanged; package-manager changes to dependencies
 and lockfiles are retained for inspection, not rolled back. If preparation fails
@@ -239,7 +234,7 @@ export default defineConfig({
 ```
 
 Run `pnpm rdx prepare` (or `pnpm dev`) to initialize `versions.json` if it
-does not exist. Its format stays compatible with the original manifest:
+does not exist. The manifest contains active and archived version labels:
 
 ```json
 {
@@ -335,16 +330,15 @@ unavailable.
 
 ## MDX content and runtime requirements
 
-The current runtime and generated projects require Node.js 20.9 or newer.
+The runtime and generated projects require Node.js 22.18+ (22.x) or 24.11+ (24.x).
 The development workspace, generated template, React/React DOM and React types
 are kept aligned on Next.js 16.4.2 or a compatible newer 16.x release.
 Development and production builds use Turbopack. The internal `.rdx/` application
 uses the project directory as its bundler root, including project-owned
-`rdx.config.ts` and optional `home.tsx` files. The existing shared UI remains
-the default theme; no layout replacement is involved in this migration.
+`rdx.config.ts` and optional `home.tsx` files. The shared UI supplies the
+default theme.
 
-The development workspace runs ESLint separately (`pnpm lint`); Next.js 16 no
-longer provides `next lint` or runs lint during `next build`. `pnpm check` still
+The development workspace runs ESLint separately (`pnpm lint`). `pnpm check`
 validates lint, types, builds and tests. `apps/web` also generates route types
 before standalone type checking.
 
@@ -353,23 +347,22 @@ enabled explicitly. Markdown, fenced code and registered JSX components remain
 available, including literal props such as `<Notice title="Note" />`.
 JavaScript expressions such as `{variable}`, `{calculate()}` and JSX expression
 attributes are removed rather than evaluated. Code examples inside fenced blocks
-are unchanged. This is an intentional compatibility change from version 5.
+are unchanged.
 
 Documentation is still trusted project-owned content. These options are not a
 sandbox for arbitrary uploads or untrusted remote MDX, and component registration
 does not make untrusted content safe. There is no config switch to turn these
-protections off in this release.
+protections off.
 
 ## Official development website
 
 `apps/web` uses the current `RDXConfig` contract, `createRdxProject` and the same
 `@lexibase/rdx-versioning` plugin as generated projects, all linked locally through
 `workspace:*`. Live content is in `docs/`; all snapshots are in `versioned_docs/`,
-with active/archived status maintained in `versions.json`. The private versioning
-helper and its automatic directory-to-manifest generator have been removed.
+with active/archived status maintained in `versions.json`.
 
 Only the official site's URL adapter is site-specific: live documentation keeps
 `/docs/canary`, and existing unambiguous filename routes remain valid. The layout
 and shared UI components are unchanged. The native Next application does not
 create a redundant `.rdx/` application. See [apps/web/README.md](./apps/web/README.md)
-for snapshot commands, local development and the remaining tracing limitation.
+for snapshot commands, local development and production tracing.

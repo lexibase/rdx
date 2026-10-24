@@ -1,6 +1,6 @@
 {
   "name": "@lexibase/rdx-types",
-  "version": "1.0.0-beta.5",
+  "version": "1.0.0",
   "license": "MIT",
   "description": "Shared TypeScript types for RDX documentation projects.",
   "types": "./dist/index.d.ts",
@@ -36,5 +36,8 @@
   "devDependencies": {
     "@rdx/typescript-config": "workspace:*",
     "@types/react": "19.3.0"
+  },
+  "engines": {
+    "node": "^22.18.0 || ^24.11.0"
   }
 }

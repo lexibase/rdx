@@ -59,7 +59,7 @@ Only explicit relative `.mdx` destinations are resolved; external URLs,
 root-relative URLs, image sources, downloads, same-page anchors, and code samples
 are left unchanged. Paths without `.mdx` retain normal browser URL behavior.
 
-Missing document destinations, ambiguous legacy routes, malformed encoded MDX
+Missing document destinations, ambiguous document URLs, malformed encoded MDX
 paths and paths escaping the current source fail compilation with the referring
 file and URL. Missing assets, arbitrary site URLs and fragment existence are not
 validated by this document-link check. This is not a site-wide link crawler.
@@ -186,7 +186,7 @@ preserve Base UI props, refs and state-based class callbacks. React files can us
 expressions remain blocked in documentation MDX. Closed panels unmount by default;
 `keepMounted` preserves them, and `hiddenUntilFound` enables browser find-in-page
 discovery of collapsed content. No additional plugin is needed for this built-in
-component; optional plugins and future custom Markdown syntax remain separate APIs.
+component.
 
 ## Authoring boundaries
 
@@ -196,7 +196,6 @@ Markdown content. JavaScript expressions, imports and arbitrary event handlers
 are not an authoring API. This is not a general HTML sanitizer: only compile
 documentation from trusted project sources, and review externally supplied MDX.
 
-The custom RDX shorthand syntax remains separate future work.
 Examples live in `apps/web/docs/cat-03/mdx-components.mdx` and the
 generated project's `docs/examples/callouts.mdx`.
 

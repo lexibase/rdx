@@ -7,8 +7,9 @@ publish new RDX package versions.
 - React/React DOM: 19.3.1; React type declarations: 19.3.0.
 - Tailwind and its PostCSS adapter: 4.3.3; direct PostCSS: 8.5.31.
 - MDX renderer: next-mdx-remote 6.0.0 with JavaScript expression blocking enabled.
-- Minimum Node.js for the site/runtime/generator: 20.9 (required by Next.js 16
-  and the image-processing dependency); Tailwind's native compiler also requires Node 20.
+- Supported Node.js for development, the site, public packages, and generated
+  projects: 22.18+ (22.x) or 24.11+ (24.x). Use the latest patch of either line.
+
 - Compatible transitive updates are recorded in pnpm-lock.yaml.
 
 ## Development toolchain
@@ -24,9 +25,8 @@ publish new RDX package versions.
 - ESLint 9 is an interim compatibility constraint, not the current upstream
   release line: `eslint-plugin-react` 7.37.5 and `eslint-plugin-import` 2.32.0 do
   not declare ESLint 10 support. Revisit this migration rather than forcing peers.
-- Development requires Node `^22.18.0 || ^24.11.0 || >=26.0.0` because of Tsup 9.
-  This applies to contributors building the monorepo, not to generated projects;
-  the public runtime and template still require Node >=20.9.
+- The first stable release aligns all Node engine declarations to
+  `^22.18.0 || ^24.11.0`. Other Node major lines are outside its support policy.
 
 TypeScript 6 configs explicitly select ambient types and root directories,
 including shared workspace sources and project-owned `home.tsx`/configuration

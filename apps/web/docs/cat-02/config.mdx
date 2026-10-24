@@ -23,8 +23,7 @@ title, the page-title suffix, social preview defaults, footer branding, and the
 built-in homepage name. For example, a page named Installation appears in the
 browser as **Installation | My documentation**.
 
-Do not add another root `title` or `metadata.title`. The optional
-`navbar.title` is separate text beside the navbar logo.
+Use `navbar.title` for optional text beside the navbar logo.
 
 ## Common options
 
@@ -68,8 +67,8 @@ export default defineConfig({
 The creator includes the GitHub action with a `#` placeholder and the theme
 toggle enabled. Replace the placeholder with your own repository URL.
 
-`lang` sets the HTML language; it does not translate your documents or the fixed
-interface labels. Automatic interface localization is planned separately.
+`lang` sets the HTML document language. For example, use `pt-BR` for a site
+written in Brazilian Portuguese.
 
 ## SEO and social previews
 
@@ -106,9 +105,8 @@ metadata: {
 ```
 
 This is the `metadata` portion of a `defineConfig` call, not a complete file.
-Add the referenced files to `public/`. RDX does not generate your images, icons,
-or web app manifest. `metadataBase` must be an absolute HTTP(S) URL and resolves
-relative social image URLs.
+Place the referenced images, icons, and web app manifest in `public/`.
+`metadataBase` must be an absolute HTTP(S) URL and resolves relative social image URLs.
 
 Supported fields include authors, keywords, icons, manifest, robots, OpenGraph,
 and Twitter metadata. This is a validated subset, not the entire Next.js Metadata
@@ -127,7 +125,7 @@ See [Homepage](../cat-04/homepage.mdx) for a project-owned `home.tsx`.
 Installing a package does not activate it. Use [Plugins](../cat-04/plugins.mdx)
 to install and configure the optional versioning feature.
 
-Live content always lives in `docs/`; there is no `docsDir` option.
+Write your documentation in `docs/`.
 Do not edit files inside `.rdx/`. Restart development after changing configuration,
 and rebuild/redeploy for production.
 

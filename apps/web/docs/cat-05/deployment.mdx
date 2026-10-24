@@ -39,16 +39,10 @@ The framework traces configured documentation and plugin runtime files into the
 server build. Keep your source content available during the build; do not create
 snapshots inside a serverless request.
 
-The official website is different: it is the monorepo's native Next.js
-application in `apps/web`, consumes local workspace packages, and outputs
-`apps/web/.next`. Its deployment settings are documented in the
-[website README](https://github.com/lexibase/rdx/blob/main/apps/web/README.md).
-
-<Callout title="Verify the deployment, not only the build">
+<Callout title="Check your deployed site">
 
 After deploying, open a document URL directly, test search and assets, refresh a
-nested page, and check that a missing page returns 404. A successful local build
-alone does not prove that a host included the runtime content files.
+nested page, and check that a missing page returns 404.
 
 </Callout>
 
@@ -57,9 +51,6 @@ alone does not prove that a host included the runtime content files.
 On a Node.js server, install dependencies, run the build, and start the generated
 project with `pnpm start`. Configure HTTPS, a process supervisor, and the host's
 network settings. Keep the complete project available to the runtime.
-
-Static export, reduced standalone images, and read-only filesystem deployments
-are not covered by this release's baseline recipe.
 
 ## Updates
 

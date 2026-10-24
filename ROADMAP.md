@@ -68,6 +68,10 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       a base shadcn/ui + Tailwind. Definir a sintaxe e o comportamento da cópia
       quando o componente for implementado; melhoria futura, não implementada.
 - [ ] Documentar a extensão e substituição de componentes MDX pelo usuário.
+- [ ] Code blocks de diff, no estilo Git: distinguir linhas adicionadas e
+      removidas, com marcadores `+`/`-` e realces acessíveis nos temas claro e
+      escuro. Definir autoria e comportamento da cópia mantendo o bloco compacto;
+      melhoria futura, sem implementação nesta etapa.
 - [x] Links entre documentos, âncoras e TOC flutuante opcional (`TOC: false`
       por padrão).
 - [x] Busca local opcional, desativada por padrão no `rdx.config.ts`. Implementação

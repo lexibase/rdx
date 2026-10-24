@@ -42,14 +42,11 @@ configuration, content, assets, and any components you own.
 
 ## Categories and URLs
 
-The first folder level becomes sidebar categories. An optional `_category.json`
-sets a category's title and order. Nested files retain their path, but nested
-sidebar groups are not part of the current release.
+Top-level folders become sidebar categories. An optional `_category.json`
+sets a category's title and order. Page URLs follow their path inside `docs/`:
+`docs/init/intro.mdx` becomes `/docs/init/intro`.
 
-In generated projects, `docs/init/intro.mdx` becomes `/docs/init/intro`.
-This official development website uses the Canary prefix and keeps its own
-short filename routes. Prefer relative MDX links so your content does not
-depend on either adapter's URL format.
+Use [relative MDX links](./document-links.mdx) to link one document to another.
 
 ## Versioned
 

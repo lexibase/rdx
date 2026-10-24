@@ -92,6 +92,61 @@ test(
           page.on('pageerror', (error) => errors.push(error.message))
           await page.setViewportSize({ width: 1872, height: 955 })
           await page.goto(`${running.base}/docs/canary/docs`)
+          const versionTrigger = page.locator('[data-rdx-version-trigger]')
+          for (const width of [360, 390, 640, 1280]) {
+            await page.setViewportSize({ width, height: 844 })
+            // The shared Button transitions min-width across the breakpoint.
+            await page.waitForFunction((compact) => {
+              const trigger = document.querySelector(
+                '[data-rdx-version-trigger]'
+              )
+              const width = trigger.getBoundingClientRect().width
+              return compact ? width < 110 : width >= 134
+            }, width < 640)
+            const metrics = await versionTrigger.evaluate((trigger) => {
+              const icon = trigger.querySelector(
+                '[data-slot="dropdown-menu-shortcut"]'
+              )
+              return {
+                width: trigger.getBoundingClientRect().width,
+                iconMargin: Number.parseFloat(
+                  getComputedStyle(icon).marginLeft
+                ),
+                actionGap: Number.parseFloat(
+                  getComputedStyle(trigger.parentElement).columnGap
+                ),
+                overflow:
+                  document.documentElement.scrollWidth > window.innerWidth,
+              }
+            })
+            if (width < 640) {
+              assert.ok(
+                metrics.width < 110,
+                `${mode}: compact version trigger at ${width}px`
+              )
+              assert.equal(
+                metrics.iconMargin,
+                0,
+                `${mode}: no stretched icon gap on mobile`
+              )
+            } else {
+              assert.ok(
+                metrics.width >= 134,
+                `${mode}: desktop trigger width is preserved`
+              )
+            }
+            assert.equal(
+              metrics.actionGap,
+              width < 768 ? 4 : 8,
+              `${mode}: navbar actions retain a visible gap at ${width}px`
+            )
+            assert.equal(
+              metrics.overflow,
+              false,
+              `${mode}: no page overflow at ${width}px`
+            )
+          }
+          await page.setViewportSize({ width: 1872, height: 955 })
           await page
             .getByRole('button', { name: 'On this page', exact: true })
             .hover()
@@ -134,6 +189,12 @@ test(
           await page
             .getByRole('button', { name: 'Documentation version: Canary' })
             .click()
+          await page.getByRole('menu').waitFor()
+          assert.equal(
+            await page.locator('[data-slot="dropdown-menu-separator"]').count(),
+            0,
+            `${mode}: Canary alone has no dangling divider`
+          )
           assert.equal(
             await page.getByRole('menuitem', { name: /^Version / }).count(),
             0

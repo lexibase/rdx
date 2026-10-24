@@ -1,6 +1,6 @@
 {
   "name": "@lexibase/rdx-core",
-  "version": "1.0.0-beta.7",
+  "version": "1.0.0",
   "description": "Content indexing and document utilities for RDX documentation projects.",
   "license": "MIT",
   "type": "module",
@@ -62,5 +62,8 @@
     "@rdx/typescript-config": "workspace:*",
     "@types/node": "^22.15.3",
     "@types/react": "19.3.0"
+  },
+  "engines": {
+    "node": "^22.18.0 || ^24.11.0"
   }
 }

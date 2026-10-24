@@ -15,6 +15,13 @@
 - Preserve os visuais aprovados. Prefira espaçamentos compactos, sem sacrificar legibilidade, acessibilidade, uso por teclado ou telas pequenas.
 - A integração MDX e uma futura sintaxe Markdown própria são camadas sobre esses componentes. Imports e plugins são opções válidas; não são proibidos.
 
+## Documentação
+
+- A documentação pública ensina o comportamento disponível, com exemplos utilizáveis.
+- Não inclua promessas, roadmap, histórico privado de desenvolvimento ou explicações sobre opções removidas nos guias de uso. Registre planejamento em `ROADMAP.md` e histórico em `CHANGELOG.md`.
+- Explique limitações operacionais e de segurança quando forem necessárias para usar a RDX corretamente.
+- Textos da documentação oficial seguem `LICENSE-docs`; código, exemplos e templates da CLI seguem MIT. Isso não define a licença da documentação criada pelos usuários.
+
 ## Entrega
 
 - Valide as mudanças e forneça ao final a mensagem de conventional commit e os comandos para atualizar ou criar a PR.

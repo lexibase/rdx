@@ -1,5 +1,53 @@
 # Changelog
 
+## 1.0.0 — Unreleased
+
+This entry describes the prepared first stable release, not a completed npm
+publication. Package manifests are staged at 1.0.0; registry publication remains
+a separate maintainer action after the release checklist is approved.
+
+### Included
+
+- Interactive scoped project creator: `npm create @lexibase/rdx`.
+- Generated internal Next.js application in `.rdx/`.
+- File-based MDX pages and categories, ordering and version-aware relative links.
+- Shared minimal theme built on Next.js, Tailwind CSS and shadcn/ui Base UI.
+- Highlighted code blocks with icon-only copying, Callouts, Tabs and Accordion.
+- Responsive tables, quotations and shared Markdown styling.
+- Opt-in local search, floating TOC and configurable homepage components.
+- Typed, validated configuration with site metadata and optional navbar actions.
+- Optional versioning plugin with explicit activation, snapshots and archives.
+- Public assets, production tracing and standalone installed-package tests.
+- Linux/Windows CI, local workspace watching and coordinated process shutdown.
+- MIT code/examples/starter templates and CC BY 4.0 official documentation prose.
+
+### Changes from the betas
+
+- Require `metadata.applicationName` instead of root `title`.
+- Remove configurable live `docsDir`; live documentation always uses `docs/`.
+- Use the canonical `RDXConfig` type; retain `RdxRuntimeConfig` as an alias.
+- Require Node.js 22.18+ (22.x) or 24.11+ (24.x), including generated projects.
+- Use Base UI `render` composition instead of Radix `asChild` in shared UI.
+- Block MDX JavaScript expressions and expression attributes. Use registered
+  components with literal attributes; React files such as `home.tsx` remain code.
+- Remove empty UI hook/context export placeholders, including the misspelled
+  `contenxts` path. No modules were available through those placeholders.
+- Show the live-edition divider only when content follows, without duplicating
+  the boundary before an archived group.
+
+### Upgrade
+
+Update installed runtime/UI packages rather than rerunning the creator over an
+existing site. Update the optional plugin if installed, review configuration
+changes, then build and test before deploying. Preserve your source files and
+snapshots; `.rdx/` is generated and is not a customization directory.
+
+## Historical development notes
+
+The following entries preserve the project's pre-publication development history.
+Their 2.x labels were used before the first stable framework distribution; they
+are not additional released documentation editions on the first-release website.
+
 ## 2.1.1 (2025-09-22)
 
 - Add Husky pre-commit hook to enforce formatting before commits.

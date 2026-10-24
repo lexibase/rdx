@@ -12,37 +12,27 @@ directory to update your framework.
 Your documentation, configuration, and public files remain yours. Update the
 installed runtime and shared UI packages through your package manager.
 
-## Choose a compatible release
+## Update the installed packages
 
-Read release notes and use the matching release channel. For a beta project:
+Stop the development server, then update the runtime and shared UI:
 
 ```bash
-pnpm add @lexibase/rdx-next@beta @lexibase/rdx-ui@beta
+pnpm add @lexibase/rdx-next@latest @lexibase/rdx-ui@latest
 ```
 
-If versioning is installed, update its package to a compatible release as well.
-Package versions do not need identical beta numbers; follow the release's
-compatibility guidance rather than guessing.
+With npm, use `npm install` with the same package names.
+If versioning is installed, update its package to a compatible release as well:
 
-After the first stable release, `latest` will be the stable channel. Do not
-assume that a tag already contains unreleased Canary changes.
+```bash
+pnpm add @lexibase/rdx-versioning@latest
+```
 
-## Migrate configuration
-
-The current first-release contract uses `metadata.applicationName` as the site
-name. Earlier beta configurations may need these changes:
-
-- Move root `title` into `metadata.applicationName`.
-- Remove `docsDir` and keep live documentation in `docs/`.
-- Use `RDXConfig` for the public type if you import it explicitly.
-
-Review other changes against the release notes before updating.
-The [configuration reference](../cat-02/config.mdx) describes the current contract.
+Review release notes and package/lockfile changes. Use the
+[configuration reference](../cat-02/config.mdx) to check your project settings.
 
 ## Validate and deploy
 
-Stop the development server, install the selected versions, and review package
-and lockfile changes. Then run:
+Run a production build and start the site:
 
 ```bash
 pnpm build

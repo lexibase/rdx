@@ -15,8 +15,8 @@ Create `docs/guides/`, then add an optional `_category.json`:
 }
 ```
 
-Without this file, RDX derives a label from the folder name. Keep one category
-per top-level folder; nested sidebar groups are not supported yet.
+Without this file, RDX derives a label from the folder name. Each top-level
+folder defines a sidebar category.
 
 ## Create a page
 
@@ -50,8 +50,9 @@ handles their styling. Add [Callouts](./callouts.mdx), [Tabs](./tabs.mdx),
 or an [Accordion](./accordion.mdx) when the content benefits from them.
 
 Leave blank lines around Markdown inside JSX components. Use literal props such
-as `title="Note"` and `variant="tip"`. Arbitrary imports and JavaScript
-expressions are not an MDX authoring API in this release.
+as `title="Note"` and `variant="tip"`. Built-in documentation components are
+available directly in MDX. Put React logic in project-owned components such as
+`home.tsx`; documentation MDX uses Markdown and literal component attributes.
 
 ## Preview and publish
 

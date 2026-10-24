@@ -23,16 +23,24 @@ from source. No npm publication is needed to preview package changes.
 Press Ctrl+C once to stop the development server and its owned watchers. The local
 Node coordinator keeps initial builds cached through Turbo and avoids Windows
 package-manager batch prompts for long-running tasks; real failures remain nonzero.
-See [apps/web/README.md](./apps/web/README.md) for the local workflow and migration status.
+See [apps/web/README.md](./apps/web/README.md) for the local workflow.
 
 See [CI.md](./CI.md) for local checks and automatic pull request validation.
 Publishing remains a manual process documented in [PUBLISHING.md](./PUBLISHING.md).
-The first stable release is being prepared using [RELEASE_READINESS.md](./RELEASE_READINESS.md).
-The candidate compatibility contract is documented in [PUBLIC_API.md](./PUBLIC_API.md).
+Release validation is tracked in [RELEASE_READINESS.md](./RELEASE_READINESS.md).
+The public API is documented in [PUBLIC_API.md](./PUBLIC_API.md).
+Supported Node.js lines and the tested platform matrix are documented in
+[SUPPORT.md](./SUPPORT.md). Prepared release notes are in [CHANGELOG.md](./CHANGELOG.md);
+an Unreleased entry does not mean packages have been published.
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for the Node.js production deployment baseline.
 
 ## License
 
-RDX is [MIT licensed](./LICENSE)
+RDX code is licensed under [MIT](./LICENSE). Official documentation prose is
+licensed under [CC BY 4.0](./LICENSE-docs).
 
-All content inside the `/web/docs` folder or `.mdx` files is covered under [Creative Commons licenses](./LICENSE-docs)
+Code examples, configuration snippets and CLI starter templates (including their
+sample MDX files) remain MIT. These licenses do not assign a license to the
+independent documentation you write with RDX. Third-party material retains its
+own license. See [LICENSE-docs](./LICENSE-docs) for the documentation scope and
+attribution.

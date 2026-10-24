@@ -16,12 +16,9 @@ For framework development, use the monorepo commands in
 
 ## A package cannot be installed
 
-Check the exact scoped package name, release channel, and registry availability.
-`@lexibase/create-rdx` is the creator; the unrelated unscoped `create-rdx`
-package is not RDX's CLI.
-
-Authentication and registry outages are different problems. Do not share npm
-tokens in reports, and do not repeatedly publish the same version to test access.
+Use the scoped creator command `pnpm create @lexibase/rdx@latest` or
+`npm create @lexibase/rdx@latest`. Check your registry connection and the error
+reported by your package manager. Keep authentication tokens out of issue reports.
 
 ## A release-age policy blocks installation
 
@@ -39,8 +36,8 @@ Use exact filename capitalization and forward slashes. Links to other documents
 should use relative `.mdx` paths. A target must exist in the same edition;
 a missing snapshot page does not fall back to Current.
 
-The full URL in generated projects includes the category folder. The official
-website retains its Canary-specific URL adapter.
+Page URLs include the path inside `docs/`; for example,
+`docs/guides/setup.mdx` is served at `/docs/guides/setup`.
 
 ## Configuration fails validation
 

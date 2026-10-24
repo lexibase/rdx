@@ -2,7 +2,7 @@
 
 This documentation site was created with RDX.
 
-Requires Node.js 20.9 or newer. Use a currently supported Node.js LTS release.
+Requires Node.js 22.18+ (22.x) or 24.11+ (24.x). Use the latest patch of either line.
 
 ## Development
 

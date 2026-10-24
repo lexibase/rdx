@@ -9,9 +9,8 @@ link_position: 4
 RDX only executes plugins listed in `rdx.config.ts`. Merely installing a package
 does not turn it on or create version files.
 
-The first official optional plugin is
-`@lexibase/rdx-versioning`. Search, TOC, and built-in MDX components do not need
-plugins.
+The official versioning plugin is `@lexibase/rdx-versioning`. Search, TOC, and
+built-in MDX components do not need plugins.
 
 ## Assisted installation
 
@@ -24,17 +23,14 @@ pnpm rdx add versioning
 With npm, use `npm exec -- rdx add versioning`.
 
 The command installs the official package, adds the import and plugin entry to
-your configuration, validates it, and prepares the runtime. There are no backup
-files to maintain. An already configured plugin is not added twice.
-
-The package channel follows the installed runtime: stable uses `latest`, beta
-uses `beta`, and release candidates use `rc`. An existing installed version is
-preserved. Restart the development server after activation.
+your configuration, validates it, and prepares the runtime. An already configured
+plugin is not added twice, and an installed version is preserved. Restart the
+development server after activation.
 
 ## Manual installation
 
 ```bash
-pnpm add @lexibase/rdx-versioning@beta
+pnpm add @lexibase/rdx-versioning@latest
 ```
 
 Use the channel compatible with your runtime. Then configure it explicitly:
