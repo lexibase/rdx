@@ -1,21 +1,24 @@
 # Publishing RDX
 
-## Prepared release: 1.1.0
+## Prepared release: 1.2.0
 
 `@lexibase/rdx` is the main framework entry for newly generated projects. It
 selects compatible runtime and UI versions. Optional plugins remain separate.
 This release has not been published by preparing these files.
 
-The three changed packages are prepared at 1.1.0:
+This grouped release publishes six changed packages:
 
 | Package                | Role                           | Selected RDX dependencies in its archive      |
 | ---------------------- | ------------------------------ | --------------------------------------------- |
-| `@lexibase/rdx-next`   | Runtime and CLI implementation | Core/types 1.0.0; compatible UI peer `^1.0.0` |
-| `@lexibase/rdx`        | Main framework entry           | Runtime 1.1.0 and UI 1.0.0                    |
-| `@lexibase/create-rdx` | Project generator              | Generated projects pin main framework 1.1.0   |
+| `@lexibase/rdx-types` | Configuration types 1.1.0 | Adds metadata.since |
+| `@lexibase/rdx-core` | Configuration validation 1.1.0 | Types 1.1.0 |
+| `@lexibase/rdx-ui` | Shared theme and components 1.1.0 | Types 1.1.0; adds FooterCredit |
+| `@lexibase/rdx-next` | Runtime and CLI implementation 1.2.0 | Core/types 1.1.0; compatible UI peer `^1.1.0` |
+| `@lexibase/rdx` | Main framework entry 1.2.0 | Runtime 1.2.0 and UI 1.1.0 |
+| `@lexibase/create-rdx` | Project generator 1.2.0 | Generated projects pin main framework 1.2.0 |
 
-The runtime and creator versions 1.0.1 are already published. Do not overwrite
-them or republish unchanged core, types, UI or versioning packages. Workspace
+The framework, runtime and creator versions 1.1.0 are already published. Do not
+overwrite them or republish the unchanged versioning package at 1.0.0. Workspace
 dependencies become exact internal versions in `pnpm pack` and `pnpm publish`.
 
 Run `pnpm check` and `pnpm test:release --install`. Inspect all seven archives
@@ -24,22 +27,38 @@ updated `main` branch, confirm `npm whoami` and publish one command at a time,
 waiting for each dependency to become available before its consumer:
 
 ```powershell
+pnpm --filter @lexibase/rdx-types publish --tag latest --access public
+npm view @lexibase/rdx-types@1.1.0 version
+
+pnpm --filter @lexibase/rdx-core publish --tag latest --access public
+npm view @lexibase/rdx-core@1.1.0 version
+
+pnpm --filter @lexibase/rdx-ui publish --tag latest --access public
+npm view @lexibase/rdx-ui@1.1.0 version
+
 pnpm --filter @lexibase/rdx-next publish --tag latest --access public
-npm view @lexibase/rdx-next@1.1.0 version
+npm view @lexibase/rdx-next@1.2.0 version
 
 pnpm --filter @lexibase/rdx publish --tag latest --access public
-npm view @lexibase/rdx@1.1.0 version
+npm view @lexibase/rdx@1.2.0 version
 
 pnpm --filter @lexibase/create-rdx publish --tag latest --access public
-npm view @lexibase/create-rdx@1.1.0 version
+npm view @lexibase/create-rdx@1.2.0 version
 ```
 
-Confirm each `latest` tag is 1.1.0, then create a fresh project outside the
-monorepo with `pnpm create @lexibase/rdx@latest`. Validate development, production
-build/start, custom component imports and optional versioning. Test adoption in
+Confirm each `latest` tag matches the table, then create fresh projects outside
+and inside a pnpm workspace with `pnpm create @lexibase/rdx@latest`. A project
+named `docs` is supported; its content remains in its own `docs/` subdirectory.
+Validate development, production build/start, footer year ranges, the repository
+credit link, custom component imports and optional versioning. Test adoption in
 an existing project using the migration instructions in the updating guide.
-Only after registry validation, record the actual 1.1.0 publication date in
+Only after registry validation, record the actual 1.2.0 publication date in
 `CHANGELOG.md`. Keep the official 1.0.1 documentation snapshot unchanged.
+
+For an existing project using the main entry, update `@lexibase/rdx@latest`.
+Projects using direct runtime/UI dependencies must update both to meet the new
+UI peer requirement, or migrate their configuration/component imports to the main
+package before removing those direct dependencies. No versioning update is required.
 
 A later UI-only release updates the UI package and the main package's selected
 UI version. An unchanged runtime does not need another publication. Existing

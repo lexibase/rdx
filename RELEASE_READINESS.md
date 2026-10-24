@@ -1,16 +1,26 @@
 # RDX release readiness
 
-Status: **1.0.0 published**. The maintainer published all six public packages,
-and their registry `latest` tags were verified at 1.0.0 on 2026-10-24.
+Status: **1.1.0 published; 1.2.0 in preparation**. Individual internal packages
+have their own versions; the grouped publication order is in PUBLISHING.md.
 The maintainer handles commits, PRs, merges and publication.
+
+## 1.2.0 follow-up
+
+- [x] Prepare framework, runtime and creator 1.2.0, plus types, core and UI 1.1.0.
+- [x] Require UI ^1.1.0 in the runtime and pin main framework 1.2.0 in generated projects.
+- [x] Complete workspace checks and installed-archive production/update tests for this release.
+- [ ] Merge the preparation PR after Linux and Windows CI passes.
+- [ ] Publish the six changed packages in dependency order and verify registry tags.
+- [ ] Validate registry installations outside/inside a workspace, including a project named docs.
+- [ ] Record the publication date after registry validation.
 
 ## 1.1.0 follow-up
 
 - [x] Prepare main framework, runtime and creator at 1.1.0; keep other package versions unchanged.
 - [x] Pin main framework 1.1.0 in generated projects.
 - [x] Complete workspace checks and installed-archive production/update tests for these versions.
-- [ ] Merge the preparation PR after Linux and Windows CI passes.
-- [ ] Publish runtime, main framework and creator in dependency order; verify registry tags.
+- [x] Merge the preparation PR after Linux and Windows CI passes.
+- [x] Publish runtime, main framework and creator in dependency order; verify registry tags.
 - [ ] Validate registry creation and existing-project migration, then record the release date.
 
 ## 1.0.1 follow-up

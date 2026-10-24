@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.2.0 — Unreleased
 
 - Add shared footer branding with a Powered by RDX repository link.
 - Add optional `metadata.since` for footer year ranges without repeating equal years.
@@ -10,7 +10,12 @@
 - Use the same root for Turbopack and dependency tracing while retaining explicit
   documentation content includes.
 
-## 1.1.0 — Unreleased
+The framework, runtime and creator are prepared at 1.2.0. Core, types and UI are
+prepared at 1.1.0; the runtime requires UI ^1.1.0 for the shared footer component.
+Versioning remains at 1.0.0. Publication is manual and has not occurred as part
+of this preparation.
+
+## 1.1.0 — 2026-10-24
 
 - Add `@lexibase/rdx` as the main framework entry, with configuration, CLI,
   runtime, styles and typed per-module UI exports.
@@ -20,10 +25,9 @@
 - Add installed-archive tests for a main-package update that introduces a new UI
   component without changing the runtime implementation.
 
-`@lexibase/rdx`, `@lexibase/rdx-next` and `@lexibase/create-rdx` are prepared
-at 1.1.0. The creator pins the main framework; its packed dependencies select
-runtime 1.1.0 and UI 1.0.0. Other packages remain unchanged. Publication is manual;
-preparing these files does not upload packages to npm.
+`@lexibase/rdx`, `@lexibase/rdx-next` and `@lexibase/create-rdx` were published
+at 1.1.0. The creator pins the main framework; its dependencies select runtime
+1.1.0 and UI 1.0.0. Other packages remained unchanged.
 
 ## 1.0.1 — 2026-10-24
 
