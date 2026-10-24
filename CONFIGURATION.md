@@ -20,6 +20,13 @@ Only `metadata.applicationName` is required. It is the single site name used for
 browser titles and their suffix, social preview defaults, accessible logo labels,
 the footer, and the built-in homepage fallback. `navbar.title` is independent
 and optional.
+
+`metadata.since` is the optional footer starting year. The CLI writes the creation
+year as a fixed number; it can be edited to an earlier founding year. Equal years
+appear once, earlier years form a range, and omission shows the current year.
+It must be a positive integer no later than the current year. This branding field
+is not forwarded to Next.js metadata. The standard footer includes a Powered by
+RDX link to https://github.com/lexibase/rdx.
 Defaults are `description: ''`, `lang: 'en'`,
 `theme.defaultTheme: 'system'`, and `plugins: []`.
 Live documentation always lives in the project's `docs/` folder and is served

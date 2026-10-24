@@ -25,6 +25,23 @@ browser as **Installation | My documentation**.
 
 Use `navbar.title` for optional text beside the navbar logo.
 
+## Footer
+
+The footer shows the site name and a **Powered by RDX** link to the framework's
+GitHub repository. Set `metadata.since` to the project's or organization's starting
+year. The CLI fills this with the year the project is created; you can edit it:
+
+```ts
+metadata: {
+  applicationName: 'My documentation',
+  since: 2004,
+},
+```
+
+An earlier starting year produces a range, such as **2004–2026**. Equal years are
+shown once. Omitting `since` shows only the current year. Use a positive whole
+year no later than the current year.
+
 ## Common options
 
 ```ts

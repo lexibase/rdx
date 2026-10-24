@@ -113,6 +113,16 @@ async function main() {
   })
   await fs.ensureDir(path.join(targetDir, 'public'))
 
+  const configPath = path.join(targetDir, 'rdx.config.ts')
+  const config = await fs.readFile(configPath, 'utf8')
+  await fs.writeFile(
+    configPath,
+    config.replace(
+      'since: new Date().getFullYear(),',
+      `since: ${new Date().getFullYear()},`
+    )
+  )
+
   const gitignoreTemplatePath = path.join(targetDir, 'gitignore.template')
   await fs.move(gitignoreTemplatePath, path.join(targetDir, '.gitignore'), {
     overwrite: true,

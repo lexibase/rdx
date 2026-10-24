@@ -21,6 +21,7 @@ Live documentation lives in the project's `docs/` folder.
 | Opção                      | Contrato e padrão                                                                                |
 | -------------------------- | ------------------------------------------------------------------------------------------------ |
 | `metadata.applicationName` | Required non-empty string; the single site name for browser titles, social defaults and branding |
+| `metadata.since` | Optional positive starting year, no later than the current year; the footer shows equal years once and earlier years as a range |
 | `description`              | String; padrão `''`                                                                              |
 | `lang`                     | String não vazia; padrão `'en'`; define o idioma HTML, ainda não traduz a interface              |
 | `TOC`, `search`            | Booleanos, ambos `false` por padrão; preservar a grafia `TOC`                                    |

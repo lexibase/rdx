@@ -46,6 +46,7 @@ export function validateMetadata(input: unknown) {
   const metadata = object(input, 'metadata', [
     'metadataBase',
     'applicationName',
+    'since',
     'authors',
     'keywords',
     'icons',
@@ -57,6 +58,16 @@ export function validateMetadata(input: unknown) {
   if (metadata.metadataBase !== undefined)
     url(metadata.metadataBase, 'metadata.metadataBase')
   string(metadata.applicationName, 'metadata.applicationName')
+  if (
+    metadata.since !== undefined &&
+    (typeof metadata.since !== 'number' ||
+      !Number.isInteger(metadata.since) ||
+      metadata.since < 1 ||
+      metadata.since > new Date().getFullYear())
+  )
+    throw new RdxConfigError(
+      'metadata.since must be a positive integer no later than the current year.'
+    )
   if (metadata.manifest !== undefined)
     url(metadata.manifest, 'metadata.manifest', true)
   if (metadata.keywords !== undefined)

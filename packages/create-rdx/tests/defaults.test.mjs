@@ -50,6 +50,8 @@ test('generated projects expose homepage and navbar defaults without activating 
   assert.equal(pkg.dependencies['@lexibase/rdx-next'], undefined)
   assert.equal(pkg.dependencies['@lexibase/rdx-ui'], undefined)
   assert.match(config, /from '@lexibase\/rdx'/)
+  assert.match(config, new RegExp(`since: ${new Date().getFullYear()},`))
+  assert.doesNotMatch(config, /since: new Date/)
   for (const [name, directory] of [['@lexibase/rdx', 'rdx']]) {
     const release = JSON.parse(
       await readFile(

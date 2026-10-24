@@ -27,6 +27,7 @@ export function getDocumentMetadata({
 /** Translate the shared configuration through Next's native Metadata API. */
 export function getRdxMetadata(config: RDXConfig): Metadata {
   const { metadataBase, ...metadata } = config.metadata
+  delete metadata.since
   const name = metadata.applicationName
   return {
     title: { default: name, template: `%s | ${name}` },

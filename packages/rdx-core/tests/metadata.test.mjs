@@ -3,6 +3,19 @@ import test from 'node:test'
 
 import { defineConfig, resolveConfig } from '../dist/index.js'
 
+test('footer starting years are optional positive integers no later than the current year', () => {
+  const currentYear = new Date().getFullYear()
+  for (const since of [undefined, 2004, currentYear]) {
+    const config = resolveConfig({ metadata: { applicationName: 'Docs', since } })
+    assert.equal(config.metadata.since, since)
+  }
+  for (const since of ['2004', null, 0, -1, 2020.5, NaN, Infinity, currentYear + 1])
+    assert.throws(
+      () => resolveConfig({ metadata: { applicationName: 'Docs', since } }),
+      /metadata\.since must be a positive integer no later than the current year/
+    )
+})
+
 test('applicationName is the required single site name without inventing deployment URLs', () => {
   assert.deepEqual(
     resolveConfig({ metadata: { applicationName: 'Docs' } }).metadata,
