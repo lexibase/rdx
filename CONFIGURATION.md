@@ -6,7 +6,7 @@ validation and defaults. Export a plain configuration object or use `defineConfi
 for typed configuration.
 
 ```ts
-import { defineConfig } from '@lexibase/rdx-next'
+import { defineConfig } from '@lexibase/rdx'
 
 export default defineConfig({
   metadata: { applicationName: 'My documentation' },
@@ -67,7 +67,7 @@ The first button is primary.
 For a custom homepage, create `home.tsx` at the project root:
 
 ```tsx
-import { Home } from '@lexibase/rdx-ui/components/home'
+import { Home } from '@lexibase/rdx/ui/components/home'
 
 export default function MyHome() {
   return <Home title="My project" />
@@ -77,7 +77,7 @@ export default function MyHome() {
 Then import the component in `rdx.config.ts`:
 
 ```ts
-import { defineConfig } from '@lexibase/rdx-next'
+import { defineConfig } from '@lexibase/rdx'
 import MyHome from './home'
 
 export default defineConfig({
@@ -224,7 +224,7 @@ are evaluated during validation, but setup hooks run only during preparation.
 Manual installation/configuration remains supported:
 
 ```ts
-import { defineConfig } from '@lexibase/rdx-next'
+import { defineConfig } from '@lexibase/rdx'
 import { versioning } from '@lexibase/rdx-versioning'
 
 export default defineConfig({
@@ -285,7 +285,7 @@ listed plugin objects are executed; no package scanning or automatic installatio
 occurs.
 
 ```ts
-import type { RdxPlugin } from '@lexibase/rdx-next'
+import type { RdxPlugin } from '@lexibase/rdx'
 
 export function translations(): RdxPlugin {
   return {

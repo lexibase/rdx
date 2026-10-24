@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { readFile } from 'node:fs/promises'
 
 import * as core from '@lexibase/rdx-core'
 import * as config from '@lexibase/rdx-core/config'
@@ -64,4 +65,18 @@ test('configuration identity, aliases and opt-in defaults remain compatible', ()
       }),
     /search must be a boolean/
   )
+})
+
+test('the built runtime leaves UI components external instead of embedding a UI copy', async () => {
+  const runtime = await readFile(
+    new URL('../dist/runtime/index.js', import.meta.url),
+    'utf8'
+  )
+  for (const subpath of [
+    'components/mdx-components',
+    'components/navbar',
+    'providers/theme-provider',
+  ]) {
+    assert.ok(runtime.includes(`@lexibase/rdx-ui/${subpath}`), subpath)
+  }
 })

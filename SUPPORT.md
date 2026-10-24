@@ -32,7 +32,8 @@ same coverage. Do not mix lockfiles in one generated project.
 
 RDX 1.0 uses Next.js 16, React 19, Tailwind CSS 4 and shadcn/ui Base UI.
 The exact constraints live in each package manifest and the generated template.
-The template pins the tested RDX runtime and UI versions. Updates are explicit;
+The template pins the tested main framework version. Its dependencies select
+compatible internal runtime and UI versions. Updates are explicit;
 running the creator again is not an update strategy for an existing project.
 
 The supported surface is documented in [PUBLIC_API.md](./PUBLIC_API.md).

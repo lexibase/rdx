@@ -11,7 +11,7 @@ O usuário mantém `docs/`, `public/`, `rdx.config.ts` e, opcionalmente, `home.t
 `.rdx/` é gerada; seus arquivos, estrutura interna e caches não são uma API de
 customização. Não editar templates internos instalados para configurar o site.
 
-O ponto de entrada recomendado é `defineConfig` de `@lexibase/rdx-next`.
+The recommended configuration entry is `defineConfig` from `@lexibase/rdx`.
 Objetos exportados diretamente continuam aceitos. `defineConfig` valida e
 devolve o mesmo objeto; não transforma componentes React em dados serializados.
 Chaves desconhecidas e tipos inválidos são erros, não opções ignoradas.
@@ -55,6 +55,12 @@ Erros operacionais encerram com código diferente de zero. Não prometer o texto
 exato das mensagens, logs do Next.js ou localização dos caches como API estável.
 
 ## Entradas de pacotes
+
+- `@lexibase/rdx`: main framework entry, reexporting configuration functions and
+  types, and supplying the `rdx` command. `/runtime`, `/config`, `/styles.css` and
+  `/postcss.config` provide adapter integration. `/ui/components/*`, `/ui/lib/*`,
+  `/ui/providers/*` and `/ui/globals.css` expose the shared UI without bundling it.
+  The package selects compatible internal releases; optional plugins remain separate.
 
 - `@lexibase/rdx-next`: `defineConfig` e os tipos públicos reexportados para
   configuração e plugins. A importação da configuração não inicia o Next.js.

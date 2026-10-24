@@ -1,30 +1,35 @@
 # Publishing RDX
 
-## Prepared patch: 1.0.1
+## Main framework package preparation
 
-The six 1.0.0 packages are published. This patch updates only
-`@lexibase/rdx-next` and `@lexibase/create-rdx`; the creator template pins
-runtime 1.0.1 and UI 1.0.0. Do not republish unchanged packages or overwrite 1.0.0.
+`@lexibase/rdx` is the main framework entry for newly generated projects. It
+selects compatible runtime and UI versions. Optional plugins remain separate.
+This entry has not been published as part of this change.
 
-After the patch PR's checks pass, run `pnpm test:release --install` and inspect
-the archives. Confirm npm identity and that the target versions are available
-for first publication, then publish one command at a time:
+The runtime and creator versions 1.0.1 are already published. Before publishing
+this change, assign fresh versions to the changed runtime and creator, choose
+the initial main-package version, and align the creator template with that main
+version. Do not overwrite published versions. Workspace dependencies are converted
+to exact internal versions by `pnpm pack` and `pnpm publish`.
 
-```powershell
-pnpm --filter @lexibase/rdx-next publish --tag latest --access public
-pnpm --filter @lexibase/create-rdx publish --tag latest --access public
-```
+Run `pnpm check` and `pnpm test:release --install` after those version changes.
+Inspect all seven archives, then publish changed dependencies before their
+consumers: runtime, main framework, creator. Publish other internal packages only
+when they have changed. Verify registry versions and tags before testing creation
+and updates from npm.
 
-Verify both `latest` tags are 1.0.1 and create a new project from the registry.
-Existing projects update with `npm install @lexibase/rdx-next@1.0.1` (or the
-equivalent pnpm command); rerun development or build to refresh generated routes.
-Check that two different documents have distinct browser titles and descriptions.
-Verify versioned documents as well when the plugin is enabled.
+A later UI-only release updates the UI package and the main package's selected
+UI version. An unchanged runtime does not need another publication. Existing
+projects update `@lexibase/rdx`; optional plugins keep their own release cycle.
 
-The official website's prepared 1.0.1 snapshot is independent of npm publication.
-Do not treat its appearance in a deployment as confirmation that the packages
-were uploaded. After registry verification, record the patch's actual release
-date in `CHANGELOG.md` and deploy the approved site changes.
+## Published patch: 1.0.1
+
+The six 1.0.0 packages and the 1.0.1 patch are published. That patch updated only
+`@lexibase/rdx-next` and `@lexibase/create-rdx`. Its creator template selected
+runtime 1.0.1 and UI 1.0.0. Those published archives cannot be overwritten.
+
+The official website's 1.0.1 snapshot documents that released package layout.
+Leave it unchanged when preparing the new main framework entry.
 
 ## First stable release runbook (1.0.0)
 

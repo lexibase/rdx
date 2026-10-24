@@ -11,6 +11,11 @@
     "lint": {
       "dependsOn": ["^lint"]
     },
+    "@lexibase/rdx#build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/rdx-ui/src/**"],
+      "outputs": ["dist/**"]
+    },
     "web#lint": {
       "dependsOn": ["^lint", "^build"]
     },

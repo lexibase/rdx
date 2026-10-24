@@ -20,16 +20,16 @@ Run the creator and follow the prompt:
   <TabsList aria-label="Create a project with your package manager">
     <TabsTrigger value="pnpm">pnpm</TabsTrigger>
     <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="npm">yarn</TabsTrigger>
   </TabsList>
   <TabsContent value="pnpm">
-
 pnpm create @lexibase/rdx@latest
-
   </TabsContent>
   <TabsContent value="npm">
-
 npm create @lexibase/rdx@latest
-
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn create @lexibase/rdx@latest
   </TabsContent>
 </Tabs>
 
@@ -38,15 +38,24 @@ RDX creates that directory and installs its dependencies.
 
 ## Run locally
 
-```bash
-cd my-docs
-pnpm dev
-```
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Run your project localy">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+    pnpm dev
+  </TabsContent>
+  <TabsContent value="npm">
+    npm run dev
+  </TabsContent>
+  <TabsContent value="yarn">
+    yarn run dev
+  </TabsContent>
+</Tabs>
 
-Open `http://localhost:3000/docs`. With npm, run `npm run dev` instead.
-
-Edit `docs/init/intro.mdx` and save. Keep the development server running to
-preview content changes. Restart it after editing framework configuration.
+Open `http://localhost:3000/docs`, edit `docs/init/intro.mdx` and save. Keep the development server running to preview content changes. Restart it after editing framework configuration.
 
 ## Optional CLI arguments
 

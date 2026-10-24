@@ -1,44 +1,72 @@
 ---
 title: Updating RDX
-description: Update runtime packages without regenerating your documentation.
+description: Update the framework and validate your documentation.
 link_position: 3
 ---
 
-## The creator is not an updater
+## Update the framework
 
-`create-rdx` creates new projects. Do not rerun it over an existing documentation
-directory to update your framework.
-
-Your documentation, configuration, and public files remain yours. Update the
-installed runtime and shared UI packages through your package manager.
-
-## Update the installed packages
-
-Stop the development server, then update the runtime and shared UI:
+Review the release notes, then stop the development server and update the main
+package from the project root:
 
 ```bash
-pnpm add @lexibase/rdx-next@latest @lexibase/rdx-ui@latest
+pnpm add @lexibase/rdx@latest
 ```
 
-With npm, use `npm install` with the same package names.
-If versioning is installed, update its package to a compatible release as well:
+With npm or Yarn:
+
+```bash
+npm install @lexibase/rdx@latest
+# Or:
+yarn add @lexibase/rdx@latest
+```
+
+The main package selects compatible runtime and UI versions. You do not need to
+manage its internal packages individually. Your documents, public files,
+configuration and custom components are not replaced by this operation.
+
+Check the release notes for migrations and any required Next.js, React or Node.js
+updates. Those requirements are separate from updating RDX itself.
+
+## Optional plugins
+
+Plugins remain separate dependencies. Update an installed plugin when its release
+notes recommend a compatible update:
 
 ```bash
 pnpm add @lexibase/rdx-versioning@latest
 ```
 
-Review release notes and package/lockfile changes. Use the
-[configuration reference](../cat-02/config.mdx) to check your project settings.
+Updating RDX does not install or activate optional plugins.
 
 ## Validate and deploy
 
-Run a production build and start the site:
+Restart `pnpm dev` to check your documentation. For production:
 
 ```bash
 pnpm build
 pnpm start
 ```
 
-Check representative documents, relative links, components, assets, search, and
-snapshots before redeploying. Configuration remains in your project; generated
-runtime files are refreshed by RDX.
+Check documents, relative links, components, assets, search and snapshots before
+redeploying. Keep customizations in project-owned files; RDX refreshes generated
+runtime files.
+
+## Adopt the main package in an existing package-level setup
+
+Install `@lexibase/rdx`, then change the configuration import to:
+
+```ts
+import { defineConfig } from '@lexibase/rdx'
+```
+
+For custom React components, use paths such as
+`@lexibase/rdx/ui/components/home` instead of direct UI package imports.
+After migrating those imports, remove direct runtime and UI dependencies:
+
+```bash
+pnpm remove @lexibase/rdx-next @lexibase/rdx-ui
+```
+
+Keep Next.js, React and any installed plugins. Rebuild and validate before
+deploying. Advanced applications can also keep using the lower-level packages.

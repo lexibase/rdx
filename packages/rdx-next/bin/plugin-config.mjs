@@ -36,7 +36,11 @@ export function activateVersioning(source) {
         if (specifier.isTypeOnly) continue
         const imported = (specifier.propertyName ?? specifier.name).text
         if (
-          ['@lexibase/rdx-next', '@lexibase/rdx-core/config'].includes(name) &&
+          [
+            '@lexibase/rdx',
+            '@lexibase/rdx-next',
+            '@lexibase/rdx-core/config',
+          ].includes(name) &&
           imported === 'defineConfig'
         )
           definitions.add(specifier.name.text)

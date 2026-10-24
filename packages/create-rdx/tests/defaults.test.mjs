@@ -46,12 +46,11 @@ test('generated projects expose homepage and navbar defaults without activating 
     await readFile(path.join(projectDir, 'README.md'), 'utf8'),
     /^# rdx-defaults\r?\n/
   )
-  assert.ok(pkg.dependencies['@lexibase/rdx-next'])
-  assert.ok(pkg.dependencies['@lexibase/rdx-ui'])
-  for (const [name, directory] of [
-    ['@lexibase/rdx-ui', 'rdx-ui'],
-    ['@lexibase/rdx-next', 'rdx-next'],
-  ]) {
+  assert.ok(pkg.dependencies['@lexibase/rdx'])
+  assert.equal(pkg.dependencies['@lexibase/rdx-next'], undefined)
+  assert.equal(pkg.dependencies['@lexibase/rdx-ui'], undefined)
+  assert.match(config, /from '@lexibase\/rdx'/)
+  for (const [name, directory] of [['@lexibase/rdx', 'rdx']]) {
     const release = JSON.parse(
       await readFile(
         new URL(`../../${directory}/package.json`, import.meta.url),
