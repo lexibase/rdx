@@ -15,62 +15,87 @@ import {
 async function fixture(t) {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), 'rdx-core-'))
   t.after(() => rm(rootDir, { recursive: true, force: true }))
-  await mkdir(path.join(rootDir, 'content/guides'), { recursive: true })
+  await mkdir(path.join(rootDir, 'docs/guides'), { recursive: true })
   await writeFile(
-    path.join(rootDir, 'content/guides/intro.mdx'),
+    path.join(rootDir, 'docs/guides/intro.mdx'),
     '---\ntitle: Intro\n---\nLive documentation'
   )
   return rootDir
 }
 
 test('configuration defaults and legacy runtime config objects remain usable', () => {
-  const input = { title: 'RDX' }
+  const input = { metadata: { applicationName: 'RDX' } }
   assert.equal(defineConfig(input), input)
   assert.deepEqual(resolveConfig(input), {
-    title: 'RDX',
+    metadata: { applicationName: 'RDX' },
     TOC: false,
     search: false,
     description: '',
-    docsDir: 'docs',
     lang: 'en',
     theme: { defaultTheme: 'system' },
     plugins: [],
   })
 })
 
+test('docsDir is rejected even when it repeats the fixed docs/ convention', () => {
+  for (const docsDir of ['docs', 'content', '..', undefined])
+    assert.throws(
+      () => resolveConfig({ metadata: { applicationName: 'Docs' }, docsDir }),
+      /docsDir is not configurable.*docs\//
+    )
+})
+
 test('TOC is opt-in and accepts only booleans', () => {
-  assert.equal(resolveConfig({ title: 'Docs' }).TOC, false)
+  assert.equal(
+    resolveConfig({ metadata: { applicationName: 'Docs' } }).TOC,
+    false
+  )
   for (const TOC of [true, false])
-    assert.equal(resolveConfig({ title: 'Docs', TOC }).TOC, TOC)
+    assert.equal(
+      resolveConfig({ metadata: { applicationName: 'Docs' }, TOC }).TOC,
+      TOC
+    )
   for (const TOC of ['false', 0, 1, null, {}])
     assert.throws(
-      () => resolveConfig({ title: 'Docs', TOC }),
+      () => resolveConfig({ metadata: { applicationName: 'Docs' }, TOC }),
       /TOC must be a boolean/
     )
 })
 
 test('search is opt-in and accepts only booleans', () => {
-  assert.equal(resolveConfig({ title: 'Docs' }).search, false)
+  assert.equal(
+    resolveConfig({ metadata: { applicationName: 'Docs' } }).search,
+    false
+  )
   for (const search of [true, false])
-    assert.equal(resolveConfig({ title: 'Docs', search }).search, search)
+    assert.equal(
+      resolveConfig({ metadata: { applicationName: 'Docs' }, search }).search,
+      search
+    )
   for (const search of ['true', 1, null, {}, []])
     assert.throws(
-      () => resolveConfig({ title: 'Docs', search }),
+      () => resolveConfig({ metadata: { applicationName: 'Docs' }, search }),
       /search must be a boolean/
     )
 })
 
 test('invalid options fail with the exact configuration field', () => {
   for (const [input, field] of [
-    [{}, 'title'],
-    [{ title: 'Docs', docsDirectory: 'content' }, 'docsDirectory'],
+    [{}, 'metadata'],
     [
-      { title: 'Docs', theme: { defaultTheme: ['dark'] } },
+      { metadata: { applicationName: 'Docs' }, docsDirectory: 'content' },
+      'docsDirectory',
+    ],
+    [
+      {
+        metadata: { applicationName: 'Docs' },
+        theme: { defaultTheme: ['dark'] },
+      },
       'theme.defaultTheme',
     ],
     [
       {
-        title: 'Docs',
+        metadata: { applicationName: 'Docs' },
         navbar: {
           actions: { github: { visible: 'yes', url: 'https://github.com' } },
         },
@@ -79,14 +104,17 @@ test('invalid options fail with the exact configuration field', () => {
     ],
     [
       {
-        title: 'Docs',
+        metadata: { applicationName: 'Docs' },
         navbar: {
           actions: { github: { visible: true, url: 'javascript:alert(1)' } },
         },
       },
       'github.url',
     ],
-    [{ title: 'Docs', plugins: ['not-a-plugin'] }, 'plugins[0]'],
+    [
+      { metadata: { applicationName: 'Docs' }, plugins: ['not-a-plugin'] },
+      'plugins[0]',
+    ],
   ])
     assert.throws(
       () => resolveConfig(input),
@@ -102,7 +130,7 @@ test('GitHub accepts only HTTP(S) URLs or the explicit placeholder', () => {
     'http://localhost:3000',
   ]) {
     const config = resolveConfig({
-      title: 'Docs',
+      metadata: { applicationName: 'Docs' },
       navbar: {
         actions: { github: { visible: true, url }, showToggleMode: true },
       },
@@ -121,7 +149,7 @@ test('GitHub accepts only HTTP(S) URLs or the explicit placeholder', () => {
     assert.throws(
       () =>
         resolveConfig({
-          title: 'Docs',
+          metadata: { applicationName: 'Docs' },
           navbar: { actions: { github: { visible: true, url } } },
         }),
       /github.url/
@@ -129,7 +157,10 @@ test('GitHub accepts only HTTP(S) URLs or the explicit placeholder', () => {
 })
 
 test('homepage is opt-in and validates labels, nested options and safe button URLs', () => {
-  assert.equal(resolveConfig({ title: 'Docs' }).homepage, undefined)
+  assert.equal(
+    resolveConfig({ metadata: { applicationName: 'Docs' } }).homepage,
+    undefined
+  )
   const homepage = {
     enabled: true,
     title: 'Welcome',
@@ -140,12 +171,14 @@ test('homepage is opt-in and validates labels, nested options and safe button UR
     ],
   }
   assert.deepEqual(
-    resolveConfig({ title: 'Docs', homepage }).homepage,
+    resolveConfig({ metadata: { applicationName: 'Docs' }, homepage }).homepage,
     homepage
   )
   assert.equal(
-    resolveConfig({ title: 'Docs', homepage: { enabled: false } }).homepage
-      .enabled,
+    resolveConfig({
+      metadata: { applicationName: 'Docs' },
+      homepage: { enabled: false },
+    }).homepage.enabled,
     false
   )
   for (const homepage of [
@@ -164,7 +197,10 @@ test('homepage is opt-in and validates labels, nested options and safe button UR
       'relative',
     ].map((href) => ({ buttons: [{ label: 'Go', href }] })),
   ])
-    assert.throws(() => resolveConfig({ title: 'Docs', homepage }), /homepage/)
+    assert.throws(
+      () => resolveConfig({ metadata: { applicationName: 'Docs' }, homepage }),
+      /homepage/
+    )
 })
 
 test('project-owned homepage and navbar components are preserved without executing them', () => {
@@ -173,7 +209,7 @@ test('project-owned homepage and navbar components are preserved without executi
   }
   const Logo = () => null
   const config = resolveConfig({
-    title: 'Docs',
+    metadata: { applicationName: 'Docs' },
     homepage: { enabled: true, component: Home },
     navbar: { logo: Logo, actions: { showToggleMode: true } },
   })
@@ -190,19 +226,25 @@ test('project-owned homepage and navbar components are preserved without executi
     { navbar: { actions: { showToggleMode: 'yes' } } },
   ])
     assert.throws(
-      () => resolveConfig({ title: 'Docs', ...input }),
+      () => resolveConfig({ metadata: { applicationName: 'Docs' }, ...input }),
       /homepage.component|navbar.logo|showToggleMode/
     )
 })
 
-test('plain projects ignore versions.json and use configured docsDir', async (t) => {
+test('plain projects ignore versions.json and always read live content from docs/', async (t) => {
   const rootDir = await fixture(t)
+  await mkdir(path.join(rootDir, 'content'), { recursive: true })
+  await writeFile(
+    path.join(rootDir, 'content/ignored.mdx'),
+    'Not live documentation'
+  )
   await writeFile(path.join(rootDir, 'versions.json'), 'not even json')
   const project = await createRdxProject(
-    { title: 'Docs', docsDir: 'content' },
+    { metadata: { applicationName: 'Docs' } },
     { rootDir, command: 'prepare' }
   )
   assert.deepEqual(getProjectDocsPaths(project), ['guides/intro'])
+  assert.equal(project.sources[0].docsDir, 'docs')
   assert.equal(
     resolveDocsRoute(project, ['guides', 'intro']).document.content.trim(),
     'Live documentation'
@@ -225,7 +267,7 @@ test('plugins declare project-relative runtime files without needing to add a co
   })
   const project = await createRdxProject(
     {
-      title: 'Files',
+      metadata: { applicationName: 'Files' },
       plugins: [plugin(['meta/manifest.json', 'meta/manifest.json'])],
     },
     { rootDir }
@@ -240,7 +282,10 @@ test('plugins declare project-relative runtime files without needing to add a co
   ]) {
     await assert.rejects(
       createRdxProject(
-        { title: 'Files', plugins: [plugin(runtimeFiles)] },
+        {
+          metadata: { applicationName: 'Files' },
+          plugins: [plugin(runtimeFiles)],
+        },
         { rootDir }
       ),
       /runtimeFiles/
@@ -258,8 +303,7 @@ test('plugin hooks run in order and contribute generic content sources', async (
   )
   const project = await createRdxProject(
     {
-      title: 'Docs',
-      docsDir: 'content',
+      metadata: { applicationName: 'Docs' },
       plugins: [
         {
           name: 'first',
@@ -306,8 +350,7 @@ test('plugin routes cannot hide live documentation categories', async (t) => {
   await assert.rejects(
     createRdxProject(
       {
-        title: 'Docs',
-        docsDir: 'content',
+        metadata: { applicationName: 'Docs' },
         plugins: [
           {
             name: 'conflicting',
@@ -381,11 +424,17 @@ test('duplicate plugins, unsupported APIs, reserved commands, unsafe paths and s
     ],
   ])
     await assert.rejects(
-      createRdxProject({ title: 'Docs', plugins }, { rootDir }),
+      createRdxProject(
+        { metadata: { applicationName: 'Docs' }, plugins },
+        { rootDir }
+      ),
       /Invalid rdx.config.ts/
     )
   await assert.rejects(
-    createRdxProject({ title: 'Docs', docsDir: '..' }, { rootDir }),
+    createRdxProject(
+      { metadata: { applicationName: 'Docs' }, docsDir: '..' },
+      { rootDir }
+    ),
     /docsDir/
   )
 })

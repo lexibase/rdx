@@ -12,7 +12,7 @@ import { defineConfig } from '@lexibase/rdx-next'
 import { versioning } from '@lexibase/rdx-versioning'
 
 export default defineConfig({
-  title: 'My documentation',
+  metadata: { applicationName: 'My documentation' },
   plugins: [versioning()],
 })
 ```

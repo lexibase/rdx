@@ -67,7 +67,8 @@ export async function DocFooter({
 
       <section className="flex items-center justify-center w-full py-5">
         <p className="text-sm text-muted-foreground">
-          &copy; {currentYear} <strong>RDX</strong>. Developed by{' '}
+          &copy; {currentYear}{' '}
+          <strong>{config.metadata.applicationName}</strong>. Developed by{' '}
           <ButtonLink
             variant="link"
             size="link"

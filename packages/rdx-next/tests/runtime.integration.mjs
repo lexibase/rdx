@@ -361,7 +361,7 @@ test(
 
     await writeFile(
       configPath,
-      `export default { title: 'Fixture docs', search: true, homepage: { enabled: true } }`
+      `export default { metadata: { applicationName: 'Fixture docs' }, search: true, homepage: { enabled: true } }`
     )
     await command(rootDir, cli, ['prepare'])
     running = await server(rootDir, 'dev')
@@ -405,7 +405,7 @@ test(
     await writeFile(
       configPath,
       `import { versioning } from '@lexibase/rdx-versioning'
-export default { title: 'RDX', TOC: true, search: true, homepage: { enabled: true }, navbar: { title: '', actions: { github: { visible: true, url: 'https://github.com/lexibase/rdx' } } }, plugins: [versioning()] }`
+export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, homepage: { enabled: true }, navbar: { title: '', actions: { github: { visible: true, url: 'https://github.com/lexibase/rdx' } } }, plugins: [versioning()] }`
     )
     await command(rootDir, cli, ['prepare'])
     await command(rootDir, cli, ['version', '1.0.0'])
@@ -1706,7 +1706,7 @@ export default { title: 'RDX', TOC: true, search: true, homepage: { enabled: tru
     await writeFile(
       configPath,
       `import MyHome from './home'
-export default { title: 'Custom site', homepage: { enabled: true, component: MyHome } }`
+export default { metadata: { applicationName: 'Custom site' }, homepage: { enabled: true, component: MyHome } }`
     )
     await command(rootDir, cli, ['prepare'])
     running = await server(rootDir, 'dev')

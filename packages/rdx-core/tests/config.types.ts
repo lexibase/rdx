@@ -1,17 +1,32 @@
 import { defineConfig } from '../src/config/index'
 import type {
-  RdxConfig,
+  RDXConfig,
   RdxRuntimeConfig,
   RdxPlugin,
 } from '@lexibase/rdx-types'
 
-const alias: RdxRuntimeConfig = { title: 'Compatible config' }
-const publicConfig: RdxConfig = alias
+const alias: RdxRuntimeConfig = {
+  metadata: { applicationName: 'Compatible config' },
+}
+const publicConfig: RDXConfig = alias
+
+// @ts-expect-error The site name belongs only in metadata.applicationName.
+defineConfig({ title: 'Old name', metadata: { applicationName: 'Docs' } })
+
+// @ts-expect-error applicationName is required, not replaced by a metadata title.
+defineConfig({ metadata: {} })
+
+// @ts-expect-error Root metadata is required.
+defineConfig({})
 const plugin: RdxPlugin = {
   name: 'contract-test',
   apiVersion: 1,
   async setup({ rootDir, command, config }) {
-    const context: [string, string, string] = [rootDir, command, config.title]
+    const context: [string, string, string] = [
+      rootDir,
+      command,
+      config.metadata.applicationName,
+    ]
     void context
     return {
       runtimeFiles: ['meta/manifest.json'],
@@ -39,11 +54,10 @@ const plugin: RdxPlugin = {
 defineConfig({ ...publicConfig, plugins: [plugin] })
 
 defineConfig({
-  title: 'Typed docs',
   TOC: true,
   search: true,
-  docsDir: 'content',
   metadata: {
+    applicationName: 'Typed docs',
     metadataBase: 'https://docs.example.com',
     authors: [{ name: 'Team' }],
     robots: { index: false },
@@ -56,36 +70,58 @@ defineConfig({
 })
 
 // @ts-expect-error TOC activation must be boolean, not a string.
-defineConfig({ title: 'Typed docs', TOC: 'false' })
-
-// @ts-expect-error Robots configuration uses booleans.
-defineConfig({ title: 'Typed docs', metadata: { robots: { index: 'no' } } })
-
-// @ts-expect-error Only the supported portable metadata fields are accepted.
-defineConfig({ title: 'Typed docs', metadata: { favicon: '/favicon.ico' } })
-
-// @ts-expect-error Search activation must be boolean.
-defineConfig({ title: 'Typed docs', search: 'true' })
-
-// @ts-expect-error Homepage activation must be boolean.
-defineConfig({ title: 'Typed docs', homepage: { enabled: 'yes' } })
+defineConfig({ metadata: { applicationName: 'Typed docs' }, TOC: 'false' })
 
 defineConfig({
-  title: 'Typed docs',
+  // @ts-expect-error Robots configuration uses booleans.
+  metadata: { applicationName: 'Typed docs', robots: { index: 'no' } },
+})
+
+defineConfig({
+  // @ts-expect-error Only the supported portable metadata fields are accepted.
+  metadata: { applicationName: 'Typed docs', favicon: '/favicon.ico' },
+})
+
+// @ts-expect-error Search activation must be boolean.
+defineConfig({ metadata: { applicationName: 'Typed docs' }, search: 'true' })
+
+defineConfig({
+  metadata: { applicationName: 'Typed docs' },
+  // @ts-expect-error Homepage activation must be boolean.
+  homepage: { enabled: 'yes' },
+})
+
+defineConfig({
+  metadata: { applicationName: 'Typed docs' },
   homepage: { enabled: true, component: () => null },
 })
 
-// @ts-expect-error Homepage components must be components, not path strings.
-defineConfig({ title: 'Typed docs', homepage: { component: './home.tsx' } })
-
-// @ts-expect-error Unknown config keys must also be rejected by TypeScript.
-defineConfig({ title: 'Typed docs', docsDirectory: 'content' })
-
-// @ts-expect-error Theme values are a closed union.
-defineConfig({ title: 'Typed docs', theme: { defaultTheme: 'purple' } })
+defineConfig({
+  metadata: { applicationName: 'Typed docs' },
+  // @ts-expect-error Homepage components must be components, not path strings.
+  homepage: { component: './home.tsx' },
+})
 
 defineConfig({
-  title: 'Typed docs',
+  metadata: { applicationName: 'Typed docs' },
+  // @ts-expect-error Unknown config keys must also be rejected by TypeScript.
+  docsDirectory: 'content',
+})
+
+defineConfig({
+  metadata: { applicationName: 'Typed docs' },
+  // @ts-expect-error Live documentation always uses docs/; its path is not configurable.
+  docsDir: 'content',
+})
+
+defineConfig({
+  metadata: { applicationName: 'Typed docs' },
+  // @ts-expect-error Theme values are a closed union.
+  theme: { defaultTheme: 'purple' },
+})
+
+defineConfig({
+  metadata: { applicationName: 'Typed docs' },
   // @ts-expect-error Plugins must support the current API version.
   plugins: [{ name: 'future', apiVersion: 2 }],
 })

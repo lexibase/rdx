@@ -64,8 +64,9 @@ meu-projeto/
     .next/                        # build interno do Next.js
 ```
 
-Se personalizou `docsDir` ou os caminhos do plugin, mantenha essas pastas em vez
-dos nomes padrão. Não copie somente `.rdx/.next`: o runtime também precisa da
+Live documentation always lives in `docs/`. If you customized the plugin's
+snapshot paths, keep those directories instead of its default paths.
+Não copie somente `.rdx/.next`: o runtime também precisa da
 configuração, componentes locais, fontes e arquivos públicos do projeto.
 
 O build delimita os arquivos de conteúdo do servidor por meio de

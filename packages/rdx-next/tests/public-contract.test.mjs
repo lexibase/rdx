@@ -43,10 +43,13 @@ test('published server entry points preserve the documented public API without l
 })
 
 test('configuration identity, aliases and opt-in defaults remain compatible', () => {
-  const input = { title: 'Public contract', plugins: [] }
+  const input = {
+    metadata: { applicationName: 'Public contract' },
+    plugins: [],
+  }
   assert.equal(runtimeConfig.defineConfig(input), input)
   const resolved = config.resolveConfig(input)
-  assert.equal(resolved.docsDir, 'docs')
+  assert.equal('docsDir' in resolved, false)
   assert.equal(resolved.lang, 'en')
   assert.equal(resolved.TOC, false)
   assert.equal(resolved.search, false)
@@ -54,7 +57,11 @@ test('configuration identity, aliases and opt-in defaults remain compatible', ()
   assert.equal(resolved.theme.defaultTheme, 'system')
   assert.deepEqual(resolved.plugins, [])
   assert.throws(
-    () => runtimeConfig.defineConfig({ title: 'Docs', search: 'true' }),
+    () =>
+      runtimeConfig.defineConfig({
+        metadata: { applicationName: 'Docs' },
+        search: 'true',
+      }),
     /search must be a boolean/
   )
 })

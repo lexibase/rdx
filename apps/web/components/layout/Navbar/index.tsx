@@ -12,7 +12,7 @@ export function Navbar() {
     <SharedNavbar
       title={config.navbar.title ?? ''}
       search={config.search ? <NavbarSearch /> : undefined}
-      siteTitle={config.title}
+      siteTitle={config.metadata.applicationName}
       logo={<BrandLogo className="size-5" />}
       versionMenu={<DropdownVersion />}
       docsLink={<NavbarLinks />}

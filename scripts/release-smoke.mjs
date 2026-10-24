@@ -171,6 +171,13 @@ async function verifySite(
         'Dynamic /docs must read live project content'
       )
       const html = await (await request(base, '/docs/init/intro')).text()
+      assert.match(html, /<title>My documentation<\/title>/)
+      assert.match(
+        html,
+        /<meta name="application-name" content="My documentation"/
+      )
+      assert.match(html, /aria-label="My documentation"/)
+      assert.match(html, /<strong>My documentation<\/strong>/)
       assert.match(html, /<meta name="author" content="RDX Metadata Fixture"/)
       assert.match(html, /<meta name="robots" content="noindex, nofollow"/)
       assert.match(

@@ -6,22 +6,29 @@ import { createJiti } from 'jiti'
 const jiti = createJiti(import.meta.url, { moduleCache: false, fsCache: false })
 const { getRdxMetadata } = await jiti.import('../src/runtime/metadata.ts')
 
-test('native metadata keeps existing title defaults and never invents canonical or localhost URLs', () => {
-  assert.deepEqual(getRdxMetadata({ title: 'Docs', description: 'Learn' }), {
-    title: { default: 'Docs', template: '%s | Docs' },
-    description: 'Learn',
-  })
+test('applicationName supplies browser titles without inventing canonical or localhost URLs', () => {
+  assert.deepEqual(
+    getRdxMetadata({
+      metadata: { applicationName: 'Docs' },
+      description: 'Learn',
+    }),
+    {
+      title: { default: 'Docs', template: '%s | Docs' },
+      applicationName: 'Docs',
+      description: 'Learn',
+    }
+  )
   assert.equal(
-    getRdxMetadata({ title: 'Docs', metadata: {} }).metadataBase,
+    getRdxMetadata({ metadata: { applicationName: 'Docs' } }).metadataBase,
     undefined
   )
 })
 
 test('configured metadata reaches Next with social defaults, explicit overrides, and no config mutation', () => {
   const config = {
-    title: 'Docs',
     description: 'Learn',
     metadata: {
+      applicationName: 'Docs',
       metadataBase: 'https://docs.example.com',
       authors: [{ name: 'Team' }],
       keywords: ['docs'],
@@ -44,6 +51,21 @@ test('configured metadata reaches Next with social defaults, explicit overrides,
   assert.equal(metadata.alternates, undefined)
   assert.equal(metadata.openGraph.url, undefined)
   assert.deepEqual(config, before)
+})
+
+test('renaming applicationName updates browser and social defaults together', () => {
+  for (const name of ['Docs', 'Renamed project']) {
+    const metadata = getRdxMetadata({
+      metadata: { applicationName: name, openGraph: {}, twitter: {} },
+    })
+    assert.deepEqual(metadata.title, {
+      default: name,
+      template: `%s | ${name}`,
+    })
+    assert.equal(metadata.applicationName, name)
+    assert.equal(metadata.openGraph.title, name)
+    assert.equal(metadata.twitter.title, name)
+  }
 })
 
 test('generated and development layouts both consume the shared metadata adapter', async () => {

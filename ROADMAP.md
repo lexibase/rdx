@@ -47,7 +47,7 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
 ## Depois da consolidação da base
 
 - [x] Alinhar configuração, leitura de conteúdo e versionamento do site oficial ao
-      motor dos projetos instalados. `apps/web` usa `RdxConfig`, `createRdxProject`
+      motor dos projetos instalados. `apps/web` usa `RDXConfig`, `createRdxProject`
       e o plugin atual via `workspace:*`, com `docs/` e `versioned_docs/`. Preservar
       Canary, URLs e snapshots. O adaptador de URLs do site é intencional; ele
       mantém os endereços antigos sem duplicar o motor ou mudar o visual.

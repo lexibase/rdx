@@ -30,7 +30,7 @@ function run(cwd, ...args) {
 test('prepare loads typed config with defineConfig without loading a Next server or versioning', async (t) => {
   const rootDir = await fixture(
     t,
-    `import { defineConfig } from '${definition}'; export default defineConfig({ title: 'Typed docs', docsDir: 'content' })`
+    `import { defineConfig } from '${definition}'; export default defineConfig({ metadata: { applicationName: 'Typed docs' } })`
   )
   const result = run(rootDir, 'prepare')
   assert.equal(result.status, 0, result.stderr)
@@ -71,7 +71,7 @@ test('prepare loads typed config with defineConfig without loading a Next server
 test('preflight rejects invalid config before creating .rdx', async (t) => {
   const rootDir = await fixture(
     t,
-    `export default { title: 'Docs', theme: { defaultTheme: 'purple' } }`
+    `export default { metadata: { applicationName: 'Docs' }, theme: { defaultTheme: 'purple' } }`
   )
   const result = run(rootDir, 'prepare')
   assert.equal(result.status, 1)
@@ -79,10 +79,26 @@ test('preflight rejects invalid config before creating .rdx', async (t) => {
   await assert.rejects(access(path.join(rootDir, '.rdx')))
 })
 
+test('removed docsDir option fails before preparing runtime or moving content', async (t) => {
+  const rootDir = await fixture(
+    t,
+    "export default { metadata: { applicationName: 'Docs' }, docsDir: 'content' }"
+  )
+  await mkdir(path.join(rootDir, 'content'))
+  const filename = path.join(rootDir, 'content/intro.mdx')
+  await writeFile(filename, 'Existing documentation')
+  const result = run(rootDir, 'prepare')
+  assert.equal(result.status, 1)
+  assert.match(result.stderr, /docsDir is not configurable.*docs\//)
+  assert.equal(await readFile(filename, 'utf8'), 'Existing documentation')
+  await assert.rejects(access(path.join(rootDir, '.rdx')))
+  await assert.rejects(access(path.join(rootDir, 'docs')))
+})
+
 test('plugin commands are registered only through config', async (t) => {
   const rootDir = await fixture(
     t,
-    `export default { title: 'Docs', plugins: [{ name: 'fixture', apiVersion: 1, commands: [{ name: 'ping', description: 'Fixture command', run(context) { console.log(context.args.join(':')) } }] }] }`
+    `export default { metadata: { applicationName: 'Docs' }, plugins: [{ name: 'fixture', apiVersion: 1, commands: [{ name: 'ping', description: 'Fixture command', run(context) { console.log(context.args.join(':')) } }] }] }`
   )
   const result = run(rootDir, 'ping', 'hello', 'world')
   assert.equal(result.status, 0, result.stderr)
@@ -97,7 +113,7 @@ test('missing configuration and missing plugin packages fail with actionable mes
   assert.match(run(rootDir, 'prepare').stderr, /Missing.*rdx.config.ts/)
   await writeFile(
     path.join(rootDir, 'rdx.config.ts'),
-    `import plugin from '@rdx-nonexistent/plugin'; export default { title: 'Docs', plugins: [plugin()] }`
+    `import plugin from '@rdx-nonexistent/plugin'; export default { metadata: { applicationName: 'Docs' }, plugins: [plugin()] }`
   )
   const result = run(rootDir, 'prepare')
   assert.equal(result.status, 1)

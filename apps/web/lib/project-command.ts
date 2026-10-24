@@ -1,10 +1,10 @@
 import { createRdxProject } from '@lexibase/rdx-core'
-import type { RdxConfig } from '@lexibase/rdx-types'
+import type { RDXConfig } from '@lexibase/rdx-types'
 
 /** Native Next development uses the same registered plugin commands as rdx. */
 export async function runProjectCommand(
   rootDir: string,
-  config: RdxConfig,
+  config: RDXConfig,
   command: string,
   args: string[] = []
 ) {

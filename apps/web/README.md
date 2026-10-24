@@ -7,7 +7,7 @@ chegar aos pacotes, não existir somente nos componentes locais do site.
 
 ## Conteúdo, configuração e versões
 
-O site usa `RdxConfig`, `createRdxProject`, o core e o plugin público de
+O site usa `RDXConfig`, `createRdxProject`, o core e o plugin público de
 versionamento por vínculos locais `workspace:*`, assim como os projetos gerados.
 `lib/documentation.ts` mantém apenas as URLs históricas do site; não reimplementa
 o indexador, a leitura do manifest ou a criação de snapshots.

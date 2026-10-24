@@ -2,7 +2,6 @@ export { VersionsRaw, MDXLoader, DocLink, DocCategory } from './loaders'
 export { RdxSearchEntry, RdxSearchIndex } from './search'
 export {
   RDXConfig,
-  RdxConfig,
   RdxHomepage,
   RdxMetadata,
   RdxRuntimeConfig,

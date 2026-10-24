@@ -31,7 +31,10 @@ export default async function RootLayout({
   return (
     <html suppressHydrationWarning lang={config.lang}>
       <head>
-        <meta content={config.title} name="apple-mobile-web-app-title" />
+        <meta
+          content={config.metadata.applicationName}
+          name="apple-mobile-web-app-title"
+        />
 
         {/* MOBILE BAR COLOR */}
         <meta name="theme-color" content="#0a0a0a" />

@@ -1,18 +1,19 @@
 import type { Metadata } from 'next'
-import type { RdxConfig } from '@lexibase/rdx-types'
+import type { RDXConfig } from '@lexibase/rdx-types'
 
 /** Translate the shared configuration through Next's native Metadata API. */
-export function getRdxMetadata(config: RdxConfig): Metadata {
-  const { metadataBase, ...metadata } = config.metadata ?? {}
+export function getRdxMetadata(config: RDXConfig): Metadata {
+  const { metadataBase, ...metadata } = config.metadata
+  const name = metadata.applicationName
   return {
-    title: { default: config.title, template: `%s | ${config.title}` },
+    title: { default: name, template: `%s | ${name}` },
     description: config.description,
     ...metadata,
     ...(metadataBase ? { metadataBase: new URL(metadataBase) } : {}),
     ...(metadata.openGraph
       ? {
           openGraph: {
-            title: config.title,
+            title: name,
             description: config.description,
             ...metadata.openGraph,
           },
@@ -21,7 +22,7 @@ export function getRdxMetadata(config: RdxConfig): Metadata {
     ...(metadata.twitter
       ? {
           twitter: {
-            title: config.title,
+            title: name,
             description: config.description,
             ...metadata.twitter,
           },

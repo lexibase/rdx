@@ -78,10 +78,15 @@ function locations(context: RdxPluginContext, options: VersioningOptions) {
     options.versionsDir ?? 'versioned_docs',
     'versioning.versionsDir'
   )
-  const docsDir = path.resolve(context.rootDir, context.config.docsDir)
+  // Live MDX files are explicitly included by getRdxTracingConfig. Snapshot
+  // commands must not cause the bundler to trace the whole project directory.
+  const docsDir = path.resolve(
+    /* turbopackIgnore: true */ context.rootDir,
+    'docs'
+  )
   if (inside(docsDir, versionsDir) || inside(versionsDir, docsDir)) {
     throw new Error(
-      'versioning.versionsDir and docsDir must be separate directories so snapshots cannot index or copy themselves.'
+      'versioning.versionsDir and the live docs/ directory must be separate directories so snapshots cannot index or copy themselves.'
     )
   }
   return { versionsFile, versionsDir, docsDir }
@@ -136,12 +141,7 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
               `Snapshot for "${version}" is missing at ${snapshotDir}. Restore the snapshot or remove its entry from ${versionsFile}.`
             )
           }
-          if (
-            hasLiveRoute(
-              path.join(context.rootDir, context.config.docsDir),
-              version
-            )
-          ) {
+          if (hasLiveRoute(path.join(context.rootDir, 'docs'), version)) {
             throw new Error(
               `Version "${version}" conflicts with live documentation. Rename that page or directory before enabling this version.`
             )

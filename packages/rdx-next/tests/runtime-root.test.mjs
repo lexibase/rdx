@@ -23,9 +23,9 @@ test('generated project resolves content from the CLI root and internal Next/ser
   t.after(() => rm(root, { recursive: true, force: true }))
   await mkdir(path.join(root, '.rdx'))
   await cp(template, path.join(root, '.rdx/rdx-project.ts'))
-  await mkdir(path.join(root, 'content/guides'), { recursive: true })
+  await mkdir(path.join(root, 'docs/guides'), { recursive: true })
   await writeFile(
-    path.join(root, 'content/guides/intro.mdx'),
+    path.join(root, 'docs/guides/intro.mdx'),
     'Current fixture body'
   )
   await mkdir(path.join(root, 'snapshots/version-1.0.0/guides'), {
@@ -44,7 +44,7 @@ test('generated project resolves content from the CLI root and internal Next/ser
     await writeFile(
       path.join(root, 'rdx.config.ts'),
       `${versioned ? `import { versioning } from '${plugin}'` : ''}
-      export default { title: 'Fixture', docsDir: 'content', plugins: [${versioned ? "versioning({ versionsFile: 'metadata/editions.json', versionsDir: 'snapshots' })" : ''}] }`
+      export default { metadata: { applicationName: 'Fixture' }, plugins: [${versioned ? "versioning({ versionsFile: 'metadata/editions.json', versionsDir: 'snapshots' })" : ''}] }`
     )
     for (const cwd of [root, path.join(root, '.rdx')]) {
       const script = `import { createJiti } from ${JSON.stringify(pathToFileURL(require.resolve('jiti')).href)};

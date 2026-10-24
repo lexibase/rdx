@@ -23,7 +23,10 @@ test('showcase commands use configured versioning, preserve snapshots and refuse
     path.join(os.tmpdir(), 'rdx-showcase-commands-')
   )
   try {
-    const input = { title: 'Test', plugins: [versioning()] }
+    const input = {
+      metadata: { applicationName: 'Test' },
+      plugins: [versioning()],
+    }
     fs.mkdirSync(path.join(temporary, 'docs/guides'), { recursive: true })
     const liveFile = path.join(temporary, 'docs/guides/intro.mdx')
     fs.writeFileSync(liveFile, 'Original')
@@ -56,9 +59,12 @@ test('showcase commands use configured versioning, preserve snapshots and refuse
     assert.equal(docs.document('1.0.0', 'intro').content, 'Original')
     await assert.rejects(
       () =>
-        runProjectCommand(temporary, { title: 'No plugin' }, 'version', [
-          '2.0.0',
-        ]),
+        runProjectCommand(
+          temporary,
+          { metadata: { applicationName: 'No plugin' } },
+          'version',
+          ['2.0.0']
+        ),
       /Unknown documentation command/
     )
     fs.writeFileSync(manifest, '{ invalid manifest')
@@ -92,7 +98,7 @@ test('showcase compilation preserves relative links, missing-document handling a
     )
     const docs = createDocumentation(
       await createRdxProject(
-        { title: 'Test', plugins: [versioning()] },
+        { metadata: { applicationName: 'Test' }, plugins: [versioning()] },
         { rootDir: temporary }
       )
     )
@@ -173,7 +179,10 @@ test('duplicate filenames use full paths and ambiguous short links never pick a 
       )
     }
     const docs = createDocumentation(
-      await createRdxProject({ title: 'Test' }, { rootDir: temporary })
+      await createRdxProject(
+        { metadata: { applicationName: 'Test' } },
+        { rootDir: temporary }
+      )
     )
     assert.deepEqual(
       docs

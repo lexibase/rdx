@@ -3,9 +3,38 @@ import test from 'node:test'
 
 import { defineConfig, resolveConfig } from '../dist/index.js'
 
-test('metadata is optional and preserves the portable contract without inventing deployment URLs', () => {
-  assert.equal(resolveConfig({ title: 'Docs' }).metadata, undefined)
-  assert.deepEqual(resolveConfig({ title: 'Docs', metadata: {} }).metadata, {})
+test('applicationName is the required single site name without inventing deployment URLs', () => {
+  assert.deepEqual(
+    resolveConfig({ metadata: { applicationName: 'Docs' } }).metadata,
+    { applicationName: 'Docs' }
+  )
+  for (const metadata of [
+    undefined,
+    null,
+    {},
+    { applicationName: '' },
+    { applicationName: '  ' },
+    { applicationName: 1 },
+  ])
+    assert.throws(
+      () => resolveConfig({ metadata }),
+      /metadata(?:\.applicationName)? must be/
+    )
+  for (const input of [
+    { title: 'Old name' },
+    { title: 'Duplicate name', metadata: { applicationName: 'Docs' } },
+  ])
+    assert.throws(
+      () => resolveConfig(input),
+      /title has been removed.*metadata\.applicationName/
+    )
+  assert.throws(
+    () =>
+      resolveConfig({
+        metadata: { applicationName: 'Docs', title: 'Duplicate name' },
+      }),
+    /unknown option metadata\.title/
+  )
   const metadata = {
     metadataBase: 'https://docs.example.com',
     applicationName: 'Docs',
@@ -31,7 +60,7 @@ test('metadata is optional and preserves the portable contract without inventing
       images: ['/og.png'],
     },
   }
-  const config = { title: 'Docs', metadata }
+  const config = { metadata }
   assert.equal(defineConfig(config), config)
   assert.deepEqual(resolveConfig(config).metadata, metadata)
 })
@@ -67,7 +96,13 @@ test('invalid metadata reports the exact field before runtime', () => {
     ],
   ]) {
     assert.throws(
-      () => resolveConfig({ title: 'Docs', metadata }),
+      () =>
+        resolveConfig({
+          metadata:
+            metadata && !Array.isArray(metadata)
+              ? { applicationName: 'Docs', ...metadata }
+              : metadata,
+        }),
       (error) => {
         assert.equal(error.name, 'RdxConfigError')
         assert.ok(error.message.includes(field), error.message)
