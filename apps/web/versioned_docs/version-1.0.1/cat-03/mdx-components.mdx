@@ -1,0 +1,110 @@
+---
+title: Markdown and Callouts
+description: Markdown formatting, syntax highlighting, and contextual notes.
+link_position: 3
+---
+
+## Native Markdown
+
+Use **strong text**, *emphasis*, ~~strikethrough~~ and `inline code`.
+
+> A quotation uses the same muted colors as the rest of the RDX theme.
+>
+> Keep **important context**, [links](../cat-01/intro.mdx), and `inline code` close to the content they explain.
+
+1. Write an `.mdx` page.
+2. Add it to a category folder.
+
+- [x] Shared documentation components
+- [ ] Review the page
+
+| Feature | Available |
+| :------ | --------: |
+| Markdown tables | Yes |
+| Callouts | Yes |
+| Code blocks | Yes |
+| Blockquotes | Yes |
+
+### Five-column comparison
+
+Wider tables scroll horizontally on small screens without widening the page.
+
+| Feature | Description | Status | Plugin | Example |
+| :------ | :---------- | :----: | :----: | :------ |
+| Markdown | Write headings, lists, and paragraphs | Included | Not required | `## Heading` |
+| Callout | Highlight contextual information | Included | Not required | `<Callout>` |
+| Code block | Display source code with a copy button | Included | Not required | `pnpm dev` |
+| Blockquote | Quote a passage or explanation | Included | Not required | `> A quotation` |
+
+```ts
+const framework = 'RDX'
+```
+
+### Syntax highlighting
+
+Set the language after the opening fence. Highlighting follows the light/dark
+theme automatically, without changing how code is copied.
+
+```tsx
+export function Welcome() {
+  return <h1 className="text-xl">Welcome to RDX</h1>
+}
+```
+
+```py
+def greet(name):
+    return f"Hello, {name}!"
+```
+
+```json
+{ "framework": "RDX", "minimal": true }
+```
+
+### Heading three
+
+#### Heading four
+
+##### Heading five
+
+###### Heading six
+
+---
+
+## Callouts
+
+<Callout title="A useful note">
+
+Callouts work without imports or plugins. They use the shared RDX theme.
+
+</Callout>
+
+<Callout variant="tip" title="A helpful tip">
+
+Keep **Markdown** and `inline code` inside the component.
+
+</Callout>
+
+<Callout variant="success" title="Ready to go">
+
+Your documentation is ready to share.
+
+</Callout>
+
+<Callout variant="warning" title="Before updating">
+
+- Read the release notes.
+- Test your changes before deploying.
+
+</Callout>
+
+<Callout variant="danger" title="Irreversible action">
+
+Deleting the source files permanently removes their content.
+
+</Callout>
+
+<Callout>
+
+You can also omit the title.
+
+</Callout>

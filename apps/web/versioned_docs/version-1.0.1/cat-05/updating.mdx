@@ -1,0 +1,44 @@
+---
+title: Updating RDX
+description: Update runtime packages without regenerating your documentation.
+link_position: 3
+---
+
+## The creator is not an updater
+
+`create-rdx` creates new projects. Do not rerun it over an existing documentation
+directory to update your framework.
+
+Your documentation, configuration, and public files remain yours. Update the
+installed runtime and shared UI packages through your package manager.
+
+## Update the installed packages
+
+Stop the development server, then update the runtime and shared UI:
+
+```bash
+pnpm add @lexibase/rdx-next@latest @lexibase/rdx-ui@latest
+```
+
+With npm, use `npm install` with the same package names.
+If versioning is installed, update its package to a compatible release as well:
+
+```bash
+pnpm add @lexibase/rdx-versioning@latest
+```
+
+Review release notes and package/lockfile changes. Use the
+[configuration reference](../cat-02/config.mdx) to check your project settings.
+
+## Validate and deploy
+
+Run a production build and start the site:
+
+```bash
+pnpm build
+pnpm start
+```
+
+Check representative documents, relative links, components, assets, search, and
+snapshots before redeploying. Configuration remains in your project; generated
+runtime files are refreshed by RDX.

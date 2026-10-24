@@ -171,7 +171,19 @@ async function verifySite(
         'Dynamic /docs must read live project content'
       )
       const html = await (await request(base, '/docs/init/intro')).text()
-      assert.match(html, /<title>My documentation<\/title>/)
+      assert.match(html, /<title>Introduction \| My documentation<\/title>/)
+      assert.match(docsRoot, /<title>Introduction \| My documentation<\/title>/)
+      assert.match(
+        html,
+        /<meta name="description" content="Start building your documentation with RDX\."/
+      )
+      const secondPage = await (
+        await request(base, '/docs/init/getting-started')
+      ).text()
+      assert.match(
+        secondPage,
+        /<title>Getting started \| My documentation<\/title>/
+      )
       assert.match(
         html,
         /<meta name="application-name" content="My documentation"/
@@ -256,6 +268,14 @@ async function verifySite(
           await request(base, '/docs/1.0.0/init/intro')
         ).text()
         assert.ok(snapshot.includes(original))
+        assert.match(
+          snapshot,
+          /<title>Snapshot introduction \| My documentation<\/title>/
+        )
+        assert.match(
+          snapshot,
+          /<meta name="description" content="Snapshot description"/
+        )
         assert.ok(!snapshot.includes(current))
         if (search) {
           const index = await (await request(base, '/rdx-search/1.0.0')).json()
@@ -431,6 +451,15 @@ if (process.argv.includes('--install')) {
     'pnpm',
   ])
   pnpm(project, ['exec', 'rdx', 'version', '1.0.0'])
+  await writeFile(
+    path.join(project, 'versioned_docs/version-1.0.0/init/intro.mdx'),
+    intro
+      .replace('title: Introduction', 'title: Snapshot introduction')
+      .replace(
+        'description: Start building your documentation with RDX.',
+        'description: Snapshot description'
+      )
+  )
   await writeFile(introPath, intro.replace(original, current))
   buildProject(project)
   await verifyDeploymentTrace(project, true)

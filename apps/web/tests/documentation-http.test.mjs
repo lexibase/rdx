@@ -11,7 +11,7 @@ const require = createRequire(import.meta.url)
 const versions = require('../versions.json')
 
 test(
-  'first-release website serves documentation, shared MDX and search without retired editions',
+  'website serves live and released documentation, shared MDX and isolated search',
   { timeout: 120_000 },
   async () => {
     const docs = await getDocumentation()

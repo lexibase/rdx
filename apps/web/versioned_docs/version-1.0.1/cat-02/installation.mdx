@@ -1,0 +1,74 @@
+---
+title: Installation
+description: Create a documentation project and preview your first page.
+link_position: 1
+---
+
+## Requirements
+
+Use Node.js **22.18+ (22.x)** or **24.11+ (24.x)**, with the latest patch of
+either line. Choose pnpm or npm and use the same package manager throughout
+your project.
+
+You do not need to create a Next.js project first.
+
+## Create a project
+
+Run the creator and follow the prompt:
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Create a project with your package manager">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+
+pnpm create @lexibase/rdx@latest
+
+  </TabsContent>
+  <TabsContent value="npm">
+
+npm create @lexibase/rdx@latest
+
+  </TabsContent>
+</Tabs>
+
+The prompt asks **What is your project named?** Enter a name such as `my-docs`.
+RDX creates that directory and installs its dependencies.
+
+## Run locally
+
+```bash
+cd my-docs
+pnpm dev
+```
+
+Open `http://localhost:3000/docs`. With npm, run `npm run dev` instead.
+
+Edit `docs/init/intro.mdx` and save. Keep the development server running to
+preview content changes. Restart it after editing framework configuration.
+
+## Optional CLI arguments
+
+Provide the directory name directly to skip the name prompt:
+
+```bash
+pnpm create @lexibase/rdx@latest my-docs
+```
+
+Inspect the creator without generating a project:
+
+```bash
+pnpm dlx @lexibase/create-rdx@latest --help
+pnpm dlx @lexibase/create-rdx@latest --version
+```
+
+Use `--skip-install` to generate files without installing dependencies, then
+install them yourself inside the new directory. An existing directory is not overwritten.
+
+## Next steps
+
+Explore the [project structure](../cat-03/docs.mdx), write your
+[first page](../cat-03/create-docs.mdx), and set your
+[application name and metadata](./config.mdx).
+

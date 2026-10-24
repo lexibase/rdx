@@ -58,7 +58,7 @@ async function server(mode) {
 }
 
 test(
-  'first-release website keeps hydration, Canary navigation, search and shared components consistent',
+  'website keeps hydration, edition navigation, search and shared components consistent',
   {
     skip:
       !process.env.RDX_PLAYWRIGHT_MODULE &&
@@ -73,7 +73,15 @@ test(
     })
     try {
       for (const mode of ['dev', 'start']) {
-        const running = await server(mode)
+        // Reuse an explicitly supplied local dev server without owning its lifecycle.
+        const running =
+          mode === 'dev' && process.env.RDX_EXISTING_DEV_URL
+            ? {
+                base: process.env.RDX_EXISTING_DEV_URL,
+                close() {},
+                logs: () => 'Existing development server',
+              }
+            : await server(mode)
         try {
           const example = await fetch(
             `${running.base}/docs/canary/mdx-components`
@@ -187,19 +195,22 @@ test(
           )
           await page.reload()
           await page
-            .getByRole('button', { name: 'Documentation version: Canary' })
+            .getByRole('button', {
+              name: 'Documentation version: Version 1.0.1',
+            })
             .click()
           await page.getByRole('menu').waitFor()
           assert.equal(
             await page.locator('[data-slot="dropdown-menu-separator"]').count(),
-            0,
-            `${mode}: Canary alone has no dangling divider`
+            1,
+            `${mode}: live and released editions have one divider`
           )
           assert.equal(
             await page.getByRole('menuitem', { name: /^Version / }).count(),
-            0
+            1
           )
           await page.keyboard.press('Escape')
+          await page.goto(`${running.base}/docs/canary/intro`)
           const liveIndex = page.waitForResponse(
             (response) =>
               new URL(response.url()).pathname === '/rdx-search/canary'
@@ -217,7 +228,13 @@ test(
           assert.equal(await page.locator('main [data-rdx-callout]').count(), 6)
           assert.equal(
             await page.locator('[data-rdx-version-notice]').count(),
-            0
+            1
+          )
+          assert.equal(
+            await page
+              .locator('[data-rdx-version-notice]')
+              .getAttribute('data-rdx-version-notice'),
+            'canary'
           )
           await page.getByRole('table').first().waitFor()
           await context.grantPermissions(
@@ -245,6 +262,34 @@ test(
             expectedCode
           )
           assert.deepEqual(errors, [], `${mode}: shared Callout and Markdown`)
+          await page
+            .getByRole('button', { name: 'Documentation version: Canary' })
+            .click()
+          await page
+            .getByRole('menuitem', { name: 'Version 1.0.1', exact: true })
+            .click()
+          await page.waitForURL('**/docs/1.0.1/mdx-components')
+          await page.waitForFunction(
+            () => document.title === 'Markdown and Callouts | RDX'
+          )
+          const releasedIndex = page.waitForResponse(
+            (response) =>
+              new URL(response.url()).pathname === '/rdx-search/1.0.1'
+          )
+          await page
+            .getByRole('button', { name: 'Search documentation', exact: true })
+            .click()
+          assert.equal(
+            (await releasedIndex).status(),
+            200,
+            `${mode}: released search index`
+          )
+          await page.keyboard.press('Escape')
+          assert.deepEqual(
+            errors,
+            [],
+            `${mode}: switching to the released snapshot`
+          )
           await context.close()
 
           const restricted = await browser.newContext()

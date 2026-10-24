@@ -1,4 +1,32 @@
-# Publishing RDX 1.0
+# Publishing RDX
+
+## Prepared patch: 1.0.1
+
+The six 1.0.0 packages are published. This patch updates only
+`@lexibase/rdx-next` and `@lexibase/create-rdx`; the creator template pins
+runtime 1.0.1 and UI 1.0.0. Do not republish unchanged packages or overwrite 1.0.0.
+
+After the patch PR's checks pass, run `pnpm test:release --install` and inspect
+the archives. Confirm npm identity and that the target versions are available
+for first publication, then publish one command at a time:
+
+```powershell
+pnpm --filter @lexibase/rdx-next publish --tag latest --access public
+pnpm --filter @lexibase/create-rdx publish --tag latest --access public
+```
+
+Verify both `latest` tags are 1.0.1 and create a new project from the registry.
+Existing projects update with `npm install @lexibase/rdx-next@1.0.1` (or the
+equivalent pnpm command); rerun development or build to refresh generated routes.
+Check that two different documents have distinct browser titles and descriptions.
+Verify versioned documents as well when the plugin is enabled.
+
+The official website's prepared 1.0.1 snapshot is independent of npm publication.
+Do not treat its appearance in a deployment as confirmation that the packages
+were uploaded. After registry verification, record the patch's actual release
+date in `CHANGELOG.md` and deploy the approved site changes.
+
+## First stable release runbook (1.0.0)
 
 This is the maintainer runbook for the prepared first stable release.
 Changing manifests, merging a PR and deploying documentation do **not** publish

@@ -1,0 +1,61 @@
+---
+title: Code blocks
+description: Language-aware highlighting and compact, icon-only copying.
+link_position: 5
+---
+
+## Highlight a language
+
+Add the language after the opening triple backticks. For example, use
+`ts`, `tsx`, `js`, `json`, `bash`, `py`, `css`, or `sql`.
+
+```ts
+const site = {
+  name: 'My documentation',
+  search: true,
+}
+```
+
+```bash
+pnpm dev
+```
+
+Highlighting runs on the server with Shiki. Its palette follows the light/dark
+theme. Unknown languages and unlabelled fences remain readable as plain text;
+inline code is not highlighted.
+
+## Copy a block
+
+The icon in the header copies only the code, preserving indentation and line
+breaks. A checkmark confirms success. If clipboard permission is unavailable,
+the code remains selectable for manual copying.
+
+Clipboard access needs HTTPS or localhost and browser permission.
+
+## Show Markdown source
+
+Use four backticks around a source example that contains triple backticks:
+
+````md
+```tsx
+export function Welcome() {
+  return <h1>Hello, RDX</h1>
+}
+```
+````
+
+Long blocks scroll horizontally inside their container. Keep examples focused;
+use [Tabs](./tabs.mdx) for related alternatives.
+
+## Directory trees
+
+Use a `text` fence to display a directory structure:
+
+```text
+my-docs/
+├── docs/
+│   └── guides/
+│       └── introduction.mdx
+├── public/
+└── rdx.config.ts
+```

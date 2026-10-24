@@ -131,15 +131,18 @@ test('showcase compilation preserves relative links, missing-document handling a
   }
 })
 
-test('the first-release website exposes only Canary and no demonstration releases', async () => {
+test('the website exposes Canary and the 1.0.1 snapshot without demonstration releases', async () => {
   const docs = createDocumentation(
     await createRdxProject(config, { rootDir: root })
   )
   assert.deepEqual(
     docs.editions.map(({ id, kind }) => ({ id, kind })),
-    [{ id: 'canary', kind: 'live' }]
+    [
+      { id: 'canary', kind: 'live' },
+      { id: '1.0.1', kind: 'version' },
+    ]
   )
-  for (const version of ['canary']) {
+  for (const version of ['canary', '1.0.1']) {
     const pages = docs.pages(version)
     assert.ok(pages.length > 0, version)
     assert.ok(docs.document(version, 'intro'), version)

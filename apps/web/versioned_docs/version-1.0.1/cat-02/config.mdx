@@ -1,0 +1,131 @@
+---
+title: Configuration
+description: One typed configuration for branding, metadata, and optional features.
+link_position: 2
+---
+
+## Minimal configuration
+
+Edit `rdx.config.ts` at your project root:
+
+```ts
+import { defineConfig } from '@lexibase/rdx-next'
+
+export default defineConfig({
+  metadata: {
+    applicationName: 'My documentation',
+  },
+})
+```
+
+Only `metadata.applicationName` is required. It provides the default browser
+title, the page-title suffix, social preview defaults, footer branding, and the
+built-in homepage name. For example, a page named Installation appears in the
+browser as **Installation | My documentation**.
+
+Use `navbar.title` for optional text beside the navbar logo.
+
+## Common options
+
+```ts
+import { defineConfig } from '@lexibase/rdx-next'
+
+export default defineConfig({
+  description: 'Guides and reference for my project.',
+  metadata: {
+    applicationName: 'My documentation',
+    metadataBase: 'https://docs.example.com',
+  },
+  lang: 'en',
+  search: true,
+  TOC: true,
+  homepage: { enabled: false },
+  theme: { defaultTheme: 'system' },
+  navbar: {
+    title: '',
+    actions: {
+      github: {
+        visible: true,
+        url: 'https://github.com/example/project',
+      },
+      showToggleMode: true,
+    },
+  },
+})
+```
+
+| Option | Default | Purpose |
+| :----- | :------ | :------ |
+| `description` | Empty | Default site description |
+| `lang` | `en` | HTML document language |
+| `search` | `false` | Navbar search dialog |
+| `TOC` | `false` | Floating heading navigation |
+| `homepage.enabled` | `false` | Homepage instead of redirecting to docs |
+| `theme.defaultTheme` | `system` | `system`, `light`, or `dark` |
+| `plugins` | Empty array | Explicitly activated plugins |
+
+The creator includes the GitHub action with a `#` placeholder and the theme
+toggle enabled. Replace the placeholder with your own repository URL.
+
+`lang` sets the HTML document language. For example, use `pt-BR` for a site
+written in Brazilian Portuguese.
+
+## SEO and social previews
+
+```ts
+metadata: {
+  applicationName: 'My documentation',
+  metadataBase: 'https://docs.example.com',
+  authors: [{ name: 'Your team', url: 'https://example.com' }],
+  keywords: ['documentation', 'my-project'],
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon.png', sizes: '96x96', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/site.webmanifest',
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: 'website',
+    images: [{
+      url: '/social-preview.png',
+      width: 1200,
+      height: 630,
+      alt: 'My documentation',
+    }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: ['/social-preview.png'],
+  },
+}
+```
+
+This is the `metadata` portion of a `defineConfig` call, not a complete file.
+Place the referenced images, icons, and web app manifest in `public/`.
+`metadataBase` must be an absolute HTTP(S) URL and resolves relative social image URLs.
+
+Supported fields include authors, keywords, icons, manifest, robots, OpenGraph,
+and Twitter metadata. This is a validated subset, not the entire Next.js Metadata
+API. Invalid or unknown configuration fields fail with an actionable error.
+
+## Navbar and homepage
+
+Set `navbar.title: ''` for logo-only branding. `navbar.logo` accepts an imported
+React component that accepts `className`, not an image path. The shared navbar
+keeps its Docs link, enabled search, optional GitHub action, and theme toggle.
+
+See [Homepage](../cat-04/homepage.mdx) for a project-owned `home.tsx`.
+
+## Plugins and configuration changes
+
+Installing a package does not activate it. Use [Plugins](../cat-04/plugins.mdx)
+to install and configure the optional versioning feature.
+
+Write your documentation in `docs/`.
+Do not edit files inside `.rdx/`. Restart development after changing configuration,
+and rebuild/redeploy for production.
+

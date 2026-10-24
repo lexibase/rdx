@@ -2,8 +2,9 @@ RDX documentation — CC BY 4.0
 
 Copyright (c) 2025–2026 Lexibase and contributors.
 
-The original RDX documentation prose in apps/web/docs/**/*.mdx and the
-repository-root Markdown documentation (*.md) is licensed under the Creative
+The original RDX documentation prose in apps/web/docs/**/*.mdx,
+apps/web/versioned_docs/**/*.mdx, and the repository-root Markdown documentation
+(*.md) is licensed under the Creative
 Commons Attribution 4.0 International License (SPDX: CC-BY-4.0), except where
 otherwise noted.
 
