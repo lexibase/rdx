@@ -302,7 +302,13 @@ async function verifyFrameworkUpgrade(project) {
   )
   const pkgPath = path.join(project, 'package.json')
   const pkg = JSON.parse(await readFile(pkgPath, 'utf8'))
+  const previousUi = pkg.pnpm.overrides['@lexibase/rdx>@lexibase/rdx-ui']
   delete pkg.pnpm.overrides['@lexibase/rdx>@lexibase/rdx-ui']
+  // pnpm may revisit the previous lock entry while replacing the main package.
+  // Keep only that old version local; the new framework must select its own UI.
+  pkg.pnpm.overrides[
+    `@lexibase/rdx@${releases.get('@lexibase/rdx').manifest.version}>@lexibase/rdx-ui`
+  ] = previousUi
   await writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n')
   pnpm(project, [
     'add',
@@ -417,6 +423,8 @@ async function verifySite(
       )
       assert.match(html, /aria-label="My documentation"/)
       assert.match(html, /<strong>My documentation<\/strong>/)
+      assert.match(html, /Powered by /)
+      assert.match(html, /href="https:\/\/github\.com\/lexibase\/rdx"/)
       assert.match(html, /<meta name="author" content="RDX Metadata Fixture"/)
       assert.match(html, /<meta name="robots" content="noindex, nofollow"/)
       assert.match(
@@ -585,7 +593,7 @@ for (const [name, release] of releases) {
   }
   if (name === '@lexibase/rdx-next') {
     assert.equal(packed.dependencies?.['@lexibase/rdx-ui'], undefined)
-    assert.equal(packed.peerDependencies['@lexibase/rdx-ui'], '^1.0.0')
+    assert.equal(packed.peerDependencies['@lexibase/rdx-ui'], '^1.1.0')
   }
   const files = new Set(
     execFileSync('tar', ['-tf', archive], { encoding: 'utf8' })
@@ -750,9 +758,14 @@ if (process.argv.includes('--install')) {
     'OK installed archives: standalone project, optional plugin, snapshot, production builds and HTTP servers'
   )
   const upgradedUi = await verifyFrameworkUpgrade(project)
-  // Existing projects can keep their lower-level runtime/UI dependency layout.
-  const legacyProject = path.join(temporary, 'legacy-project')
-  await mkdir(legacyProject)
+  // Exercise a real pnpm workspace, with a docs project and dependencies above it.
+  const legacyWorkspace = path.join(temporary, 'legacy-workspace')
+  const legacyProject = path.join(legacyWorkspace, 'apps/docs')
+  await mkdir(legacyProject, { recursive: true })
+  await writeFile(
+    path.join(legacyWorkspace, 'pnpm-workspace.yaml'),
+    "packages:\n  - 'apps/*'\n"
+  )
   for (const name of [
     'docs',
     'public',
@@ -761,7 +774,6 @@ if (process.argv.includes('--install')) {
     'rdx.config.ts',
     'home.tsx',
     'package.json',
-    'pnpm-workspace.yaml',
   ]) {
     await cp(path.join(project, name), path.join(legacyProject, name), {
       recursive: true,
@@ -770,6 +782,20 @@ if (process.argv.includes('--install')) {
   const legacyPkgPath = path.join(legacyProject, 'package.json')
   const legacyConfigPath = path.join(legacyProject, 'rdx.config.ts')
   const legacyPkg = JSON.parse(await readFile(legacyPkgPath, 'utf8'))
+  legacyPkg.name = 'docs'
+  await writeFile(
+    path.join(legacyWorkspace, 'package.json'),
+    JSON.stringify(
+      {
+        name: 'rdx-workspace-smoke',
+        private: true,
+        pnpm: legacyPkg.pnpm,
+      },
+      null,
+      2
+    ) + '\n'
+  )
+  delete legacyPkg.pnpm
   delete legacyPkg.dependencies['@lexibase/rdx']
   legacyPkg.dependencies['@lexibase/rdx-next'] = overrides['@lexibase/rdx-next']
   legacyPkg.dependencies['@lexibase/rdx-ui'] =
@@ -791,6 +817,15 @@ if (process.argv.includes('--install')) {
     )
   )
   pnpm(legacyProject, ['install', '--strict-peer-dependencies'])
+  const nextInstallation = await realpath(
+    createRequire(path.join(legacyProject, 'package.json')).resolve(
+      'next/package.json'
+    )
+  )
+  assert.ok(
+    path.relative(legacyProject, nextInstallation).startsWith(`..${path.sep}`),
+    'The workspace scenario must resolve Next outside the documentation project'
+  )
   buildProject(legacyProject)
   await verifySite(legacyProject, {
     original,
@@ -799,6 +834,8 @@ if (process.argv.includes('--install')) {
     search: false,
     framework: false,
   })
-  console.log('OK existing runtime/UI projects remain supported')
+  console.log(
+    'OK pnpm workspace apps/docs with parent dependencies and direct runtime/UI remains supported'
+  )
 }
 console.log(`Release artifacts retained for inspection: ${temporary}`)
