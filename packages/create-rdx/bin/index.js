@@ -8,6 +8,7 @@ import fs from 'fs-extra'
 import prompts from 'prompts'
 
 import { parseArguments, validateProjectName } from './options.mjs'
+import { normalizePnpmRdxApprovals } from './pnpm-policy.mjs'
 
 function getPackageManager() {
   const userAgent = process.env.npm_config_user_agent || ''
@@ -149,7 +150,11 @@ async function main() {
   if (!skipInstall) {
     try {
       console.log(`\nInstalling dependencies with ${packageManager}...\n`)
+      if (packageManager === 'pnpm')
+        await normalizePnpmRdxApprovals(targetDir)
       await run(packageManager, ['install'], targetDir)
+      if (packageManager === 'pnpm')
+        await normalizePnpmRdxApprovals(targetDir)
       const prepareArgs =
         packageManager === 'npm'
           ? ['exec', '--', 'rdx', 'prepare']

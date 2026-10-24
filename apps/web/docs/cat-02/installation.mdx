@@ -75,6 +75,25 @@ pnpm dlx @lexibase/create-rdx@latest --version
 Use `--skip-install` to generate files without installing dependencies, then
 install them yourself inside the new directory. An existing directory is not overwritten.
 
+## pnpm workspaces
+
+Create the project inside a directory included by your workspace's `packages`
+patterns, such as `apps/docs`. Turborepo is optional. The generated application
+uses the workspace dependency installation and shared lockfile.
+
+The creator consolidates duplicate exact RDX versions already recorded in
+`minimumReleaseAgeExclude` before installation and runtime preparation. This
+prevents an earlier version entry from hiding a later approval. It does not add
+unlisted versions or change the workspace's release-age threshold or strict mode.
+
+If installation fails, keep the generated project and follow the reported error;
+you do not need to recreate your documents. The generator version can be checked
+with `pnpm create @lexibase/rdx@latest --version`. To refresh a cached creator:
+
+```bash
+pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@latest my-docs
+```
+
 ## Next steps
 
 Explore the [project structure](../cat-03/docs.mdx), write your

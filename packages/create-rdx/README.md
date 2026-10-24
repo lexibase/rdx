@@ -41,6 +41,12 @@ the runtime. Follow the commands printed by the generator.
 
 ## Recovery
 
+In a pnpm workspace, installation uses the workspace's existing dependencies and
+policy. Before installation and runtime preparation, the creator consolidates
+duplicate exact-version approvals for RDX in `minimumReleaseAgeExclude`. Only
+versions already listed are combined; the age threshold, strict mode, unrelated
+package rules, comments and other workspace settings are preserved.
+
 If installation or preparation fails, the command exits with an error and keeps
 the generated files. Fix the reported issue, enter the created folder and retry
 installation/development using the same package manager. Do not rerun creation
