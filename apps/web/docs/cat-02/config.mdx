@@ -1,77 +1,133 @@
 ---
-title: "Configuration"
-description: "Customize yor documentation setup"
+title: Configuration
+description: One typed configuration for branding, metadata, and optional features.
 link_position: 2
 ---
 
-RDX includes a configuration file where you can tweak settings, enable or disable features, and define key information for your documentation.
+## Minimal configuration
 
-## What goes into?
----
-
-You don't need to write your `rdx.config.ts` from scratch - even when building your documentation from the ground up.
-
-## Metadata
----
-
-Your documentation's metadata includes essential global fields like `title`, `description`, `author`, `favicon`, and `url`, all of which are required.
-
-These values are used across your site - in page titles, browser tab icons, social sharing previews, and even tog enerate correct paths for serving static assets.
-
-## Theme
----
-
-You can choose between three theme modes for your documentations: `system`, `dark`, and `light`.
+Edit `rdx.config.ts` at your project root:
 
 ```ts
-// rdx.config.ts
-{
-  // ...
-  theme: {
-    defaultTheme: 'system',
+import { defineConfig } from '@lexibase/rdx-next'
+
+export default defineConfig({
+  metadata: {
+    applicationName: 'My documentation',
+  },
+})
+```
+
+Only `metadata.applicationName` is required. It provides the default browser
+title, the page-title suffix, social preview defaults, footer branding, and the
+built-in homepage name. For example, a page named Installation appears in the
+browser as **Installation | My documentation**.
+
+Do not add another root `title` or `metadata.title`. The optional
+`navbar.title` is separate text beside the navbar logo.
+
+## Common options
+
+```ts
+import { defineConfig } from '@lexibase/rdx-next'
+
+export default defineConfig({
+  description: 'Guides and reference for my project.',
+  metadata: {
+    applicationName: 'My documentation',
+    metadataBase: 'https://docs.example.com',
+  },
+  lang: 'en',
+  search: true,
+  TOC: true,
+  homepage: { enabled: false },
+  theme: { defaultTheme: 'system' },
+  navbar: {
+    title: '',
+    actions: {
+      github: {
+        visible: true,
+        url: 'https://github.com/example/project',
+      },
+      showToggleMode: true,
+    },
+  },
+})
+```
+
+| Option | Default | Purpose |
+| :----- | :------ | :------ |
+| `description` | Empty | Default site description |
+| `lang` | `en` | HTML document language |
+| `search` | `false` | Navbar search dialog |
+| `TOC` | `false` | Floating heading navigation |
+| `homepage.enabled` | `false` | Homepage instead of redirecting to docs |
+| `theme.defaultTheme` | `system` | `system`, `light`, or `dark` |
+| `plugins` | Empty array | Explicitly activated plugins |
+
+The creator includes the GitHub action with a `#` placeholder and the theme
+toggle enabled. Replace the placeholder with your own repository URL.
+
+`lang` sets the HTML language; it does not translate your documents or the fixed
+interface labels. Automatic interface localization is planned separately.
+
+## SEO and social previews
+
+```ts
+metadata: {
+  applicationName: 'My documentation',
+  metadataBase: 'https://docs.example.com',
+  authors: [{ name: 'Your team', url: 'https://example.com' }],
+  keywords: ['documentation', 'my-project'],
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon.png', sizes: '96x96', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/site.webmanifest',
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: 'website',
+    images: [{
+      url: '/social-preview.png',
+      width: 1200,
+      height: 630,
+      alt: 'My documentation',
+    }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: ['/social-preview.png'],
   },
 }
 ```
 
-- `system` - Automatically detects the user's system theme preference.
-- `dark` - Forces the documentation to always use dark mode.
-- `light` - Forces the documentation to always use light mode.
+This is the `metadata` portion of a `defineConfig` call, not a complete file.
+Add the referenced files to `public/`. RDX does not generate your images, icons,
+or web app manifest. `metadataBase` must be an absolute HTTP(S) URL and resolves
+relative social image URLs.
 
-## Navbar
----
+Supported fields include authors, keywords, icons, manifest, robots, OpenGraph,
+and Twitter metadata. This is a validated subset, not the entire Next.js Metadata
+API. Invalid or unknown configuration fields fail with an actionable error.
 
-You can customize your navbar with a few simple options:
+## Navbar and homepage
 
-```ts
-// rdx.config.ts
-{
-  // ...
-  navbar: {
-      title: '',
-      logo: Logo,
+Set `navbar.title: ''` for logo-only branding. `navbar.logo` accepts an imported
+React component that accepts `className`, not an image path. The shared navbar
+keeps its Docs link, enabled search, optional GitHub action, and theme toggle.
 
-      items: [
-        {
-          label: 'Docs',
-        },
-      ],
+See [Homepage](../cat-04/homepage.mdx) for a project-owned `home.tsx`.
 
-      actions: {
-        githubButton: true,
-        githubUrl: 'https://github.com/lexibase/rdx',
-        showToggleMode: true,
-      },
-    },
-}
-```
+## Plugins and configuration changes
 
-- `title` - Sets the name of your documentation shown next to the logo. Leave it blank to hide the title.
-- `logo` - Imports a `.tsx` component containing your logo.
-- `items[]` - Defines the navigation links in your navbar.
-  - `label` - The name of the link displayed in the navbar.
-  - `href` - The URL for the link (optional for `Docs`).
-- `actions` - Configures action buttons.
-  - `githubButton` - Enables/disables the GitHub button.
-  - `githubUrl` - Sets the URL the GitHub button points to.
-  - `showToggleMode` - Enables/disables the theme toggle (dark/light).
+Installing a package does not activate it. Use [Plugins](../cat-04/plugins.mdx)
+to install and configure the optional versioning feature.
+
+Live content always lives in `docs/`; there is no `docsDir` option.
+Do not edit files inside `.rdx/`. Restart development after changing configuration,
+and rebuild/redeploy for production.
 

@@ -40,6 +40,11 @@
         "RDX_THEME_SCREENSHOTS"
       ]
     },
+    "test:deployment": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "env": ["RDX_PUBLIC_TEST_URL"]
+    },
     "check-types": {
       "dependsOn": ["^check-types"]
     },

@@ -1,7 +1,7 @@
 ---
 title: Tabs
 description: Accessible tabs for related examples and documentation.
-link_position: 4
+link_position: 6
 ---
 
 ## Choose your package manager
@@ -16,17 +16,54 @@ Tabs are included in RDX without imports or plugins.
     <TabsTrigger value="yarn">yarn</TabsTrigger>
   </TabsList>
   <TabsContent value="npm">
+
+```bash
 npm install
+```
+
   </TabsContent>
   <TabsContent value="pnpm">
+
+```bash
 pnpm install
+```
+
   </TabsContent>
   <TabsContent value="yarn">
+
+```bash
 yarn install
+```
+
   </TabsContent>
 </Tabs>
 
-## Markdown and components
+## Write your own tabs
+
+```mdx
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Package manager">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+
+Run `pnpm install`.
+
+  </TabsContent>
+  <TabsContent value="npm">
+
+Run `npm install`.
+
+  </TabsContent>
+</Tabs>
+```
+
+Use matching, unique values for triggers and panels. Set `defaultValue` to an
+enabled tab and give the list an accessible label. The icon-only copy button
+copies the selected panel as plain text, without its tab label or button text.
+
+## Combine with Markdown
 
 Each group maintains its own selection. Panels support normal Markdown and RDX components.
 

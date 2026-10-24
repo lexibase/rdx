@@ -1,49 +1,62 @@
 ---
-title: Creating
-description: The docs feature lets you organize Markdown files into a structured, hierarchical format.
+title: Writing pages
+description: Add categories, order pages, and write your first document.
 link_position: 2
 ---
 
-## Create a Doc
----
+## Create a category
 
-To create a documentation page, add a `.mdx` file inside a folder within `(canary)`.  
-The folder acts as a category, adn the `.mdx` file becomes the actual page.
+Create `docs/guides/`, then add an optional `_category.json`:
 
+```json
+{
+  "title": "Guides",
+  "sidebar_position": 1
+}
 ```
-// apps/web/app/docs/ # root directory of your docs
-├── (canary)
-│   └── cat-01  // folder name can be anyting
-│   |   └── hello.mdx
-├── ...
-```
-```
+
+Without this file, RDX derives a label from the folder name. Keep one category
+per top-level folder; nested sidebar groups are not supported yet.
+
+## Create a page
+
+Add `docs/guides/first-page.mdx`:
+
+```mdx
 ---
-title: Hello
-description: Create a doc page with rich content.
+title: First page
+description: Everything you need to begin.
 link_position: 1
 ---
 
-# Hello World
+## Before you begin
 
-Are you ready to create the documentation for your project.
+Install the tools for your project.
 
+## Your first example
+
+Write a short, useful example.
 ```
 
-## Doc front matter
----
+The page title and description appear in the document header. Use `##` for the
+first section below that header. `link_position` sets the page order within its
+category. Lower positions come first; ties and pages without positions use slug
+ordering. The filename supplies the fallback title when one is not provided.
 
-Front matter is required and provides metadata for your doc page.  
+## Write for readers
 
-Each content plugin defines its own front matter schema, which helps enrich the default metadata inferred from the contet or other configuration.
+Use paragraphs, headings, lists, links, and code fences. The shared renderer
+handles their styling. Add [Callouts](./callouts.mdx), [Tabs](./tabs.mdx),
+or an [Accordion](./accordion.mdx) when the content benefits from them.
 
-Front matter must be placed at the very top of the file, wrapped in triple dashes `---`.   It's parsed using [YAML](https://yaml.org/spec/1.2.2/).
+Leave blank lines around Markdown inside JSX components. Use literal props such
+as `title="Note"` and `variant="tip"`. Arbitrary imports and JavaScript
+expressions are not an MDX authoring API in this release.
 
-```
----
-title: My Page Title
-description: Description for my Page
-link_position: Number indicating position within the category sidebar
----
-```
+## Preview and publish
+
+Save the file while `pnpm dev` is running. Use
+[relative document links](./document-links.mdx) to connect pages.
+Run a production build before deploying; missing relative document links fail
+compilation rather than silently sending readers to another version.
 

@@ -1,55 +1,87 @@
 ---
 title: Installation
-description: How to install RDX
+description: Create a documentation project and preview your first page.
 link_position: 1
 ---
 
 ## Requirements
----
 
-- [Node.js](https://nodejs.org/) version 18 or above (which can be checked by running `node -v`).
+Use a supported Node.js installation and one package manager: pnpm, npm, or Yarn.
+Node.js 22 or 24 is recommended for the currently tested development environments.
+The generated project declares Node.js 20.9 or newer.
 
-## Scaffold project website
----
+You do not need to create a Next.js project first.
 
-You can create project cloning the repository using `gh repo clone lexibase/rdx` or `git repo clone https://github.com/lexibase/rdx.git`.  
+## Create a project
 
+The currently published channel is **beta**:
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Create a project with your package manager">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+
+```bash
+pnpm create @lexibase/rdx@beta
 ```
-gh repo clone lexibase/rdx
-code rdx
-pnpm i
+
+  </TabsContent>
+  <TabsContent value="npm">
+
+```bash
+npm create @lexibase/rdx@beta
+```
+
+  </TabsContent>
+</Tabs>
+
+The prompt asks **What is your project named?** Enter a name such as `my-docs`.
+RDX creates that directory and installs its dependencies.
+
+<Callout variant="warning" title="Before the stable release">
+
+This website follows the development source. A published beta may not contain the
+latest configuration changes shown here. Use the matching package release and
+review its release notes. The stable `@latest` installation will be announced
+when it is published; it is not being published as part of this website deployment.
+
+</Callout>
+
+## Run locally
+
+```bash
+cd my-docs
 pnpm dev
 ```
 
-## Project Structure
----
+Open `http://localhost:3000/docs`. With npm, run `npm run dev` instead.
 
-Only the contents inside `apps/web` are relevant for configuring and assembling your project. Minimal setup is required for it to function properly:
+Edit `docs/init/intro.mdx` and save. Keep the development server running to
+preview content changes. Restart it after editing framework configuration.
 
-```folder
-my-documentation
-apps/
-├── web
-│   ├── app
-│   │   ├── docs
-|   |   |   ├── (archived)
-|   |   |   ├── (canary)
-|   |   |   ├── (versioned)
-│   ├── rdx.config.ts
-└── └── versions.json
+## Optional CLI arguments
+
+Provide the directory name directly to skip the name prompt:
+
+```bash
+pnpm create @lexibase/rdx@beta my-docs
 ```
 
-## Project structure rundown
----
+Inspect the creator without generating a project:
 
-- `(archived)` - This is where you store archived versions - those that are no longer supported. See [archived config](/docs/canary/docs) for more details.
-- `(canary)` - This section of the documentation is still under development and this not the main version. See [canary config](/docs/canary/docs) for more details.
-- `(versioned)` - This is where you manage versioning for your documentation. The latest released version (the one with the highest number) is always considered the `current` version. See [versioned config](/docs/canary/docs) for more details. 
+```bash
+pnpm dlx @lexibase/create-rdx@beta --help
+pnpm dlx @lexibase/create-rdx@beta --version
+```
 
-## Running the development server
----
+Use `--skip-install` to generate files without installing dependencies, then
+install them yourself inside the new directory. An existing directory is not overwritten.
 
-Too see changes made to your `.mdx` files, you`ll need to either navigate to a different page or manually reload the current one, due to the server-side nature of how MDX content is loaded.
+## Next steps
 
-Congratulations! You have created your first RDX Documentation!
+Explore the [project structure](../cat-03/docs.mdx), write your
+[first page](../cat-03/create-docs.mdx), and set your
+[application name and metadata](./config.mdx).
 

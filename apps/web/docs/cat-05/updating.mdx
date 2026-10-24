@@ -1,0 +1,54 @@
+---
+title: Updating RDX
+description: Update runtime packages without regenerating your documentation.
+link_position: 3
+---
+
+## The creator is not an updater
+
+`create-rdx` creates new projects. Do not rerun it over an existing documentation
+directory to update your framework.
+
+Your documentation, configuration, and public files remain yours. Update the
+installed runtime and shared UI packages through your package manager.
+
+## Choose a compatible release
+
+Read release notes and use the matching release channel. For a beta project:
+
+```bash
+pnpm add @lexibase/rdx-next@beta @lexibase/rdx-ui@beta
+```
+
+If versioning is installed, update its package to a compatible release as well.
+Package versions do not need identical beta numbers; follow the release's
+compatibility guidance rather than guessing.
+
+After the first stable release, `latest` will be the stable channel. Do not
+assume that a tag already contains unreleased Canary changes.
+
+## Migrate configuration
+
+The current first-release contract uses `metadata.applicationName` as the site
+name. Earlier beta configurations may need these changes:
+
+- Move root `title` into `metadata.applicationName`.
+- Remove `docsDir` and keep live documentation in `docs/`.
+- Use `RDXConfig` for the public type if you import it explicitly.
+
+Review other changes against the release notes before updating.
+The [configuration reference](../cat-02/config.mdx) describes the current contract.
+
+## Validate and deploy
+
+Stop the development server, install the selected versions, and review package
+and lockfile changes. Then run:
+
+```bash
+pnpm build
+pnpm start
+```
+
+Check representative documents, relative links, components, assets, search, and
+snapshots before redeploying. Configuration remains in your project; generated
+runtime files are refreshed by RDX.

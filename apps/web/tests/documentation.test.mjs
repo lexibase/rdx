@@ -15,7 +15,6 @@ import { compileDocument } from '../lib/compile-documentation.ts'
 import config from '../rdx.config.ts'
 import { runProjectCommand } from '../lib/project-command.ts'
 
-const versions = { active: ['2.1.1', '2.1.0'], archived: ['2.0.0'] }
 const root = fileURLToPath(new URL('../', import.meta.url))
 
 test('showcase commands use configured versioning, preserve snapshots and refuse invalid state', async () => {
@@ -132,20 +131,15 @@ test('showcase compilation preserves relative links, missing-document handling a
   }
 })
 
-test('public core and configured plugin read Canary, active and archived editions without changing historical URLs', async () => {
+test('the first-release website exposes only Canary and no demonstration releases', async () => {
   const docs = createDocumentation(
     await createRdxProject(config, { rootDir: root })
   )
   assert.deepEqual(
     docs.editions.map(({ id, kind }) => ({ id, kind })),
-    [
-      { id: 'canary', kind: 'live' },
-      { id: '2.1.1', kind: 'version' },
-      { id: '2.1.0', kind: 'version' },
-      { id: '2.0.0', kind: 'archived' },
-    ]
+    [{ id: 'canary', kind: 'live' }]
   )
-  for (const version of ['canary', ...versions.active, ...versions.archived]) {
+  for (const version of ['canary']) {
     const pages = docs.pages(version)
     assert.ok(pages.length > 0, version)
     assert.ok(docs.document(version, 'intro'), version)
@@ -162,6 +156,9 @@ test('public core and configured plugin read Canary, active and archived edition
     for (const page of pages) assert.ok(docs.document(version, page.slug))
   }
   assert.deepEqual(docs.index('../canary'), [])
+  for (const retired of ['2.1.1', '2.1.0', '2.0.0']) {
+    assert.equal(docs.document(retired, 'intro'), null)
+  }
   assert.equal(docs.document('unknown', 'intro'), null)
   assert.equal(docs.document('canary', '../intro'), null)
   assert.equal(docs.document('canary', 'invented/path/intro'), null)
