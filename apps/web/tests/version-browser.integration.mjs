@@ -58,7 +58,7 @@ async function server(mode) {
 }
 
 test(
-  'showcase keeps hydration, stored versions, URL priority and history consistent',
+  'first-release website keeps hydration, Canary navigation, search and shared components consistent',
   {
     skip:
       !process.env.RDX_PLAYWRIGHT_MODULE &&
@@ -126,91 +126,27 @@ test(
           await page
             .getByRole('button', { name: 'Documentation version: Canary' })
             .waitFor()
-          await page.goto(`${running.base}/docs/2.1.1/intro`)
-          await page
-            .getByRole('button', {
-              name: 'Documentation version: Version 2.1.1',
-            })
-            .waitFor()
-          await page.waitForFunction(
-            () => localStorage.getItem('rdx-version') === '2.1.1'
+          // A retired browser preference must not resurrect removed demo editions.
+          await page.evaluate(() =>
+            localStorage.setItem('rdx-version', '2.1.1')
           )
+          await page.reload()
+          await page
+            .getByRole('button', { name: 'Documentation version: Canary' })
+            .click()
           assert.equal(
-            await page.locator('[data-rdx-version-notice]').count(),
+            await page.getByRole('menuitem', { name: /^Version / }).count(),
             0
           )
-          await page
-            .getByRole('button', {
-              name: 'Documentation version: Version 2.1.1',
-            })
-            .click()
-          await page
-            .getByRole('menuitem', { name: 'Version 2.1.0', exact: true })
-            .click()
-          await page.waitForURL('**/docs/2.1.0/intro')
-          await page
-            .getByRole('button', {
-              name: 'Documentation version: Version 2.1.0',
-            })
-            .waitFor()
-          await page.waitForFunction(
-            () => localStorage.getItem('rdx-version') === '2.1.0'
-          )
-          const notice = page.locator('[data-rdx-version-notice="outdated"]')
-          await notice.waitFor()
-          assert.match(
-            await notice.innerText(),
-            /This is an outdated version of the documentation\./
-          )
-          assert.equal(
-            await notice.getByRole('link').getAttribute('href'),
-            '/docs/2.1.1'
-          )
-          await page.goBack()
-          await page.waitForURL('**/docs/2.1.1/intro')
-          await page
-            .getByRole('button', {
-              name: 'Documentation version: Version 2.1.1',
-            })
-            .waitFor()
-          await page.waitForFunction(
-            () => localStorage.getItem('rdx-version') === '2.1.1'
-          )
-          await page.goto(running.base)
-          await page
-            .getByRole('button', {
-              name: 'Documentation version: Version 2.1.1',
-            })
-            .waitFor()
-          assert.deepEqual(errors, [], `${mode}: hydration and navigation`)
-          await page
-            .getByRole('button', {
-              name: 'Documentation version: Version 2.1.1',
-            })
-            .click()
-          await page.getByText('Archived', { exact: true }).waitFor()
-          await page
-            .getByRole('menuitem', { name: 'Version 2.0.0', exact: true })
-            .click()
-          await page.waitForURL('**/docs/2.0.0/intro')
-          await page
-            .getByRole('button', {
-              name: 'Documentation version: Version 2.0.0',
-            })
-            .waitFor()
-          await page.locator('[data-rdx-version-notice="outdated"]').waitFor()
-          const archivedIndex = page.waitForResponse(
+          await page.keyboard.press('Escape')
+          const liveIndex = page.waitForResponse(
             (response) =>
-              new URL(response.url()).pathname === '/rdx-search/2.0.0'
+              new URL(response.url()).pathname === '/rdx-search/canary'
           )
           await page
             .getByRole('button', { name: 'Search documentation', exact: true })
             .click()
-          assert.equal(
-            (await archivedIndex).status(),
-            200,
-            `${mode}: archived search\n${running.logs()}`
-          )
+          assert.equal((await liveIndex).status(), 200, running.logs())
           await page
             .getByRole('dialog', { name: 'Search documentation' })
             .waitFor()
@@ -218,9 +154,10 @@ test(
           await page.goto(`${running.base}/docs/canary/mdx-components`)
           await page.getByRole('note', { name: 'Before updating' }).waitFor()
           assert.equal(await page.locator('main [data-rdx-callout]').count(), 6)
-          await page
-            .getByRole('note', { name: 'Pre-release documentation' })
-            .waitFor()
+          assert.equal(
+            await page.locator('[data-rdx-version-notice]').count(),
+            0
+          )
           await page.getByRole('table').first().waitFor()
           await context.grantPermissions(
             ['clipboard-read', 'clipboard-write'],
@@ -267,10 +204,10 @@ test(
           blockedPage.on('pageerror', (error) =>
             blockedErrors.push(error.message)
           )
-          await blockedPage.goto(`${running.base}/docs/2.1.1/intro`)
+          await blockedPage.goto(`${running.base}/docs/canary/intro`)
           await blockedPage
             .getByRole('button', {
-              name: 'Documentation version: Version 2.1.1',
+              name: 'Documentation version: Canary',
             })
             .waitFor()
           assert.deepEqual(blockedErrors, [], `${mode}: blocked storage`)

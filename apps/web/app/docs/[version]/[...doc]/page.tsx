@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { mdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
 import { notFound, redirect } from 'next/navigation'
@@ -8,6 +9,24 @@ import { DocHeader } from '@/components/Page/doc-header'
 import { DocFooter } from '@/components/Page/doc-footer'
 import { compileDocument } from '@/lib/compile-documentation'
 import { getDocumentation } from '@/lib/docs'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ version: string; doc: string[] }>
+}): Promise<Metadata> {
+  const { version, doc } = await params
+  const documentation = await getDocumentation()
+  const document = documentation.document(version, doc.join('/'))
+  if (!document) notFound()
+  const page = documentation
+    .pages(version)
+    .find((entry) => entry.sourcePath === document.sourcePath)!
+  return {
+    title: page.title,
+    description: page.description || config.description,
+  }
+}
 
 export default async function DocPage({
   params,

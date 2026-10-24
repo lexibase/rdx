@@ -1,7 +1,7 @@
 ---
 title: Accordion
 description: Optional explanations, without crowding your documentation.
-link_position: 5
+link_position: 7
 ---
 
 ## Frequently asked questions
@@ -39,7 +39,26 @@ Keep the server running while editing your documentation.
   </AccordionItem>
 </Accordion>
 
-## Production checklist
+## Write an Accordion
+
+```mdx
+<Accordion>
+  <AccordionItem value="preview">
+    <AccordionTrigger>How do I preview my docs?</AccordionTrigger>
+    <AccordionContent>
+
+Run `pnpm dev` from your documentation project root.
+
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+No import or plugin is required. Use unique item values. One item opens at a time
+by default; add the literal boolean attribute `multiple` to allow several open
+items. Keep essential steps visible rather than hiding the whole guide in panels.
+
+## Production example
 
 Opening an answer closes the previous one in the same group.
 

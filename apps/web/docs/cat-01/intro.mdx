@@ -1,21 +1,56 @@
 ---
 title: Introduction
-description: RDX streamlines the process of building documentation with clarity and efficiency
+description: Simple documentation, built on Next.js, Tailwind CSS, and shadcn/ui.
 link_position: 1
 ---
 
-RDX is a documentation system designed to help you build fast, versioned, and visually consistent documentation with zero friction.  
+RDX turns folders and `.mdx` files into a documentation website. Write your content,
+choose the features you need, and keep the framework's internal application out of your way.
 
-It was created to simplify the process of writing and organizing docs - whether you're documenting components, APIs, internal tools, or entire platforms.  
-The system is caffolded via CLI and comes pre-configured with everything you need to start writing immediately.
+## The idea
 
-Built on top of **Next.js**, **TailwindCss**, and **Shadcn/ui**, RDX delivers a modern developer experience with clean styling, responsive layout, and full React support.
+- A folder inside `docs/` becomes a sidebar category.
+- An `.mdx` file becomes a page.
+- `rdx.config.ts` controls branding, metadata, navigation, and optional features.
+- `.rdx/` contains the generated Next.js application. You do not maintain it.
 
-## Features
----
+The foundation is **Next.js + Tailwind CSS + shadcn/ui**, using the **Base UI**
+variant. RDX adds the documentation layer: content indexing, Markdown integration,
+search, heading navigation, and optional version snapshots.
 
-- Write documentation using `.mdx` with embedded React components
-- Automatic sidebar generation based on category structure
-- Built-in support for canary and versioned documentation
-- Clean, responsive UI powered by TailwindCSS and Shadcn components
+## What is included?
+
+| Feature | How to use it |
+| :------ | :------------ |
+| File-based pages and categories | Add folders and MDX files |
+| Markdown, tables, and highlighted code | Write standard Markdown |
+| Callouts, Tabs, and Accordion | Use the built-in MDX components |
+| Navbar, sidebar, theme, and page navigation | Included in the shared layout |
+| Local search | Enable `search: true` |
+| Floating table of contents | Enable `TOC: true` |
+| Optional homepage | Enable `homepage.enabled` |
+| Versioned documentation | Install and activate the versioning plugin |
+
+## Start here
+
+Follow [Installation](../cat-02/installation.mdx), then
+[create your first page](../cat-03/create-docs.mdx).
+The [configuration reference](../cat-02/config.mdx) explains the options without
+requiring you to edit generated Next.js files.
+
+<Callout title="First-release documentation">
+
+This is the Canary documentation for the upcoming first stable release. Some
+examples describe changes that have not reached the published beta packages yet.
+We have removed the old demonstration versions; no stable release is implied by
+this website being online.
+
+</Callout>
+
+## Keep it simple
+
+Use ordinary Markdown for ordinary content. Add a component when it helps the
+reader, not to fill the page. Features such as nested sidebar categories, a custom
+Markdown shorthand, and automatic translation of interface labels are future work,
+not requirements for writing documentation today.
 

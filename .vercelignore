@@ -1,0 +1,16 @@
+node_modules/
+**/node_modules/
+.git/
+.next/
+**/.next/
+.turbo/
+**/.turbo/
+.rdx-package-smoke/
+.rdx-theme-preview/
+.runtime-test-*/
+**/.runtime-test-*/
+.env*
+**/.env*
+.agents/
+.codex/
+coverage/

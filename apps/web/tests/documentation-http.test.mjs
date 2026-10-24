@@ -11,7 +11,7 @@ const require = createRequire(import.meta.url)
 const versions = require('../versions.json')
 
 test(
-  'showcase serves historical URLs, shared MDX and version-scoped search through the public core',
+  'first-release website serves documentation, shared MDX and search without retired editions',
   { timeout: 120_000 },
   async () => {
     const docs = await getDocumentation()
@@ -26,7 +26,9 @@ test(
         ]) {
           const response = await fetch(`${base}/docs/${version}/intro`)
           assert.equal(response.status, 200, version)
-          assert.match(await response.text(), /data-rdx-sidebar/)
+          const introHtml = await response.text()
+          assert.match(introHtml, /data-rdx-sidebar/)
+          assert.match(introHtml, /Introduction \| RDX/)
           const search = await fetch(`${base}/rdx-search/${version}`)
           assert.equal(search.status, 200, version)
           const index = await search.json()
@@ -56,6 +58,12 @@ test(
           '/docs/canary/invented/intro',
           '/docs/canary/not-a-page',
           '/rdx-search/unknown',
+          '/docs/2.1.1/intro',
+          '/docs/2.1.0/intro',
+          '/docs/2.0.0/intro',
+          '/rdx-search/2.1.1',
+          '/rdx-search/2.1.0',
+          '/rdx-search/2.0.0',
         ]) {
           assert.equal((await fetch(`${base}${route}`)).status, 404, route)
         }

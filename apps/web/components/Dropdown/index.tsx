@@ -5,8 +5,6 @@ import { VersionDropdown } from '@lexibase/rdx-ui/components/version-dropdown'
 import { useVersion } from '@/hooks/use-version'
 import { useVersionNavigation } from '@/hooks/use-version-navigation'
 
-import { ExternalLink } from './external-link'
-
 export function DropdownVersion() {
   const { version, editions } = useVersion()
   const navigateToVersion = useVersionNavigation()
@@ -15,7 +13,6 @@ export function DropdownVersion() {
       options={editions}
       currentId={version}
       onSelect={navigateToVersion}
-      footer={<ExternalLink />}
     />
   )
 }

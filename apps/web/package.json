@@ -14,6 +14,7 @@
     "check-types": "next typegen && tsc --noEmit",
     "test": "node --import tsx --test tests/documentation*.test.mjs",
     "test:runtime": "node --test tests/version-browser.integration.mjs",
+    "test:deployment": "node --import tsx --test tests/deployment.integration.mjs",
     "docs:prepare": "tsx scripts/project.ts prepare",
     "docs:version": "tsx scripts/project.ts version"
   },

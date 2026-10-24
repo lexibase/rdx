@@ -1,97 +1,126 @@
-# RDX: site oficial e ambiente de desenvolvimento
+# RDX documentation and development website
 
-O site apresenta a evolução em Canary e mantém a documentação publicada e
-arquivada. Os componentes compartilhados ficam em `packages/rdx-ui`; o motor de
-conteúdo fica em `packages/rdx-core`. Uma melhoria destinada aos usuários deve
-chegar aos pacotes, não existir somente nos componentes locais do site.
+`apps/web` is the official RDX website and the local development application.
+It uses the current packages through `workspace:*`. Shared improvements belong
+in the packages so CLI-generated projects receive them too.
 
-## Conteúdo, configuração e versões
+## Content and editions
 
-O site usa `RDXConfig`, `createRdxProject`, o core e o plugin público de
-versionamento por vínculos locais `workspace:*`, assim como os projetos gerados.
-`lib/documentation.ts` mantém apenas as URLs históricas do site; não reimplementa
-o indexador, a leitura do manifest ou a criação de snapshots.
+- Live documentation: `docs/`, exposed as the **Canary** edition.
+- Released snapshots: `versioned_docs/version-<version>/`, once a real release exists.
+- `versions.json`: active and archived snapshot labels. Both arrays start empty;
+  the old 2.x demonstration releases and unrelated external version link are removed.
+- Metadata and features: `rdx.config.ts`, using the public `RDXConfig` contract.
+- Public files: `public/`. Metadata paths refer to existing files here.
 
-- Canary: `docs/` (a fonte `current` do motor recebe o nome Canary no site).
-- Publicadas e arquivadas: `versioned_docs/version-<versão>/`.
-- `versions.json`: a ordem de `active` determina a versão publicada atual;
-  `archived` identifica os snapshots arquivados sem mover seus arquivos.
-- Links antigos como `/docs/canary/intro` continuam funcionando.
-- Arquivos com nomes repetidos usam o caminho completo da categoria, sem escolher
-  arbitrariamente qual documento abrir.
-- Links relativos MDX e busca usam as mesmas rotas da sidebar.
+The website retains `/docs/canary/<filename>` URLs for unique filenames.
+Repeated filenames use full category paths. Relative MDX links and search use
+the same adapter as the sidebar. Generated projects use full paths such as
+`/docs/init/intro` without the website's Canary prefix.
 
-Os arquivos das antigas pastas `(canary)`, `(versioned)` e `(archived)` foram
-movidos sem alterar seu conteúdo. Os pacotes privados de core e versionamento
-redundantes foram removidos. Os componentes e estilos aprovados continuam os mesmos.
+Create the first documentation snapshot **when the actual release is ready**:
 
-`rdx.config.ts` é validado pelo contrato atual e ativa `versioning()` em `plugins`.
-Site SEO is configured in `metadata` inside `defineConfig`, using the same
-validated public contract and Next.js metadata adapter as CLI-generated projects.
-There is no separate `siteMetadata` export. Set `metadata.metadataBase` to the
-public deployment URL and keep referenced icons and share images in `public/`.
-Os componentes de navegador recebem somente opções serializáveis do servidor;
-não importam o plugin nem código de sistema de arquivos.
-
-Para criar uma versão do site, na raiz do monorepo:
-
-```powershell
-pnpm --filter web docs:version 3.0.0
+```sh
+pnpm --filter web docs:version 1.0.0
 ```
 
-O comando usa a implementação registrada pelo próprio plugin e não sobrescreve
-snapshots existentes. Ele copia `docs/` e atualiza `versions.json`; não publicar nem
-criar uma versão automaticamente a cada commit. Para arquivar uma versão, mova
-somente seu identificador de `active` para `archived` no manifest. Não existe um
-comando de arquivamento nesta etapa.
+This copies live docs and updates the manifest through the configured plugin.
+Do not run it on every commit/build. Archiving moves a label from `active` to
+`archived`, keeping its directory; it does not delete content.
 
-O site continua uma aplicação Next nativa para desenvolvimento; não gera uma
-segunda aplicação `.rdx/` dentro de si. `docs:prepare` valida o projeto com o plugin,
-sem reconstruir o manifest a partir de nomes de pastas. Não há hook `prepare` na
-instalação que exija pacotes compilados antes do primeiro build do monorepo.
+## Local development
 
-O `next.config.js` usa `getRdxTracingConfig` do adaptador compartilhado. Ele inclui
-explicitamente os documentos e `_category.json` de cada fonte configurada, além
-dos arquivos de runtime declarados pelos plugins (como o manifest de versões).
-As leituras dinâmicas do core não rastreiam mais a árvore inteira do projeto.
-Há testes dos arquivos efetivamente listados para o deploy e das páginas em
-produção. Isso não substitui a validação de uma hospedagem pública.
+From the monorepo root:
 
-## Validação
+```sh
+pnpm install
+pnpm dev
+```
 
-Na raiz do monorepo, `pnpm check` inclui testes do site com o core público e um
-servidor de produção em porta temporária. Eles verificam todas as páginas das
-edições existentes, busca isolada por versão, componentes MDX e respostas 404.
-Não ocupam nem encerram o servidor de desenvolvimento da porta 3000.
+The coordinator builds and watches local core/types/runtime/versioning.
+The UI is consumed directly from `packages/rdx-ui/src` with Fast Refresh.
+No npm publication is necessary. One Ctrl+C stops only this run's processes in
+the original terminal, including on Windows, without opening another window.
+Set `PORT` to use a port other than 3000.
 
-## Desenvolvimento local
+Advanced shortcuts such as `pnpm --filter web dev` do not start the full
+coordinator and all watchers. This native Next.js app uses `.next/`, not a
+redundant generated `.rdx/` app. `docs:prepare` validates sources and does not
+reconstruct the manifest from directory names.
 
-Na raiz, basta executar `pnpm dev`. O coordenador local em Node prepara os builds
-das dependências pelo Turbo e inicia os processos contínuos diretamente, sem
-camadas de `pnpm.CMD` para cada observador no Windows:
+## Validation
 
-- Core, runtime Next e plugin de versões recompilam os arquivos locais de `src/`
-  para `dist/` quando são alterados.
-- Tipos sincronizam alterações, adições e remoções de declarações.
-- A UI já é consumida diretamente de `packages/rdx-ui/src` pelo Next, sem build
-  intermediário; estilos e componentes continuam com Fast Refresh.
+```sh
+pnpm check
+pnpm test:release --install
+```
 
-Não é necessário publicar no npm para testar. Os vínculos continuam sendo
-`workspace:*`. O modo de observação não limpa `dist/` a cada alteração.
+Website tests inspect deployment traces and run a production HTTP server on a
+temporary port. They check all current pages, search, MDX, and retired-version
+404s. Synthetic fixtures continue covering snapshots and archived editions.
 
-Use um único `Ctrl+C` para encerrar o servidor e seus observadores. No terminal
-interativo, o coordenador captura essa tecla antes que ela seja propagada aos
-arquivos batch do gerenciador e restaura o modo original do terminal ao terminar.
-No Windows, os processos compartilham a sessão do terminal original, inclusive
-os workers internos do Next, sem abrir uma janela separada de `next-server`.
-Somente as árvores de processos iniciadas por essa execução são encerradas; não
-há comandos que matem todos os processos Node. Cancelamento intencional retorna
-sucesso, mas uma falha real de build ou processo mantém saída diferente de zero.
+The optional browser suite uses `RDX_PLAYWRIGHT_MODULE` and
+`RDX_BROWSER_EXECUTABLE`:
 
-`pnpm --filter web dev` e `pnpm exec turbo run dev --filter=web` continuam sendo
-atalhos avançados, mas não passam pelo coordenador e não oferecem esse tratamento
-de encerramento. O primeiro também não inicia os observadores dos pacotes. Para
-o fluxo completo e o encerramento coordenado, prefira `pnpm dev` na raiz.
+```sh
+pnpm --filter web test:runtime
+```
 
-A porta padrão continua sendo 3000. É possível definir `PORT` no ambiente para
-usar outra porta, sem encerrar um servidor de desenvolvimento existente.
+It checks TOC, clipboard, hydration, search, stale version preferences, and
+blocked browser storage. Framework tests cover multi-edition behavior separately.
+
+To check an already deployed website from PowerShell:
+
+```powershell
+$env:RDX_PUBLIC_TEST_URL = 'https://rdx-tool.vercel.app'
+pnpm --filter web test:deployment
+```
+
+This opt-in check makes real HTTPS requests to every current page, verifies page
+metadata, public assets, search scoping, and retired-version 404s. Normal local
+checks do not depend on a live Vercel deployment.
+
+## Vercel deployment
+
+The dedicated project is **rdx-tool** in **duh-nunes**, separate from the
+disposable `rdx-deploy-test` project.
+
+Project settings:
+
+- Framework: Next.js.
+- Root Directory: `apps/web`.
+- Include source files outside Root Directory: enabled.
+- Node.js: 24.x.
+- Install Command: `pnpm install --frozen-lockfile`.
+- Build Command: `cd ../.. && pnpm exec turbo run build --filter=web`.
+- Output Directory: Next.js default (`.next` relative to `apps/web`).
+
+Build/install settings live in `apps/web/vercel.json`; Root Directory and the
+outside-source setting belong to the Vercel project, not JSON configuration keys.
+Run the CLI from the **monorepo root** so workspace packages and the lockfile are
+uploaded. `.vercelignore` excludes dependencies, builds, environment files,
+and release smoke artifacts.
+
+If Vercel blocks a deployment because its commit author has no access, connect
+the author's GitHub account in Vercel Login Connections and verify commit email
+attribution. An authenticated CLI session alone does not grant a Git author
+access. Do not rewrite published history or remove Git metadata to bypass that
+check. See Vercel's [collaboration troubleshooting](https://vercel.com/docs/deployments/troubleshoot-project-collaboration).
+
+```sh
+pnpm dlx vercel@latest link --project rdx-tool --scope duh-nunes
+pnpm dlx vercel@latest deploy --scope duh-nunes
+# After validating the preview:
+pnpm dlx vercel@latest promote <deployment-url> --scope duh-nunes
+```
+
+The first deployment of a new project may automatically target production.
+The CLI link is local and ignored by Git. CLI deployment does not itself connect
+GitHub for automatic builds from pushes. Never commit tokens or generated
+`.env.local` files.
+
+`metadata.metadataBase` uses `NEXT_PUBLIC_SITE_URL` when supplied and otherwise
+`https://rdx-tool.vercel.app`. Update it if the domain changes.
+The tracing adapter includes exact MDX, category, and plugin runtime files
+without including unrelated source. Check deployed documents, search, public
+assets, and 404s before considering a deployment complete.

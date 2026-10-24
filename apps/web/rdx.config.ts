@@ -16,13 +16,10 @@ const config = {
       'duhnunes',
       'RDX',
       'documentation',
-      'documento',
-      'padrão',
-      'pt-br',
-      'ptbr',
       'nextjs',
+      'tailwindcss',
+      'shadcn',
       'mdx',
-      'rdx',
     ],
     icons: {
       // Browser tab icons; each entry can specify its size and MIME type.
@@ -42,19 +39,19 @@ const config = {
       images: [
         {
           url: '/icons/favicon-96x96.png',
-          width: 1200,
-          height: 630,
-          alt: 'RDX Open Graph Image TEMPORARY',
+          width: 96,
+          height: 96,
+          alt: 'RDX logo',
         },
       ],
     },
     twitter: {
-      card: 'summary_large_image',
+      card: 'summary',
       images: ['/icons/favicon-96x96.png'],
     },
   },
   // HTML document language; this does not translate your documentation.
-  lang: 'pt-BR',
+  lang: 'en',
   // When disabled, '/' redirects to '/docs'. A custom component can be provided.
   homepage: { enabled: true },
   // Installed plugins only become active when registered here.
@@ -64,7 +61,7 @@ const config = {
   // Local documentation search in the navbar; no external search service needed.
   search: true,
   description:
-    'A tool for building documentation with MDX in a friendly and focused way — fast, easy, and built for clarity',
+    'Simple documentation built on Next.js, Tailwind CSS, and shadcn/ui. Write MDX, add folders, and publish your docs.',
 
   theme: {
     defaultTheme: 'system',

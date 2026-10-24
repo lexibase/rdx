@@ -1,0 +1,68 @@
+---
+title: Build and deployment
+description: Validate production locally, then deploy the complete documentation project.
+link_position: 2
+---
+
+## Build locally
+
+From the directory containing `package.json` and `rdx.config.ts`:
+
+```bash
+pnpm build
+pnpm start
+```
+
+With npm, use `npm run build` and `npm run start`. The generated scripts call
+`rdx build` and `rdx start`; they run Next.js against the internal `.rdx/` app.
+
+Do not deploy the development server. Test your pages, assets, navigation,
+search, and a nonexistent URL before making a deployment public.
+
+## Keep the source
+
+Your build environment needs `docs/`, `public/`, `rdx.config.ts`, the package
+manifest and lockfile, and any imported React components. With versioning,
+include `versions.json` and `versioned_docs/` too.
+
+Do not upload only `.rdx/.next`. Do not commit generated `.rdx/` files or copy
+Windows dependencies into a Linux build environment. Install and build on the host.
+
+## Vercel
+
+For a standalone CLI-generated project, use its project root as the Vercel Root
+Directory. Select the Next.js framework preset, set the Build Command to
+`pnpm build`, and set the Output Directory to `.rdx/.next`.
+Use your package manager's corresponding installation command.
+
+The framework traces configured documentation and plugin runtime files into the
+server build. Keep your source content available during the build; do not create
+snapshots inside a serverless request.
+
+The official website is different: it is the monorepo's native Next.js
+application in `apps/web`, consumes local workspace packages, and outputs
+`apps/web/.next`. Its deployment settings are documented in the
+[website README](https://github.com/lexibase/rdx/blob/main/apps/web/README.md).
+
+<Callout title="Verify the deployment, not only the build">
+
+After deploying, open a document URL directly, test search and assets, refresh a
+nested page, and check that a missing page returns 404. A successful local build
+alone does not prove that a host included the runtime content files.
+
+</Callout>
+
+## Node.js hosting
+
+On a Node.js server, install dependencies, run the build, and start the generated
+project with `pnpm start`. Configure HTTPS, a process supervisor, and the host's
+network settings. Keep the complete project available to the runtime.
+
+Static export, reduced standalone images, and read-only filesystem deployments
+are not covered by this release's baseline recipe.
+
+## Updates
+
+Content, configuration, component, and version changes require a new build and
+deployment. Search indexes are built from the documentation at build time.
+Set `metadata.metadataBase` to your final public URL for social previews.
