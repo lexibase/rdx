@@ -48,7 +48,7 @@ export function Navbar({
           {title !== '' && <span>{title}</span>}
         </ButtonLink>
       </div>
-      <div className="flex items-center md:gap-x-2 h-4">
+      <div className="flex items-center gap-x-1 md:gap-x-2 h-4">
         {search}
         {versionMenu}
         {docsLink ?? (

@@ -86,20 +86,20 @@ export function VersionDropdown({
             data-rdx-version-trigger
             variant="outline"
             size="sm"
-            className="min-w-[134px] capitalize"
+            className="min-w-0 capitalize sm:min-w-[134px]"
             aria-label={`Documentation version: ${current.label}`}
           />
         }
       >
         {current.label}
         <DropdownMenuShortcut
-          className={
+          className={`ml-0 sm:ml-auto ${
             current.kind === 'live'
               ? 'text-blue-500'
               : current.kind === 'archived'
                 ? 'text-red-500'
                 : 'text-primary'
-          }
+          }`}
         >
           <VersionIcon kind={current.kind} />
         </DropdownMenuShortcut>

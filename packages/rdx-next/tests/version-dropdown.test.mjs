@@ -55,3 +55,15 @@ for (const [kinds, footer, expected] of [
 test('an empty version list renders no dropdown', () => {
   assert.equal(VersionDropdown({ options: [], currentId: 'current' }), null)
 })
+
+test('version trigger uses content width on mobile and preserves desktop spacing', () => {
+  const tree = VersionDropdown({ options: [option('live')], currentId: 'live' })
+  const trigger = Children.toArray(tree.props.children)[0]
+  const button = trigger.props.render
+  assert.match(button.props.className, /(?:^| )min-w-0(?: |$)/)
+  assert.match(button.props.className, /sm:min-w-\[134px\]/)
+  const icon = Children.toArray(trigger.props.children)[1]
+  assert.match(icon.props.className, /(?:^| )ml-0(?: |$)/)
+  assert.match(icon.props.className, /sm:ml-auto/)
+  assert.equal(button.props['aria-label'], 'Documentation version: live')
+})

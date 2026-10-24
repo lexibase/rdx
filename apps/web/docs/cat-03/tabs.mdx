@@ -11,30 +11,18 @@ Tabs are included in RDX without imports or plugins.
 
 <Tabs defaultValue="pnpm">
   <TabsList aria-label="Package manager">
-    <TabsTrigger value="npm">npm</TabsTrigger>
     <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
     <TabsTrigger value="yarn">yarn</TabsTrigger>
   </TabsList>
   <TabsContent value="npm">
-
-```bash
 npm install
-```
-
   </TabsContent>
   <TabsContent value="pnpm">
-
-```bash
 pnpm install
-```
-
   </TabsContent>
   <TabsContent value="yarn">
-
-```bash
 yarn install
-```
-
   </TabsContent>
 </Tabs>
 
@@ -45,16 +33,16 @@ yarn install
   <TabsList aria-label="Package manager">
     <TabsTrigger value="pnpm">pnpm</TabsTrigger>
     <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
   </TabsList>
-  <TabsContent value="pnpm">
-
-Run `pnpm install`.
-
-  </TabsContent>
   <TabsContent value="npm">
-
-Run `npm install`.
-
+npm install
+  </TabsContent>
+  <TabsContent value="pnpm">
+pnpm install
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn install
   </TabsContent>
 </Tabs>
 ```
