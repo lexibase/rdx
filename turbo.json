@@ -37,6 +37,7 @@
       "env": [
         "RDX_PLAYWRIGHT_MODULE",
         "RDX_BROWSER_EXECUTABLE",
+        "RDX_EXISTING_DEV_URL",
         "RDX_THEME_SCREENSHOTS"
       ]
     },
