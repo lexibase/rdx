@@ -58,6 +58,12 @@ test('prepare loads typed config with defineConfig without loading a Next server
     process.platform === 'win32' ? 'junction' : 'dir'
   )
   t.after(() => rm(adapterLink, { force: true }))
+  // The configuration resolves package metadata without loading a Next server.
+  await mkdir(path.join(rootDir, 'node_modules/next'), { recursive: true })
+  await writeFile(
+    path.join(rootDir, 'node_modules/next/package.json'),
+    '{"name":"next","version":"16.4.3"}'
+  )
   const nextConfig = (
     await import(pathToFileURL(path.join(rootDir, '.rdx/next.config.mjs')).href)
   ).default

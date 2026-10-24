@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Resolve the generated application's build root from the real Next.js installation
+  so pnpm workspace projects can compile dependencies stored above `apps/web`.
+- Use the same root for Turbopack and dependency tracing while retaining explicit
+  documentation content includes.
+
 ## 1.1.0 — Unreleased
 
 - Add `@lexibase/rdx` as the main framework entry, with configuration, CLI,

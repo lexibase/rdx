@@ -1,17 +1,18 @@
 import { fileURLToPath } from 'node:url'
 
-import { getRdxTracingConfig } from '@lexibase/rdx-next/config'
+import { getRdxBuildRoot, getRdxTracingConfig } from '@lexibase/rdx-next/config'
 
 const rootDir = fileURLToPath(new URL('..', import.meta.url))
 const appDir = fileURLToPath(new URL('.', import.meta.url))
+const buildRoot = await getRdxBuildRoot(rootDir)
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   ...(await getRdxTracingConfig({ rootDir, appDir })),
-  outputFileTracingRoot: rootDir,
+  outputFileTracingRoot: buildRoot,
   agentRules: false,
   turbopack: {
-    root: fileURLToPath(new URL('..', import.meta.url)),
+    root: buildRoot,
   },
   transpilePackages: [
     '@lexibase/rdx-core',
