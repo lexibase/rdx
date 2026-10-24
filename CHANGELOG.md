@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Consolidate existing exact RDX release approvals before and after pnpm workspace
+  installation, preventing older entries from shadowing approvals added by pnpm.
+- Cover legacy workspace policies, first-install approvals, preservation of
+  unrelated rules and repeatable creation in creator regression tests.
+
 ## 1.2.0 — Unreleased
 
 - Add shared footer branding with a Powered by RDX repository link.

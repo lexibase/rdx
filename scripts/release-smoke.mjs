@@ -96,6 +96,7 @@ const required = {
   'create-rdx': [
     'bin/index.js',
     'bin/options.mjs',
+    'bin/pnpm-policy.mjs',
     'templates/default/package.json',
     'templates/default/rdx.config.ts',
     'templates/default/gitignore.template',
