@@ -70,5 +70,5 @@ test('generated projects expose homepage and navbar defaults without activating 
   assert.equal(pkg.dependencies['react-dom'], pkg.dependencies.react)
   assert.equal(pkg.devDependencies['@types/react'], '19.3.0')
   assert.equal(pkg.devDependencies.typescript, '6.0.3')
-  assert.equal(pkg.engines.node, '>=20.9')
+  assert.equal(pkg.engines.node, '^22.18.0 || ^24.11.0')
 })

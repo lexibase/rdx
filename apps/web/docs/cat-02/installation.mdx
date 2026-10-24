@@ -6,9 +6,15 @@ link_position: 1
 
 ## Requirements
 
-Use a supported Node.js installation and one package manager: pnpm, npm, or Yarn.
-Node.js 22 or 24 is recommended for the currently tested development environments.
-The generated project declares Node.js 20.9 or newer.
+Use Node.js **22.18+ (22.x)** or **24.11+ (24.x)** and one package manager.
+Use the latest patch of either supported Node.js line. Node 20 is not supported
+by the first stable release. The same requirement applies to the creator, runtime,
+generated projects, and framework development.
+
+The automated release matrix uses pnpm 9 on Linux/Node 22 and Windows/Node 24.
+The CLI also recognizes npm and Yarn; their installation paths are not covered
+by that complete automated matrix. Do not mix package managers or lockfiles in
+the same documentation project.
 
 You do not need to create a Next.js project first.
 
@@ -23,16 +29,12 @@ The currently published channel is **beta**:
   </TabsList>
   <TabsContent value="pnpm">
 
-```bash
 pnpm create @lexibase/rdx@beta
-```
 
   </TabsContent>
   <TabsContent value="npm">
 
-```bash
 npm create @lexibase/rdx@beta
-```
 
   </TabsContent>
 </Tabs>

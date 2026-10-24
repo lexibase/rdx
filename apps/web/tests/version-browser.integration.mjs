@@ -134,6 +134,12 @@ test(
           await page
             .getByRole('button', { name: 'Documentation version: Canary' })
             .click()
+          await page.getByRole('menu').waitFor()
+          assert.equal(
+            await page.locator('[data-slot="dropdown-menu-separator"]').count(),
+            0,
+            `${mode}: Canary alone has no dangling divider`
+          )
           assert.equal(
             await page.getByRole('menuitem', { name: /^Version / }).count(),
             0

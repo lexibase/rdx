@@ -84,7 +84,9 @@ test(
         signal: controller.signal,
         stdout: logs.stream,
         stderr: logs.stream,
-        timeoutMs: 500,
+        // Use the production shutdown budget: Windows tree enumeration can
+        // exceed 500ms when the complete test suite runs concurrently.
+        timeoutMs: 5_000,
         onFailure: (message) => errors.push(message),
       }
     )
@@ -103,8 +105,12 @@ test(
       )
     } finally {
       controller.abort()
-      await run
-      await new Promise((resolve) => guard.close(resolve))
+      try {
+        await run
+      } finally {
+        guard.closeAllConnections()
+        await new Promise((resolve) => guard.close(resolve))
+      }
     }
   }
 )

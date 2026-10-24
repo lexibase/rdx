@@ -11,10 +11,10 @@ separada antes do lançamento. Não há publicação automática de site ou de n
 
 ## Preparar o projeto
 
-Use preferencialmente uma versão de Node.js 22 ou 24 compatível com as
-dependências do projeto. A matriz atual valida Linux/Node 22 e Windows/Node 24,
-não todas as combinações de sistema e versão. O mínimo declarado pelos pacotes
-ainda é Node >=20.9; a política definitiva da 1.0 está no checklist da release.
+Use Node.js 22.18+ (22.x) or 24.11+ (24.x), preferably the latest patch of either
+line. These are the supported Node.js lines for the first stable release.
+The automated matrix validates Linux/Node 22 and Windows/Node 24 with pnpm 9;
+it does not validate every system, Node, or package-manager combination.
 
 Escolha **um** gerenciador e mantenha seu lockfile no repositório do site.
 Na máquina de destino, entre na pasta que contém `package.json` e

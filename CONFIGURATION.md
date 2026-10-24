@@ -116,8 +116,8 @@ Tailwind scanning, PostCSS and Next's transpilation are configured by the runtim
 there are no monorepo paths or private UI dependencies in generated projects.
 
 For contributors, use a supported Node.js version matching
-`^22.18.0 || ^24.11.0 || >=26.0.0` for the monorepo build tools.
-Generated projects retain Node >=20.9 support.
+`^22.18.0 || ^24.11.0` for both the monorepo and generated projects.
+Node 20 and other major lines are outside the first stable release's support policy.
 
 Run `pnpm check`, then `pnpm --filter @lexibase/rdx-next test:runtime` to exercise
 a disposable generated site in development and production. This integration test requires the workspace
@@ -335,7 +335,7 @@ unavailable.
 
 ## MDX content and runtime requirements
 
-The current runtime and generated projects require Node.js 20.9 or newer.
+The runtime and generated projects require Node.js 22.18+ (22.x) or 24.11+ (24.x).
 The development workspace, generated template, React/React DOM and React types
 are kept aligned on Next.js 16.4.2 or a compatible newer 16.x release.
 Development and production builds use Turbopack. The internal `.rdx/` application

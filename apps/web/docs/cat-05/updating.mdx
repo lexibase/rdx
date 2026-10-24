@@ -32,6 +32,7 @@ assume that a tag already contains unreleased Canary changes.
 The current first-release contract uses `metadata.applicationName` as the site
 name. Earlier beta configurations may need these changes:
 
+- Use Node.js 22.18+ (22.x) or 24.11+ (24.x); Node 20 is no longer supported.
 - Move root `title` into `metadata.applicationName`.
 - Remove `docsDir` and keep live documentation in `docs/`.
 - Use `RDXConfig` for the public type if you import it explicitly.

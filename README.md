@@ -29,6 +29,9 @@ See [CI.md](./CI.md) for local checks and automatic pull request validation.
 Publishing remains a manual process documented in [PUBLISHING.md](./PUBLISHING.md).
 The first stable release is being prepared using [RELEASE_READINESS.md](./RELEASE_READINESS.md).
 The candidate compatibility contract is documented in [PUBLIC_API.md](./PUBLIC_API.md).
+Supported Node.js lines and the tested platform matrix are documented in
+[SUPPORT.md](./SUPPORT.md). Prepared release notes are in [CHANGELOG.md](./CHANGELOG.md);
+an Unreleased entry does not mean packages have been published.
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for the Node.js production deployment baseline.
 
 ## License

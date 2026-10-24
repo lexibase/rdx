@@ -108,13 +108,15 @@ export function VersionDropdown({
         {live.length > 0 && (
           <>
             <DropdownMenuGroup>{live.map(item)}</DropdownMenuGroup>
-            <DropdownMenuSeparator />
+            {(active.length > 0 || archived.length > 0 || Boolean(footer)) && (
+              <DropdownMenuSeparator />
+            )}
           </>
         )}
         {active.map(item)}
         {archived.length > 0 && (
           <>
-            <DropdownMenuSeparator />
+            {active.length > 0 && <DropdownMenuSeparator />}
             <DropdownMenuGroup>
               <DropdownMenuLabel className="text-center py-px cursor-default">
                 Archived

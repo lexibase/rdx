@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "engines": {
-    "node": ">=20.9"
+    "node": "^22.18.0 || ^24.11.0"
   },
   "scripts": {
     "dev": "pnpm run docs:prepare && next dev",
