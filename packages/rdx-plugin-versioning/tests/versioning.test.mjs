@@ -30,12 +30,15 @@ async function fixture(t) {
   return rootDir
 }
 
-const config = () => ({ title: 'Docs', plugins: [versioning()] })
+const config = () => ({
+  metadata: { applicationName: 'Docs' },
+  plugins: [versioning()],
+})
 
 test('installing without configuring versioning creates no manifest or commands', async (t) => {
   const rootDir = await fixture(t)
   const project = await createRdxProject(
-    { title: 'Docs' },
+    { metadata: { applicationName: 'Docs' } },
     { rootDir, command: 'prepare' }
   )
   await assert.rejects(access(path.join(rootDir, 'versions.json')))
@@ -212,7 +215,10 @@ test('snapshot paths cannot overlap live docs or escape the project', async (t) 
   for (const versionsDir of ['docs/history', '../outside']) {
     await assert.rejects(
       createRdxProject(
-        { title: 'Docs', plugins: [versioning({ versionsDir })] },
+        {
+          metadata: { applicationName: 'Docs' },
+          plugins: [versioning({ versionsDir })],
+        },
         { rootDir, command: 'prepare' }
       ),
       /separate directories|inside the project/

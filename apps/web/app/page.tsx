@@ -12,7 +12,7 @@ export default function HomePage() {
     <CustomHome />
   ) : (
     <Home
-      title={homepage.title ?? config.title}
+      title={homepage.title ?? config.metadata.applicationName}
       description={homepage.description}
       buttons={homepage.buttons}
     />

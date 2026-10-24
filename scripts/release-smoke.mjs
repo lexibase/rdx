@@ -171,6 +171,25 @@ async function verifySite(
         'Dynamic /docs must read live project content'
       )
       const html = await (await request(base, '/docs/init/intro')).text()
+      assert.match(html, /<title>My documentation<\/title>/)
+      assert.match(
+        html,
+        /<meta name="application-name" content="My documentation"/
+      )
+      assert.match(html, /aria-label="My documentation"/)
+      assert.match(html, /<strong>My documentation<\/strong>/)
+      assert.match(html, /<meta name="author" content="RDX Metadata Fixture"/)
+      assert.match(html, /<meta name="robots" content="noindex, nofollow"/)
+      assert.match(
+        html,
+        /<meta property="og:image" content="https:\/\/docs\.example\.test\/images\/rdx\.svg"/
+      )
+      assert.match(
+        html,
+        /<meta name="twitter:card" content="summary_large_image"/
+      )
+      assert.match(html, /<link rel="icon" href="\/images\/rdx\.svg"/)
+      assert.doesNotMatch(html, /<link rel="canonical"/)
       assert.ok(
         html.includes(current),
         'Current page must contain the current documentation'
@@ -374,6 +393,17 @@ if (process.argv.includes('--install')) {
   await writeFile(
     configPath,
     config
+      .replace(
+        'metadata: {',
+        `metadata: {
+        metadataBase: 'https://docs.example.test',
+        authors: [{ name: 'RDX Metadata Fixture' }],
+        keywords: ['rdx-metadata-fixture'],
+        icons: { icon: '/images/rdx.svg' },
+        robots: { index: false, follow: false },
+        openGraph: { type: 'website', images: [{ url: '/images/rdx.svg' }] },
+        twitter: { card: 'summary_large_image' },`
+      )
       .replace('TOC: false', 'TOC: true')
       .replace('search: false', 'search: true')
   )

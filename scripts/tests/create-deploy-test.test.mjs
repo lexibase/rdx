@@ -70,7 +70,7 @@ async function fixture(t) {
   )
   await writeFile(
     path.join(source, 'rdx.config.ts'),
-    'export default { title: "Fixture", search: false, TOC: false }'
+    'export default { metadata: { applicationName: "Fixture" }, search: false, TOC: false }'
   )
   for (const dir of [
     'docs',

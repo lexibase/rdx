@@ -9,18 +9,24 @@ validation and defaults. Existing plain-object exports and the first beta's
 import { defineConfig } from '@lexibase/rdx-next'
 
 export default defineConfig({
-  title: 'My documentation',
+  metadata: { applicationName: 'My documentation' },
   description: 'Documentation for my project.',
   lang: 'pt-BR',
-  docsDir: 'docs',
   theme: { defaultTheme: 'system' },
 })
 ```
 
-Only `title` is required. Defaults are `description: ''`, `lang: 'en'`,
-`docsDir: 'docs'`, `theme.defaultTheme: 'system'`, and `plugins: []`.
-The documentation URL remains `/docs`; `docsDir` changes the filesystem source,
-not the URL. Theme values are `system`, `light`, and `dark`.
+Only `metadata.applicationName` is required. It is the single site name used for
+browser titles and their suffix, social preview defaults, accessible logo labels,
+the footer, and the built-in homepage fallback. The root `title` option has been
+removed; move its value into `metadata.applicationName` when upgrading. Do not
+add a separate `metadata.title`. `navbar.title` remains independent and optional.
+Defaults are `description: ''`, `lang: 'en'`,
+`theme.defaultTheme: 'system'`, and `plugins: []`.
+Live documentation always lives in the project's `docs/` folder and is served
+under `/docs`. This folder is an RDX convention, not a configuration option.
+Remove `docsDir` from older configurations; move any custom live content folder
+to `docs/` before upgrading. Theme values are `system`, `light`, and `dark`.
 
 `navbar.title` adds text beside the logo; absent or empty means logo-only, as in
 the development website. `navbar.logo` accepts a React component with an optional
@@ -39,7 +45,7 @@ By default `/` redirects to `/docs`. Enable the built-in landing page explicitly
 
 ```ts
 export default defineConfig({
-  title: 'My documentation',
+  metadata: { applicationName: 'My documentation' },
   description: 'Everything you need to build with our tools.',
   homepage: {
     enabled: true,
@@ -55,7 +61,7 @@ export default defineConfig({
 
 `homepage.enabled` defaults to false. With only `{ enabled: true }`, the homepage
 is the same centered logo and site name as `apps/web`, not a marketing hero.
-The title defaults to the site title; descriptions and buttons appear only when
+The title defaults to `metadata.applicationName`; descriptions and buttons appear only when
 explicitly configured. Links accept root-relative paths (starting
 with a single `/`) or HTTP(S) URLs, not JavaScript URLs or protocol-relative URLs.
 The first button is primary.
@@ -77,7 +83,7 @@ import { defineConfig } from '@lexibase/rdx-next'
 import MyHome from './home'
 
 export default defineConfig({
-  title: 'My project',
+  metadata: { applicationName: 'My project' },
   homepage: { enabled: true, component: MyHome },
 })
 ```
@@ -227,7 +233,7 @@ import { defineConfig } from '@lexibase/rdx-next'
 import { versioning } from '@lexibase/rdx-versioning'
 
 export default defineConfig({
-  title: 'My documentation',
+  metadata: { applicationName: 'My documentation' },
   plugins: [versioning()],
 })
 ```
@@ -248,7 +254,7 @@ Create a snapshot with:
 pnpm rdx version 1.0.0
 ```
 
-This copies the current `docsDir` to `versioned_docs/version-1.0.0/` and prepends
+This copies the current `docs/` folder to `versioned_docs/version-1.0.0/` and prepends
 `1.0.0` to `active`. Existing snapshots are never overwritten. Labels support
 `major.minor.patch` and prerelease suffixes such as `1.0.0-beta.1`.
 
@@ -317,6 +323,10 @@ and a unique single-segment `routePrefix`. Optional `badge` text is displayed in
 navigation and on the source's pages. These sources are generic: the Next
 adapter does not import or know about the versioning plugin.
 
+The source-level `docsDir` belongs to the plugin/content-source contract (for
+example, a version snapshot), not to `rdx.config.ts`. It does not change the
+fixed `docs/` location of the live source.
+
 Plugins may also return a `commands` array on the plugin object. Each command has
 `name`, `description`, and `run(context)`. Its context additionally contains
 `args: string[]`. Built-in or duplicate command names are rejected. For example,
@@ -352,7 +362,7 @@ protections off in this release.
 
 ## Official development website
 
-`apps/web` uses the current `RdxConfig` contract, `createRdxProject` and the same
+`apps/web` uses the current `RDXConfig` contract, `createRdxProject` and the same
 `@lexibase/rdx-versioning` plugin as generated projects, all linked locally through
 `workspace:*`. Live content is in `docs/`; all snapshots are in `versioned_docs/`,
 with active/archived status maintained in `versions.json`. The private versioning

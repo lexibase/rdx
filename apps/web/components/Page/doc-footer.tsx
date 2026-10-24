@@ -2,7 +2,7 @@ import { Button } from '@lexibase/rdx-ui/components/button'
 import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 
 import { docsIndexer } from '@/lib/docs'
-import { siteMetadata } from '@/rdx.config'
+import config from '@/rdx.config'
 
 export async function DocFooter({
   version,
@@ -67,7 +67,8 @@ export async function DocFooter({
 
       <section className="flex items-center justify-center w-full py-5">
         <p className="text-sm text-muted-foreground">
-          &copy; {currentYear} <strong>RDX</strong>. Developed by{' '}
+          &copy; {currentYear}{' '}
+          <strong>{config.metadata.applicationName}</strong>. Developed by{' '}
           <ButtonLink
             variant="link"
             size="link"
@@ -76,7 +77,7 @@ export async function DocFooter({
             target="_blank"
             rel="noopener noreferrer"
           >
-            {siteMetadata.author}
+            {config.metadata.authors[0]?.name}
           </ButtonLink>
         </p>
       </section>

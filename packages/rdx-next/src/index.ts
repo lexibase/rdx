@@ -1,7 +1,8 @@
 export { defineConfig } from '@lexibase/rdx-core/config'
 export type {
-  RdxConfig,
+  RDXConfig,
   RdxHomepage,
+  RdxMetadata,
   RdxRuntimeConfig,
   RdxPlugin,
   RdxPluginContext,

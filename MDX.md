@@ -48,7 +48,8 @@ Write relative `.mdx` file paths; RDX resolves them against the current file:
 Generated sites preserve full document slugs and the current content source's
 route prefix, including archived snapshots. There is no fallback to Current
 when a target is absent from a snapshot. The development website uses the same
-resolver with its existing filename-only routes. Custom `docsDir` works too.
+resolver with its existing filename-only routes. Live documents always come from
+the project's `docs/` folder.
 
 Inline links, reference-style Markdown links and literal `<a href="...">` links
 are supported, including Markdown inside Callouts, Tabs and Accordion panels.

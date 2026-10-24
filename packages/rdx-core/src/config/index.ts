@@ -1,8 +1,11 @@
 import path from 'node:path'
 import { existsSync } from 'node:fs'
 
+import { validateMetadata } from './metadata.js'
+import { RdxConfigError } from './error.js'
+
 import type {
-  RdxConfig,
+  RDXConfig,
   RdxContentSource,
   RdxPlugin,
   RdxPluginCommand,
@@ -10,12 +13,7 @@ import type {
   ResolvedRdxConfig,
 } from '@lexibase/rdx-types'
 
-export class RdxConfigError extends Error {
-  constructor(message: string) {
-    super(`Invalid rdx.config.ts: ${message}`)
-    this.name = 'RdxConfigError'
-  }
-}
+export { RdxConfigError } from './error.js'
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -88,13 +86,20 @@ export function resolveProjectPath(
 
 export function resolveConfig(input: unknown): ResolvedRdxConfig {
   const config = object(input, 'default export')
+  if ('title' in config)
+    throw new RdxConfigError(
+      'title has been removed. Set the site name in metadata.applicationName instead.'
+    )
+  if ('docsDir' in config)
+    throw new RdxConfigError(
+      'docsDir is not configurable. Live documentation must be stored in docs/.'
+    )
   keys(
     config,
     [
-      'title',
       'description',
+      'metadata',
       'lang',
-      'docsDir',
       'theme',
       'navbar',
       'plugins',
@@ -104,7 +109,6 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
     ],
     ''
   )
-  text(config.title, 'title')
   if (config.search !== undefined && typeof config.search !== 'boolean')
     throw new RdxConfigError('search must be a boolean.')
   if (config.TOC !== undefined && typeof config.TOC !== 'boolean')
@@ -112,7 +116,7 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
   if (config.description !== undefined)
     text(config.description, 'description', true)
   if (config.lang !== undefined) text(config.lang, 'lang')
-  if (config.docsDir !== undefined) text(config.docsDir, 'docsDir')
+  validateMetadata(config.metadata)
 
   if (config.homepage !== undefined) {
     const homepage = object(config.homepage, 'homepage')
@@ -227,20 +231,19 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
       throw new RdxConfigError(`plugin "${name}" commands must be an array.`)
   }
 
-  const typed = config as RdxConfig
+  const typed = config as RDXConfig
   return {
     ...typed,
     TOC: typed.TOC ?? false,
     search: typed.search ?? false,
     description: typed.description ?? '',
     lang: typed.lang ?? 'en',
-    docsDir: typed.docsDir ?? 'docs',
     theme: { defaultTheme: typed.theme?.defaultTheme ?? 'system' },
     plugins: typed.plugins ?? [],
   }
 }
 
-export function defineConfig(config: RdxConfig): RdxConfig {
+export function defineConfig(config: RDXConfig): RDXConfig {
   resolveConfig(config)
   return config
 }
@@ -254,12 +257,16 @@ export async function createRdxProject(
 ): Promise<RdxProject> {
   rootDir = path.resolve(/* turbopackIgnore: true */ rootDir)
   const config = resolveConfig(input)
-  const docsRoot = resolveProjectPath(rootDir, config.docsDir, 'docsDir')
+  const docsRoot = resolveProjectPath(
+    rootDir,
+    'docs',
+    'documentation directory'
+  )
   const sources: RdxContentSource[] = [
     {
       id: 'current',
       label: 'Current',
-      docsDir: config.docsDir,
+      docsDir: 'docs',
       routePrefix: '',
     },
   ]

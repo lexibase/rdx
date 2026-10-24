@@ -28,7 +28,7 @@ test('tracing includes only configured MDX, category metadata and declared plugi
     rootDir,
     'rdx.config.ts',
     `export default {
-    title: 'Trace fixture', docsDir: 'content [live]',
+    metadata: { applicationName: 'Trace fixture' },
     plugins: [{ name: 'custom', apiVersion: 1, setup() { return {
       runtimeFiles: ['metadata/releases.data'],
       sources: [{ id: 'archive', label: 'Archive', docsDir: 'snapshots/v1', routePrefix: 'v1' }]
@@ -36,8 +36,8 @@ test('tracing includes only configured MDX, category metadata and declared plugi
   }`
   )
   const expected = [
-    'content [live]/guides/intro.mdx',
-    'content [live]/guides/_category.json',
+    'docs/guides [live]/intro.mdx',
+    'docs/guides [live]/_category.json',
     'snapshots/v1/guide.mdx',
     'metadata/releases.data',
   ]
@@ -47,8 +47,8 @@ test('tracing includes only configured MDX, category metadata and declared plugi
     '.env.local',
     'README.md',
     'home.tsx',
-    'docs/ignored.mdx',
-    'content [live]/private.txt',
+    'content/ignored.mdx',
+    'docs/guides [live]/private.txt',
     'public/images/logo.svg',
     'versions.json',
   ])
@@ -61,8 +61,9 @@ test('tracing includes only configured MDX, category metadata and declared plugi
   assert.equal(patterns.length, expected.length)
   const matches = picomatch(patterns)
   for (const name of expected) assert.ok(matches(`../${name}`), name)
-  assert.equal(matches('../content l/guides/intro.mdx'), false)
-  assert.equal(matches('../content [live]/private.txt'), false)
+  assert.equal(matches('../docs/guides l/intro.mdx'), false)
+  assert.equal(matches('../docs/guides [live]/private.txt'), false)
+  assert.equal(matches('../content/ignored.mdx'), false)
   assert.equal(matches('../versions.json'), false)
   assert.equal(matches('../.env.local'), false)
   assert.deepEqual(
@@ -76,7 +77,7 @@ test('tracing supports empty projects without enabling versioning or creating fi
   await file(
     rootDir,
     'rdx.config.ts',
-    "export default { title: 'Empty project' }"
+    "export default { metadata: { applicationName: 'Empty project' } }"
   )
   assert.deepEqual(await getRdxTracingConfig({ rootDir }), {
     outputFileTracingIncludes: { '/*': [] },
@@ -93,12 +94,12 @@ test('configured versioning traces custom manifests and both active and archived
     rootDir,
     'rdx.config.ts',
     `import { versioning } from '${plugin}';
-    export default { title: 'Versions', docsDir: 'content', plugins: [versioning({
+    export default { metadata: { applicationName: 'Versions' }, plugins: [versioning({
       versionsFile: 'metadata/editions.data', versionsDir: 'snapshots'
     })] }`
   )
   for (const name of [
-    'content/intro.mdx',
+    'docs/intro.mdx',
     'snapshots/version-1.0.0/intro.mdx',
     'snapshots/version-0.1.0/intro.mdx',
   ])
@@ -111,7 +112,7 @@ test('configured versioning traces custom manifests and both active and archived
   assert.deepEqual(
     (await getRdxTracingConfig({ rootDir })).outputFileTracingIncludes['/*'],
     [
-      'content/intro.mdx',
+      'docs/intro.mdx',
       'metadata/editions.data',
       'snapshots/version-0.1.0/intro.mdx',
       'snapshots/version-1.0.0/intro.mdx',
@@ -124,7 +125,7 @@ test('missing or non-file plugin runtime entries fail instead of creating an inc
   await file(
     rootDir,
     'rdx.config.ts',
-    `export default { title: 'Invalid files',
+    `export default { metadata: { applicationName: 'Invalid files' },
     plugins: [{ name: 'custom', apiVersion: 1, setup: () => ({runtimeFiles: ['metadata']}) }]
   }`
   )

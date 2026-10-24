@@ -12,11 +12,7 @@
       "dependsOn": ["^lint"]
     },
     "web#lint": {
-      "dependsOn": [
-        "^lint",
-        "@lexibase/rdx-core#build",
-        "@lexibase/rdx-versioning#build"
-      ]
+      "dependsOn": ["^lint", "^build"]
     },
     "test": {
       "dependsOn": ["build"]
@@ -48,11 +44,7 @@
       "dependsOn": ["^check-types"]
     },
     "web#check-types": {
-      "dependsOn": [
-        "^check-types",
-        "@lexibase/rdx-core#build",
-        "@lexibase/rdx-versioning#build"
-      ]
+      "dependsOn": ["^check-types", "^build"]
     },
     "dev": {
       "cache": false,

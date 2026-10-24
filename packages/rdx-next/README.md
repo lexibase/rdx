@@ -56,8 +56,9 @@ share this directory; snapshots do not copy its contents.
 Production builds trace only configured documentation (`.mdx` and
 `_category.json`) and runtime files declared by configured plugins. The versioning
 plugin declares its manifest, including a custom `versionsFile`; current, active
-and archived content sources are included. Custom `docsDir` and `versionsDir`
-are supported without copying the whole project into the server deployment.
+and archived content sources are included. Live documentation always uses `docs/`;
+custom plugin snapshot paths remain supported without copying the whole project
+into the server deployment.
 Rebuild/redeploy after changing production content or version manifests.
 
 Native Next.js applications using the RDX core (such as `apps/web`) must spread
@@ -67,3 +68,48 @@ set `outputFileTracingRoot` to include the documentation project root. Generated
 `.rdx/next.config.mjs` already does this. Do not remove the explicit tracing
 configuration: the core intentionally does not ask Turbopack to trace arbitrary
 project-relative filesystem paths.
+
+## Site metadata
+
+Configure SEO in `rdx.config.ts`; the generated layout uses Next.js's native
+Metadata API. `metadata.applicationName` is the single site name, while
+`description` remains at the top level. The root `title` option has been removed.
+
+```ts
+export default defineConfig({
+  description: 'Learn how to use our project.',
+  metadata: {
+    applicationName: 'My documentation',
+    metadataBase: 'https://docs.example.com',
+    authors: [{ name: 'My team', url: 'https://example.com' }],
+    keywords: ['documentation', 'my-project'],
+    icons: { icon: '/favicon.ico' },
+    robots: { index: true, follow: true },
+    openGraph: {
+      type: 'website',
+      images: [{ url: '/og.png', width: 1200, height: 630, alt: 'My project' }],
+    },
+    twitter: { card: 'summary_large_image', images: ['/og.png'] },
+  },
+})
+```
+
+The starter provides `metadata.applicationName: 'My documentation'`. This name
+is required and supplies browser titles (including the `%s | Name` page title
+template), social preview defaults, accessible logo labels, the footer and the
+built-in homepage fallback. `navbar.title` is independent and optional. Custom
+homepage components own their contents; RDX does not inject this name into them.
+When upgrading, move the former root `title` into `metadata.applicationName`;
+there is no separate `metadata.title` to repeat. Set
+`metadataBase` to your real public URL when deploying; RDX does not invent a
+production domain or force localhost. Image, favicon and manifest paths refer
+to files you create in `public/`. Nothing creates those assets automatically.
+
+Supported fields are `metadataBase` (an absolute http(s) string),
+`applicationName`, `authors`, `keywords`, `icons`, `manifest`, `robots`,
+`openGraph` and `twitter`. TypeScript describes the supported nested options,
+and invalid fields fail during configuration validation. This is a portable
+subset, not an unrestricted pass-through of all Next.js metadata options.
+Open Graph and Twitter inherit `metadata.applicationName` and the site description
+unless explicitly overridden within their own options.
+No site-wide canonical or fixed Open Graph URL is emitted for every document.

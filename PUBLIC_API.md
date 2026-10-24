@@ -16,22 +16,24 @@ Objetos exportados diretamente continuam aceitos. `defineConfig` valida e
 devolve o mesmo objeto; não transforma componentes React em dados serializados.
 Chaves desconhecidas e tipos inválidos são erros, não opções ignoradas.
 
-| Opção                | Contrato e padrão                                                                               |
-| -------------------- | ----------------------------------------------------------------------------------------------- |
-| `title`              | String não vazia, obrigatória                                                                   |
-| `description`        | String; padrão `''`                                                                             |
-| `lang`               | String não vazia; padrão `'en'`; define o idioma HTML, ainda não traduz a interface             |
-| `docsDir`            | Caminho relativo dentro do projeto; padrão `'docs'`; não muda a URL `/docs`                     |
-| `TOC`, `search`      | Booleanos, ambos `false` por padrão; preservar a grafia `TOC`                                   |
-| `theme.defaultTheme` | `'system'`, `'light'` ou `'dark'`; padrão `'system'`                                            |
-| `homepage`           | Opcional e desativada por padrão; aceita conteúdo da Home padrão ou `component`                 |
-| `navbar`             | Título, componente de logo e ações opcionais; o template explicita GitHub e alternância de tema |
-| `plugins`            | Array de objetos de plugins; padrão vazio; instalar um pacote não o ativa                       |
+Live documentation always uses the project's `docs/` folder. Its location is not
+configurable; older configurations must remove `docsDir`.
+
+| Opção                      | Contrato e padrão                                                                                |
+| -------------------------- | ------------------------------------------------------------------------------------------------ |
+| `metadata.applicationName` | Required non-empty string; the single site name for browser titles, social defaults and branding |
+| `description`              | String; padrão `''`                                                                              |
+| `lang`                     | String não vazia; padrão `'en'`; define o idioma HTML, ainda não traduz a interface              |
+| `TOC`, `search`            | Booleanos, ambos `false` por padrão; preservar a grafia `TOC`                                    |
+| `theme.defaultTheme`       | `'system'`, `'light'` ou `'dark'`; padrão `'system'`                                             |
+| `homepage`                 | Opcional e desativada por padrão; aceita conteúdo da Home padrão ou `component`                  |
+| `navbar`                   | Título, componente de logo e ações opcionais; o template explicita GitHub e alternância de tema  |
+| `plugins`                  | Array de objetos de plugins; padrão vazio; instalar um pacote não o ativa                        |
 
 Detalhes e exemplos de propriedades aninhadas ficam em
-[CONFIGURATION.md](./CONFIGURATION.md). O alias `RdxRuntimeConfig` continua
-equivalente a `RdxConfig`. O tipo legado `RDXConfig` não é o contrato recomendado
-para projetos novos.
+[CONFIGURATION.md](./CONFIGURATION.md). The canonical public type is `RDXConfig`.
+`RdxRuntimeConfig` is only a compatibility alias for that same contract, not a
+second configuration shape. The former duplicate `RdxConfig` has been removed.
 
 Pastas do primeiro nível formam categorias. Slugs preservam o caminho completo
 do arquivo MDX, sem a extensão. Categorias aninhadas na sidebar não são prometidas

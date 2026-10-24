@@ -6,7 +6,7 @@ import {
   getSourceOptions,
   resolveDocsRoute,
 } from '@lexibase/rdx-core'
-import type { RdxProject, RdxRuntimeConfig } from '@lexibase/rdx-types'
+import type { RdxProject, RDXConfig } from '@lexibase/rdx-types'
 import { Button } from '@lexibase/rdx-ui/components/button'
 import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 import { DocsSidebar } from '@lexibase/rdx-ui/components/docs-sidebar'
@@ -27,6 +27,7 @@ import { compileDocumentation } from './mdx'
 
 export { createRdxProject, getProjectDocsPaths } from '@lexibase/rdx-core'
 export { getSearchResponse, getSearchSources } from './search'
+export { getRdxMetadata } from './metadata'
 
 export function RdxLayout({
   children,
@@ -34,7 +35,7 @@ export function RdxLayout({
   bodyClassName,
 }: {
   children: ReactNode
-  config: RdxRuntimeConfig
+  config: RDXConfig
   bodyClassName?: string
 }) {
   return (
@@ -97,7 +98,7 @@ function RdxHeader({
           />
         ) : undefined
       }
-      siteTitle={config.title}
+      siteTitle={config.metadata.applicationName}
       logo={<BrandLogo className="size-5" />}
       homeHref={config.homepage?.enabled ? '/' : '/docs'}
       docsHref={['/docs', source.routePrefix].filter(Boolean).join('/')}
@@ -130,7 +131,7 @@ export function HomePage({ project }: { project: RdxProject }) {
           <CustomHome />
         ) : (
           <Home
-            title={homepage.title ?? config.title}
+            title={homepage.title ?? config.metadata.applicationName}
             logo={
               <BrandLogo className="size-52 hover:scale-105 hover:rotate-1 transition-[scale,rotation] duration-1000" />
             }
@@ -276,7 +277,7 @@ export async function DocsPage({
               <section className="flex items-center justify-center w-full py-5">
                 <p className="text-sm text-muted-foreground">
                   &copy; {new Date().getFullYear()}{' '}
-                  <strong>{project.config.title}</strong>
+                  <strong>{project.config.metadata.applicationName}</strong>
                 </p>
               </section>
             </footer>

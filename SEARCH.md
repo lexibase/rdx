@@ -6,7 +6,7 @@ Enable the built-in search in `rdx.config.ts`:
 import { defineConfig } from '@lexibase/rdx-next'
 
 export default defineConfig({
-  title: 'My documentation',
+  metadata: { applicationName: 'My documentation' },
   search: true,
 })
 ```

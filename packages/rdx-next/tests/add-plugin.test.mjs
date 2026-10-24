@@ -32,7 +32,7 @@ const expectedInstallArgs = [
   'install',
   versioningInstallRequest(runtimePackage.version).specifier,
 ]
-const basic = `// Project documentation\nexport default { title: 'Docs', navbar: { title: 'Custom' } }\n`
+const basic = `// Project documentation\nexport default { metadata: { applicationName: 'Docs' }, navbar: { title: 'Custom' } }\n`
 async function fixture(t, source = basic) {
   const root = await mkdtemp(path.join(os.tmpdir(), 'rdx-add-'))
   t.after(() => rm(root, { force: true, recursive: true }))
@@ -66,11 +66,11 @@ async function installStub(root, { invalid = false } = {}) {
 const silent = () => {}
 
 test('literal editing preserves imports, aliases, comments, plugin options, CRLF and repeatability', () => {
-  const source = `import { defineConfig as config } from '@lexibase/rdx-next'\r\nimport { versioning as snapshots } from '${versioningPackage}'\r\n// Keep this\r\nexport default config({ title: 'Docs', plugins: [snapshots({ versionsDir: 'history' })], navbar: { title: '' } } satisfies Config)\r\n`
+  const source = `import { defineConfig as config } from '@lexibase/rdx-next'\r\nimport { versioning as snapshots } from '${versioningPackage}'\r\n// Keep this\r\nexport default config({ metadata: { applicationName: 'Docs' }, plugins: [snapshots({ versionsDir: 'history' })], navbar: { title: '' } } satisfies Config)\r\n`
   assert.equal(activateVersioning(source), source)
-  const existing = `import * as snapshots from '${versioningPackage}'\nexport default { title: 'Docs', plugins: [snapshots.versioning()] }`
+  const existing = `import * as snapshots from '${versioningPackage}'\nexport default { metadata: { applicationName: 'Docs' }, plugins: [snapshots.versioning()] }`
   assert.equal(activateVersioning(existing), existing)
-  const unrelated = `import { defineConfig } from '@lexibase/rdx-next'\nconst versioning = 'reserved';\nexport default defineConfig({ title: 'Docs', plugins: [other(), /* keep */], homepage: { enabled: false } })`
+  const unrelated = `import { defineConfig } from '@lexibase/rdx-next'\nconst versioning = 'reserved';\nexport default defineConfig({ metadata: { applicationName: 'Docs' }, plugins: [other(), /* keep */], homepage: { enabled: false } })`
   const result = activateVersioning(unrelated)
   assert.match(result, /versioning as rdxVersioning1/)
   assert.match(result, /other\(\), rdxVersioning1\(\), \/\* keep \*\//)
@@ -82,13 +82,13 @@ test('literal editing preserves imports, aliases, comments, plugin options, CRLF
 
 test('unsafe dynamic shapes and syntax errors receive manual instructions', () => {
   for (const source of [
-    `export default makeConfig({ title: 'Docs' })`,
-    `const config = { title: 'Docs' }; export default config`,
-    `export default { title: 'Docs', ...options }`,
-    `export default { title: 'Docs', plugins: getPlugins() }`,
-    `export default { title: 'Docs', plugins: [...plugins] }`,
-    `export default { title: 'Docs', ['plugins']: [] }`,
-    `export default { title: 'Docs', plugins: [], plugins: [] }`,
+    `export default makeConfig({ metadata: { applicationName: 'Docs' } })`,
+    `const config = { metadata: { applicationName: 'Docs' } }; export default config`,
+    `export default { metadata: { applicationName: 'Docs' }, ...options }`,
+    `export default { metadata: { applicationName: 'Docs' }, plugins: getPlugins() }`,
+    `export default { metadata: { applicationName: 'Docs' }, plugins: [...plugins] }`,
+    `export default { metadata: { applicationName: 'Docs' }, ['plugins']: [] }`,
+    `export default { metadata: { applicationName: 'Docs' }, plugins: [], plugins: [] }`,
     `export default {`,
   ])
     assert.throws(
@@ -271,7 +271,7 @@ test('installation and validation failures leave the original configuration inta
   for (const failure of ['install', 'plugin', 'config']) {
     const source =
       failure === 'config'
-        ? `export default { title: 'Docs', theme: { defaultTheme: 'purple' } }`
+        ? `export default { metadata: { applicationName: 'Docs' }, theme: { defaultTheme: 'purple' } }`
         : basic
     const root = await fixture(t, source)
     await assert.rejects(
