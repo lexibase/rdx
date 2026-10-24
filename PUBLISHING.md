@@ -1,22 +1,45 @@
 # Publishing RDX
 
-## Main framework package preparation
+## Prepared release: 1.1.0
 
 `@lexibase/rdx` is the main framework entry for newly generated projects. It
 selects compatible runtime and UI versions. Optional plugins remain separate.
-This entry has not been published as part of this change.
+This release has not been published by preparing these files.
 
-The runtime and creator versions 1.0.1 are already published. Before publishing
-this change, assign fresh versions to the changed runtime and creator, choose
-the initial main-package version, and align the creator template with that main
-version. Do not overwrite published versions. Workspace dependencies are converted
-to exact internal versions by `pnpm pack` and `pnpm publish`.
+The three changed packages are prepared at 1.1.0:
 
-Run `pnpm check` and `pnpm test:release --install` after those version changes.
-Inspect all seven archives, then publish changed dependencies before their
-consumers: runtime, main framework, creator. Publish other internal packages only
-when they have changed. Verify registry versions and tags before testing creation
-and updates from npm.
+| Package | Role | Selected RDX dependencies in its archive |
+| --- | --- | --- |
+| `@lexibase/rdx-next` | Runtime and CLI implementation | Core/types 1.0.0; compatible UI peer `^1.0.0` |
+| `@lexibase/rdx` | Main framework entry | Runtime 1.1.0 and UI 1.0.0 |
+| `@lexibase/create-rdx` | Project generator | Generated projects pin main framework 1.1.0 |
+
+The runtime and creator versions 1.0.1 are already published. Do not overwrite
+them or republish unchanged core, types, UI or versioning packages. Workspace
+dependencies become exact internal versions in `pnpm pack` and `pnpm publish`.
+
+Run `pnpm check` and `pnpm test:release --install`. Inspect all seven archives
+and merge the preparation PR after the Linux and Windows checks pass. From the
+updated `main` branch, confirm `npm whoami` and publish one command at a time,
+waiting for each dependency to become available before its consumer:
+
+```powershell
+pnpm --filter @lexibase/rdx-next publish --tag latest --access public
+npm view @lexibase/rdx-next@1.1.0 version
+
+pnpm --filter @lexibase/rdx publish --tag latest --access public
+npm view @lexibase/rdx@1.1.0 version
+
+pnpm --filter @lexibase/create-rdx publish --tag latest --access public
+npm view @lexibase/create-rdx@1.1.0 version
+```
+
+Confirm each `latest` tag is 1.1.0, then create a fresh project outside the
+monorepo with `pnpm create @lexibase/rdx@latest`. Validate development, production
+build/start, custom component imports and optional versioning. Test adoption in
+an existing project using the migration instructions in the updating guide.
+Only after registry validation, record the actual 1.1.0 publication date in
+`CHANGELOG.md`. Keep the official 1.0.1 documentation snapshot unchanged.
 
 A later UI-only release updates the UI package and the main package's selected
 UI version. An unchanged runtime does not need another publication. Existing

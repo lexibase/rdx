@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 — Unreleased
 
 - Add `@lexibase/rdx` as the main framework entry, with configuration, CLI,
   runtime, styles and typed per-module UI exports.
@@ -9,7 +9,11 @@
 - Keep optional versioning separate and preserve direct runtime/UI integrations.
 - Add installed-archive tests for a main-package update that introduces a new UI
   component without changing the runtime implementation.
-- Package version changes and npm publication are not part of this preparation.
+
+`@lexibase/rdx`, `@lexibase/rdx-next` and `@lexibase/create-rdx` are prepared
+at 1.1.0. The creator pins the main framework; its packed dependencies select
+runtime 1.1.0 and UI 1.0.0. Other packages remain unchanged. Publication is manual;
+preparing these files does not upload packages to npm.
 
 ## 1.0.1 — 2026-10-24
 
@@ -27,9 +31,8 @@
 
 - Prepare the 1.0.1 documentation snapshot alongside the live Canary edition.
 
-Only `@lexibase/rdx-next` and `@lexibase/create-rdx` are prepared at 1.0.1.
-The creator pins the corrected runtime; other packages remain at 1.0.0.
-This patch has not been published by updating these files.
+Only `@lexibase/rdx-next` and `@lexibase/create-rdx` were published at 1.0.1.
+The creator pins the corrected runtime; other packages remained at 1.0.0.
 
 ## 1.0.0 — 2026-10-24
 

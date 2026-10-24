@@ -1,8 +1,17 @@
-# RDX 1.0 — release readiness
+# RDX release readiness
 
 Status: **1.0.0 published**. The maintainer published all six public packages,
 and their registry `latest` tags were verified at 1.0.0 on 2026-10-24.
 The maintainer handles commits, PRs, merges and publication.
+
+## 1.1.0 follow-up
+
+- [x] Prepare main framework, runtime and creator at 1.1.0; keep other package versions unchanged.
+- [x] Pin main framework 1.1.0 in generated projects.
+- [x] Complete workspace checks and installed-archive production/update tests for these versions.
+- [ ] Merge the preparation PR after Linux and Windows CI passes.
+- [ ] Publish runtime, main framework and creator in dependency order; verify registry tags.
+- [ ] Validate registry creation and existing-project migration, then record the release date.
 
 ## 1.0.1 follow-up
 
@@ -11,7 +20,7 @@ The maintainer handles commits, PRs, merges and publication.
 - [x] Create the official 1.0.1 documentation snapshot alongside Canary.
 - [x] Complete `pnpm check`, installed-archive production/HTTP tests and native
       browser checks in development and production, including edition switching.
-- [ ] Merge the patch PR and publish the two changed packages.
+- [x] Merge the patch PR and publish the two changed packages.
 - [ ] Verify registry installation, record the patch release date and deploy the snapshot.
 
 Public-registry validation of 1.0.0 confirmed npm creation, installation, build,
