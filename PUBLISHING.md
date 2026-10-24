@@ -8,14 +8,14 @@ This release has not been published by preparing these files.
 
 This grouped release publishes six changed packages:
 
-| Package                | Role                           | Selected RDX dependencies in its archive      |
-| ---------------------- | ------------------------------ | --------------------------------------------- |
-| `@lexibase/rdx-types` | Configuration types 1.1.0 | Adds metadata.since |
-| `@lexibase/rdx-core` | Configuration validation 1.1.0 | Types 1.1.0 |
-| `@lexibase/rdx-ui` | Shared theme and components 1.1.0 | Types 1.1.0; adds FooterCredit |
-| `@lexibase/rdx-next` | Runtime and CLI implementation 1.2.0 | Core/types 1.1.0; compatible UI peer `^1.1.0` |
-| `@lexibase/rdx` | Main framework entry 1.2.0 | Runtime 1.2.0 and UI 1.1.0 |
-| `@lexibase/create-rdx` | Project generator 1.2.0 | Generated projects pin main framework 1.2.0 |
+| Package                | Role                                 | Selected RDX dependencies in its archive      |
+| ---------------------- | ------------------------------------ | --------------------------------------------- |
+| `@lexibase/rdx-types`  | Configuration types 1.1.0            | Adds metadata.since                           |
+| `@lexibase/rdx-core`   | Configuration validation 1.1.0       | Types 1.1.0                                   |
+| `@lexibase/rdx-ui`     | Shared theme and components 1.1.0    | Types 1.1.0; adds FooterCredit                |
+| `@lexibase/rdx-next`   | Runtime and CLI implementation 1.2.0 | Core/types 1.1.0; compatible UI peer `^1.1.0` |
+| `@lexibase/rdx`        | Main framework entry 1.2.0           | Runtime 1.2.0 and UI 1.1.0                    |
+| `@lexibase/create-rdx` | Project generator 1.2.0              | Generated projects pin main framework 1.2.0   |
 
 The framework, runtime and creator versions 1.1.0 are already published. Do not
 overwrite them or republish the unchanged versioning package at 1.0.0. Workspace
