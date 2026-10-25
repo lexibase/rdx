@@ -71,13 +71,14 @@ export function Logo({ className }: { className?: string }) {
     config
       .replace(
         "import { defineConfig } from '@lexibase/rdx'",
-        "import { defineConfig } from '@lexibase/rdx'\nimport { Logo } from './components/logo'"
+        "import { defineConfig } from '@lexibase/rdx'\nimport { Logo } from './components/logo'\nimport MyHome from './components/home'"
       )
       .replace("title: '',", "title: '', logo: Logo,")
+      .replace('enabled: false', 'enabled: true, component: MyHome')
   )
   await writeFile(
-    path.join(project, 'home.tsx'),
-    'import { Logo } from \'./components/logo\'\nexport default function Home() { return <Logo className="size-5" /> }\n'
+    path.join(project, 'components/home.tsx'),
+    'import { Logo } from \'./logo\'\nexport default function Home() { return <Logo className="size-5" /> }\n'
   )
   const filename = ts.findConfigFile(
     path.join(project, 'components'),

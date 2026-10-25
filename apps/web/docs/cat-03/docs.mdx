@@ -6,8 +6,13 @@ link_position: 1
 
 ## Your project
 
+Organize your documentation, assets, and custom React components as follows:
+
 ```text
 my-docs/
+  components/
+    home.tsx
+    logo.tsx
   docs/
     init/
       _category.json
@@ -20,6 +25,7 @@ my-docs/
     images/
   package.json
   rdx.config.ts
+  tsconfig.json
   .gitignore
   README.md
   .rdx/
@@ -28,8 +34,17 @@ my-docs/
 Use `docs/` for content, `public/` for public files, and `rdx.config.ts` for
 configuration. The creator includes example pages that you can replace.
 
-`home.tsx` is optional and belongs beside `rdx.config.ts`. It is only used
-when imported and assigned to `homepage.component`.
+## Custom components
+
+Create a `components/` folder at the project root for your own React components,
+such as a [custom logo](../cat-04/custom-logo.mdx) or parts of your homepage.
+Keep these files together and import each component where you use it. For a
+custom logo, import `Logo` from `./components/logo` in `rdx.config.ts` and assign
+it to `navbar.logo`.
+
+For a custom homepage, create `components/home.tsx`. Import it from
+`./components/home` in `rdx.config.ts` and assign it to `homepage.component`.
+Keep the other React components used by your homepage in `components/` as well.
 
 ## The internal application
 
