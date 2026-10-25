@@ -65,6 +65,23 @@ test(
   }
 )
 
+test('server harness supports development with the matching Node environment and cleanup', async () => {
+  let base
+  await withProductionServer(
+    entry,
+    cwd,
+    async (url) => {
+      base = url
+      assert.deepEqual(await (await fetch(`${url}/environment`)).json(), {
+        command: 'dev',
+        nodeEnv: 'development',
+      })
+    },
+    { mode: 'dev' }
+  )
+  await assertPortReleased(base)
+})
+
 test(
   'production startup failures include captured server logs',
   { timeout: 20_000 },
@@ -80,6 +97,16 @@ test(
     )
   }
 )
+
+test('server harness reports startup HTTP errors without waiting for the readiness timeout', async () => {
+  await assert.rejects(
+    withProductionServer(entry, cwd, () => assert.fail('must not verify'), {
+      readyPath: '/unhealthy',
+      timeoutMs: 10_000,
+    }),
+    /HTTP 500 during startup/
+  )
+})
 
 test(
   'production harness bounds startup waits and stops an unready process',

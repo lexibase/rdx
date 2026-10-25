@@ -1,16 +1,25 @@
 # RDX release readiness
 
-Status: **framework/runtime 1.2.1 and CLI 1.2.2 in preparation**. Individual internal packages
+Status: **framework/runtime 1.2.2 and CLI 1.2.3 in preparation**. Individual internal packages
 have their own versions; the grouped publication order is in PUBLISHING.md.
 The maintainer handles commits, PRs, merges and publication.
+
+## CSS and TypeScript patch follow-up
+
+- [x] Prepare runtime/framework 1.2.2 and creator 1.2.3 with the updated template pin.
+- [x] Validate workspace checks and installed archives.
+- [x] Validate development after a production build without serialized CSS selectors.
+- [ ] Merge the preparation PR after Linux and Windows checks pass.
+- [ ] Publish runtime, main framework and creator in dependency order; verify latest tags.
+- [ ] Validate the published update and fresh creation, using explicit versions during pnpm's release-age window.
 
 ## Layout patch follow-up
 
 - [x] Prepare runtime/framework 1.2.1 and creator 1.2.2, with the corrected template pin.
 - [x] Validate workspace checks and installed archives, including CSS layout rules in a monorepo.
-- [ ] Merge the preparation PR after Linux and Windows checks pass.
-- [ ] Publish runtime, main framework and creator in dependency order; verify latest tags.
-- [ ] Validate a fresh registry installation and an existing framework update.
+- [x] Merge the preparation PR after Linux and Windows checks pass.
+- [x] Publish runtime, main framework and creator in dependency order; verify latest tags.
+- [x] Validate fresh registry creation inside the consumer monorepo.
 
 ## CLI 1.2.1 follow-up
 

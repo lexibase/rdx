@@ -1,6 +1,46 @@
 # Publishing RDX
 
-## Prepared layout patch: runtime/framework 1.2.1 and creator 1.2.2
+## Prepared CSS and TypeScript patch: runtime/framework 1.2.2 and creator 1.2.3
+
+This patch delivers the Tailwind build-output exclusion, transitive PostCSS plugin
+resolution for development workers, and a project-root
+TypeScript configuration for new projects. Publish only runtime, main framework
+and creator. The main package selects runtime 1.2.2 and UI 1.1.0; creator 1.2.3
+pins framework 1.2.2. UI, core, types and versioning remain unchanged.
+
+Run `pnpm check` and `pnpm test:release --install`. Confirm that the creator
+archive includes `templates/default/tsconfig.json` and that generated styles
+exclude `.rdx/.next` while retaining runtime, component and MDX classes. Validate
+`rdx dev` after a production build with clean CSS and no parsing warnings.
+Merge the preparation PR after Linux and Windows checks pass. From updated main,
+publish one package at a time, waiting for each dependency to become available:
+
+```powershell
+npm whoami
+pnpm --filter @lexibase/rdx-next publish --tag latest --access public
+npm view @lexibase/rdx-next@1.2.2 version
+pnpm --filter @lexibase/rdx publish --tag latest --access public
+npm view @lexibase/rdx@1.2.2 version
+pnpm --filter @lexibase/create-rdx publish --tag latest --access public
+npm view @lexibase/create-rdx@1.2.3 version
+```
+
+Verify latest tags: runtime/framework 1.2.2 and creator 1.2.3. For release-day
+validation, use `pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@1.2.3 docs`.
+pnpm 11's default release-age policy can select an older creator for `@latest`
+during the first 24 hours; refreshing the dlx cache alone does not change that
+policy. Test inside and outside a workspace and verify the generated framework
+dependency is 1.2.2.
+
+Existing main-package projects update the framework dependency; project-owned
+configuration, content and components are preserved. Add the project-root
+`tsconfig.json` from the creator template to an existing project that needs it,
+merging settings if a config already exists. Record the publication date after
+registry validation. Package changes do not publish automatically.
+
+## Published layout patch: runtime/framework 1.2.1 and creator 1.2.2 (reference)
+
+These versions are already published. Do not republish them.
 
 Publish only these three packages, in this order. UI, core, types and versioning
 remain at their published versions. The main package selects runtime 1.2.1 and

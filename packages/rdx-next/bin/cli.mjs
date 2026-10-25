@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process'
 import { createRequire } from 'node:module'
-import { access, cp, mkdir } from 'node:fs/promises'
+import { access, cp, mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import process from 'node:process'
@@ -8,6 +8,7 @@ import process from 'node:process'
 import { createRdxProject } from '@lexibase/rdx-core/config'
 import { createJiti } from 'jiti'
 
+import postcssConfig from '../postcss.config.mjs'
 import { preparePublicAssets } from './public-assets.mjs'
 
 export async function runRdxCli({ templateDir } = {}) {
@@ -30,6 +31,19 @@ export async function runRdxCli({ templateDir } = {}) {
       force: true,
       recursive: true,
     })
+    // Resolve in Node before Next processes this file: UI may be transitive,
+    // and native Tailwind plugins must stay outside the Turbopack module graph.
+    const resolvePlugin = createRequire(import.meta.url)
+    const plugins = Object.fromEntries(
+      Object.entries(postcssConfig.plugins).map(([name, options]) => [
+        resolvePlugin.resolve(name),
+        options,
+      ])
+    )
+    await writeFile(
+      path.join(runtimeDirectory, 'postcss.config.mjs'),
+      `export default ${JSON.stringify({ ...postcssConfig, plugins }, null, 2)}\n`
+    )
   }
 
   async function main() {
