@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Preserve the centered documentation layout when a consumer's `.gitignore`
+  excludes nested `dist` directories by registering the compiled runtime entry
+  directly with Tailwind.
+- Verify runtime spacing and width rules in generated production CSS and cover
+  consumer ignore patterns in layout regression tests.
+
 ## 1.2.1 — Unreleased
 
 - Consolidate existing exact RDX release approvals before and after pnpm workspace

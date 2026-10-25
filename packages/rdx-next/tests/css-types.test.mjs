@@ -17,6 +17,50 @@ import test from 'node:test'
 
 import ts from 'typescript'
 
+test('installed runtime layout styles survive a consumer ignoring nested dist directories', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'rdx-layout-css-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  await mkdir(path.join(root, '.git'))
+  await writeFile(path.join(root, '.gitignore'), 'node_modules\n**/dist/*\n')
+  const runtime = path.join(root, 'node_modules/@lexibase/rdx-next')
+  await mkdir(path.join(runtime, 'src/runtime'), { recursive: true })
+  await mkdir(path.join(runtime, 'dist/runtime'), { recursive: true })
+  await copyFile(
+    new URL('../src/runtime/styles.css', import.meta.url),
+    path.join(runtime, 'src/runtime/styles.css')
+  )
+  await copyFile(
+    new URL('../dist/runtime/index.js', import.meta.url),
+    path.join(runtime, 'dist/runtime/index.js')
+  )
+  await symlink(
+    fileURLToPath(new URL('../../rdx-ui', import.meta.url)),
+    path.join(root, 'node_modules/@lexibase/rdx-ui'),
+    process.platform === 'win32' ? 'junction' : 'dir'
+  )
+  const require = createRequire(
+    new URL('../../rdx-ui/package.json', import.meta.url)
+  )
+  const postcss = require('postcss')
+  const tailwind = require('@tailwindcss/postcss')
+  const result = await postcss([tailwind({ base: root })]).process(
+    "@import './node_modules/@lexibase/rdx-next/src/runtime/styles.css';",
+    { from: path.join(root, 'globals.css') }
+  )
+  for (const selector of [
+    '.px-7',
+    '.gap-5',
+    '.md\\:mx-auto',
+    '.md\\:max-w-\\[860px\\]',
+    '.md\\:py-8',
+    '.xl\\:pr-20',
+  ])
+    assert.ok(
+      result.css.includes(selector),
+      `Missing runtime layout rule: ${selector}`
+    )
+})
+
 test('shared PostCSS config exposes a Node-loadable plugin through the published UI export', async () => {
   const config = (await import('../../rdx-ui/postcss.config.mjs')).default
   assert.deepEqual(Object.keys(config.plugins), [

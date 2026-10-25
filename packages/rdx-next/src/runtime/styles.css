@@ -1,5 +1,6 @@
 @import '@lexibase/rdx-ui/globals.css';
-@source '../../dist/**/*.js';
+/* Register the entry file directly: consumer ignore rules can hide nested dist folders. */
+@source '../../dist/runtime/index.js';
 
 /* Colors, buttons, dropdowns and typography come from the shared UI theme. */
 .rdx-skip-link {
