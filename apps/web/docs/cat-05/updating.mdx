@@ -28,6 +28,18 @@ configuration and custom components are not replaced by this operation.
 Check the release notes for migrations and any required Next.js, React or Node.js
 updates. Those requirements are separate from updating RDX itself.
 
+## Newly published releases with pnpm
+
+pnpm can apply a minimum release age when installing updates and checking the
+lockfile before `pnpm dev`. If an update is blocked with
+`ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION`, follow
+[Release-age policies](./troubleshooting.mdx#a-release-age-policy-blocks-installation)
+to wait for the configured period or approve the exact versions you reviewed.
+The error can name internal RDX dependencies as well as the main framework package.
+
+Apply approvals in the `pnpm-workspace.yaml` that governs the project. In a
+monorepo, this is usually the workspace-root file, shared by its applications.
+
 ## Optional plugins
 
 Plugins remain separate dependencies. Update an installed plugin when its release

@@ -22,13 +22,50 @@ reported by your package manager. Keep authentication tokens out of issue report
 
 ## A release-age policy blocks installation
 
-Some package managers reject newly published dependencies. Read the rejected
-package names and versions, then approve only releases you trust through the
-project's package-manager policy. Do not globally disable protections or delete
-lockfiles as a first response.
+pnpm 11 uses a default minimum release age of **24 hours**. Projects can configure
+a different period. This policy applies to direct and transitive dependencies,
+so an installation, update, or lockfile check before `pnpm dev` can report
+`ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` for a newly published RDX package.
 
-A failed `rdx add versioning` does not mean the plugin was activated. Inspect
-the error and any package/lockfile changes before retrying.
+Read the package names and versions in the error, and check their release notes
+before approving them. You can wait for the configured period or add exact
+version approvals to the project's `minimumReleaseAgeExclude` list in
+`pnpm-workspace.yaml`. In a monorepo, edit the workspace-root file.
+
+For example, after reviewing these two releases:
+
+```yaml
+minimumReleaseAgeExclude:
+  - '@lexibase/rdx@1.2.2'
+  - '@lexibase/rdx-next@1.2.2'
+```
+
+Use the versions reported by your error and preserve the list's existing
+approvals. Keep one entry per package name: if both `1.2.1` and `1.2.2` are
+approved, combine them as `'@lexibase/rdx@1.2.1 || 1.2.2'`.
+pnpm 11.9 and later also handle separate exact-version entries correctly;
+see the [pnpm 11.9 release notes](https://github.com/pnpm/pnpm/releases/tag/v11.9.0).
+
+Run `pnpm install`, then retry your original command. The package manager
+applies the updated approvals while retaining the age policy for other releases.
+
+If `rdx add versioning` fails, inspect the reported error and any package or
+lockfile changes before retrying activation.
+
+### Cache and command-line overrides
+
+`--config.dlxCacheMaxAge=0` refreshes the creator's execution cache; release
+selection still follows the configured age policy. Check the creator with
+`pnpm create @lexibase/rdx@latest --version` and use an explicit creator version
+from the release notes when validating a specific release.
+
+`--config.minimumReleaseAge=0` sets the age threshold to zero for that command,
+including its transitive dependencies. The next command uses the project's
+normal policy again. Exact-version exclusions remain recorded for subsequent
+commands and apply only to the listed releases.
+
+See [pnpm's release-age settings](https://github.com/pnpm/pnpm/blob/main/pnpm/docs/settings/dependency-resolution.md#minimumreleaseage)
+for the complete policy options.
 
 ## A document or link is missing
 
