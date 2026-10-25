@@ -74,6 +74,63 @@ test('shared PostCSS config exposes a Node-loadable plugin through the published
   assert.equal(plugin.postcss, true)
 })
 
+test('runtime CSS ignores serialized classes in previous Next builds while retaining project sources', async (t) => {
+  const root = await fixture(t)
+  await mkdir(path.join(root, '.git'))
+  await writeFile(path.join(root, '.gitignore'), '.rdx\n.next\nnode_modules\n')
+  const app = path.join(root, '.rdx/app')
+  const build = path.join(root, '.rdx/.next/server/app')
+  await mkdir(app, { recursive: true })
+  await mkdir(build, { recursive: true })
+  await mkdir(path.join(root, 'components'))
+  await mkdir(path.join(root, 'docs'))
+  const from = path.join(app, 'globals.css')
+  await copyFile(
+    new URL('../templates/runtime/app/globals.css', import.meta.url),
+    from
+  )
+  // Next's serialized HTML contains escaped copies of valid UI class names.
+  const escaped = String.raw`[\u0026_tbody\u003etr:last-child\u003etd]:border-b-0`
+  await writeFile(path.join(build, 'page.html'), `<script>${escaped}</script>`)
+  await writeFile(
+    path.join(root, 'components/logo.tsx'),
+    '<svg className="text-[37px]" />'
+  )
+  await writeFile(
+    path.join(root, 'docs/intro.mdx'),
+    '<div className="tracking-[0.123em]" />'
+  )
+  const require = createRequire(
+    new URL('../../rdx-ui/package.json', import.meta.url)
+  )
+  const result = await require('postcss')([
+    require('@tailwindcss/postcss')({ base: path.join(root, '.rdx') }),
+  ]).process(await readFile(from, 'utf8'), { from })
+  assert.equal(
+    /u0026|u003e/.test(result.css),
+    false,
+    'Serialized build classes must not generate CSS'
+  )
+  assert.ok(result.css.includes('.px-7'), 'Runtime layout must remain styled')
+  assert.ok(
+    result.css.includes('37px'),
+    'Project components must remain styled'
+  )
+  assert.ok(result.css.includes('0.123em'), 'Project MDX must remain styled')
+  assert.equal(
+    result.messages.some(
+      (message) =>
+        message.type === 'dependency' &&
+        message.file &&
+        path
+          .relative(path.join(root, '.rdx/.next'), message.file)
+          .startsWith('server')
+    ),
+    false,
+    'Generated build files must not be style sources'
+  )
+})
+
 async function fixture(t) {
   const root = await mkdtemp(path.join(os.tmpdir(), 'rdx-css-types-'))
   t.after(() => rm(root, { recursive: true, force: true }))

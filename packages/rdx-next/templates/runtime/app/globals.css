@@ -1,4 +1,6 @@
 @import '@lexibase/rdx-next/styles.css';
+/* Build output contains serialized classes, not authoring sources. */
+@source not '../.next';
 @source '../../home.{ts,tsx}';
 @source '../../components/**/*.{ts,tsx}';
 @source '../../docs/**/*.mdx';
