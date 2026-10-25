@@ -1,13 +1,108 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdtemp, readFile, access, rm } from 'node:fs/promises'
+import {
+  mkdtemp,
+  readFile,
+  access,
+  rm,
+  mkdir,
+  writeFile,
+  symlink,
+} from 'node:fs/promises'
+import { createRequire } from 'node:module'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
 
+import ts from 'typescript'
+
 const cli = fileURLToPath(new URL('../bin/index.js', import.meta.url))
+
+test('generated components and config typecheck independently of a NodeNext parent project', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'rdx-project-types-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  await writeFile(
+    path.join(root, 'tsconfig.json'),
+    JSON.stringify({
+      compilerOptions: { module: 'NodeNext', moduleResolution: 'NodeNext' },
+    })
+  )
+  const result = spawnSync(process.execPath, [cli, 'web', '--skip-install'], {
+    cwd: root,
+    encoding: 'utf8',
+  })
+  assert.equal(result.status, 0, result.stderr)
+  const project = path.join(root, 'web')
+  const require = createRequire(
+    new URL('../../rdx-ui/package.json', import.meta.url)
+  )
+  for (const [name, target] of [
+    ['react', path.dirname(require.resolve('react/package.json'))],
+    [
+      '@types/react',
+      path.dirname(require.resolve('@types/react/package.json')),
+    ],
+    ['@types/node', path.dirname(require.resolve('@types/node/package.json'))],
+    ['@lexibase/rdx', fileURLToPath(new URL('../../rdx', import.meta.url))],
+  ]) {
+    const destination = path.join(project, 'node_modules', name)
+    await mkdir(path.dirname(destination), { recursive: true })
+    await symlink(
+      target,
+      destination,
+      process.platform === 'win32' ? 'junction' : 'dir'
+    )
+  }
+  await mkdir(path.join(project, 'components'))
+  await writeFile(
+    path.join(project, 'components/logo.tsx'),
+    `
+export function Logo({ className }: { className?: string }) {
+  return <img src="/favicon.svg" alt="" className={className} />
+}
+`
+  )
+  const configPath = path.join(project, 'rdx.config.ts')
+  const config = await readFile(configPath, 'utf8')
+  await writeFile(
+    configPath,
+    config
+      .replace(
+        "import { defineConfig } from '@lexibase/rdx'",
+        "import { defineConfig } from '@lexibase/rdx'\nimport { Logo } from './components/logo'"
+      )
+      .replace("title: '',", "title: '', logo: Logo,")
+  )
+  await writeFile(
+    path.join(project, 'home.tsx'),
+    'import { Logo } from \'./components/logo\'\nexport default function Home() { return <Logo className="size-5" /> }\n'
+  )
+  const filename = ts.findConfigFile(
+    path.join(project, 'components'),
+    ts.sys.fileExists
+  )
+  assert.equal(path.resolve(filename), path.join(project, 'tsconfig.json'))
+  const read = ts.readConfigFile(filename, ts.sys.readFile)
+  assert.equal(read.error, undefined)
+  const parsed = ts.parseJsonConfigFileContent(
+    read.config,
+    ts.sys,
+    project,
+    undefined,
+    filename
+  )
+  assert.deepEqual(parsed.errors, [])
+  const program = ts.createProgram(parsed.fileNames, parsed.options)
+  const diagnostics = ts.getPreEmitDiagnostics(program)
+  assert.deepEqual(
+    diagnostics.map((diagnostic) =>
+      ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')
+    ),
+    []
+  )
+})
 
 test('generated projects expose homepage and navbar defaults without activating plugins', async (t) => {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), 'rdx-defaults-'))

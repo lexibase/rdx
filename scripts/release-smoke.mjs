@@ -99,6 +99,7 @@ const required = {
     'bin/pnpm-policy.mjs',
     'templates/default/package.json',
     'templates/default/rdx.config.ts',
+    'templates/default/tsconfig.json',
     'templates/default/gitignore.template',
     'templates/default/public/images/rdx.svg',
   ],

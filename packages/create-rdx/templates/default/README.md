@@ -16,6 +16,9 @@ pnpm dev
 
 Edit files in `docs/` to create your documentation. RDX creates and maintains
 its internal runtime in `.rdx/`.
+Keep custom React components in `components/` and import them from
+`rdx.config.ts` or `home.tsx`. The project-root `tsconfig.json` configures JSX
+and bundler-style imports for these files, including inside a monorepo.
 If installation failed during creation, keep these files, fix the reported error
 and retry `pnpm install` (or `npm install` / `yarn install`) before starting.
 
