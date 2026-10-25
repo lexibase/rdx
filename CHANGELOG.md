@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Exclude internal Next.js build output from Tailwind sources, preventing
+  serialized selectors from generating invalid CSS during development after a build.
+- Include a project-root TypeScript configuration in generated projects so local
+  React components and configuration imports use JSX and bundler resolution
+  independently of a parent monorepo's compiler settings.
+
 ## Layout patch — Unreleased
 
 - Preserve the centered documentation layout when a consumer's `.gitignore`

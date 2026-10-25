@@ -39,7 +39,7 @@ export default defineConfig({
     },
   },
   // When disabled, '/' redirects to '/docs'.
-  // To use your own home.tsx, import its component and set homepage.component.
+  // Import your components/home.tsx and set homepage.component to use a custom page.
   homepage: {
     enabled: false,
   },
