@@ -20,7 +20,7 @@ Run the creator and follow the prompt:
   <TabsList aria-label="Create a project with your package manager">
     <TabsTrigger value="pnpm">pnpm</TabsTrigger>
     <TabsTrigger value="npm">npm</TabsTrigger>
-    <TabsTrigger value="npm">yarn</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
   </TabsList>
   <TabsContent value="pnpm">
 pnpm create @lexibase/rdx@latest
@@ -81,10 +81,9 @@ Create the project inside a directory included by your workspace's `packages`
 patterns, such as `apps/docs`. Turborepo is optional. The generated application
 uses the workspace dependency installation and shared lockfile.
 
-The creator consolidates duplicate exact RDX versions already recorded in
-`minimumReleaseAgeExclude` before installation and runtime preparation. This
-prevents an earlier version entry from hiding a later approval. It does not add
-unlisted versions or change the workspace's release-age threshold or strict mode.
+The creator consolidates existing exact-version RDX approvals in
+`minimumReleaseAgeExclude` before installation and runtime preparation,
+preserving the workspace's release-age threshold and strict mode.
 
 If installation fails, keep the generated project and follow the reported error;
 you do not need to recreate your documents. The generator version can be checked
@@ -93,6 +92,11 @@ with `pnpm create @lexibase/rdx@latest --version`. To refresh a cached creator:
 ```bash
 pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@latest my-docs
 ```
+
+Cache refresh and release approval are separate settings. pnpm's release-age
+policy can select an older creator for `@latest` or block newly published
+dependencies. See [Release-age policies](../cat-05/troubleshooting.mdx#a-release-age-policy-blocks-installation)
+to check the selected version and approve specific releases when needed.
 
 ## Next steps
 
