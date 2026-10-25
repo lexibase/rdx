@@ -1,13 +1,17 @@
 # Changelog
 
-## Unreleased
+## 1.2.1 — Unreleased
 
 - Consolidate existing exact RDX release approvals before and after pnpm workspace
   installation, preventing older entries from shadowing approvals added by pnpm.
 - Cover legacy workspace policies, first-install approvals, preservation of
   unrelated rules and repeatable creation in creator regression tests.
+- Check staged formatting without rewriting unrelated working files during commits.
 
-## 1.2.0 — Unreleased
+Only `@lexibase/create-rdx` is prepared at 1.2.1. Generated projects continue to
+select framework 1.2.0. Publication remains a separate maintainer action.
+
+## 1.2.0 — 2026-10-24
 
 - Add shared footer branding with a Powered by RDX repository link.
 - Add optional `metadata.since` for footer year ranges without repeating equal years.

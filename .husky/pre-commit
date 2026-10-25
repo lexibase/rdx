@@ -1,1 +1,1 @@
-pnpm format
+node scripts/check-staged-format.mjs

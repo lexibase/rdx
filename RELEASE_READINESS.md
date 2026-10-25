@@ -1,16 +1,24 @@
 # RDX release readiness
 
-Status: **1.1.0 published; 1.2.0 in preparation**. Individual internal packages
+Status: **1.2.0 published; CLI 1.2.1 in preparation**. Individual internal packages
 have their own versions; the grouped publication order is in PUBLISHING.md.
 The maintainer handles commits, PRs, merges and publication.
+
+## CLI 1.2.1 follow-up
+
+- [x] Prepare creator 1.2.1 while preserving framework 1.2.0 in the template.
+- [x] Validate workspace checks, creator regressions and package contents.
+- [ ] Merge the patch PR after Linux and Windows CI passes.
+- [ ] Publish only the creator and verify the 1.2.1 latest tag.
+- [ ] Validate the published creator in a workspace with existing RDX approvals.
 
 ## 1.2.0 follow-up
 
 - [x] Prepare framework, runtime and creator 1.2.0, plus types, core and UI 1.1.0.
 - [x] Require UI ^1.1.0 in the runtime and pin main framework 1.2.0 in generated projects.
 - [x] Complete workspace checks and installed-archive production/update tests for this release.
-- [ ] Merge the preparation PR after Linux and Windows CI passes.
-- [ ] Publish the six changed packages in dependency order and verify registry tags.
+- [x] Merge the preparation PR after Linux and Windows CI passes.
+- [x] Publish the six changed packages in dependency order and verify registry tags.
 - [ ] Validate registry installations outside/inside a workspace, including a project named docs.
 - [ ] Record the publication date after registry validation.
 
