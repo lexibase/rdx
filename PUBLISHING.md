@@ -1,21 +1,52 @@
 # Publishing RDX
 
-## Prepared release: 1.2.0
+## Prepared CLI patch: 1.2.1
+
+Only `@lexibase/create-rdx` changes version for this patch. The generator handles
+repeated exact RDX approvals in pnpm workspaces before installation and runtime
+preparation. Generated projects still pin `@lexibase/rdx@1.2.0`; runtime, UI, core,
+types and versioning do not need another publication.
+
+Run `pnpm check` and `pnpm test:release`. Verify that the creator archive includes
+`bin/pnpm-policy.mjs` and declares its `yaml` dependency. Merge the preparation PR
+after Linux and Windows checks pass. From the updated `main` branch:
+
+```powershell
+npm whoami
+pnpm --filter @lexibase/create-rdx publish --tag latest --access public
+npm view @lexibase/create-rdx@1.2.1 version
+npm view @lexibase/create-rdx dist-tags --json
+```
+
+The exact version and `latest` must both be 1.2.1. Validate creation in a workspace
+with earlier RDX approvals, not just an empty workspace. Refresh the cached creator
+when testing a fresh publication:
+
+```powershell
+pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@latest docs
+```
+
+Check installation, a second lockfile policy verification, development, build and
+production startup. Record the actual publication date only after registry
+validation. These preparation steps do not publish packages.
+
+## Published release: 1.2.0 (reference)
 
 `@lexibase/rdx` is the main framework entry for newly generated projects. It
 selects compatible runtime and UI versions. Optional plugins remain separate.
-This release has not been published by preparing these files.
+This grouped release is already published. The following table and commands
+record its dependency order; do not republish these existing versions.
 
 This grouped release publishes six changed packages:
 
-| Package                | Role                           | Selected RDX dependencies in its archive      |
-| ---------------------- | ------------------------------ | --------------------------------------------- |
-| `@lexibase/rdx-types` | Configuration types 1.1.0 | Adds metadata.since |
-| `@lexibase/rdx-core` | Configuration validation 1.1.0 | Types 1.1.0 |
-| `@lexibase/rdx-ui` | Shared theme and components 1.1.0 | Types 1.1.0; adds FooterCredit |
-| `@lexibase/rdx-next` | Runtime and CLI implementation 1.2.0 | Core/types 1.1.0; compatible UI peer `^1.1.0` |
-| `@lexibase/rdx` | Main framework entry 1.2.0 | Runtime 1.2.0 and UI 1.1.0 |
-| `@lexibase/create-rdx` | Project generator 1.2.0 | Generated projects pin main framework 1.2.0 |
+| Package                | Role                                 | Selected RDX dependencies in its archive      |
+| ---------------------- | ------------------------------------ | --------------------------------------------- |
+| `@lexibase/rdx-types`  | Configuration types 1.1.0            | Adds metadata.since                           |
+| `@lexibase/rdx-core`   | Configuration validation 1.1.0       | Types 1.1.0                                   |
+| `@lexibase/rdx-ui`     | Shared theme and components 1.1.0    | Types 1.1.0; adds FooterCredit                |
+| `@lexibase/rdx-next`   | Runtime and CLI implementation 1.2.0 | Core/types 1.1.0; compatible UI peer `^1.1.0` |
+| `@lexibase/rdx`        | Main framework entry 1.2.0           | Runtime 1.2.0 and UI 1.1.0                    |
+| `@lexibase/create-rdx` | Project generator 1.2.0              | Generated projects pin main framework 1.2.0   |
 
 The framework, runtime and creator versions 1.1.0 are already published. Do not
 overwrite them or republish the unchanged versioning package at 1.0.0. Workspace
