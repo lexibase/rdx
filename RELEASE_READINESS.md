@@ -1,15 +1,23 @@
 # RDX release readiness
 
-Status: **1.2.0 published; CLI 1.2.1 in preparation**. Individual internal packages
+Status: **framework/runtime 1.2.1 and CLI 1.2.2 in preparation**. Individual internal packages
 have their own versions; the grouped publication order is in PUBLISHING.md.
 The maintainer handles commits, PRs, merges and publication.
+
+## Layout patch follow-up
+
+- [x] Prepare runtime/framework 1.2.1 and creator 1.2.2, with the corrected template pin.
+- [x] Validate workspace checks and installed archives, including CSS layout rules in a monorepo.
+- [ ] Merge the preparation PR after Linux and Windows checks pass.
+- [ ] Publish runtime, main framework and creator in dependency order; verify latest tags.
+- [ ] Validate a fresh registry installation and an existing framework update.
 
 ## CLI 1.2.1 follow-up
 
 - [x] Prepare creator 1.2.1 while preserving framework 1.2.0 in the template.
 - [x] Validate workspace checks, creator regressions and package contents.
-- [ ] Merge the patch PR after Linux and Windows CI passes.
-- [ ] Publish only the creator and verify the 1.2.1 latest tag.
+- [x] Merge the patch PR after Linux and Windows CI passes.
+- [x] Publish only the creator and verify the 1.2.1 latest tag.
 - [ ] Validate the published creator in a workspace with existing RDX approvals.
 
 ## 1.2.0 follow-up

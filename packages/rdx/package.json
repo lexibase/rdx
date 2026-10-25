@@ -1,6 +1,6 @@
 {
   "name": "@lexibase/rdx",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "The RDX documentation framework, with compatible runtime and UI packages.",
   "type": "module",
   "license": "MIT",

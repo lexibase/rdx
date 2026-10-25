@@ -1,14 +1,16 @@
 # Changelog
 
-## Unreleased
+## Layout patch — Unreleased
 
 - Preserve the centered documentation layout when a consumer's `.gitignore`
   excludes nested `dist` directories by registering the compiled runtime entry
   directly with Tailwind.
 - Verify runtime spacing and width rules in generated production CSS and cover
   consumer ignore patterns in layout regression tests.
+- Prepare runtime and main framework 1.2.1, with creator 1.2.2 selecting the
+  corrected framework. UI, core, types and versioning versions remain unchanged.
 
-## 1.2.1 — Unreleased
+## Creator 1.2.1 — Published
 
 - Consolidate existing exact RDX release approvals before and after pnpm workspace
   installation, preventing older entries from shadowing approvals added by pnpm.
@@ -16,8 +18,8 @@
   unrelated rules and repeatable creation in creator regression tests.
 - Check staged formatting without rewriting unrelated working files during commits.
 
-Only `@lexibase/create-rdx` is prepared at 1.2.1. Generated projects continue to
-select framework 1.2.0. Publication remains a separate maintainer action.
+Only `@lexibase/create-rdx` changed version for this patch. Its generated projects
+select framework 1.2.0.
 
 ## 1.2.0 — 2026-10-24
 

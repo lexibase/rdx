@@ -1,8 +1,38 @@
 # Publishing RDX
 
-## Prepared CLI patch: 1.2.1
+## Prepared layout patch: runtime/framework 1.2.1 and creator 1.2.2
 
-Only `@lexibase/create-rdx` changes version for this patch. The generator handles
+Publish only these three packages, in this order. UI, core, types and versioning
+remain at their published versions. The main package selects runtime 1.2.1 and
+UI 1.1.0; the creator template pins the main framework at 1.2.1.
+
+Run `pnpm check` and `pnpm test:release --install`, including the generated CSS
+layout assertions and the pnpm workspace fixture with nested dist ignore rules.
+Merge the preparation PR after Linux and Windows checks pass. From updated main,
+run one command at a time and wait for each dependency to become available:
+
+```powershell
+npm whoami
+pnpm --filter @lexibase/rdx-next publish --tag latest --access public
+npm view @lexibase/rdx-next@1.2.1 version
+pnpm --filter @lexibase/rdx publish --tag latest --access public
+npm view @lexibase/rdx@1.2.1 version
+pnpm --filter @lexibase/create-rdx publish --tag latest --access public
+npm view @lexibase/create-rdx@1.2.2 version
+```
+
+Verify all three latest tags. Test fresh creation with
+`pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@latest docs` outside and
+inside a pnpm workspace, then check development and production layout. Existing
+main-package projects update with `pnpm add @lexibase/rdx@latest`; projects using
+the runtime directly update `@lexibase/rdx-next@latest` instead. Do not regenerate
+existing documentation or edit `.rdx` manually. Record the publication date after
+registry validation. Package preparation does not publish anything.
+
+## Published CLI patch: 1.2.1 (reference)
+
+Only `@lexibase/create-rdx` changed version for this patch. Do not republish it.
+The generator handles
 repeated exact RDX approvals in pnpm workspaces before installation and runtime
 preparation. Generated projects still pin `@lexibase/rdx@1.2.0`; runtime, UI, core,
 types and versioning do not need another publication.
