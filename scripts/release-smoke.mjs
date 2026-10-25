@@ -474,7 +474,18 @@ async function verifySite(
       assert.ok(script, 'The page must reference its generated JavaScript')
       const css = await request(base, stylesheet)
       assert.match(css.headers.get('content-type'), /text\/css/)
-      assert.ok((await css.text()).length)
+      const cssText = await css.text()
+      for (const selector of [
+        '.px-7',
+        '.gap-5',
+        '.md\\:mx-auto',
+        '.md\\:max-w-\\[860px\\]',
+        '.md\\:py-8',
+      ])
+        assert.ok(
+          cssText.includes(selector),
+          `Missing runtime layout rule: ${selector}`
+        )
       const js = await request(base, script)
       assert.match(js.headers.get('content-type'), /javascript/)
       assert.ok((await js.text()).length)
@@ -766,6 +777,11 @@ if (process.argv.includes('--install')) {
   await writeFile(
     path.join(legacyWorkspace, 'pnpm-workspace.yaml'),
     "packages:\n  - 'apps/*'\n"
+  )
+  await mkdir(path.join(legacyWorkspace, '.git'), { recursive: true })
+  await writeFile(
+    path.join(legacyWorkspace, '.gitignore'),
+    'node_modules\n**/dist/*\n'
   )
   for (const name of [
     'docs',
