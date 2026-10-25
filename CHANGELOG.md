@@ -1,14 +1,21 @@
 # Changelog
 
-## Unreleased
+## Runtime 1.2.2 and creator 1.2.3 — Unreleased
 
 - Exclude internal Next.js build output from Tailwind sources, preventing
   serialized selectors from generating invalid CSS during development after a build.
+- Resolve PostCSS plugins from the runtime package so development workers can
+  load the UI plugin when a project depends only on the main framework package.
 - Include a project-root TypeScript configuration in generated projects so local
   React components and configuration imports use JSX and bundler resolution
   independently of a parent monorepo's compiler settings.
+- Document custom SVG logos, favicon configuration and project-owned components
+  organized in `components/`, including `components/home.tsx`.
 
-## Layout patch — Unreleased
+Runtime and main framework are prepared at 1.2.2. Creator 1.2.3 selects framework
+1.2.2. UI, core, types and versioning remain unchanged. Publication is manual.
+
+## Layout patch — Published
 
 - Preserve the centered documentation layout when a consumer's `.gitignore`
   excludes nested `dist` directories by registering the compiled runtime entry

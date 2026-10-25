@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { spawnSync } from 'node:child_process'
 import {
   mkdtemp,
   mkdir,
@@ -11,7 +12,7 @@ import {
 import os from 'node:os'
 import { createRequire } from 'node:module'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import process from 'node:process'
 import test from 'node:test'
 
@@ -72,6 +73,29 @@ test('shared PostCSS config exposes a Node-loadable plugin through the published
   const plugin = require('@lexibase/rdx-ui/postcss-plugin')
   assert.equal(typeof plugin, 'function')
   assert.equal(plugin.postcss, true)
+})
+
+test('prepare resolves transitive PostCSS plugins into standalone config before Next workers load it', async (t) => {
+  const root = await fixture(t)
+  await writeFile(
+    path.join(root, 'rdx.config.ts'),
+    "export default { metadata: { applicationName: 'PostCSS fixture' } }"
+  )
+  const result = spawnSync(
+    process.execPath,
+    [fileURLToPath(new URL('../bin/rdx.mjs', import.meta.url)), 'prepare'],
+    { cwd: root, encoding: 'utf8' }
+  )
+  assert.equal(result.status, 0, result.stderr)
+  const file = path.join(root, '.rdx/postcss.config.mjs')
+  const config = (await import(pathToFileURL(file).href)).default
+  const require = createRequire(new URL('../package.json', import.meta.url))
+  const pluginPath = require.resolve('@lexibase/rdx-ui/postcss-plugin')
+  assert.deepEqual(Object.keys(config.plugins), [pluginPath])
+  assert.ok(path.isAbsolute(pluginPath))
+  const workerRequire = createRequire(path.join(root, '.rdx/worker.cjs'))
+  assert.equal(workerRequire(pluginPath).postcss, true)
+  assert.doesNotMatch(await readFile(file, 'utf8'), /\bimport\b|\brequire\(/)
 })
 
 test('runtime CSS ignores serialized classes in previous Next builds while retaining project sources', async (t) => {

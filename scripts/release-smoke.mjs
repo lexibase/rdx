@@ -122,6 +122,46 @@ function buildProject(project) {
   )
 }
 
+async function verifyDevelopmentAfterBuild(project) {
+  await withProductionServer(
+    path.join(project, 'node_modules/@lexibase/rdx/bin/rdx.mjs'),
+    project,
+    async (base, logs) => {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const html = await (
+          await request(base, '/docs/examples/markdown')
+        ).text()
+        const styles = [
+          ...html.matchAll(/<link\b[^>]*href="([^"]+\.css[^" ]*)"/g),
+        ]
+        assert.ok(styles.length, 'Development must serve generated CSS')
+        let css = ''
+        for (const [, href] of styles)
+          css += await (
+            await request(base, href.replaceAll('&amp;', '&'))
+          ).text()
+        assert.ok(
+          css.includes('.px-7') && css.includes('860px'),
+          'Layout must remain styled after build -> dev'
+        )
+        assert.equal(
+          /u0026|u003e/.test(css),
+          false,
+          'Serialized build classes must not enter development CSS'
+        )
+      }
+      assert.doesNotMatch(
+        logs(),
+        /Parsing CSS source code failed|not recognized as a valid pseudo-class/
+      )
+    },
+    { mode: 'dev', timeoutMs: 120_000 }
+  )
+  console.log(
+    'OK installed archives: build -> dev, Markdown, layout CSS and no serialized selector warnings'
+  )
+}
+
 async function verifyDeploymentTrace(project, versioned) {
   const tracePath = path.join(
     project,
@@ -711,6 +751,7 @@ if (process.argv.includes('--install')) {
   await verifyDeploymentTrace(project, false)
   await verifySite(project, { original, current: original })
   await verifySite(project, { original, current: original, runtimeCwd: true })
+  await verifyDevelopmentAfterBuild(project)
   // This fixture's isolated workspace contains only the generated project.
   pnpm(project, [
     'add',

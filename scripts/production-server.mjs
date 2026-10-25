@@ -22,18 +22,22 @@ export async function withProductionServer(
   entry,
   cwd,
   verify,
-  { timeoutMs = 90_000, readyPath = '/docs/init/intro' } = {}
+  { timeoutMs = 90_000, readyPath = '/docs/init/intro', mode = 'start' } = {}
 ) {
+  assert.ok(
+    ['start', 'dev'].includes(mode),
+    'Expected a production or development server'
+  )
   const port = await availablePort()
   const base = `http://127.0.0.1:${port}`
   const child = spawn(
     process.execPath,
-    [entry, 'start', '--port', String(port), '--hostname', '127.0.0.1'],
+    [entry, mode, '--port', String(port), '--hostname', '127.0.0.1'],
     {
       cwd,
       env: {
         ...process.env,
-        NODE_ENV: 'production',
+        NODE_ENV: mode === 'dev' ? 'development' : 'production',
         NEXT_TELEMETRY_DISABLED: '1',
       },
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -111,6 +115,7 @@ export async function withProductionServer(
     const deadline = Date.now() + timeoutMs
     let ready = false
     while (Date.now() < deadline) {
+      let startupError
       if (spawnError) throw spawnError
       assert.ok(
         child.exitCode === null && child.signalCode === null,
@@ -118,9 +123,13 @@ export async function withProductionServer(
       )
       try {
         const response = await fetch(`${base}${readyPath}`, {
-          signal: AbortSignal.timeout(Math.min(3_000, timeoutMs)),
+          signal: AbortSignal.timeout(Math.min(mode === 'dev' ? 30_000 : 3_000, timeoutMs)),
         })
         await response.arrayBuffer()
+        if (response.status >= 500)
+          startupError = new Error(
+            `Server returned HTTP ${response.status} during startup`
+          )
         if (response.status === 200) {
           ready = true
           break
@@ -128,13 +137,14 @@ export async function withProductionServer(
       } catch {
         /* Startup may not have bound the socket yet. */
       }
+      if (startupError) throw startupError
       await delay(200)
     }
     assert.ok(
       ready,
       `Production fixture did not become ready within ${timeoutMs}ms`
     )
-    await verify(base)
+    await verify(base, () => output)
     assert.ok(
       child.exitCode === null && child.signalCode === null,
       'Production fixture exited during HTTP validation'
