@@ -29,6 +29,33 @@ test(
           const introHtml = await response.text()
           assert.match(introHtml, /data-rdx-sidebar/)
           assert.match(introHtml, /Introduction \| RDX/)
+          assert.match(
+            introHtml,
+            /<meta property="og:title" content="Introduction"/
+          )
+          assert.match(
+            introHtml,
+            /<meta name="twitter:title" content="Introduction"/
+          )
+          const description = introHtml.match(
+            /<meta name="description" content="([^"]*)"/
+          )?.[1]
+          assert.ok(description)
+          assert.ok(
+            introHtml.includes(
+              `<meta property="og:description" content="${description}"`
+            )
+          )
+          assert.ok(
+            introHtml.includes(
+              `<meta name="twitter:description" content="${description}"`
+            )
+          )
+          assert.match(
+            introHtml,
+            /<meta property="og:image" content="https:\/\/[^"]+\/icons\/favicon-96x96.png"/
+          )
+          assert.match(introHtml, /<meta name="twitter:card" content="summary"/)
           const search = await fetch(`${base}/rdx-search/${version}`)
           assert.equal(search.status, 200, version)
           const index = await search.json()

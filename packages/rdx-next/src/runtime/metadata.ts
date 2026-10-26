@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { RdxProject, RDXConfig } from '@lexibase/rdx-types'
+import type { RdxDocPage, RdxProject, RDXConfig } from '@lexibase/rdx-types'
 import { resolveDocsRoute } from '@lexibase/rdx-core'
 import { notFound } from 'next/navigation'
 
@@ -18,9 +18,21 @@ export function getDocumentMetadata({
   const page = route.categories
     .flatMap((category) => category.pages)
     .find((page) => page.slug === route.slug)!
+  return getPageMetadata(project.config, page)
+}
+
+/** Keep page previews in sync while retaining the site's social images and options. */
+export function getPageMetadata(
+  config: RDXConfig,
+  page: Pick<RdxDocPage, 'title' | 'description'>
+): Metadata {
+  const title = page.title
+  const description = page.description || config.description
   return {
-    title: page.title,
-    description: page.description || project.config.description,
+    title,
+    description,
+    openGraph: { ...config.metadata.openGraph, title, description },
+    twitter: { ...config.metadata.twitter, title, description },
   }
 }
 

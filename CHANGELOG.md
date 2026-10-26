@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Use each documentation page's title and description in Open Graph and Twitter
+  previews, preserving configured social images, locale, and card settings.
+
 - Consolidate navigation in Button with native link semantics and remove ButtonLink.
 
 - Render Markdown tables with the shadcn/ui base-nova Table components while

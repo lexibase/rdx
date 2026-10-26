@@ -35,7 +35,7 @@ const config = {
     manifest: '/site.webmanifest',
     // Instructions for search engines, not access control or a privacy setting.
     robots: { index: true, follow: true },
-    // Link previews on social platforms; title and description inherit site values.
+    // Shared preview images; documentation pages use their own title and description.
     openGraph: {
       type: 'website',
       images: [

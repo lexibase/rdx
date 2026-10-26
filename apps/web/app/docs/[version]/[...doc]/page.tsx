@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { getPageMetadata } from '@lexibase/rdx-next/runtime'
 import { mdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
 import { notFound, redirect } from 'next/navigation'
@@ -22,10 +23,7 @@ export async function generateMetadata({
   const page = documentation
     .pages(version)
     .find((entry) => entry.sourcePath === document.sourcePath)!
-  return {
-    title: page.title,
-    description: page.description || config.description,
-  }
+  return getPageMetadata(config, page)
 }
 
 export default async function DocPage({

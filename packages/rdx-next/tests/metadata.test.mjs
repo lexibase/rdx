@@ -7,9 +7,8 @@ import test from 'node:test'
 import { createJiti } from 'jiti'
 
 const jiti = createJiti(import.meta.url, { moduleCache: false, fsCache: false })
-const { getDocumentMetadata, getRdxMetadata } = await jiti.import(
-  '../src/runtime/metadata.ts'
-)
+const { getDocumentMetadata, getPageMetadata, getRdxMetadata } =
+  await jiti.import('../src/runtime/metadata.ts')
 const { createRdxProject } = await jiti.import('@lexibase/rdx-core')
 
 test('applicationName supplies browser titles without inventing canonical or localhost URLs', () => {
@@ -76,6 +75,62 @@ test('renaming applicationName updates browser and social defaults together', ()
   }
 })
 
+test('page previews replace site text while preserving social images, locale and card options', () => {
+  const config = {
+    description: 'Site description',
+    metadata: {
+      applicationName: 'Docs',
+      openGraph: {
+        title: 'Site preview',
+        description: 'Site preview description',
+        type: 'website',
+        locale: 'pt_BR',
+        siteName: 'Docs',
+        images: [
+          { url: '/og.png', alt: 'Docs logo', width: 1200, height: 630 },
+        ],
+      },
+      twitter: {
+        title: 'Site card',
+        description: 'Site card description',
+        card: 'summary_large_image',
+        site: '@docs',
+        creator: '@author',
+        images: ['/card.png'],
+      },
+    },
+  }
+  const before = structuredClone(config)
+  const page = {
+    title: 'Moving and renaming files',
+    description: 'Rename or move a file or folder.',
+  }
+  const metadata = getPageMetadata(config, page)
+  assert.deepEqual(metadata, {
+    ...page,
+    openGraph: { ...before.metadata.openGraph, ...page },
+    twitter: { ...before.metadata.twitter, ...page },
+  })
+  assert.deepEqual(config, before)
+  assert.equal(
+    getPageMetadata(config, { title: 'No description', description: '' })
+      .openGraph.description,
+    'Site description'
+  )
+  assert.deepEqual(
+    getPageMetadata(
+      { metadata: { applicationName: 'Docs' } },
+      { title: 'Minimal page', description: '' }
+    ),
+    {
+      title: 'Minimal page',
+      description: undefined,
+      openGraph: { title: 'Minimal page', description: undefined },
+      twitter: { title: 'Minimal page', description: undefined },
+    }
+  )
+})
+
 test('generated and development layouts both consume the shared metadata adapter', async () => {
   for (const filename of [
     '../templates/runtime/app/layout.tsx',
@@ -137,25 +192,43 @@ test('document metadata follows live and plugin sources, frontmatter and filenam
   const live = { title: 'Live introduction', description: 'Live description' }
   assert.deepEqual(
     getDocumentMetadata({ project, slug: ['guides', 'intro'] }),
-    live
+    { ...live, openGraph: live, twitter: live }
   )
-  assert.deepEqual(getDocumentMetadata({ project }), live)
+  assert.deepEqual(getDocumentMetadata({ project }), {
+    ...live,
+    openGraph: live,
+    twitter: live,
+  })
   const snapshot = {
     title: 'Snapshot introduction',
     description: 'Snapshot description',
   }
   assert.deepEqual(
     getDocumentMetadata({ project, slug: ['1.0.1', 'guides', 'intro'] }),
-    snapshot
+    { ...snapshot, openGraph: snapshot, twitter: snapshot }
   )
-  assert.deepEqual(getDocumentMetadata({ project, slug: ['1.0.1'] }), snapshot)
+  assert.deepEqual(getDocumentMetadata({ project, slug: ['1.0.1'] }), {
+    ...snapshot,
+    openGraph: snapshot,
+    twitter: snapshot,
+  })
   assert.deepEqual(
     getDocumentMetadata({ project, slug: ['guides', 'getting-started'] }),
-    { title: 'Getting Started', description: 'Site description' }
+    {
+      title: 'Getting Started',
+      description: 'Site description',
+      openGraph: { title: 'Getting Started', description: 'Site description' },
+      twitter: { title: 'Getting Started', description: 'Site description' },
+    }
   )
   assert.deepEqual(
     getDocumentMetadata({ project, slug: ['guides', 'blank'] }),
-    { title: 'Blank', description: 'Site description' }
+    {
+      title: 'Blank',
+      description: 'Site description',
+      openGraph: { title: 'Blank', description: 'Site description' },
+      twitter: { title: 'Blank', description: 'Site description' },
+    }
   )
   for (const slug of [['missing'], ['1.0.1', 'missing'], ['..', 'private']]) {
     assert.throws(
