@@ -58,6 +58,8 @@ const required = {
     'dist/ui/components/table.d.ts',
     'dist/ui/components/kbd.js',
     'dist/ui/components/kbd.d.ts',
+    'dist/ui/lib/i18n.js',
+    'dist/ui/providers/locale-provider.js',
     'dist/styles.css',
     'dist/styles.d.css.ts',
     'dist/templates/app/docs/[[...slug]]/page.tsx',
@@ -84,6 +86,8 @@ const required = {
     'src/components/command.tsx',
     'src/components/dialog.tsx',
     'src/lib/docs-search.ts',
+    'src/lib/i18n.ts',
+    'src/providers/locale-provider.tsx',
   ],
   'rdx-next': [
     'config.mjs',
@@ -95,6 +99,7 @@ const required = {
     'dist/runtime/index.d.ts',
     'templates/runtime/app/rdx-search/[source]/route.ts',
     'templates/runtime/app/docs/[[...slug]]/page.tsx',
+    'templates/runtime/app/not-found.tsx',
     'templates/runtime/rdx-project.ts',
     'src/runtime/styles.css',
     'src/runtime/styles.d.css.ts',
@@ -430,6 +435,7 @@ async function verifySite(
     search = true,
     runtimeCwd = false,
     framework = true,
+    locale = 'en',
   }
 ) {
   const entry = runtimeCwd
@@ -472,7 +478,28 @@ async function verifySite(
       )
       assert.match(html, /aria-label="My documentation"/)
       assert.match(html, /<strong>My documentation<\/strong>/)
-      assert.match(html, /Powered by /)
+      assert.ok(html.includes(locale === 'pt-BR' ? 'Feito com' : 'Powered by'))
+      assert.ok(html.includes(`lang="${locale}"`))
+      const markdown = await (
+        await request(base, '/docs/examples/markdown')
+      ).text()
+      assert.ok(
+        markdown.includes(locale === 'pt-BR' ? 'Copiar código' : 'Copy code')
+      )
+      assert.ok(
+        html.includes(
+          locale === 'pt-BR' ? 'Ir para o conteúdo' : 'Skip to content'
+        )
+      )
+      if (versioned) {
+        assert.ok(
+          html.includes(
+            locale === 'pt-BR'
+              ? 'Versão da documentação: Atual'
+              : 'Documentation version: Current'
+          )
+        )
+      }
       assert.match(html, /href="https:\/\/github\.com\/lexibase\/rdx"/)
       assert.match(html, /<meta name="author" content="RDX Metadata Fixture"/)
       assert.match(html, /<meta name="robots" content="noindex, nofollow"/)
@@ -495,7 +522,14 @@ async function verifySite(
           !html.includes(original),
           'Current page must not contain snapshot-only text'
         )
-      await (await request(base, '/docs/rdx-missing-page', 404)).arrayBuffer()
+      const missing = await (
+        await request(base, '/docs/rdx-missing-page', 404)
+      ).text()
+      assert.ok(
+        missing.includes(
+          locale === 'pt-BR' ? 'Página não encontrada' : 'Page not found'
+        )
+      )
       await (
         await request(base, '/rdx-search/rdx-missing-source', 404)
       ).arrayBuffer()
@@ -795,10 +829,9 @@ if (process.argv.includes('--install')) {
   })
   await writeFile(
     configPath,
-    (await readFile(configPath, 'utf8')).replace(
-      'search: true',
-      'search: false'
-    )
+    (await readFile(configPath, 'utf8'))
+      .replace("lang: 'en'", "lang: 'pt-BR'")
+      .replace('search: true', 'search: false')
   )
   buildProject(project)
   await verifyDeploymentTrace(project, true)
@@ -807,12 +840,14 @@ if (process.argv.includes('--install')) {
     current,
     versioned: true,
     search: false,
+    locale: 'pt-BR',
   })
   await verifySite(project, {
     original,
     current,
     versioned: true,
     search: false,
+    locale: 'pt-BR',
     runtimeCwd: true,
   })
   console.log(
@@ -899,6 +934,7 @@ if (process.argv.includes('--install')) {
     versioned: true,
     search: false,
     framework: false,
+    locale: 'pt-BR',
   })
   console.log(
     'OK pnpm workspace apps/docs with parent dependencies and direct runtime/UI remains supported'

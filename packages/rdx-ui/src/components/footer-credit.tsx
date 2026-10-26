@@ -1,17 +1,21 @@
+import { getMessages } from '../lib/i18n'
 import type { ReactNode } from 'react'
 
 import { Button } from './button'
 
 /** Shared site identity and framework credit for documentation footers. */
 export function FooterCredit({
+  lang,
   name,
   since,
   children,
 }: {
+  lang?: string
   name: string
   since?: number
   children?: ReactNode
 }) {
+  const messages = getMessages(lang)
   const currentYear = new Date().getFullYear()
   const years =
     since !== undefined && since !== currentYear
@@ -24,7 +28,7 @@ export function FooterCredit({
         &copy; {years} <strong>{name}</strong>
         {children}
         <span className="inline-block">
-          {' · Powered by '}
+          {` · ${messages.poweredBy} `}
           <Button
             variant="link"
             size="link"

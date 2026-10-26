@@ -52,8 +52,8 @@ const config = {
       images: ['/icons/favicon-96x96.png'],
     },
   },
-  // HTML document language; this does not translate your documentation.
-  lang: 'en',
+  // HTML and interface language: 'en' or 'pt-BR'. Your documents stay as written.
+  lang: 'pt-br',
   // When disabled, '/' redirects to '/docs'. A custom component can be provided.
   homepage: { enabled: true },
   // Installed plugins only become active when registered here.

@@ -1,5 +1,7 @@
 'use client'
 
+import { useMessages } from '../providers/locale-provider'
+
 import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 
@@ -77,6 +79,7 @@ export function DocsToc({ contentId = 'rdx-main' }: { contentId?: string }) {
 }
 
 function PageToc({ contentId }: { contentId: string }) {
+  const messages = useMessages()
   const [headings, setHeadings] = useState<Heading[]>([])
   const [activeId, setActiveId] = useState('')
   const actions = useRef<PopoverActions | null>(null)
@@ -184,7 +187,7 @@ function PageToc({ contentId }: { contentId: string }) {
         <PopoverTrigger
           openOnHover
           delay={120}
-          aria-label="On this page"
+          aria-label={messages.onThisPage}
           className="flex max-h-[40vh] w-12 flex-col items-end gap-2 overflow-hidden rounded-md p-3 text-muted-foreground/40 outline-none transition-colors hover:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
         >
           {headings.map((heading) => (
@@ -215,9 +218,9 @@ function PageToc({ contentId }: { contentId: string }) {
           className="hidden max-h-[min(60vh,var(--available-height))] w-64 overflow-y-auto xl:flex"
         >
           <PopoverTitle className="px-2 pt-1 text-xs text-muted-foreground">
-            On this page
+            {messages.onThisPage}
           </PopoverTitle>
-          <nav aria-label="On this page">
+          <nav aria-label={messages.onThisPage}>
             <HeadingLinks
               nodes={headingTree(headings)}
               baseDepth={baseDepth}

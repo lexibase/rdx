@@ -1,5 +1,7 @@
 'use client'
 
+import { useMessages } from '../providers/locale-provider'
+
 // shadcn/ui Base Nova Dialog, using the shared RDX theme and buttons.
 import * as React from 'react'
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
@@ -20,6 +22,7 @@ function DialogContent({
   children,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Popup>) {
+  const messages = useMessages()
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Backdrop
@@ -43,7 +46,7 @@ function DialogContent({
               className="absolute top-2 right-2 size-7"
             />
           }
-          aria-label="Close search"
+          aria-label={messages.closeSearch}
         >
           <X className="size-3.5" />
         </DialogPrimitive.Close>

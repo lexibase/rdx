@@ -1,10 +1,13 @@
 'use client'
 
+import { useMessages } from '../providers/locale-provider'
+
 import { SunMoon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Button } from '@lexibase/rdx-ui/components/button'
 
 export function ModeToggle() {
+  const messages = useMessages()
   const { theme, setTheme } = useTheme()
 
   const toggleTheme = () => {
@@ -17,10 +20,10 @@ export function ModeToggle() {
       size="icon"
       variant="ghost"
       onClick={toggleTheme}
-      aria-label="Mode Toggle"
+      aria-label={messages.modeToggle}
     >
       <SunMoon className="h-[1.2rem] w-[1.2rem]" />
-      <span className="sr-only">colorTheme</span>
+      <span className="sr-only">{messages.modeToggle}</span>
     </Button>
   )
 }

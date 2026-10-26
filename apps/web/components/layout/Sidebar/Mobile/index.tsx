@@ -1,3 +1,6 @@
+'use client'
+
+import { useMessages } from '@lexibase/rdx-ui/providers/locale-provider'
 import { SidebarClose } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import type { DocCategory } from '@lexibase/rdx-types'
@@ -16,6 +19,7 @@ export function MobileSidebar({
   isOpen: boolean
   onClose: () => void
 }) {
+  const messages = useMessages()
   return (
     <AnimatePresence>
       {isOpen && (
@@ -30,8 +34,8 @@ export function MobileSidebar({
             <Button
               variant="ghost"
               onClick={onClose}
-              title="Close"
-              aria-label="Close sidebar"
+              title={messages.close}
+              aria-label={messages.closeSidebar}
             >
               <SidebarClose className="size-4" />
             </Button>

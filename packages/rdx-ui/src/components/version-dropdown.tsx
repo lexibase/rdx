@@ -1,8 +1,12 @@
 'use client'
 
+import { useMessages } from '../providers/locale-provider'
+
 import { Archive, Bird, PackageOpen } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+
+import { formatMessage } from '../lib/i18n'
 
 import { Button } from './button'
 import {
@@ -42,6 +46,7 @@ export function VersionDropdown({
   onSelect?: (id: string) => void
   footer?: ReactNode
 }) {
+  const messages = useMessages()
   const current =
     options.find((option) => option.id === currentId) ?? options[0]
   if (!current) return null
@@ -87,7 +92,9 @@ export function VersionDropdown({
             variant="outline"
             size="sm"
             className="min-w-0 capitalize sm:min-w-[134px]"
-            aria-label={`Documentation version: ${current.label}`}
+            aria-label={formatMessage(messages.documentationVersion, {
+              version: current.label,
+            })}
           />
         }
       >
@@ -119,7 +126,7 @@ export function VersionDropdown({
             {active.length > 0 && <DropdownMenuSeparator />}
             <DropdownMenuGroup>
               <DropdownMenuLabel className="text-center py-px cursor-default">
-                Archived
+                {messages.archived}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               {archived.map(item)}

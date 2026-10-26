@@ -1,11 +1,14 @@
 'use client'
 
+import { useMessages } from '../providers/locale-provider'
+
 import { useEffect, useRef, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
 
 import { Button } from './button'
 
 export function CopyCodeButton() {
+  const messages = useMessages()
   const [status, setStatus] = useState<'idle' | 'copied' | 'error'>('idle')
   const pending = useRef(false)
   const mounted = useRef(false)
@@ -50,9 +53,9 @@ export function CopyCodeButton() {
         }
       >
         {status === 'copied'
-          ? 'Code copied to clipboard.'
+          ? messages.codeCopied
           : status === 'error'
-            ? 'Could not copy. Select the code and copy it manually.'
+            ? messages.copyCodeError
             : ''}
       </span>
       <Button
@@ -61,13 +64,13 @@ export function CopyCodeButton() {
         size="icon"
         data-status={status}
         className="size-7 shrink-0 border-border/70 bg-background/60 p-0 text-muted-foreground shadow-none hover:text-foreground data-[status=copied]:border-emerald-500/30 data-[status=copied]:bg-emerald-500/10 data-[status=copied]:text-emerald-700 dark:data-[status=copied]:text-emerald-400 data-[status=error]:border-amber-500/30 [&>svg]:size-3.5"
-        aria-label="Copy code"
+        aria-label={messages.copyCode}
         title={
           status === 'copied'
-            ? 'Copied!'
+            ? messages.copied
             : status === 'error'
-              ? 'Could not copy. Try again or copy manually.'
-              : 'Copy code'
+              ? messages.copyRetry
+              : messages.copyCode
         }
         onClick={(event) => copy(event.currentTarget)}
       >

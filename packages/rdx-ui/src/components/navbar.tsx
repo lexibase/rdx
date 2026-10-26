@@ -1,3 +1,4 @@
+import { getMessages } from '../lib/i18n'
 import type { ReactNode } from 'react'
 import { Github } from 'lucide-react'
 
@@ -8,6 +9,7 @@ import { ModeToggle } from './mode-toggle'
 
 /** Shared composition extracted from apps/web/components/layout/Navbar. */
 export function Navbar({
+  lang,
   title = '',
   siteTitle = 'RDX',
   logo = <Logo className="size-5" />,
@@ -19,6 +21,7 @@ export function Navbar({
   github,
   showToggleMode = false,
 }: {
+  lang?: string
   title?: string
   siteTitle?: string
   logo?: ReactNode
@@ -30,10 +33,11 @@ export function Navbar({
   github?: { visible: boolean; url: string }
   showToggleMode?: boolean
 }) {
+  const messages = getMessages(lang)
   return (
     <nav
       data-rdx-navbar
-      aria-label="Main navigation"
+      aria-label={messages.mainNavigation}
       className="w-full flex flex-wrap shrink-0 items-center justify-between px-6 py-2 border-b border-border gap-y-2"
     >
       <div className="flex items-center gap-1">
@@ -53,7 +57,7 @@ export function Navbar({
         {versionMenu}
         {docsLink ?? (
           <Button variant="link" size="sm" href={docsHref}>
-            Docs
+            {messages.docs}
           </Button>
         )}
         {github?.visible && github.url && (

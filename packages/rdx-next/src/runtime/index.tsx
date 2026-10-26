@@ -14,7 +14,9 @@ import { DocsSearch } from '@lexibase/rdx-ui/components/docs-search'
 import { Home } from '@lexibase/rdx-ui/components/home'
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
 import { Logo } from '@lexibase/rdx-ui/components/logo'
-import { mdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
+import { getMdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
+import { getMessages, formatMessage } from '@lexibase/rdx-ui/lib/i18n'
+import { LocaleProvider } from '@lexibase/rdx-ui/providers/locale-provider'
 import { Navbar } from '@lexibase/rdx-ui/components/navbar'
 import {
   VersionDropdown,
@@ -42,6 +44,7 @@ export function RdxLayout({
   config: RDXConfig
   bodyClassName?: string
 }) {
+  const messages = getMessages(config.lang)
   return (
     <html suppressHydrationWarning lang={config.lang ?? 'en'}>
       <body className={bodyClassName}>
@@ -51,10 +54,12 @@ export function RdxLayout({
           attribute="class"
           defaultTheme={config.theme?.defaultTheme ?? 'system'}
         >
-          <a className="rdx-skip-link" href="#rdx-main">
-            Skip to content
-          </a>
-          <div className="flex flex-col h-dvh">{children}</div>
+          <LocaleProvider lang={config.lang}>
+            <a className="rdx-skip-link" href="#rdx-main">
+              {messages.skipContent}
+            </a>
+            <div className="flex flex-col h-dvh">{children}</div>
+          </LocaleProvider>
         </ThemeProvider>
       </body>
     </html>
@@ -69,6 +74,7 @@ function RdxHeader({
   slug?: string[]
 }) {
   const { config } = project
+  const messages = getMessages(config.lang)
   const { source, slug: currentSlug } = resolveDocsRoute(project, slug)
   const options: VersionOption[] = project.sources.map((edition) => {
     const docs = getSourceOptions(project, edition)
@@ -78,7 +84,10 @@ function RdxHeader({
         : getDocsPaths(docs)[0]
     return {
       id: edition.id,
-      label: edition.id === 'current' ? 'Current' : `Version ${edition.label}`,
+      label:
+        edition.id === 'current'
+          ? messages.current
+          : formatMessage(messages.version, { version: edition.label }),
       kind:
         edition.id === 'current'
           ? 'live'
@@ -93,12 +102,17 @@ function RdxHeader({
   const BrandLogo = config.navbar?.logo ?? Logo
   return (
     <Navbar
+      lang={config.lang}
       title={config.navbar?.title ?? ''}
       search={
         config.search ? (
           <DocsSearch
             indexUrl={`/rdx-search/${encodeURIComponent(source.routePrefix || '_')}`}
-            version={source.label}
+            version={
+              source.id === 'current'
+                ? messages.current
+                : formatMessage(messages.version, { version: source.label })
+            }
           />
         ) : undefined
       }
@@ -148,6 +162,26 @@ export function HomePage({ project }: { project: RdxProject }) {
   )
 }
 
+export function NotFoundPage({ config }: { config: RDXConfig }) {
+  const messages = getMessages(config.lang)
+  return (
+    <main
+      id="rdx-main"
+      tabIndex={-1}
+      className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center"
+    >
+      <p className="text-sm text-muted-foreground">404</p>
+      <h1 className="text-3xl font-bold">{messages.notFound}</h1>
+      <p className="text-sm text-muted-foreground">
+        {messages.notFoundDescription}
+      </p>
+      <Button href="/docs" variant="link">
+        {messages.backToDocs}
+      </Button>
+    </main>
+  )
+}
+
 export async function DocsPage({
   slug,
   project,
@@ -155,6 +189,7 @@ export async function DocsPage({
   slug?: string[]
   project: RdxProject
 }) {
+  const messages = getMessages(project.config.lang)
   const {
     source,
     slug: currentSlug,
@@ -166,17 +201,15 @@ export async function DocsPage({
       <>
         <RdxHeader project={project} slug={slug} />
         <main id="rdx-main" tabIndex={-1} className="p-8">
-          <h1>Your documentation is ready.</h1>
-          <p>
-            Add an .mdx file inside your configured documentation directory.
-          </p>
+          <h1>{messages.documentationReady}</h1>
+          <p>{messages.addDocument}</p>
         </main>
       </>
     )
   if (!document) notFound()
   const { content } = await compileDocumentation(
     document.content,
-    mdxComponents,
+    getMdxComponents(project.config.lang),
     {
       sourceRoot: getSourceOptions(project, source).docsDir,
       sourcePath: document.sourcePath,
@@ -228,7 +261,9 @@ export async function DocsPage({
               <header className="mb-6">
                 {source.badge && (
                   <p className="text-sm text-muted-foreground mb-4">
-                    {source.badge}
+                    {source.badge === 'Archived'
+                      ? messages.archivedVersion
+                      : source.badge}
                   </p>
                 )}
                 <span className="text-xs text-zinc-600 font-semibold uppercase block -mb-0.5">
@@ -261,7 +296,7 @@ export async function DocsPage({
                   </Button>
                 ) : (
                   <Button variant="outline" size="sm" disabled>
-                    Previous
+                    {messages.previous}
                   </Button>
                 )}
                 {next ? (
@@ -270,11 +305,12 @@ export async function DocsPage({
                   </Button>
                 ) : (
                   <Button variant="outline" size="sm" disabled>
-                    Next
+                    {messages.next}
                   </Button>
                 )}
               </section>
               <FooterCredit
+                lang={project.config.lang}
                 name={project.config.metadata.applicationName}
                 since={project.config.metadata.since}
               />

@@ -1,5 +1,7 @@
 'use client'
 
+import { useMessages } from '../providers/locale-provider'
+
 import { Tabs as TabsPrimitive } from '@base-ui/react/tabs'
 import { Check, Copy } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -43,6 +45,7 @@ function panelText(node: Node): string {
 }
 
 function CopyTabButton() {
+  const messages = useMessages()
   const [status, setStatus] = useState<'idle' | 'copied' | 'error'>('idle')
   const pending = useRef(false)
   const mounted = useRef(false)
@@ -92,13 +95,13 @@ function CopyTabButton() {
         type="button"
         variant="ghost"
         size="icon"
-        aria-label="Copy active tab"
+        aria-label={messages.copyTab}
         title={
           status === 'error'
-            ? 'Could not copy. Select the tab content and copy it manually.'
+            ? messages.copyTabError
             : status === 'copied'
-              ? 'Copied!'
-              : 'Copy active tab'
+              ? messages.copied
+              : messages.copyTab
         }
         data-status={status}
         className="mr-1.5 size-7 shrink-0 text-muted-foreground hover:text-foreground data-[status=copied]:text-emerald-700 dark:data-[status=copied]:text-emerald-400 data-[status=error]:text-amber-600 [&>svg]:size-3.5"
@@ -113,9 +116,9 @@ function CopyTabButton() {
         className="sr-only"
       >
         {status === 'copied'
-          ? 'Tab content copied to clipboard.'
+          ? messages.tabCopied
           : status === 'error'
-            ? 'Could not copy. Select the tab content and copy it manually.'
+            ? messages.copyTabError
             : ''}
       </span>
     </>

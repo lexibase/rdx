@@ -1,3 +1,4 @@
+import { getMessages } from '@lexibase/rdx-ui/lib/i18n'
 import { Button } from '@lexibase/rdx-ui/components/button'
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
 
@@ -11,6 +12,7 @@ export async function DocFooter({
   version: string
   filename: string
 }) {
+  const messages = getMessages(config.lang)
   const sidebarLinks = await docsIndexer(version)
   const slug = `/docs/${version}/${filename}`
 
@@ -41,9 +43,9 @@ export async function DocFooter({
             variant="outline"
             size="sm"
             disabled
-            aria-label="previous page"
+            aria-label={messages.previousPage}
           >
-            Previous
+            {messages.previous}
           </Button>
         )}
 
@@ -57,21 +59,26 @@ export async function DocFooter({
             {nextLink.label}
           </Button>
         ) : (
-          <Button variant="outline" size="sm" disabled aria-label="next link">
-            Next
+          <Button
+            variant="outline"
+            size="sm"
+            disabled
+            aria-label={messages.nextPage}
+          >
+            {messages.next}
           </Button>
         )}
       </section>
 
       <FooterCredit
+        lang={config.lang}
         name={config.metadata.applicationName}
         since={config.metadata.since}
       >
-        {'. Developed by '}
+        {`. ${messages.developedBy} `}
         <Button
           variant="link"
           size="link"
-          aria-label="go to github page from duhnunes"
           href="https://github.com/duhnunes"
           target="_blank"
           rel="noopener noreferrer"

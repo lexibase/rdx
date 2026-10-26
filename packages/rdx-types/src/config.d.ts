@@ -34,8 +34,9 @@ export type RDXConfig = {
    */
   description?: string
   /**
-   * HTML document language, such as 'en' or 'pt-BR'.
-   * This does not automatically translate the interface or documentation.
+   * HTML document language and built-in interface translations, such as 'en' or 'pt-BR'.
+   * Portuguese locales use Brazilian Portuguese labels; unsupported languages use English.
+   * Document content and author-provided labels remain as written.
    * @defaultValue 'en'
    */
   lang?: string

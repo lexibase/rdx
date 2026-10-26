@@ -74,7 +74,7 @@ export default defineConfig({
 | Option | Default | Purpose |
 | :----- | :------ | :------ |
 | `description` | Empty | Default site description |
-| `lang` | `en` | HTML document language |
+| `lang` | `en` | HTML and interface language |
 | `search` | `false` | Navbar search dialog |
 | `TOC` | `false` | Floating heading navigation |
 | `homepage.enabled` | `false` | Homepage instead of redirecting to docs |
@@ -84,8 +84,20 @@ export default defineConfig({
 The creator includes the GitHub action with a `#` placeholder and the theme
 toggle enabled. Replace the placeholder with your own repository URL.
 
-`lang` sets the HTML document language. For example, use `pt-BR` for a site
-written in Brazilian Portuguese.
+`lang` sets the HTML language and translates built-in interface labels:
+
+```ts
+lang: 'pt-BR',
+```
+
+Use `en` for English or `pt-BR` for Brazilian Portuguese. Portuguese locale
+variants, including `pt`, use Brazilian Portuguese labels. Other languages keep
+their configured HTML language and use English interface labels.
+
+This includes search, the table of contents, copy buttons, navigation, version
+notices, and footer credits. Your MDX content, page titles, category names, and
+custom component text remain as written. Rebuild and redeploy after changing
+`lang` in production.
 
 ## SEO and social previews
 

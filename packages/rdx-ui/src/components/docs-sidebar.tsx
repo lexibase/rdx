@@ -1,5 +1,7 @@
 'use client'
 
+import { useMessages } from '../providers/locale-provider'
+
 import { useEffect, useRef, useState } from 'react'
 import { SidebarClose, SidebarOpen } from 'lucide-react'
 
@@ -18,6 +20,7 @@ export function DocsSidebar({
   categories: SidebarCategory[]
   pathname: string
 }) {
+  const messages = useMessages()
   const [openPath, setOpenPath] = useState<string | null>(null)
   const isOpen = openPath === pathname
   const dialog = useRef<HTMLDialogElement>(null)
@@ -26,7 +29,7 @@ export function DocsSidebar({
     if (!isOpen && dialog.current?.open) dialog.current?.close()
   }, [isOpen])
   const content = (
-    <nav aria-label="Documentation pages">
+    <nav aria-label={messages.documentationPages}>
       {categories.map((category, index) => (
         <div
           key={`${index}:${category.title}`}
@@ -61,7 +64,7 @@ export function DocsSidebar({
         <Button
           variant="ghost"
           onClick={() => setOpenPath(pathname)}
-          aria-label="Open sidebar"
+          aria-label={messages.openSidebar}
         >
           <SidebarOpen className="size-4" />
         </Button>
@@ -74,7 +77,7 @@ export function DocsSidebar({
       </aside>
       <dialog
         ref={dialog}
-        aria-label="Documentation navigation"
+        aria-label={messages.documentationNavigation}
         onClose={() => setOpenPath(null)}
         className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none bg-background text-foreground border-0 p-4 backdrop:bg-black/40"
       >
@@ -82,7 +85,7 @@ export function DocsSidebar({
           <Button
             variant="ghost"
             onClick={() => setOpenPath(null)}
-            aria-label="Close sidebar"
+            aria-label={messages.closeSidebar}
           >
             <SidebarClose className="size-4" />
           </Button>

@@ -3,6 +3,7 @@ import test from 'node:test'
 
 import { createJiti } from 'jiti'
 import { Children, createElement, isValidElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 
 const jiti = createJiti(import.meta.url, {
   moduleCache: true,
@@ -17,8 +18,17 @@ function option(kind) {
   return { id: kind, kind, label: kind, href: `/docs/${kind}` }
 }
 
-// Inspect the composition before Base UI portals mount. No hooks or primitive
-// behavior is mocked: this regression concerns which separators RDX provides.
+// Run locale hooks through React, then inspect composition before portals mount.
+function composition(props) {
+  let tree
+  function Inspect() {
+    tree = VersionDropdown(props)
+    return null
+  }
+  renderToStaticMarkup(createElement(Inspect))
+  return tree
+}
+
 function countSeparators(node) {
   let count = 0
   Children.forEach(node, (child) => {
@@ -47,17 +57,17 @@ for (const [kinds, footer, expected] of [
       ...option(kind),
       id: `${kind}-${index}`,
     }))
-    const tree = VersionDropdown({ options, currentId: options[0].id, footer })
+    const tree = composition({ options, currentId: options[0].id, footer })
     assert.equal(countSeparators(tree), expected)
   })
 }
 
 test('an empty version list renders no dropdown', () => {
-  assert.equal(VersionDropdown({ options: [], currentId: 'current' }), null)
+  assert.equal(composition({ options: [], currentId: 'current' }), null)
 })
 
 test('version trigger uses content width on mobile and preserves desktop spacing', () => {
-  const tree = VersionDropdown({ options: [option('live')], currentId: 'live' })
+  const tree = composition({ options: [option('live')], currentId: 'live' })
   const trigger = Children.toArray(tree.props.children)[0]
   const button = trigger.props.render
   assert.match(button.props.className, /(?:^| )min-w-0(?: |$)/)

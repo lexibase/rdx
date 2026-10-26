@@ -2,6 +2,8 @@ import { defineConfig } from '@lexibase/rdx'
 
 export default defineConfig({
   description: 'Documentation built with RDX.',
+  // HTML and interface language: 'en' or 'pt-BR'. Your documents stay as written.
+  lang: 'en',
   // Site identity, SEO and link previews. '/' paths refer to files in public/.
   metadata: {
     // The single site name: browser titles, social previews and default branding.

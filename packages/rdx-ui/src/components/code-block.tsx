@@ -1,3 +1,4 @@
+import { getMessages } from '../lib/i18n'
 import { Children, isValidElement, type ComponentProps } from 'react'
 import { CodeXml } from 'lucide-react'
 
@@ -6,10 +7,12 @@ import { CopyCodeButton } from './copy-code-button'
 
 /** Keep the code server-rendered; only clipboard interaction needs JavaScript. */
 export function CodeBlock({
+  lang,
   children,
   className,
   ...props
 }: ComponentProps<'pre'>) {
+  const messages = getMessages(lang)
   const code = Children.toArray(children).find(
     (child) =>
       isValidElement<{ className?: string }>(child) &&
@@ -35,7 +38,7 @@ export function CodeBlock({
             className="min-w-0 truncate font-mono text-xs font-medium text-muted-foreground"
             title={language}
           >
-            {language ?? 'Code'}
+            {language ?? messages.code}
           </span>
         </div>
         <CopyCodeButton />
