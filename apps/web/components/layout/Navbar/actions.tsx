@@ -1,4 +1,4 @@
-import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
+import { Button } from '@lexibase/rdx-ui/components/button'
 import { Separator } from '@lexibase/rdx-ui/components/separator'
 import { Github } from 'lucide-react'
 import { ModeToggle } from '@lexibase/rdx-ui/components/mode-toggle'
@@ -15,7 +15,7 @@ export function NavbarActions() {
       {github.visible && (
         <>
           <Separator orientation="vertical" />
-          <ButtonLink
+          <Button
             variant="ghost"
             size="icon"
             title="GitHub"
@@ -27,7 +27,7 @@ export function NavbarActions() {
           >
             <Github className="h-[1.2rem] w-[1.2rem]" />
             <span className="sr-only">GitHub</span>
-          </ButtonLink>
+          </Button>
         </>
       )}
 

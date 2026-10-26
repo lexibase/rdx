@@ -29,6 +29,33 @@ test(
           const introHtml = await response.text()
           assert.match(introHtml, /data-rdx-sidebar/)
           assert.match(introHtml, /Introduction \| RDX/)
+          assert.match(
+            introHtml,
+            /<meta property="og:title" content="Introduction"/
+          )
+          assert.match(
+            introHtml,
+            /<meta name="twitter:title" content="Introduction"/
+          )
+          const description = introHtml.match(
+            /<meta name="description" content="([^"]*)"/
+          )?.[1]
+          assert.ok(description)
+          assert.ok(
+            introHtml.includes(
+              `<meta property="og:description" content="${description}"`
+            )
+          )
+          assert.ok(
+            introHtml.includes(
+              `<meta name="twitter:description" content="${description}"`
+            )
+          )
+          assert.match(
+            introHtml,
+            /<meta property="og:image" content="https:\/\/[^"]+\/icons\/favicon-96x96.png"/
+          )
+          assert.match(introHtml, /<meta name="twitter:card" content="summary"/)
           const search = await fetch(`${base}/rdx-search/${version}`)
           assert.equal(search.status, 200, version)
           const index = await search.json()
@@ -46,7 +73,11 @@ test(
         }
         const example = await fetch(`${base}/docs/canary/mdx-components`)
         const html = await example.text()
-        assert.match(html, /data-rdx-callout="warning"/)
+        assert.match(html, /Markdown \| RDX/)
+        assert.doesNotMatch(html, /data-rdx-callout="warning"/)
+        const callouts = await fetch(`${base}/docs/canary/callouts`)
+        assert.equal(callouts.status, 200)
+        assert.match(await callouts.text(), /data-rdx-callout="warning"/)
         assert.match(html, /data-slot="mdx-table-scroll"/)
         assert.match(html, /data-rdx-code-block/)
         assert.equal(

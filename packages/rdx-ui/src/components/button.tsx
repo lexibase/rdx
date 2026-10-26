@@ -2,6 +2,8 @@
 
 import { Button as ButtonPrimitive } from '@base-ui/react/button'
 import { cva, type VariantProps } from 'class-variance-authority'
+import Link from 'next/link'
+import type { ComponentProps } from 'react'
 
 import { cn } from '@lexibase/rdx-ui/lib/utils'
 
@@ -43,13 +45,23 @@ const buttonVariants = cva(
   }
 )
 
-function Button({
-  className,
-  variant,
-  size,
-  active,
-  ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+type ButtonProps =
+  | (ButtonPrimitive.Props &
+      VariantProps<typeof buttonVariants> & { href?: never })
+  | (ComponentProps<typeof Link> & VariantProps<typeof buttonVariants>)
+
+function Button(props: ButtonProps) {
+  if (props.href !== undefined) {
+    const { className, variant = 'link', size, active, ...linkProps } = props
+    return (
+      <Link
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, active }), className)}
+        {...linkProps}
+      />
+    )
+  }
+  const { className, variant, size, active, ...buttonProps } = props
   return (
     <ButtonPrimitive
       data-slot="button"
@@ -59,7 +71,7 @@ function Button({
           typeof className === 'function' ? className(state) : className
         )
       }
-      {...props}
+      {...buttonProps}
     />
   )
 }

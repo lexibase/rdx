@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 import { SidebarClose, SidebarOpen } from 'lucide-react'
 
 import { Button } from './button'
-import { ButtonLink } from './button-link'
 import { Separator } from './separator'
 
 export type SidebarCategory = {
@@ -37,7 +36,7 @@ export function DocsSidebar({
             {category.title}
           </p>
           {category.links.map((link) => (
-            <ButtonLink
+            <Button
               key={link.href}
               variant="ghost"
               size="sm"
@@ -49,7 +48,7 @@ export function DocsSidebar({
               className="justify-start text-sm text-primary"
             >
               {link.label}
-            </ButtonLink>
+            </Button>
           ))}
           {index < categories.length - 1 && <Separator className="my-4" />}
         </div>

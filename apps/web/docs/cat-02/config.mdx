@@ -125,6 +125,11 @@ This is the `metadata` portion of a `defineConfig` call, not a complete file.
 Place the referenced images, icons, and web app manifest in `public/`.
 `metadataBase` must be an absolute HTTP(S) URL and resolves relative social image URLs.
 
+Documentation pages use their frontmatter `title` and `description` for browser
+metadata and Open Graph/Twitter link previews. When a page has no description,
+the site's `description` is used. Social images, locale, and card settings come
+from `metadata.openGraph` and `metadata.twitter`.
+
 Supported fields include authors, keywords, icons, manifest, robots, OpenGraph,
 and Twitter metadata. This is a validated subset, not the entire Next.js Metadata
 API. Invalid or unknown configuration fields fail with an actionable error.

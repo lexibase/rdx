@@ -195,9 +195,9 @@ export type RdxMetadata = {
   }
   /** Optional Open Graph link previews. No fixed URL is applied to every page. */
   openGraph?: {
-    /** Preview title override; defaults to metadata.applicationName. */
+    /** Site preview title; defaults to applicationName. Docs pages use their page title. */
     title?: string
-    /** Preview description override; defaults to the root description. */
+    /** Site preview description; docs use their page description or the root description. */
     description?: string
     /** Optional site name shown by platforms that support it. */
     siteName?: string
@@ -221,9 +221,9 @@ export type RdxMetadata = {
   twitter?: {
     /** Text-oriented summary or a large-image preview card. */
     card?: 'summary' | 'summary_large_image'
-    /** Card title override; defaults to metadata.applicationName. */
+    /** Site card title; defaults to applicationName. Docs pages use their page title. */
     title?: string
-    /** Card description override; defaults to the root description. */
+    /** Site card description; docs use their page description or the root description. */
     description?: string
     /** Account associated with the site, usually '@account'. */
     site?: string

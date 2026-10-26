@@ -324,24 +324,106 @@ test('React tabs preserve Base UI state classes, native props and opt-in mounted
   assert.match(html, /Preserved content/)
 })
 
-test('tables keep native structure, column alignment and rich content with rounded striped styling', async () => {
+test('tables keep native structure, column alignment and rich content with the default shadcn style', async () => {
   const { content } = await compileDocumentation(
     '| Feature | Status | Count |\n| :--- | :---: | ---: |\n| **Markdown** | Ready | 1 |\n| [Guide](/docs/init/intro) | `code` | 2 |',
     mdxComponents
   )
   const html = renderToStaticMarkup(content)
   assert.match(html, /data-slot="mdx-table-scroll"/)
-  assert.match(html, /rounded-lg border/)
-  assert.match(html, /border-separate border-spacing-0/)
-  assert.match(html, /nth-child\(even\)/)
-  assert.match(html, /<thead>/)
-  assert.match(html, /<tbody>/)
+  assert.doesNotMatch(html, /border-separate|nth-child\(even\)|border-r/)
+  assert.match(html, /hover:bg-muted\/50/)
+  assert.match(html, /<thead\b[^>]*data-slot="table-header"/)
+  assert.match(html, /<tbody\b[^>]*data-slot="table-body"/)
+  assert.match(html, /data-slot="table"/)
+  assert.match(html, /data-slot="table-row"/)
+  assert.match(html, /data-slot="table-cell"/)
   assert.equal((html.match(/scope="col"/g) ?? []).length, 3)
   for (const alignment of ['left', 'center', 'right'])
     assert.match(html, new RegExp(`text-align:${alignment}`))
   assert.match(html, /<strong>Markdown<\/strong>/)
   assert.match(html, /href="\/docs\/init\/intro"/)
   assert.match(html, />code<\/code>/)
+})
+
+test('keyboard shortcuts use shadcn Kbd and KbdGroup in inline Markdown and table cells', async () => {
+  const { content } = await compileDocumentation(
+    `
+Press <Kbd>Esc</Kbd> to close.
+
+<KbdGroup aria-label="Control plus K"><Kbd>Ctrl</Kbd><span>+</span><Kbd>K</Kbd></KbdGroup>
+
+| Action | Shortcut |
+| --- | --- |
+| Search | <KbdGroup><Kbd>Ctrl</Kbd>+<Kbd>K</Kbd></KbdGroup> |
+
+Native markup: <kbd>Enter</kbd>.
+`,
+    mdxComponents
+  )
+  const html = renderToStaticMarkup(content)
+  assert.equal((html.match(/data-slot="kbd-group"/g) ?? []).length, 2)
+  assert.match(html, /<kbd\b[^>]*data-slot="kbd"[^>]*>Esc<\/kbd>/)
+  assert.match(html, /aria-label="Control plus K"/)
+  assert.match(html, /h-5 w-fit min-w-5/)
+  assert.match(html, /<td\b[^>]*>[\s\S]*data-slot="kbd-group"/)
+  assert.match(html, /<kbd>Enter<\/kbd>/)
+  assert.doesNotMatch(html, /role="button"|<kbd\b[^>]*tabindex=/)
+})
+
+test('shadcn Table composition preserves caption, footer, scroll accessibility and class overrides', async () => {
+  const {
+    Table,
+    TableCaption,
+    TableHeader,
+    TableBody,
+    TableFooter,
+    TableRow,
+    TableHead,
+    TableCell,
+  } = await jiti.import('../../rdx-ui/src/components/table.tsx')
+  const row = (Cell, text) =>
+    createElement(TableRow, null, createElement(Cell, null, text))
+  const html = renderToStaticMarkup(
+    createElement(
+      Table,
+      {
+        className: 'w-auto',
+        containerProps: {
+          role: 'region',
+          'aria-label': 'Shortcuts',
+          tabIndex: 0,
+          className: 'rounded-lg',
+        },
+      },
+      createElement(TableCaption, null, 'Keyboard shortcuts'),
+      createElement(TableHeader, null, row(TableHead, 'Action')),
+      createElement(TableBody, null, row(TableCell, 'Search')),
+      createElement(TableFooter, null, row(TableCell, 'One shortcut'))
+    )
+  )
+  for (const slot of [
+    'table-container',
+    'table',
+    'table-caption',
+    'table-header',
+    'table-body',
+    'table-footer',
+    'table-row',
+    'table-head',
+    'table-cell',
+  ])
+    assert.ok(html.includes(`data-slot="${slot}"`), slot)
+  assert.match(
+    html,
+    /role="region"[^>]*aria-label="Shortcuts"[^>]*tabindex="0"/
+  )
+  assert.match(html, /<caption\b[^>]*>Keyboard shortcuts<\/caption>/)
+  assert.match(html, /<tfoot\b/)
+  assert.equal((html.match(/<div\b/g) ?? []).length, 1)
+  const tableClass = html.match(/<table\b[^>]*class="([^"]*)"/)?.[1]
+  assert.ok(tableClass.includes('w-auto'))
+  assert.ok(!tableClass.includes('w-full'))
 })
 
 test('blockquotes preserve Markdown, native citation semantics and class overrides', async () => {
@@ -561,4 +643,32 @@ test('MDX expressions and JSX expression attributes cannot execute project-serve
   } finally {
     delete globalThis.__rdxMdxSecurityProbe
   }
+})
+
+test('Button navigation keeps native anchor semantics and the link variant', async () => {
+  const { Button } = await jiti.import('../../rdx-ui/src/components/button.tsx')
+  const html = renderToStaticMarkup(
+    createElement(
+      Button,
+      {
+        href: '/docs',
+        variant: 'link',
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        'aria-label': 'Read documentation',
+      },
+      'Documentation'
+    )
+  )
+  assert.match(html, /<a\b/)
+  assert.match(html, /href="\/docs"/)
+  assert.match(html, /hover:underline/)
+  assert.match(html, /target="_blank"/)
+  assert.match(html, /aria-label="Read documentation"/)
+  assert.doesNotMatch(html, /role="button"|type="button"/)
+  const action = renderToStaticMarkup(
+    createElement(Button, { disabled: true }, 'Save')
+  )
+  assert.match(action, /<button\b/)
+  assert.match(action, /disabled=""/)
 })

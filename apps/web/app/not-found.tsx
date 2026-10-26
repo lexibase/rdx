@@ -1,6 +1,6 @@
 'use client'
 
-import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
+import { Button } from '@lexibase/rdx-ui/components/button'
 
 import { useVersion } from '@/hooks/use-version'
 
@@ -23,9 +23,9 @@ export default function NotFound() {
             Please contact the owner of the site that led you to this link and
             let them know the link is broken.
           </p>
-          <ButtonLink variant="primary" href={href}>
+          <Button variant="primary" href={href}>
             Go back to documentation
-          </ButtonLink>
+          </Button>
         </article>
       </div>
     </section>

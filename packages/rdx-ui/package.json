@@ -8,6 +8,7 @@
   "description": "The shared RDX documentation theme and UI components.",
   "license": "MIT",
   "files": [
+    "THIRD_PARTY_NOTICES.md",
     "src",
     "postcss.config.mjs",
     "postcss-plugin.cjs",

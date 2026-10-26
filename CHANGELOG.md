@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Use each documentation page's title and description in Open Graph and Twitter
+  previews, preserving configured social images, locale, and card settings.
+
+- Consolidate navigation in Button with native link semantics and remove ButtonLink.
+
+- Render Markdown tables with the shadcn/ui base-nova Table components while
+  using its default visual style, Markdown alignment and keyboard scrolling.
+- Add shadcn/ui Kbd and KbdGroup to MDX and public component exports, with
+  keyboard shortcut examples in the official documentation and generated projects.
+
 ## Runtime 1.2.2 and creator 1.2.3 — Unreleased
 
 - Exclude internal Next.js build output from Tailwind sources, preventing

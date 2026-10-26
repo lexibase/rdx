@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Github } from 'lucide-react'
 
-import { ButtonLink } from './button-link'
+import { Button } from './button'
 import { Logo } from './logo'
 import { Separator } from './separator'
 import { ModeToggle } from './mode-toggle'
@@ -37,7 +37,7 @@ export function Navbar({
       className="w-full flex flex-wrap shrink-0 items-center justify-between px-6 py-2 border-b border-border gap-y-2"
     >
       <div className="flex items-center gap-1">
-        <ButtonLink
+        <Button
           variant="ghost"
           size={title === '' ? 'icon' : 'default'}
           aria-label={siteTitle}
@@ -46,20 +46,20 @@ export function Navbar({
         >
           {logo}
           {title !== '' && <span>{title}</span>}
-        </ButtonLink>
+        </Button>
       </div>
       <div className="flex items-center gap-x-1 md:gap-x-2 h-4">
         {search}
         {versionMenu}
         {docsLink ?? (
-          <ButtonLink variant="link" size="sm" href={docsHref}>
+          <Button variant="link" size="sm" href={docsHref}>
             Docs
-          </ButtonLink>
+          </Button>
         )}
         {github?.visible && github.url && (
           <>
             <Separator orientation="vertical" />
-            <ButtonLink
+            <Button
               variant="ghost"
               size="icon"
               title="GitHub"
@@ -71,7 +71,7 @@ export function Navbar({
             >
               <Github className="h-[1.2rem] w-[1.2rem]" />
               <span className="sr-only">GitHub</span>
-            </ButtonLink>
+            </Button>
           </>
         )}
         {showToggleMode && (

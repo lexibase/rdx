@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { ButtonLink } from './button-link'
+import { Button } from './button'
 import { Logo } from './logo'
 
 /** The default landing page from apps/web, not a separate marketing theme. */
@@ -32,13 +32,13 @@ export function Home({
       {buttons.length > 0 && (
         <div className="flex flex-wrap justify-center gap-3 mt-6 px-6">
           {buttons.map((button, index) => (
-            <ButtonLink
+            <Button
               key={`${index}:${button.href}`}
               variant={index === 0 ? 'default' : 'outline'}
               href={button.href}
             >
               {button.label}
-            </ButtonLink>
+            </Button>
           ))}
         </div>
       )}

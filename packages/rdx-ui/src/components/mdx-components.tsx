@@ -10,6 +10,17 @@ import {
 import { Blockquote } from './blockquote'
 import { Callout } from './callout'
 import { CodeBlock } from './code-block'
+import { Kbd, KbdGroup } from './kbd'
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from './table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs'
 import { Separator } from '@lexibase/rdx-ui/components/separator'
 
@@ -85,41 +96,38 @@ export const mdxComponents = {
     />
   ),
   table: ({ className, ...props }: ComponentProps<'table'>) => (
-    <div
-      data-slot="mdx-table-scroll"
-      role="region"
-      aria-label="Table"
-      tabIndex={0}
-      className="my-6 min-w-0 max-w-full overflow-x-auto rounded-lg border border-border bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-    >
-      <table
-        className={cn(
-          'w-full border-separate border-spacing-0 text-sm [&_tbody>tr]:transition-colors motion-reduce:[&_tbody>tr]:transition-none [&_tbody>tr:nth-child(even)]:bg-muted/20 [&_tbody>tr:hover]:bg-muted/40 [&_tbody>tr:last-child>td]:border-b-0',
-          className
-        )}
-        {...props}
-      />
-    </div>
+    <Table
+      containerProps={{
+        'data-slot': 'mdx-table-scroll',
+        role: 'region',
+        'aria-label': 'Table',
+        tabIndex: 0,
+        className:
+          'my-6 min-w-0 max-w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+      }}
+      className={className}
+      {...props}
+    />
   ),
+  thead: TableHeader,
+  tbody: TableBody,
+  tfoot: TableFooter,
+  tr: TableRow,
+  caption: TableCaption,
   th: ({ className, scope = 'col', ...props }: ComponentProps<'th'>) => (
-    <th
-      scope={scope}
-      className={cn(
-        'border-b border-r border-border bg-muted/40 px-4 py-3 text-left text-xs font-semibold tracking-wide text-foreground/90 last:border-r-0',
-        className
-      )}
-      {...props}
-    />
+    <TableHead scope={scope} className={className} {...props} />
   ),
-  td: ({ className, ...props }: ComponentProps<'td'>) => (
-    <td
-      className={cn(
-        'min-w-40 border-b border-r border-border/70 px-4 py-3 align-top leading-6 last:border-r-0',
-        className
-      )}
-      {...props}
-    />
-  ),
+  td: TableCell,
+  Kbd,
+  KbdGroup,
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
   Callout,
   Accordion,
   AccordionItem,

@@ -1,0 +1,31 @@
+---
+title: Keyboard shortcuts
+description: Display keys and shortcut combinations with Kbd.
+link_position: 8
+---
+
+## Single keys
+
+Press <Kbd>Enter</Kbd> to confirm or <Kbd>Esc</Kbd> to close a dialog.
+
+## Shortcut reference
+
+Use `KbdGroup` to keep keys together when describing your application's shortcuts:
+
+| Action | Shortcut |
+| :----- | :------- |
+| Search | <KbdGroup><Kbd>Ctrl</Kbd>+<Kbd>K</Kbd></KbdGroup> |
+| Save | <KbdGroup><Kbd>Ctrl</Kbd>+<Kbd>S</Kbd></KbdGroup> |
+| Close | <Kbd>Esc</Kbd> |
+
+```mdx
+<KbdGroup aria-label="Control plus K">
+  <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd>
+</KbdGroup>
+```
+
+For a macOS shortcut:
+
+<KbdGroup aria-label="Command plus K">
+  <Kbd aria-label="Command">⌘</Kbd>+<Kbd>K</Kbd>
+</KbdGroup>

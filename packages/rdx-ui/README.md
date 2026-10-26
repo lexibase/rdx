@@ -45,11 +45,10 @@ manual-copy guidance instead of a false success message.
 
 The shared components use `@base-ui/react` and the RDX theme.
 `components.json` selects shadcn/ui's `base-nova` style.
-Use `render` for interactive composition and `ButtonLink` for navigation:
+Use `render` for interactive composition and `Button` with `href` for navigation:
 
 ```tsx
 import { Button } from '@lexibase/rdx-ui/components/button'
-import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
   DropdownMenuGroup, DropdownMenuLabel, DropdownMenuItem,
@@ -57,7 +56,7 @@ import {
 } from '@lexibase/rdx-ui/components/dropdown-menu'
 import Link from 'next/link'
 
-<ButtonLink href="/docs" variant="outline">Documentation</ButtonLink>
+<Button href="/docs" variant="link">Documentation</Button>
 
 <DropdownMenu>
   <DropdownMenuTrigger render={<Button variant="outline" />}>
@@ -75,8 +74,8 @@ import Link from 'next/link'
 </DropdownMenu>
 ```
 
-`ButtonLink` renders a Next.js link with button styling, not `role="button"`.
-`Button` renders a native button; use `type="submit"` explicitly for form submission.
+`Button` with `href` renders a native Next.js link; use `variant="link"` for text links.
+Without `href`, `Button` renders a native button; use `type="submit"` explicitly for form submission.
 Menu actions use `onClick`. Labels must be inside `DropdownMenuGroup`.
 Checkbox values are boolean; checkbox/radio items remain open unless
 `closeOnClick` is enabled.

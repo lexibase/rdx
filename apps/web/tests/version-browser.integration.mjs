@@ -88,7 +88,8 @@ test(
           )
           assert.equal(example.status, 200, `${mode}: showcase MDX example`)
           const exampleHtml = await example.text()
-          assert.match(exampleHtml, /data-rdx-callout="warning"/)
+          assert.match(exampleHtml, /Markdown \| RDX/)
+          assert.doesNotMatch(exampleHtml, /data-rdx-callout="warning"/)
           assert.match(exampleHtml, /data-slot="mdx-table-scroll"/)
           const context = await browser.newContext()
           await context.addInitScript(() => {
@@ -224,8 +225,8 @@ test(
             .waitFor()
           await page.keyboard.press('Escape')
           await page.goto(`${running.base}/docs/canary/mdx-components`)
-          await page.getByRole('note', { name: 'Before updating' }).waitFor()
-          assert.equal(await page.locator('main [data-rdx-callout]').count(), 6)
+          await page.getByRole('heading', { name: /^Markdown$/i }).waitFor()
+          assert.equal(await page.locator('main [data-rdx-callout]').count(), 0)
           assert.equal(
             await page.locator('[data-rdx-version-notice]').count(),
             1
@@ -261,7 +262,7 @@ test(
             ),
             expectedCode
           )
-          assert.deepEqual(errors, [], `${mode}: shared Callout and Markdown`)
+          assert.deepEqual(errors, [], `${mode}: shared Markdown components`)
           await page
             .getByRole('button', { name: 'Documentation version: Canary' })
             .click()

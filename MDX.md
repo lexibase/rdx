@@ -69,6 +69,26 @@ duplicate suffixes such as `setup-1`. Explicit existing IDs are preserved. This
 does not add automatic heading anchor buttons. The floating table of contents
 is separately opt-in through `TOC: true`.
 
+## Tables and keyboard shortcuts
+
+Markdown tables use the default shadcn/ui base-nova Table styling: horizontal row
+separators and compact cells. RDX supports Markdown alignment and a focusable
+horizontal scroll container. The shared Table
+primitives are also available from `@lexibase/rdx/ui/components/table` for custom
+React components and through their named tags in MDX.
+
+Use shadcn/ui `Kbd` and `KbdGroup` directly in MDX to document keyboard input:
+
+```mdx
+<KbdGroup aria-label="Control plus K">
+  <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd>
+</KbdGroup>
+```
+
+These components render native `<kbd>` elements and can be used inside paragraphs
+and table cells. Import them from `@lexibase/rdx/ui/components/kbd` in custom React
+components. Standard lowercase `<kbd>` JSX keeps its native HTML rendering.
+
 ## Callout
 
 Use directly in any `.mdx` page, without an import:

@@ -1,5 +1,5 @@
 import type { DocCategory } from '@lexibase/rdx-types'
-import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
+import { Button } from '@lexibase/rdx-ui/components/button'
 import { Separator } from '@lexibase/rdx-ui/components/separator'
 
 export function SidebarCategory({
@@ -17,7 +17,7 @@ export function SidebarCategory({
         {category.title}
       </p>
       {category.links.map((link) => (
-        <ButtonLink
+        <Button
           key={link.href}
           variant="ghost"
           size="sm"
@@ -28,7 +28,7 @@ export function SidebarCategory({
           className="justify-start text-sm text-primary"
         >
           {link.label}
-        </ButtonLink>
+        </Button>
       ))}
       {showSeparator && <Separator className="my-4" />}
     </div>
