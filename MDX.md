@@ -35,8 +35,9 @@ Unknown languages fall back to plain text; unlabelled fences stay plain. Inline
 code is not highlighted. Token markup preserves code whitespace and the trailing
 newline for both block copying and copying a complete tab.
 
-Each Markdown block includes the shadcn wrap-lines action. Wrapping is disabled
-initially, toggles independently per block, and does not change copied text.
+On small screens (below 768px), each Markdown block shows the shadcn wrap-lines
+action. Wrapping is disabled initially, toggles independently per block, and does
+not change copied text.
 
 ### Diff and folder fences
 

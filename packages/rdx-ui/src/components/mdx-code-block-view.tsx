@@ -52,6 +52,7 @@ export function MdxCodeBlockView({
           <Button
             variant="ghost"
             size="icon-xs"
+            className="md:hidden"
             aria-label={messages.wrapCode}
             title={messages.wrapCode}
             aria-pressed={wrap}

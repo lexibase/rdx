@@ -1434,6 +1434,18 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
           (await blocks.nth(1).boundingBox()).height <= 96,
           'A single-line code block should remain compact'
         )
+        assert.equal(
+          await blocks
+            .first()
+            .getByRole('button', {
+              name: 'Wrap lines',
+              exact: true,
+              includeHidden: true,
+            })
+            .isVisible(),
+          false
+        )
+        await page.setViewportSize({ width: 390, height: 844 })
         const wrap = blocks
           .first()
           .getByRole('button', { name: 'Wrap lines', exact: true })
@@ -1494,6 +1506,7 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
           null
         )
         assert.equal(await page.locator('p [data-rdx-code-block]').count(), 0)
+        await page.setViewportSize({ width: 1872, height: 955 })
         await blocks.first().locator('button[data-status="idle"]').waitFor()
         if (process.env.RDX_THEME_SCREENSHOTS) {
           await mkdir(process.env.RDX_THEME_SCREENSHOTS, { recursive: true })
