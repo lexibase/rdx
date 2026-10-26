@@ -27,6 +27,9 @@ Use **strong text**, *emphasis*, ~~strikethrough~~ and `inline code`.
 
 ### Five-column comparison
 
+Markdown tables use the shared shadcn/ui Table components, with the RDX
+documentation styling. Column alignment follows the Markdown separator row.
+
 Wider tables scroll horizontally on small screens without widening the page.
 
 | Feature | Description | Status | Plugin | Example |
@@ -35,6 +38,9 @@ Wider tables scroll horizontally on small screens without widening the page.
 | Callout | Highlight contextual information | Included | Not required | `<Callout>` |
 | Code block | Display source code with a copy button | Included | Not required | `pnpm dev` |
 | Blockquote | Quote a passage or explanation | Included | Not required | `> A quotation` |
+
+Table cells can contain [keyboard shortcut components](./keyboard-shortcuts.mdx)
+such as `<Kbd>Esc</Kbd>`.
 
 ```ts
 const framework = 'RDX'

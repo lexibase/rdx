@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { Search } from 'lucide-react'
 import { Button } from './button'
+import { Kbd } from './kbd'
 
 const SearchDialog = dynamic(
   () =>
@@ -58,12 +59,12 @@ export function DocsSearch({
       >
         <Search className="size-3.5" />
         <span className="hidden sm:inline">Search…</span>
-        <kbd
-          className="ml-auto hidden rounded border px-1 text-[10px] text-muted-foreground sm:inline"
+        <Kbd
+          className="ml-auto hidden h-auto rounded border bg-transparent px-1 text-[10px] text-muted-foreground sm:inline"
           aria-hidden="true"
         >
           ⌘ / Ctrl K
-        </kbd>
+        </Kbd>
       </Button>
       {activated && (
         <SearchDialog
