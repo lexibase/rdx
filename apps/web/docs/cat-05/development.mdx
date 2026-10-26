@@ -9,9 +9,20 @@ link_position: 5
 ```bash
 git clone https://github.com/lexibase/rdx.git
 cd rdx
-pnpm install
-pnpm dev
 ```
+
+The framework repository uses pnpm workspaces. Install the pnpm version declared
+in its `packageManager` field, then run these commands from the repository root:
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Install and develop the RDX workspace">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm install  
+pnpm dev
+  </TabsContent>
+</Tabs>
 
 Use a Node.js version supported by the repository's `engines` field. The tested
 CI environments use Linux/Node 22 and Windows/Node 24.
@@ -30,10 +41,15 @@ Use one Ctrl+C to stop its processes in the same terminal.
 
 ## Validate a change
 
-```bash
-pnpm check
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Validate the RDX workspace">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm check  
 pnpm test:release --install
-```
+  </TabsContent>
+</Tabs>
 
 The first command runs lint, type checks, builds, and tests. The second packs
 local packages, installs their archives into a disposable generated project,
@@ -47,9 +63,14 @@ Release test artifacts are retained for inspection under
 Canary is the live documentation in `apps/web/docs/`. To save a documentation
 snapshot for a release, run:
 
-```bash
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Create an RDX documentation snapshot">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
 pnpm --filter web docs:version 1.0.0
-```
+  </TabsContent>
+</Tabs>
 
 Do not run this on every commit or deployment. Subsequent work continues in
 Canary while the released snapshot remains unchanged.

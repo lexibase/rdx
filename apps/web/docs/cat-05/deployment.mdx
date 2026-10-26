@@ -8,12 +8,27 @@ link_position: 2
 
 From the directory containing `package.json` and `rdx.config.ts`:
 
-```bash
-pnpm build
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Build and serve the production site">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm build<br />
 pnpm start
-```
+  </TabsContent>
+  <TabsContent value="npm">
+npm run build<br />
+npm run start
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn build<br />
+yarn start
+  </TabsContent>
+</Tabs>
 
-With npm, use `npm run build` and `npm run start`. The generated scripts call
+The generated scripts call
 `rdx build` and `rdx start`; they run Next.js against the internal `.rdx/` app.
 
 Do not deploy the development server. Test your pages, assets, navigation,
@@ -101,8 +116,27 @@ nested page, and check that a missing page returns 404.
 ## Node.js hosting
 
 On a Node.js server, install dependencies, run the build, and start the generated
-project with `pnpm start`. Configure HTTPS, a process supervisor, and the host's
-network settings. Keep the complete project available to the runtime.
+project:
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Start the production server">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm start
+  </TabsContent>
+  <TabsContent value="npm">
+npm run start
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn start
+  </TabsContent>
+</Tabs>
+
+Configure HTTPS, a process supervisor, and the host's network settings. Keep the
+complete project available to the runtime.
 
 ## Updates
 

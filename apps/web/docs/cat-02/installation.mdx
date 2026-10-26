@@ -7,7 +7,7 @@ link_position: 1
 ## Requirements
 
 Use Node.js **22.18+ (22.x)** or **24.11+ (24.x)**, with the latest patch of
-either line. Choose pnpm or npm and use the same package manager throughout
+either line. Choose pnpm, npm, or Yarn and use the same package manager throughout
 your project.
 
 You do not need to create a Next.js project first.
@@ -29,9 +29,11 @@ pnpm create @lexibase/rdx@latest
 npm create @lexibase/rdx@latest
   </TabsContent>
   <TabsContent value="yarn">
-yarn create @lexibase/rdx@latest
+yarn dlx @lexibase/create-rdx@latest
   </TabsContent>
 </Tabs>
+
+The Yarn creator examples use `yarn dlx` (Yarn 2+).
 
 The prompt asks **What is your project named?** Enter a name such as `my-docs`.
 RDX creates that directory and installs its dependencies.
@@ -39,7 +41,7 @@ RDX creates that directory and installs its dependencies.
 ## Run locally
 
 <Tabs defaultValue="pnpm">
-  <TabsList aria-label="Run your project localy">
+  <TabsList aria-label="Run your project locally">
     <TabsTrigger value="pnpm">pnpm</TabsTrigger>
     <TabsTrigger value="npm">npm</TabsTrigger>
     <TabsTrigger value="yarn">yarn</TabsTrigger>
@@ -61,16 +63,44 @@ Open `http://localhost:3000/docs`, edit `docs/init/intro.mdx` and save. Keep the
 
 Provide the directory name directly to skip the name prompt:
 
-```bash
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Create a named documentation project">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
 pnpm create @lexibase/rdx@latest my-docs
-```
+  </TabsContent>
+  <TabsContent value="npm">
+npm create @lexibase/rdx@latest -- my-docs
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn dlx @lexibase/create-rdx@latest my-docs
+  </TabsContent>
+</Tabs>
 
 Inspect the creator without generating a project:
 
-```bash
-pnpm dlx @lexibase/create-rdx@latest --help
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Inspect the creator">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm dlx @lexibase/create-rdx@latest --help<br />
 pnpm dlx @lexibase/create-rdx@latest --version
-```
+  </TabsContent>
+  <TabsContent value="npm">
+npx @lexibase/create-rdx@latest --help<br />
+npx @lexibase/create-rdx@latest --version
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn dlx @lexibase/create-rdx@latest --help<br />
+yarn dlx @lexibase/create-rdx@latest --version
+  </TabsContent>
+</Tabs>
 
 Use `--skip-install` to generate files without installing dependencies, then
 install them yourself inside the new directory. An existing directory is not overwritten.
@@ -89,9 +119,14 @@ If installation fails, keep the generated project and follow the reported error;
 you do not need to recreate your documents. The generator version can be checked
 with `pnpm create @lexibase/rdx@latest --version`. To refresh a cached creator:
 
-```bash
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Refresh the pnpm creator cache">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
 pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@latest my-docs
-```
+  </TabsContent>
+</Tabs>
 
 Cache refresh and release approval are separate settings. pnpm's release-age
 policy can select an older creator for `@latest` or block newly published
