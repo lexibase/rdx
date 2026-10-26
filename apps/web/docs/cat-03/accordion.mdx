@@ -25,9 +25,22 @@ and each file becomes a page.
 
 Run the development server:
 
-```bash
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Preview your documentation">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
 pnpm dev
-```
+  </TabsContent>
+  <TabsContent value="npm">
+npm run dev
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn dev
+  </TabsContent>
+</Tabs>
 
 <Callout variant="tip" title="Live updates">
 
@@ -47,7 +60,7 @@ Keep the server running while editing your documentation.
     <AccordionTrigger>How do I preview my docs?</AccordionTrigger>
     <AccordionContent>
 
-Run `pnpm dev` from your documentation project root.
+Start the development server from your documentation project root.
 
     </AccordionContent>
   </AccordionItem>
@@ -67,7 +80,24 @@ Opening an answer closes the previous one in the same group.
     <AccordionTrigger>Build for production</AccordionTrigger>
     <AccordionContent>
 
-Run `pnpm build` to generate the production site.
+Generate the production site:
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Build the documentation">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm build
+  </TabsContent>
+  <TabsContent value="npm">
+npm run build
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn build
+  </TabsContent>
+</Tabs>
 
     </AccordionContent>
   </AccordionItem>
@@ -75,7 +105,24 @@ Run `pnpm build` to generate the production site.
     <AccordionTrigger>Check the production site</AccordionTrigger>
     <AccordionContent>
 
-Run `pnpm start` after a successful build.
+After a successful build, start the production server:
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Serve the documentation">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm start
+  </TabsContent>
+  <TabsContent value="npm">
+npm run start
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn start
+  </TabsContent>
+</Tabs>
 
     </AccordionContent>
   </AccordionItem>

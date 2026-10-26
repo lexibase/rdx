@@ -9,17 +9,22 @@ link_position: 3
 Review the release notes, then stop the development server and update the main
 package from the project root:
 
-```bash
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Update RDX with your package manager">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
 pnpm add @lexibase/rdx@latest
-```
-
-With npm or Yarn:
-
-```bash
+  </TabsContent>
+  <TabsContent value="npm">
 npm install @lexibase/rdx@latest
-# Or:
+  </TabsContent>
+  <TabsContent value="yarn">
 yarn add @lexibase/rdx@latest
-```
+  </TabsContent>
+</Tabs>
 
 The main package selects compatible runtime and UI versions. You do not need to
 manage its internal packages individually. Your documents, public files,
@@ -45,20 +50,48 @@ monorepo, this is usually the workspace-root file, shared by its applications.
 Plugins remain separate dependencies. Update an installed plugin when its release
 notes recommend a compatible update:
 
-```bash
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Update the versioning plugin with your package manager">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
 pnpm add @lexibase/rdx-versioning@latest
-```
+  </TabsContent>
+  <TabsContent value="npm">
+npm install @lexibase/rdx-versioning@latest
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn add @lexibase/rdx-versioning@latest
+  </TabsContent>
+</Tabs>
 
 Updating RDX does not install or activate optional plugins.
 
 ## Validate and deploy
 
-Restart `pnpm dev` to check your documentation. For production:
+Restart the development server to check your documentation. For production:
 
-```bash
-pnpm build
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Validate production with your package manager">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm build  
 pnpm start
-```
+  </TabsContent>
+  <TabsContent value="npm">
+npm run build  
+npm run start
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn build  
+yarn start
+  </TabsContent>
+</Tabs>
 
 Check documents, relative links, components, assets, search and snapshots before
 redeploying. Keep customizations in project-owned files; RDX refreshes generated
@@ -76,9 +109,22 @@ For custom React components, use paths such as
 `@lexibase/rdx/ui/components/home` instead of direct UI package imports.
 After migrating those imports, remove direct runtime and UI dependencies:
 
-```bash
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Remove direct runtime and UI dependencies with your package manager">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
 pnpm remove @lexibase/rdx-next @lexibase/rdx-ui
-```
+  </TabsContent>
+  <TabsContent value="npm">
+npm uninstall @lexibase/rdx-next @lexibase/rdx-ui
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn remove @lexibase/rdx-next @lexibase/rdx-ui
+  </TabsContent>
+</Tabs>
 
 Keep Next.js, React and any installed plugins. Rebuild and validate before
 deploying. Advanced applications can also keep using the lower-level packages.

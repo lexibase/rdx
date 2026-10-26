@@ -16,11 +16,22 @@ built-in MDX components do not need plugins.
 
 From your documentation project root:
 
-```bash
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Install and activate versioning">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
 pnpm rdx add versioning
-```
-
-With npm, use `npm exec -- rdx add versioning`.
+  </TabsContent>
+  <TabsContent value="npm">
+npm exec -- rdx add versioning
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn rdx add versioning
+  </TabsContent>
+</Tabs>
 
 The command installs the official package, adds the import and plugin entry to
 your configuration, validates it, and prepares the runtime. An already configured
@@ -29,9 +40,22 @@ development server after activation.
 
 ## Manual installation
 
-```bash
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Install the versioning package">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
 pnpm add @lexibase/rdx-versioning@latest
-```
+  </TabsContent>
+  <TabsContent value="npm">
+npm install @lexibase/rdx-versioning@latest
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn add @lexibase/rdx-versioning@latest
+  </TabsContent>
+</Tabs>
 
 Use the channel compatible with your runtime. Then configure it explicitly:
 
@@ -45,7 +69,24 @@ export default defineConfig({
 })
 ```
 
-Run `pnpm rdx prepare` and continue with [Versioning](./versioning.mdx).
+Prepare the runtime, then continue with [Versioning](./versioning.mdx):
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Prepare the configured plugins">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm rdx prepare
+  </TabsContent>
+  <TabsContent value="npm">
+npm exec -- rdx prepare
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn rdx prepare
+  </TabsContent>
+</Tabs>
 
 ## Removal and failed installation
 

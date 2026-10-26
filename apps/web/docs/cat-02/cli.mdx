@@ -12,9 +12,24 @@ existing documentation project. You do not need a global RDX installation.
 
 ## Create a project
 
-```bash
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Create a documentation project">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
 pnpm create @lexibase/rdx@latest my-docs
-```
+  </TabsContent>
+  <TabsContent value="npm">
+npm create @lexibase/rdx@latest -- my-docs
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn dlx @lexibase/create-rdx@latest my-docs
+  </TabsContent>
+</Tabs>
+
+The Yarn creator example uses `yarn dlx` (Yarn 2+).
 
 Omit the name to get an interactive prompt. The directory name is preserved;
 the generated package name is normalized to lowercase. Existing directories
@@ -30,41 +45,98 @@ are not overwritten.
 
 Run these from the generated project root:
 
-```bash
-pnpm dev
-pnpm build
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Run development and production scripts">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm dev<br />
+pnpm build<br />
 pnpm start
-```
+  </TabsContent>
+  <TabsContent value="npm">
+npm run dev<br />
+npm run build<br />
+npm run start
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn dev<br />
+yarn build<br />
+yarn start
+  </TabsContent>
+</Tabs>
 
 `dev` starts the development server, `build` prepares a production build, and
-`start` serves that build. With npm, use `npm run dev`, `npm run build`, and
-`npm run start`.
+`start` serves that build. Stop the development server before building for production.
 
 The underlying commands are `rdx dev`, `rdx build`, and `rdx start`. They prepare
 the internal app automatically. Forward Next.js arguments when needed:
 
-```bash
-pnpm rdx dev --port 3001
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Forward server options">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm rdx dev --port 3001<br />
 pnpm rdx start --hostname 127.0.0.1 --port 3001
-```
-
-For npm, use `npm exec -- rdx dev --port 3001`.
+  </TabsContent>
+  <TabsContent value="npm">
+npm exec -- rdx dev --port 3001<br />
+npm exec -- rdx start --hostname 127.0.0.1 --port 3001
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn rdx dev --port 3001<br />
+yarn rdx start --hostname 127.0.0.1 --port 3001
+  </TabsContent>
+</Tabs>
 
 ## Prepare without starting a server
 
-```bash
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Prepare the runtime">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
 pnpm rdx prepare
-```
+  </TabsContent>
+  <TabsContent value="npm">
+npm exec -- rdx prepare
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn rdx prepare
+  </TabsContent>
+</Tabs>
 
 This validates configuration and prepares `.rdx/`, including public assets and
 configured plugin preparation. It does not create a documentation snapshot.
 
 ## Plugins and snapshots
 
-```bash
-pnpm rdx add versioning
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Activate versioning and create a snapshot">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm rdx add versioning<br />
 pnpm rdx version 1.0.0
-```
+  </TabsContent>
+  <TabsContent value="npm">
+npm exec -- rdx add versioning<br />
+npm exec -- rdx version 1.0.0
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn rdx add versioning<br />
+yarn rdx version 1.0.0
+  </TabsContent>
+</Tabs>
 
 `version` is registered only after the versioning plugin is configured.
 See [Plugins](../cat-04/plugins.mdx) and [Versioning](../cat-04/versioning.mdx)

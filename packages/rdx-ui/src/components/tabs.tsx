@@ -172,7 +172,7 @@ function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
     <TabsPrimitive.Panel
       data-slot="tabs-content"
       className={mergeStateClassName(
-        'min-w-0 rounded-b-lg p-3 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring [&>:first-child]:mt-0 [&>:last-child]:mb-0 [&>[data-rdx-code-block]]:my-3 [&_[data-rdx-code-block]>pre]:p-3',
+        'min-w-0 rounded-b-lg p-3 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring [&>:first-child]:mt-0 [&>:last-child]:mb-0 [&>[data-rdx-code-block]]:my-3 [&_[data-rdx-code-block]>pre]:p-3 font-mono',
         className
       )}
       {...props}
