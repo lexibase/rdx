@@ -12,9 +12,12 @@
     "test": "turbo run test && node --test scripts/tests/*.test.mjs",
     "test:release": "node scripts/release-smoke.mjs",
     "test:deploy": "node scripts/create-deploy-test.mjs",
-    "prepare": "husky"
+    "prepare": "husky",
+    "format:check": "node scripts/check-staged-format.mjs"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
     "husky": "^9.1.7",
     "prettier": "^3.9.10",
     "tsup": "^9.0.0",

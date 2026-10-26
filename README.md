@@ -33,6 +33,14 @@ package-manager batch prompts for long-running tasks; real failures remain nonze
 See [apps/web/README.md](./apps/web/README.md) for the local workflow.
 
 See [CI.md](./CI.md) for local checks and automatic pull request validation.
+
+`pnpm install` activates the repository's Husky hooks. Before a commit, Prettier
+checks only staged files in supported formats; it does not rewrite files or stage
+additional changes. Run `pnpm format:check` to repeat that check. The manual
+`pnpm format` command formats all matching TypeScript and Markdown files in the
+repository. Commit messages are validated against Conventional Commits, for
+example `fix(ui): correct mobile spacing`.
+
 Publishing remains a manual process documented in [PUBLISHING.md](./PUBLISHING.md).
 Release validation is tracked in [RELEASE_READINESS.md](./RELEASE_READINESS.md).
 The public API is documented in [PUBLIC_API.md](./PUBLIC_API.md).

@@ -1,5 +1,27 @@
 # Publishing RDX
 
+## Release order: packages before documentation
+
+Prepare code and documentation together, but release them in this order:
+
+1. Publish the packages to npm in dependency order.
+2. Allow time for registry propagation. Query each exact version and its intended
+   dist-tag until both return the expected release; elapsed time alone is not
+   confirmation.
+3. Verify a fresh installation from the public registry. Refresh the creator's
+   local cache when needed with `pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@latest`.
+   This refresh does not bypass pnpm release-age policies.
+4. Only then deploy the corresponding official guides and versioned documentation
+   snapshot to production.
+
+The documentation must describe an update users can already install. If merging
+into `main` automatically deploys the website, keep release-specific documentation
+and snapshot changes in a separate PR and merge it after registry and installation
+verification. Drafts and preview deployments can be prepared alongside the code.
+
+This order applies to future releases and takes precedence over the historical
+release checklists below.
+
 ## Prepared grouped release: RDX 2.0.0
 
 The 2.0 release removes the published ButtonLink module. Project-owned imports
