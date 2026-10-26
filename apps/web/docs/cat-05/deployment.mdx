@@ -30,10 +30,62 @@ Windows dependencies into a Linux build environment. Install and build on the ho
 
 ## Vercel
 
-For a standalone CLI-generated project, use its project root as the Vercel Root
-Directory. Select the Next.js framework preset, set the Build Command to
-`pnpm build`, and set the Output Directory to `.rdx/.next`.
-Use your package manager's corresponding installation command.
+Create `vercel.json` beside your documentation project's `package.json` and
+`rdx.config.ts`. For a pnpm project:
+
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm build",
+  "outputDirectory": ".rdx/.next"
+}
+```
+
+Commit the package manifest, lockfile, configuration, and documentation sources
+before deploying. `--frozen-lockfile` uses the committed dependency versions and
+fails if the lockfile needs updating. With npm and a committed `package-lock.json`,
+use `npm ci` for `installCommand` and `npm run build` for `buildCommand`.
+
+Import your Git repository through the Vercel dashboard. Set **Root Directory**
+to the folder containing `rdx.config.ts`. For a standalone documentation
+repository, this is the repository root. The configuration selects the Next.js
+preset, runs the RDX build script, and points Vercel to the generated Next.js
+output in `.rdx/.next`.
+
+### Inside a monorepo
+
+For documentation installed in `apps/web`, keep the configuration inside that
+application:
+
+```text
+my-repository/
+  package.json
+  pnpm-lock.yaml
+  pnpm-workspace.yaml
+  apps/
+    web/
+      package.json
+      rdx.config.ts
+      vercel.json
+      docs/
+      public/
+```
+
+Include the application in your workspace, for example through `apps/*` in
+`pnpm-workspace.yaml`, and commit the updated repository-root lockfile. Set the
+Vercel project's **Root Directory** to `apps/web`. Keep `outputDirectory` as
+`.rdx/.next`: the path is relative to that application directory.
+
+If the build needs workspace files outside `apps/web`, enable **Include source
+files outside of the Root Directory in the Build Step** in the Vercel project's
+Root Directory settings. If your app depends on local packages that require
+compilation, include those build steps before the documentation build.
+
+See Vercel's [monorepo setup](https://vercel.com/docs/monorepos) and
+[`vercel.json` reference](https://vercel.com/docs/project-configuration/vercel-json)
+for the corresponding platform settings.
 
 The framework traces configured documentation and plugin runtime files into the
 server build. Keep your source content available during the build; do not create
