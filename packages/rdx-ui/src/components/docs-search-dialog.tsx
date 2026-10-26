@@ -99,7 +99,12 @@ export function DocsSearchDialog({
   }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent finalFocus={triggerRef}>
+      <DialogContent
+        finalFocus={triggerRef}
+        closeLabel={messages.closeSearch}
+        overlayClassName="bg-black/30"
+        className="top-[20%] w-[calc(100%-2rem)] max-w-lg translate-y-0 p-1 shadow-lg sm:max-w-lg"
+      >
         <DialogTitle className="sr-only">
           {messages.searchDocumentation}
         </DialogTitle>

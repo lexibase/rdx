@@ -26,6 +26,10 @@ const en = {
   open: 'Open',
   close: 'Close',
   closeSearch: 'Close search',
+  enlargeImage: 'Enlarge image: {alt}',
+  closeImage: 'Close image',
+  imagePreviewDescription:
+    'Press Escape or use the close button to return to the document.',
   copyCode: 'Copy code',
   wrapCode: 'Wrap lines',
   codeCopied: 'Code copied to clipboard.',
@@ -91,6 +95,10 @@ const ptBR = {
   open: 'Abrir',
   close: 'Fechar',
   closeSearch: 'Fechar busca',
+  enlargeImage: 'Ampliar imagem: {alt}',
+  closeImage: 'Fechar imagem',
+  imagePreviewDescription:
+    'Pressione Escape ou use o botão de fechar para voltar ao documento.',
   copyCode: 'Copiar código',
   wrapCode: 'Quebrar linhas',
   codeCopied: 'Código copiado para a área de transferência.',

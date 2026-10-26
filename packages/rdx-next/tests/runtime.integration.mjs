@@ -1727,6 +1727,32 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
           true
         )
         await page.setViewportSize({ width: 390, height: 844 })
+        const imageTrigger = page.getByRole('button', {
+          name: 'Enlarge image: Public asset',
+          exact: true,
+        })
+        await imageTrigger.focus()
+        await page.keyboard.press('Enter')
+        const imageDialog = page.getByRole('dialog', {
+          name: 'Public asset',
+          exact: true,
+        })
+        await imageDialog.waitFor()
+        await imageDialog
+          .getByAltText('Public asset')
+          .evaluate((img) => img.decode())
+        await imageDialog.getByRole('button', { name: 'Close image' }).focus()
+        await page.keyboard.press('Tab')
+        assert.ok(
+          await imageDialog.evaluate((node) =>
+            node.contains(document.activeElement)
+          )
+        )
+        await page.keyboard.press('Escape')
+        await imageDialog.waitFor({ state: 'hidden' })
+        assert.ok(
+          await imageTrigger.evaluate((node) => document.activeElement === node)
+        )
         await page.getByRole('button', { name: 'Open sidebar' }).click()
         await page
           .getByRole('dialog', { name: 'Documentation navigation' })

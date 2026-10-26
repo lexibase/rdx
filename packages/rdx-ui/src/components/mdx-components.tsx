@@ -1,7 +1,14 @@
 import { getMessages } from '../lib/i18n'
-import type { ComponentProps } from 'react'
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  type ComponentProps,
+  type ReactNode,
+} from 'react'
 
 import { cn } from '../lib/utils'
+import { MdxImage } from './mdx-image'
 import {
   Accordion,
   AccordionContent,
@@ -34,6 +41,17 @@ import {
 } from './table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs'
 import { Separator } from '@lexibase/rdx-ui/components/separator'
+
+function linkedImages(children: ReactNode): ReactNode {
+  return Children.map(children, (child) => {
+    if (!isValidElement<{ children?: ReactNode; zoom?: boolean }>(child))
+      return child
+    if (child.type === MdxImage) return cloneElement(child, { zoom: false })
+    return child.props.children
+      ? cloneElement(child, {}, linkedImages(child.props.children))
+      : child
+  })
+}
 
 function MdxTable({ lang, className, ...props }: ComponentProps<'table'>) {
   return (
@@ -86,11 +104,13 @@ export const mdxComponents = {
       {...props}
     />
   ),
-  a: ({ className, ...props }: ComponentProps<'a'>) => (
+  a: ({ className, children, ...props }: ComponentProps<'a'>) => (
     <a
       className={cn('underline text-chart-1 text-blue-500', className)}
       {...props}
-    />
+    >
+      {linkedImages(children)}
+    </a>
   ),
   blockquote: Blockquote,
   pre: MdxCodeBlock,
@@ -116,13 +136,7 @@ export const mdxComponents = {
   hr: ({ className, ...props }: ComponentProps<'hr'>) => (
     <hr className={cn('my-8 border-border', className)} {...props} />
   ),
-  img: ({ className, alt = '', ...props }: ComponentProps<'img'>) => (
-    <img
-      alt={alt}
-      className={cn('max-w-full h-auto rounded-md my-4', className)}
-      {...props}
-    />
-  ),
+  img: MdxImage,
   table: MdxTable,
   thead: TableHeader,
   tbody: TableBody,

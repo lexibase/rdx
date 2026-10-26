@@ -17,6 +17,10 @@ Table cells have a minimum width so wider comparisons remain readable on mobile
 instead of compressing every sentence into a narrow column.
 Images retain their aspect ratio and cannot exceed the content width. Existing
 classes are merged with custom `className` values rather than discarded.
+Descriptive Markdown images open the shared shadcn Dialog on click, Enter or
+Space. Escape, the localized close button and outside clicks dismiss the preview
+and restore focus. Linked images navigate normally; empty-alt images remain
+decorative. The preview fits the viewport on desktop and mobile.
 Fenced code displays its language (or "Code" when omitted) and an icon-only copy
 button with an accessible name, a tooltip and a checkmark on success.
 Copying preserves the code's indentation, line breaks and trailing newline,

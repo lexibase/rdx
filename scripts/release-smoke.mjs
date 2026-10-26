@@ -98,6 +98,7 @@ const required = {
     'src/components/docs-search-dialog.tsx',
     'src/components/command.tsx',
     'src/components/dialog.tsx',
+    'src/components/mdx-image.tsx',
     'src/lib/docs-search.ts',
     'src/lib/i18n.ts',
     'src/providers/locale-provider.tsx',

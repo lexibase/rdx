@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Open Markdown images in responsive shadcn dialogs with localized controls,
+  keyboard navigation and focus restoration. Linked images keep their navigation.
+
 - Add the shadcn wrap-lines action to Markdown code block headers, with independent
   per-block state, localized labels, and unchanged clipboard output.
 
