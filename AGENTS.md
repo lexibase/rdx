@@ -27,3 +27,5 @@
 - Valide as mudanças e forneça ao final a mensagem de conventional commit e os comandos para atualizar ou criar a PR.
 - O usuário faz commits, merges e publicações pelo terminal. Não os execute automaticamente sem autorização explícita para essas ações.
 - Não publique pacotes nem incremente versões a cada ajuste; as publicações são agrupadas quando solicitadas.
+
+- Em releases, publique os pacotes primeiro e confirme sua disponibilidade no npm antes de lançar a documentação correspondente em produção. Prepare os guias junto com a implementação, mas só publique os guias e o snapshot da versão após validar as versões e a instalação pelo registro. Se o merge dispara deploy automático, separe a entrega pública da documentação para respeitar essa ordem.
