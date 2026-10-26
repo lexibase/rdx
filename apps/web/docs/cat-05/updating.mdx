@@ -33,6 +33,63 @@ configuration and custom components are not replaced by this operation.
 Check the release notes for migrations and any required Next.js, React or Node.js
 updates. Those requirements are separate from updating RDX itself.
 
+## Upgrade from RDX 1.x to 2.x
+
+Update the main package using the commands above. RDX 2 includes interface
+translations selected by `lang`, keyboard shortcut components, page-specific
+social previews, and the shared custom 404 page. Markdown tables use the default
+shadcn/ui styling.
+
+### Custom navigation components
+
+Replace `ButtonLink` imports from `@lexibase/rdx/ui/components/button-link` with
+`Button` from `@lexibase/rdx/ui/components/button`. For direct UI imports, use
+`@lexibase/rdx-ui/components/button`.
+
+```tsx
+import { Button } from '@lexibase/rdx/ui/components/button'
+
+export function DocumentationLink() {
+  return (
+    <Button href="/docs" variant="link">
+      Documentation
+    </Button>
+  )
+}
+```
+
+Keep your existing `variant` and `size` when preserving button styling. With
+`href`, `Button` renders a native link; without it, it renders an action button.
+Projects using only the generated configuration and MDX pages do not need this
+import change.
+
+### Direct runtime and UI dependencies
+
+The main `@lexibase/rdx` package selects compatible dependencies automatically.
+If your project declares `@lexibase/rdx-next` and `@lexibase/rdx-ui` directly,
+update both to 2.x together:
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Update direct runtime and UI dependencies to RDX 2">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm add @lexibase/rdx-next@2 @lexibase/rdx-ui@2
+  </TabsContent>
+  <TabsContent value="npm">
+npm install @lexibase/rdx-next@2 @lexibase/rdx-ui@2
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn add @lexibase/rdx-next@2 @lexibase/rdx-ui@2
+  </TabsContent>
+</Tabs>
+
+The next development run or production build refreshes the internal app and its
+404 page. Keep your documents, configuration, public assets, custom components,
+and installed plugins in the existing project.
+
 ## Newly published releases with pnpm
 
 pnpm can apply a minimum release age when installing updates and checking the

@@ -1,0 +1,64 @@
+---
+title: Writing pages
+description: Add categories, order pages, and write your first document.
+link_position: 2
+---
+
+## Create a category
+
+Create `docs/guides/`, then add an optional `_category.json`:
+
+```json
+{
+  "title": "Guides",
+  "sidebar_position": 1
+}
+```
+
+Without this file, RDX derives a label from the folder name. Each top-level
+folder defines a sidebar category.
+
+## Create a page
+
+Add `docs/guides/first-page.mdx`:
+
+```mdx
+---
+title: First page
+description: Everything you need to begin.
+link_position: 1
+---
+
+## Before you begin
+
+Install the tools for your project.
+
+## Your first example
+
+Write a short, useful example.
+```
+
+The page title and description appear in the document header. Use `##` for the
+first section below that header. `link_position` sets the page order within its
+category. Lower positions come first; ties and pages without positions use slug
+ordering. The filename supplies the fallback title when one is not provided.
+
+## Write for readers
+
+Use paragraphs, headings, lists, links, and code fences. The shared renderer
+handles their styling. Add [Callouts](./callouts.mdx), [Tabs](./tabs.mdx),
+or an [Accordion](./accordion.mdx) when the content benefits from them.
+
+Leave blank lines around Markdown inside JSX components. Use literal props such
+as `title="Note"` and `variant="tip"`. Built-in documentation components are
+available directly in MDX. Put React logic in project-owned components such as
+`components/home.tsx`; documentation MDX uses Markdown and literal component
+attributes.
+
+## Preview and publish
+
+Save the file while `pnpm dev` is running. Use
+[relative document links](./document-links.mdx) to connect pages.
+Run a production build before deploying; missing relative document links fail
+compilation rather than silently sending readers to another version.
+

@@ -1,0 +1,129 @@
+---
+title: Accordion
+description: Optional explanations, without crowding your documentation.
+link_position: 7
+---
+
+## Frequently asked questions
+
+Expand a question to read its answer. Use Enter or Space to toggle and Tab to
+move between questions and links.
+
+<Accordion>
+  <AccordionItem value="content">
+    <AccordionTrigger>Where do I write my documentation?</AccordionTrigger>
+    <AccordionContent>
+
+Create folders and `.mdx` files inside **docs/**. Each folder becomes a category
+and each file becomes a page.
+
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="preview">
+    <AccordionTrigger>How do I preview my changes?</AccordionTrigger>
+    <AccordionContent>
+
+Run the development server:
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Preview your documentation">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm dev
+  </TabsContent>
+  <TabsContent value="npm">
+npm run dev
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn dev
+  </TabsContent>
+</Tabs>
+
+<Callout variant="tip" title="Live updates">
+
+Keep the server running while editing your documentation.
+
+</Callout>
+
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+
+## Write an Accordion
+
+```mdx
+<Accordion>
+  <AccordionItem value="preview">
+    <AccordionTrigger>How do I preview my docs?</AccordionTrigger>
+    <AccordionContent>
+
+Start the development server from your documentation project root.
+
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+No import or plugin is required. Use unique item values. One item opens at a time
+by default; add the literal boolean attribute `multiple` to allow several open
+items. Keep essential steps visible rather than hiding the whole guide in panels.
+
+## Production example
+
+Opening an answer closes the previous one in the same group.
+
+<Accordion>
+  <AccordionItem value="build">
+    <AccordionTrigger>Build for production</AccordionTrigger>
+    <AccordionContent>
+
+Generate the production site:
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Build the documentation">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm build
+  </TabsContent>
+  <TabsContent value="npm">
+npm run build
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn build
+  </TabsContent>
+</Tabs>
+
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="start">
+    <AccordionTrigger>Check the production site</AccordionTrigger>
+    <AccordionContent>
+
+After a successful build, start the production server:
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Serve the documentation">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm start
+  </TabsContent>
+  <TabsContent value="npm">
+npm run start
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn start
+  </TabsContent>
+</Tabs>
+
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>

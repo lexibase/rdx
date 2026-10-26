@@ -1,6 +1,17 @@
 # Changelog
 
-## Unreleased
+## 2.0.0 — Prepared
+
+### Breaking change
+
+- Remove the published ButtonLink module. Replace its imports with Button from
+  the button module and pass href for navigation. Preserve variant and size when
+  keeping custom styling. The runtime now requires UI ^2.0.0.
+
+### Included
+
+- Snapshot the official documentation at 2.0.0, retaining Canary and the 1.0.1
+  release, with a guide for upgrading existing projects.
 
 - Share the development website's custom 404 layout with generated projects,
   including navigation, translated guidance, and a documentation return link.
@@ -20,7 +31,11 @@
 - Add shadcn/ui Kbd and KbdGroup to MDX and public component exports, with
   keyboard shortcut examples in the official documentation and generated projects.
 
-## Runtime 1.2.2 and creator 1.2.3 — Unreleased
+Types/core are prepared at 1.1.1; optional versioning at 1.0.1. These patches
+align dependencies and configuration JSDocs. UI, runtime, framework and creator
+are prepared at 2.0.0. Publication is manual; no publication date is recorded yet.
+
+## Runtime/framework 1.2.2 and creator 1.2.3 — 2026-10-25
 
 - Exclude internal Next.js build output from Tailwind sources, preventing
   serialized selectors from generating invalid CSS during development after a build.
@@ -32,8 +47,9 @@
 - Document custom SVG logos, favicon configuration and project-owned components
   organized in `components/`, including `components/home.tsx`.
 
-Runtime and main framework are prepared at 1.2.2. Creator 1.2.3 selects framework
-1.2.2. UI, core, types and versioning remain unchanged. Publication is manual.
+Runtime and main framework 1.2.2 and creator 1.2.3 are published. Creator 1.2.3
+selects framework 1.2.2; UI, core, types and versioning stayed at their existing
+versions. Verified against the npm registry.
 
 ## Layout patch — Published
 
@@ -66,10 +82,9 @@ select framework 1.2.0.
 - Use the same root for Turbopack and dependency tracing while retaining explicit
   documentation content includes.
 
-The framework, runtime and creator are prepared at 1.2.0. Core, types and UI are
-prepared at 1.1.0; the runtime requires UI ^1.1.0 for the shared footer component.
-Versioning remains at 1.0.0. Publication is manual and has not occurred as part
-of this preparation.
+The framework, runtime and creator 1.2.0, along with core, types and UI 1.1.0,
+are published. The runtime requires UI ^1.1.0 for the shared footer component.
+Versioning remained at 1.0.0.
 
 ## 1.1.0 — 2026-10-24
 

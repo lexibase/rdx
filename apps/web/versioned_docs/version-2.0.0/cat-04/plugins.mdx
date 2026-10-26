@@ -1,0 +1,109 @@
+---
+title: Plugins
+description: Install optional features without making them part of every project.
+link_position: 4
+---
+
+## Explicit activation
+
+RDX only executes plugins listed in `rdx.config.ts`. Merely installing a package
+does not turn it on or create version files.
+
+The official versioning plugin is `@lexibase/rdx-versioning`. Search, TOC, and
+built-in MDX components do not need plugins.
+
+## Assisted installation
+
+From your documentation project root:
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Install and activate versioning">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm rdx add versioning
+  </TabsContent>
+  <TabsContent value="npm">
+npm exec -- rdx add versioning
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn rdx add versioning
+  </TabsContent>
+</Tabs>
+
+The command installs the official package, adds the import and plugin entry to
+your configuration, validates it, and prepares the runtime. An already configured
+plugin is not added twice, and an installed version is preserved. Restart the
+development server after activation.
+
+## Manual installation
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Install the versioning package">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm add @lexibase/rdx-versioning@latest
+  </TabsContent>
+  <TabsContent value="npm">
+npm install @lexibase/rdx-versioning@latest
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn add @lexibase/rdx-versioning@latest
+  </TabsContent>
+</Tabs>
+
+Use the channel compatible with your runtime. Then configure it explicitly:
+
+```ts
+import { defineConfig } from '@lexibase/rdx'
+import { versioning } from '@lexibase/rdx-versioning'
+
+export default defineConfig({
+  metadata: { applicationName: 'My documentation' },
+  plugins: [versioning()],
+})
+```
+
+Prepare the runtime, then continue with [Versioning](./versioning.mdx):
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Prepare the configured plugins">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+pnpm rdx prepare
+  </TabsContent>
+  <TabsContent value="npm">
+npm exec -- rdx prepare
+  </TabsContent>
+  <TabsContent value="yarn">
+yarn rdx prepare
+  </TabsContent>
+</Tabs>
+
+## Removal and failed installation
+
+To deactivate a plugin, remove its entry and unused import from the configuration.
+You can then uninstall its package. Existing snapshots and manifests are not
+deleted automatically.
+
+If dependency installation fails, inspect package and lockfile changes before
+retrying. For package-manager release-age policies, approve only releases you
+trust under your project's policy; do not disable supply-chain protections
+globally. See [Troubleshooting](../cat-05/troubleshooting.mdx).
+
+## Custom plugin authors
+
+The public plugin contract has `apiVersion: 1`. Plugins may contribute named
+content sources and commands. This is an advanced API, not a requirement for
+authoring docs. Consult the
+[configuration and plugin contract](https://github.com/lexibase/rdx/blob/main/CONFIGURATION.md)
+before implementing one; setup can run more than once and must not write content
+during runtime reads.

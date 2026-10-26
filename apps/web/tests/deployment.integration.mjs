@@ -7,7 +7,7 @@ import { getDocumentation } from '../lib/docs.ts'
 const base = process.env.RDX_PUBLIC_TEST_URL
 
 test(
-  'deployed website serves every first-release page, public assets, search and retired-version 404s',
+  'deployed website serves every documentation edition, public assets, search and retired-version 404s',
   {
     skip: !base && 'Set RDX_PUBLIC_TEST_URL to check a deployment',
     timeout: 180_000,
@@ -21,12 +21,12 @@ test(
     assert.match(await home.text(), /<title>RDX<\/title>/)
     const root = await request('/docs')
     assert.equal(root.status, 200)
-    assert.equal(new URL(root.url).pathname, '/docs/1.0.1/intro')
+    assert.equal(new URL(root.url).pathname, '/docs/2.0.0/intro')
     const html = await root.text()
     assert.match(html, /<html[^>]*lang="en"/)
     assert.match(html, /data-rdx-sidebar/)
     assert.match(html, /Introduction \| RDX/)
-    assert.doesNotMatch(html, /Version 2\.[01]\.[01]|mdxRenderDocs/)
+    assert.doesNotMatch(html, /Version 2\.1\.[01]|mdxRenderDocs/)
     for (const edition of docs.editions) {
       for (const page of docs.pages(edition.id)) {
         const response = await request(`/docs/${edition.id}/${page.slug}`)
@@ -54,7 +54,6 @@ test(
       '/docs/canary/not-a-page',
       '/docs/2.1.1/intro',
       '/docs/2.1.0/intro',
-      '/docs/2.0.0/intro',
       '/rdx-search/2.1.1',
       '/rdx-search/unknown',
     ]) {

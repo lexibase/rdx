@@ -1,6 +1,6 @@
 {
   "name": "@lexibase/rdx-core",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Content indexing and document utilities for RDX documentation projects.",
   "license": "MIT",
   "type": "module",

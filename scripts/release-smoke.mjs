@@ -693,7 +693,7 @@ for (const [name, release] of releases) {
   }
   if (name === '@lexibase/rdx-next') {
     assert.equal(packed.dependencies?.['@lexibase/rdx-ui'], undefined)
-    assert.equal(packed.peerDependencies['@lexibase/rdx-ui'], '^1.1.0')
+    assert.equal(packed.peerDependencies['@lexibase/rdx-ui'], '^2.0.0')
   }
   const files = new Set(
     execFileSync('tar', ['-tf', archive], { encoding: 'utf8' })
@@ -702,6 +702,12 @@ for (const [name, release] of releases) {
   )
   for (const file of ['LICENSE', 'package.json', ...required[directory]])
     assert.ok(files.has(`package/${file}`), `${name} is missing ${file}`)
+  if (name === '@lexibase/rdx-ui' || name === '@lexibase/rdx') {
+    assert.ok(
+      [...files].every((file) => !file.includes('button-link')),
+      name + ' must not ship the removed ButtonLink module'
+    )
+  }
   release.archive = archive
   console.log(
     `OK ${name}@${manifest.version}: archive, exports and dependency versions`
