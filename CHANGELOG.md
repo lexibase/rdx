@@ -1,6 +1,19 @@
 # Changelog
 
-## Unreleased
+## 3.0.0 — Prepared
+
+### Breaking changes
+
+- The React `CodeBlock` export now uses the complete shadcn composition, with a
+  div root and separate content, header, actions and footer components. Direct
+  callers of the former pre wrapper can use `MdxCodeBlock` or compose the official
+  components. Markdown fences require no migration.
+- `DialogContent` uses the official centered layout and close-button options.
+  Custom compositions can set their own position, width and padding. The built-in
+  search preserves its existing layout through explicit props.
+- The runtime requires UI ^3.0.0; the main framework selects matching releases.
+
+### Included
 
 - Open Markdown images in responsive shadcn dialogs with localized controls,
   keyboard navigation and focus restoration. Linked images keep their navigation.
@@ -18,7 +31,12 @@
 - React composition uses the official CodeBlock root API; custom callers of the
   former pre wrapper can use MdxCodeBlock. Markdown fences remain automatic.
 
-## 2.0.0 — Prepared
+Core is prepared at 1.2.0 for the diff and folder transformations; optional
+versioning at 1.0.2 aligns its core dependency. Types remain at the published
+1.1.1. UI, runtime, framework and creator are prepared at 3.0.0. Publish packages
+and verify registry installation before releasing the 3.0.0 documentation snapshot.
+
+## 2.0.0 — Published
 
 ### Breaking change
 
@@ -49,9 +67,9 @@
 - Add shadcn/ui Kbd and KbdGroup to MDX and public component exports, with
   keyboard shortcut examples in the official documentation and generated projects.
 
-Types/core are prepared at 1.1.1; optional versioning at 1.0.1. These patches
-align dependencies and configuration JSDocs. UI, runtime, framework and creator
-are prepared at 2.0.0. Publication is manual; no publication date is recorded yet.
+Types/core 1.1.1, optional versioning 1.0.1, and UI, runtime, framework and creator
+2.0.0 are published. Exact versions and latest tags were verified against the npm
+registry before preparing the component release.
 
 ## Runtime/framework 1.2.2 and creator 1.2.3 — 2026-10-25
 

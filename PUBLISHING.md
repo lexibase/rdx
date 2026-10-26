@@ -22,7 +22,73 @@ verification. Drafts and preview deployments can be prepared alongside the code.
 This order applies to future releases and takes precedence over the historical
 release checklists below.
 
-## Prepared grouped release: RDX 2.0.0
+## Prepared grouped component release: RDX 3.0.0
+
+The complete shadcn Code Block changes the public React composition from a pre
+wrapper to the official root/content API. DialogContent also adopts the official
+centered defaults. This requires a major release for custom React callers;
+standard Markdown fences and images remain automatic. See PUBLIC_API.md for
+migration examples. Do not regenerate existing projects or authored content.
+
+| Package                  | Version | Reason                                                          |
+| ------------------------ | ------- | --------------------------------------------------------------- |
+| @lexibase/rdx-core       | 1.2.0   | Diff and folder fence transformations                           |
+| @lexibase/rdx-ui         | 3.0.0   | Complete shadcn Code Block/Dialog, image previews, hooks/styles |
+| @lexibase/rdx-versioning | 1.0.2   | Align its core dependency to 1.2.0; plugin stays optional       |
+| @lexibase/rdx-next       | 3.0.0   | Integrate the updated MDX components and require UI ^3.0.0      |
+| @lexibase/rdx            | 3.0.0   | Select runtime/UI 3.0.0 and expose official highlighter/hooks   |
+| @lexibase/create-rdx     | 3.0.0   | Pin framework 3.0.0 and deliver updated starter examples        |
+
+Types remain at the published 1.1.1 and must not be republished. Workspace
+dependencies remain local and are converted to exact versions during packing.
+
+Run `pnpm check` and `pnpm test:release --install` before publishing. Verify
+archive exports, new project creation, an existing framework update, optional
+versioning, diff/folder rendering, clipboard/wrap controls, image dialogs,
+production builds and HTTP responses. Merge the preparation PR after its checks
+pass. Publish from updated main, one command at a time, waiting for each exact
+version to become readable before publishing consumers:
+
+```powershell
+npm whoami
+pnpm --filter @lexibase/rdx-core publish --tag latest --access public
+npm view @lexibase/rdx-core@1.2.0 version
+pnpm --filter @lexibase/rdx-ui publish --tag latest --access public
+npm view @lexibase/rdx-ui@3.0.0 version
+pnpm --filter @lexibase/rdx-versioning publish --tag latest --access public
+npm view @lexibase/rdx-versioning@1.0.2 version
+pnpm --filter @lexibase/rdx-next publish --tag latest --access public
+npm view @lexibase/rdx-next@3.0.0 version
+pnpm --filter @lexibase/rdx publish --tag latest --access public
+npm view @lexibase/rdx@3.0.0 version
+pnpm --filter @lexibase/create-rdx publish --tag latest --access public
+npm view @lexibase/create-rdx@3.0.0 version
+```
+
+Query each package's `latest` tag as well as its exact version. Then validate a
+fresh public-registry installation outside and inside a pnpm workspace:
+
+```powershell
+pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@3.0.0 docs-validacao-3
+```
+
+A dlx cache refresh does not bypass release-age policy. Review/approve trusted
+exact versions in the consumer policy, or wait for the configured age; do not
+disable the policy globally. Existing projects update the framework with
+`pnpm add @lexibase/rdx@latest`; update the optional versioning plugin separately
+when installed. Migrate direct React CodeBlock callers before rebuilding.
+
+After registry and fresh-install verification, prepare the public 3.0 upgrade
+guide and finalize the component guides in a documentation PR. Create its
+snapshot with `pnpm --filter web docs:version 3.0.0`, preserving the 2.0.0 and
+1.0.1 snapshots. Validate the website and snapshot before merging that PR and
+deploying production. Record the verified publication date in CHANGELOG.md.
+Do not create or advertise the new snapshot during package preparation.
+
+## Published grouped release: RDX 2.0.0 (reference)
+
+All versions in this section are already published and registry-verified. Do not
+republish them. The instructions below describe the previous release.
 
 The 2.0 release removes the published ButtonLink module. Project-owned imports
 must migrate to Button with href; the implementation stays in button.tsx.

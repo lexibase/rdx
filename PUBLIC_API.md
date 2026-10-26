@@ -1,7 +1,35 @@
-# RDX public API — 2.0
+# RDX public API — 3.0
 
-This document describes the public API prepared for RDX 2.0. Publication is
+This document describes the public API prepared for RDX 3.0. Publication is
 manual; see the release instructions in [PUBLISHING.md](./PUBLISHING.md).
+
+RDX 3.0 installs the complete shadcn Code Block and Dialog compositions. Markdown
+fences and image syntax stay unchanged. Custom React callers of the former
+`CodeBlock` pre wrapper must choose either `MdxCodeBlock` (the Markdown adapter)
+or the official composition:
+
+```tsx
+import {
+  CodeBlock,
+  CodeBlockContent,
+} from '@lexibase/rdx/ui/components/code-block'
+
+export function Example() {
+  return (
+    <CodeBlock>
+      <CodeBlockContent>{'const enabled = true'}</CodeBlockContent>
+    </CodeBlock>
+  )
+}
+```
+
+For existing pre-shaped React content, import `MdxCodeBlock` from
+`@lexibase/rdx/ui/components/mdx-code-block`; it accepts pre props and a code child.
+The official CodeBlock root uses div props; pass wrapping and line-number options
+to `CodeBlockContent` and explicit clipboard values to `CodeBlockCopyButton`.
+`DialogContent` defaults to the official centered layout; set `className` for
+custom positioning/sizing and `showCloseButton` for the native close control.
+Runtime 3.x requires UI ^3.0.0. The main package selects matching versions.
 
 RDX 2.0 removes the published `ButtonLink` module. Use `Button` with `href`
 from `@lexibase/rdx/ui/components/button`. See the
@@ -63,7 +91,7 @@ exato das mensagens, logs do Next.js ou localização dos caches como API estáv
 - `@lexibase/rdx`: main framework entry, reexporting configuration functions and
   types, and supplying the `rdx` command. `/runtime`, `/config`, `/styles.css` and
   `/postcss.config` provide adapter integration. `/ui/components/*`, `/ui/lib/*`,
-  `/ui/providers/*` and `/ui/globals.css` expose the shared UI without bundling it.
+  `/ui/providers/*`, `/ui/hooks/*` and `/ui/globals.css` expose the shared UI without bundling it.
   The package selects compatible internal releases; optional plugins remain separate.
 
 - `@lexibase/rdx-next`: `defineConfig` e os tipos públicos reexportados para
@@ -101,7 +129,7 @@ exato das mensagens, logs do Next.js ou localização dos caches como API estáv
 Código `bin/`, caminhos físicos `src/` e `dist/`, templates, utilitários privados
 não exportados, classes CSS e a estrutura DOM dos componentes não são caminhos
 para extensão com garantia de compatibilidade. Os exports públicos e suas props
-documentadas são a superfície de integração; preservá-los durante a linha 1.x.
+documentadas são a superfície de integração; preservá-los durante cada versão major.
 Os testes de contrato verificam as entradas compiladas de servidor e os padrões
 de configuração; eles complementam os testes existentes de tipos, UI e pacotes.
 
