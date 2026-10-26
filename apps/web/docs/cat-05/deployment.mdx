@@ -15,16 +15,19 @@ From the directory containing `package.json` and `rdx.config.ts`:
     <TabsTrigger value="yarn">yarn</TabsTrigger>
   </TabsList>
   <TabsContent value="pnpm">
-pnpm build<br />
-pnpm start
+    pnpm build
+    <br />
+    pnpm start
   </TabsContent>
   <TabsContent value="npm">
-npm run build<br />
-npm run start
+    npm run build
+    <br />
+    npm run start
   </TabsContent>
   <TabsContent value="yarn">
-yarn build<br />
-yarn start
+    yarn build
+    <br />
+    yarn start
   </TabsContent>
 </Tabs>
 
@@ -74,7 +77,7 @@ output in `.rdx/.next`.
 For documentation installed in `apps/web`, keep the configuration inside that
 application:
 
-```text
+```folder
 my-repository/
   package.json
   pnpm-lock.yaml
@@ -124,15 +127,9 @@ project:
     <TabsTrigger value="npm">npm</TabsTrigger>
     <TabsTrigger value="yarn">yarn</TabsTrigger>
   </TabsList>
-  <TabsContent value="pnpm">
-pnpm start
-  </TabsContent>
-  <TabsContent value="npm">
-npm run start
-  </TabsContent>
-  <TabsContent value="yarn">
-yarn start
-  </TabsContent>
+  <TabsContent value="pnpm">pnpm start</TabsContent>
+  <TabsContent value="npm">npm run start</TabsContent>
+  <TabsContent value="yarn">yarn start</TabsContent>
 </Tabs>
 
 Configure HTTPS, a process supervisor, and the host's network settings. Keep the

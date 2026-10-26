@@ -10,7 +10,17 @@ import {
 } from './accordion'
 import { Blockquote } from './blockquote'
 import { Callout } from './callout'
-import { CodeBlock } from './code-block'
+import {
+  CodeBlock,
+  CodeBlockActions,
+  CodeBlockContent,
+  CodeBlockCopyButton,
+  CodeBlockFooter,
+  CodeBlockHeader,
+  CodeBlockLine,
+  CodeBlockTitle,
+} from './code-block'
+import { MdxCodeBlock } from './mdx-code-block'
 import { Kbd, KbdGroup } from './kbd'
 import {
   Table,
@@ -83,7 +93,7 @@ export const mdxComponents = {
     />
   ),
   blockquote: Blockquote,
-  pre: CodeBlock,
+  pre: MdxCodeBlock,
   code: ({ className, ...props }: ComponentProps<'code'>) => (
     <code
       className={cn(
@@ -123,6 +133,14 @@ export const mdxComponents = {
     <TableHead scope={scope} className={className} {...props} />
   ),
   td: TableCell,
+  CodeBlock,
+  CodeBlockActions,
+  CodeBlockContent,
+  CodeBlockCopyButton,
+  CodeBlockFooter,
+  CodeBlockHeader,
+  CodeBlockLine,
+  CodeBlockTitle,
   Kbd,
   KbdGroup,
   Table,
@@ -158,7 +176,9 @@ export const mdxComponents = {
 export function getMdxComponents(lang?: string) {
   return {
     ...mdxComponents,
-    pre: (props: ComponentProps<'pre'>) => <CodeBlock {...props} lang={lang} />,
+    pre: (props: ComponentProps<'pre'>) => (
+      <MdxCodeBlock {...props} lang={lang} />
+    ),
     table: (props: ComponentProps<'table'>) => (
       <MdxTable {...props} lang={lang} />
     ),

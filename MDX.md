@@ -35,6 +35,47 @@ Unknown languages fall back to plain text; unlabelled fences stay plain. Inline
 code is not highlighted. Token markup preserves code whitespace and the trailing
 newline for both block copying and copying a complete tab.
 
+Each Markdown block includes the shadcn wrap-lines action. Wrapping is disabled
+initially, toggles independently per block, and does not change copied text.
+
+### Diff and folder fences
+
+CodeBlock is the complete shadcn/ui base-nova component. Its Header, Title,
+Actions, CopyButton, Content, Line and Footer exports remain available, including
+variants, sizes, wrapping, lineNumbers and startLine. The official
+useHighlightedCode hook and server highlightCode function are also available.
+Markdown uses a separate MdxCodeBlock adapter and the official small size.
+
+Use `diff` to show a patch. Added and removed lines retain their `+` and `-`
+markers and receive a background tint. Unified diff file headers are not treated
+as content changes; `@@` hunk headers use the highlighted line variant. The Markdown copy button retains the
+complete patch, including its markers, indentation, and final newline.
+
+````md
+```diff
+-const enabled = false
++const enabled = true
+ console.log(enabled)
+```
+````
+
+Use `folder` to generate tree branches from indentation. Two spaces or one tab
+define a level. Parent folder names end with `/`; levels cannot be skipped.
+Blank lines are ignored. Names are rendered as text, and no filesystem access
+is performed. Copying produces the rendered diagram. Existing hand-drawn trees
+can continue to use `text` fences.
+
+````md
+```folder
+my-docs/
+  docs/
+    guides/
+      intro.mdx
+  public/
+  rdx.config.ts
+```
+````
+
 ## Links between documents
 
 Write relative `.mdx` file paths; RDX resolves them against the current file:

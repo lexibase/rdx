@@ -62,16 +62,14 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       da configuração ainda serão definidos; melhoria futura, fora da 1.0.0.
 - [ ] Evoluir Markdown/MDX e componentes próprios: tabelas, listas de tarefas,
       código com destaque/cópia, Callout, Tabs, Steps e Cards.
-- [ ] Adicionar um modo `FOLDER` aos code blocks para apresentar estruturas de
-      diretórios com pastas, arquivos, indentação e linhas de conexão alinhadas.
-      Priorizar autoria simples em um bloco Markdown e visual compacto, mantendo
-      a base shadcn/ui + Tailwind. Definir a sintaxe e o comportamento da cópia
-      quando o componente for implementado; melhoria futura, não implementada.
+- [x] Modo `folder` nos code blocks: listas com dois espaços por nível geram
+      árvores com linhas de conexão. Visual compacto e cópia do desenho gerado.
+      Implementado; aguarda publicação agrupada e lançamento dos guias públicos.
 - [ ] Documentar a extensão e substituição de componentes MDX pelo usuário.
-- [ ] Code blocks de diff, no estilo Git: distinguir linhas adicionadas e
+- [x] Code blocks de diff, no estilo Git: distinguir linhas adicionadas e
       removidas, com marcadores `+`/`-` e realces acessíveis nos temas claro e
-      escuro. Definir autoria e comportamento da cópia mantendo o bloco compacto;
-      melhoria futura, sem implementação nesta etapa.
+      escuro. Autoria com fences `diff` e cópia integral do patch, mantendo o
+      bloco compacto. Implementado; aguarda publicação agrupada e guias públicos.
 - [x] Links entre documentos, âncoras e TOC flutuante opcional (`TOC: false`
       por padrão).
 - [x] Busca local opcional, desativada por padrão no `rdx.config.ts`. Implementação

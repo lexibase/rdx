@@ -5,6 +5,7 @@
 - A RDX oferece uma experiência simples de documentação sobre **Next.js + Tailwind CSS + shadcn/ui**. Essa é a base do projeto, não apenas uma referência visual.
 - Use a variante **Base UI** ao instalar ou adicionar componentes do shadcn/ui, respeitando o `components.json` do pacote. Consulte a implementação oficial antes de criar uma alternativa.
 - Se o componente já existe no shadcn/ui, parta dele e adapte somente a integração com MDX, a configuração e as necessidades da documentação. Não reimplemente por conta própria a funcionalidade já fornecida pelo componente.
+- Preserve o componente oficial completo, sua composição e opções. Não o substitua por uma versão própria reduzida ou apenas por alguns primitives extraídos. A ligação com MDX fica em um adaptador separado; extensões como `folder` acrescentam recursos ao componente oficial.
 - Quando não existir um componente adequado, crie um componente específico de documentação, compondo os componentes do shadcn/ui quando aplicável e mantendo seu padrão visual. Callouts são um exemplo de extensão da RDX.
 - Não substitua essa fundação, adicione outra biblioteca de UI ou introduza outra variante headless sem solicitação explícita do usuário.
 

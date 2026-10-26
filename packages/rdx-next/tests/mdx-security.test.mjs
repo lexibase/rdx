@@ -21,6 +21,76 @@ const { Blockquote } = await jiti.import(
   '../../rdx-ui/src/components/blockquote.tsx'
 )
 
+test('the complete shadcn Code Block API keeps composition, variants, wrapping and line numbering', () => {
+  const {
+    CodeBlock,
+    CodeBlockHeader,
+    CodeBlockTitle,
+    CodeBlockActions,
+    CodeBlockCopyButton,
+    CodeBlockContent,
+    CodeBlockLine,
+    CodeBlockFooter,
+  } = mdxComponents
+  const html = renderToStaticMarkup(
+    createElement(
+      CodeBlock,
+      { variant: 'destructive', size: 'sm' },
+      createElement(
+        CodeBlockHeader,
+        null,
+        createElement(CodeBlockTitle, null, 'example.ts'),
+        createElement(
+          CodeBlockActions,
+          null,
+          createElement(CodeBlockCopyButton, { value: 'one\n\nthree' })
+        )
+      ),
+      createElement(
+        CodeBlockContent,
+        { wrap: true, lineNumbers: true, startLine: 8 },
+        'one\n\nthree'
+      ),
+      createElement(CodeBlockFooter, null, 'Example footer')
+    )
+  )
+  for (const slot of [
+    'code-block-header',
+    'code-block-title',
+    'code-block-actions',
+    'code-block-copy-button',
+    'code-block-content',
+    'code-block-line-content',
+    'code-block-footer',
+  ])
+    assert.ok(html.includes(`data-slot="${slot}"`), slot)
+  assert.match(html, /data-variant="destructive"/)
+  assert.match(html, /data-size="sm"/)
+  assert.match(html, /data-wrap="true"/)
+  assert.match(html, /data-numbered="true"/)
+  assert.match(html, /counter-reset:line 7/)
+  assert.equal((html.match(/data-slot="code-block-line"/g) ?? []).length, 3)
+  for (const variant of ['added', 'removed', 'highlighted']) {
+    const line = renderToStaticMarkup(
+      createElement(CodeBlockLine, { variant }, 'value')
+    )
+    assert.ok(line.includes(`data-variant="${variant}"`))
+  }
+})
+
+test('the official server highlighter exposes lazy language loading without client hooks', async () => {
+  const { highlightCode } = await jiti.import(
+    '../../rdx-ui/src/lib/highlighter.tsx'
+  )
+  const lines = await highlightCode('const ready = true', 'ts')
+  assert.ok(lines?.length)
+  assert.match(
+    renderToStaticMarkup(createElement('code', null, lines)),
+    /--shiki-light/
+  )
+  assert.equal(await highlightCode('plain', 'unknown-language'), null)
+})
+
 function renderedCodeText(html) {
   const body =
     html.match(/<pre\b[^>]*><code\b[^>]*>([\s\S]*?)<\/code><\/pre>/)?.[1] ?? ''
@@ -73,6 +143,70 @@ test('unknown, text and unlabelled fences remain readable; inline code stays unc
     assert.match(html, />const inline = true<\/code>/)
     assert.doesNotMatch(html, /<script>/)
   }
+})
+
+test('diff fences distinguish patch content from headers and preserve the exact copyable patch', async () => {
+  const patch =
+    'diff --git a/app.ts b/app.ts\n--- a/app.ts\n+++ b/app.ts\n@@ -1,2 +1,3 @@\n-const enabled = false\n+const enabled = true\n+const label = "<script> & RDX"\n console.log(enabled)\n'
+  const { content } = await compileDocumentation(
+    '```diff\n' + patch + '```',
+    mdxComponents
+  )
+  const html = renderToStaticMarkup(content)
+  assert.match(html, /data-rdx-code-mode="diff"/)
+  assert.equal((html.match(/data-variant="added"/g) ?? []).length, 2)
+  assert.equal((html.match(/data-variant="removed"/g) ?? []).length, 1)
+  assert.equal((html.match(/data-variant="highlighted"/g) ?? []).length, 1)
+  const copyValue = html.match(/data-rdx-code-value="([^"]*)"/)?.[1]
+  assert.ok(copyValue)
+  assert.equal(
+    copyValue.replace(
+      /&(?:amp|lt|gt|quot|#x27);/g,
+      (entity) =>
+        ({
+          '&amp;': '&',
+          '&lt;': '<',
+          '&gt;': '>',
+          '&quot;': '"',
+          '&#x27;': "'",
+        })[entity]
+    ),
+    patch
+  )
+  assert.match(renderedCodeText(html), /const enabled = true/)
+  assert.doesNotMatch(html, /<script>/)
+})
+
+test('folder fences draw nested branches and escaped filenames without changing plain text fences', async () => {
+  const source =
+    'my-docs/\n  docs/\n    guides/\n      intro.mdx\n    <example>.mdx\n  public/\n  rdx.config.ts\n'
+  const diagram =
+    'my-docs/\n├── docs/\n│   ├── guides/\n│   │   └── intro.mdx\n│   └── <example>.mdx\n├── public/\n└── rdx.config.ts\n'
+  for (const language of ['folder', 'FOLDER']) {
+    const { content } = await compileDocumentation(
+      '```' + language + '\n' + source + '```',
+      mdxComponents
+    )
+    const html = renderToStaticMarkup(content)
+    assert.match(html, /data-rdx-code-mode="folder"/)
+    assert.equal(renderedCodeText(html), diagram)
+    assert.doesNotMatch(html, /<example>/)
+    assert.match(html, /dir="ltr"/)
+  }
+  const { content } = await compileDocumentation(
+    '```text\n' + source + '```',
+    mdxComponents
+  )
+  assert.equal(renderedCodeText(renderToStaticMarkup(content)), source)
+  for (const invalid of [
+    'root/\n   bad.txt\n',
+    'root/\n    skipped.txt\n',
+    'root.txt\n  child.txt\n',
+  ])
+    await assert.rejects(
+      compileDocumentation('```folder\n' + invalid + '```', mdxComponents),
+      /Invalid folder fence at line 2/
+    )
 })
 
 test('all starter documents compile with their real filesystem link context', async () => {
@@ -600,6 +734,8 @@ test('code blocks preserve text and language while inline code has no copy butto
   const html = renderToStaticMarkup(content)
   assert.equal((html.match(/data-rdx-code-block/g) ?? []).length, 2)
   assert.equal((html.match(/aria-label="Copy code"/g) ?? []).length, 2)
+  assert.equal((html.match(/aria-label="Wrap lines"/g) ?? []).length, 2)
+  assert.equal((html.match(/aria-pressed="false"/g) ?? []).length, 2)
   for (const button of html.matchAll(/<button\b[^>]*>([\s\S]*?)<\/button>/g)) {
     assert.match(button[1], /<svg\b/)
     assert.equal(button[1].replace(/<[^>]*>/g, '').trim(), '')
@@ -609,7 +745,7 @@ test('code blocks preserve text and language while inline code has no copy butto
     html.replace(/<[^>]*>/g, ''),
     / {2}const text = &quot;&lt;tag&gt; &amp; RDX&quot;\n\tconsole.log\(text\)\n/
   )
-  assert.match(html, />Code<\/span>/)
+  assert.match(html, / Code<\/div>/)
   assert.match(html, />inline<\/code>/)
 })
 

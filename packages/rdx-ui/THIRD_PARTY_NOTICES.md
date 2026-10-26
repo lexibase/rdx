@@ -2,9 +2,13 @@
 
 ## shadcn/ui
 
-Table and Kbd are adapted from the official base-nova registry components:
+Table and Kbd use the official base-nova registry components. Code Block,
+useHighlightedCode, and highlighter are installed in full from that registry,
+with project imports, icons, localization and clipboard failure feedback wired
+to RDX. The official shadcn 4.22.1 tailwind.css is included as styles/shadcn.css.
 https://ui.shadcn.com/docs/components/base/table and
-https://ui.shadcn.com/docs/components/base/kbd.
+https://ui.shadcn.com/docs/components/base/kbd and
+https://ui.shadcn.com/docs/components/base/code-block.
 
 MIT License
 

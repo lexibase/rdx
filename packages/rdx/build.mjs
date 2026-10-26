@@ -59,7 +59,7 @@ await emit('ui/globals.css', "@import '@lexibase/rdx-ui/globals.css';\n")
 await emit('ui/globals.d.css.ts', 'export {}\n')
 
 // Proxy individual public UI modules without bundling or recreating components.
-for (const group of ['components', 'lib', 'providers']) {
+for (const group of ['components', 'lib', 'providers', 'hooks']) {
   for (const entry of await readdir(path.join(ui, 'src', group))) {
     if (!/\.tsx?$/.test(entry) || entry.endsWith('.d.ts')) continue
     const name = entry.replace(/\.tsx?$/, '')

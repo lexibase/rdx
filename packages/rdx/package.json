@@ -49,7 +49,11 @@
       "types": "./dist/ui/providers/*.d.ts",
       "import": "./dist/ui/providers/*.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./ui/hooks/*": {
+      "types": "./dist/ui/hooks/*.d.ts",
+      "import": "./dist/ui/hooks/*.js"
+    }
   },
   "scripts": {
     "build": "node build.mjs",

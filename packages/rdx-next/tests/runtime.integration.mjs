@@ -253,7 +253,7 @@ test(
         '\n\n| Wide column | Status |\n| --- | --- |\n| ' +
         'LongTableValue'.repeat(30) +
         ' | Ready |\n\n```text\n' +
-        'long-code-value-'.repeat(30) +
+        'LongCodeValue'.repeat(30) +
         '\n```\n'
     )
     await writeFile(
@@ -1422,14 +1422,37 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
               lineHeight: style.lineHeight,
             }
           })
-        assert.deepEqual(codeMetrics, {
-          padding: '12px',
-          fontSize: '13px',
-          lineHeight: '24px',
-        })
+        assert.equal(await blocks.nth(1).getAttribute('data-size'), 'sm')
+        assert.ok(Number.parseFloat(codeMetrics.fontSize) <= 13)
+        assert.ok(Number.parseFloat(codeMetrics.lineHeight) <= 24)
+        assert.ok(
+          codeMetrics.padding
+            .split(' ')
+            .every((value) => Number.parseFloat(value) <= 12)
+        )
         assert.ok(
           (await blocks.nth(1).boundingBox()).height <= 96,
           'A single-line code block should remain compact'
+        )
+        const wrap = blocks
+          .first()
+          .getByRole('button', { name: 'Wrap lines', exact: true })
+        assert.equal(await wrap.getAttribute('aria-pressed'), 'false')
+        await wrap.focus()
+        await page.keyboard.press('Enter')
+        await page.waitForFunction(
+          () =>
+            document
+              .querySelector('[data-rdx-code-block] pre')
+              ?.getAttribute('data-wrap') === 'true'
+        )
+        assert.equal(await wrap.getAttribute('aria-pressed'), 'true')
+        assert.equal(
+          await blocks
+            .nth(1)
+            .getByRole('button', { name: 'Wrap lines', exact: true })
+            .getAttribute('aria-pressed'),
+          'false'
         )
         const copy = blocks.first().getByRole('button', { name: 'Copy code' })
         await copy.focus()
@@ -1437,7 +1460,9 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         await page.waitForFunction(
           () =>
             document
-              .querySelector('[data-rdx-code-block] button')
+              .querySelector(
+                '[data-rdx-code-block] [data-slot=code-block-copy-button]'
+              )
               ?.getAttribute('data-status') === 'copied'
         )
         assert.equal(
@@ -1461,6 +1486,12 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         assert.equal(
           await blocks.first().locator('pre').textContent(),
           copySample
+        )
+        await wrap.click()
+        assert.equal(await wrap.getAttribute('aria-pressed'), 'false')
+        assert.equal(
+          await blocks.first().locator('pre').getAttribute('data-wrap'),
+          null
         )
         assert.equal(await page.locator('p [data-rdx-code-block]').count(), 0)
         await blocks.first().locator('button[data-status="idle"]').waitFor()
@@ -1524,12 +1555,21 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
             hasText: 'Could not copy. Select the code and copy it manually.',
           })
           .waitFor()
-        assert.equal(await failed.getByRole('button').innerText(), '')
         assert.equal(
-          await failed.getByRole('button').getAttribute('data-status'),
+          await failed
+            .getByRole('button', { name: 'Copy code', exact: true })
+            .innerText(),
+          ''
+        )
+        assert.equal(
+          await failed
+            .getByRole('button', { name: 'Copy code', exact: true })
+            .getAttribute('data-status'),
           'error'
         )
-        const retryBounds = await failed.getByRole('button').boundingBox()
+        const retryBounds = await failed
+          .getByRole('button', { name: 'Copy code', exact: true })
+          .boundingBox()
         assert.ok(
           retryBounds &&
             retryBounds.x >= 0 &&
@@ -1603,6 +1643,37 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
             selector
           )
         }
+        const longBlock = page.locator('[data-rdx-code-block]').last()
+        const longWrap = longBlock.getByRole('button', {
+          name: 'Wrap lines',
+          exact: true,
+        })
+        await longWrap.click()
+        await longBlock.locator('pre[data-wrap="true"]').waitFor()
+        assert.ok(
+          await longBlock
+            .locator('pre')
+            .evaluate(
+              (element) => element.scrollWidth <= element.clientWidth + 1
+            )
+        )
+        await longBlock
+          .getByRole('button', { name: 'Copy code', exact: true })
+          .click()
+        await longBlock.locator('button[data-status="copied"]').waitFor()
+        assert.equal(
+          (await page.evaluate(() => navigator.clipboard.readText())).replace(
+            /\r\n/g,
+            '\n'
+          ),
+          await longBlock.getAttribute('data-rdx-code-value')
+        )
+        await longWrap.click()
+        assert.ok(
+          await longBlock
+            .locator('pre')
+            .evaluate((element) => element.scrollWidth > element.clientWidth)
+        )
         await page.setViewportSize({ width: 1872, height: 955 })
         await page.goto(running.base)
         await page

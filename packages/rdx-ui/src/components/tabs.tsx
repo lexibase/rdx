@@ -25,8 +25,13 @@ function panelText(node: Node): string {
     )
   )
     return ''
-  if (node.matches('[data-rdx-code-block]')) {
-    return `${node.querySelector('pre')?.textContent ?? ''}\n`
+  if (node.matches('[data-rdx-code-block], [data-slot="code-block"]')) {
+    const pre = node.querySelector('pre')
+    const lines = pre?.querySelectorAll('[data-slot="code-block-line-content"]')
+    const text = lines?.length
+      ? Array.from(lines, (line) => line.textContent ?? '').join('\n')
+      : pre?.textContent
+    return `${node.dataset.rdxCodeValue ?? text ?? ''}\n`
   }
   if (node.tagName === 'PRE') return `${node.textContent ?? ''}\n`
   if (node.tagName === 'BR') return '\n'
