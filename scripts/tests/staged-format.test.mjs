@@ -56,3 +56,37 @@ test('unformatted staged content is reported without rewriting or restaging a fo
     staged
   )
 })
+
+test('staged checks cover supported formats and skip ignored and unknown files', async (t) => {
+  const root = await fixture(t)
+  await writeFile(path.join(root, '.prettierignore'), 'generated.json\n')
+  const sources = {
+    'script with spaces.mjs': 'const count=1;\n',
+    'settings.json': '{"enabled":true}',
+    'styles.css': 'a{color:red}',
+    'workflow.yaml': 'enabled:   true\n',
+    'guide.mdx': '# Heading\n\n<Component   enabled={true} />\n',
+    'generated.json': '{not valid json',
+    'unknown.fixture': '\u0000not text',
+  }
+  for (const [filename, source] of Object.entries(sources))
+    await writeFile(path.join(root, filename), source)
+  execFileSync('git', ['add', '--', ...Object.keys(sources)], { cwd: root })
+  assert.deepEqual(await checkStagedFormat(root), [
+    'guide.mdx',
+    'script with spaces.mjs',
+    'settings.json',
+    'styles.css',
+    'workflow.yaml',
+  ])
+  for (const [filename, source] of Object.entries(sources)) {
+    assert.equal(await readFile(path.join(root, filename), 'utf8'), source)
+    assert.equal(
+      execFileSync('git', ['show', `:${filename}`], {
+        cwd: root,
+        encoding: 'utf8',
+      }),
+      source
+    )
+  }
+})

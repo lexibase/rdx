@@ -17,14 +17,14 @@ export async function checkStagedFormat(cwd = process.cwd()) {
     { cwd: root, encoding: 'utf8' }
   )
     .split('\0')
-    .filter((filename) => /\.(ts|tsx|md)$/.test(filename))
+    .filter(Boolean)
   const unformatted = []
   for (const filename of filenames) {
     const filepath = path.join(root, filename)
     const info = await prettier.getFileInfo(filepath, {
       ignorePath: path.join(root, '.prettierignore'),
     })
-    if (info.ignored) continue
+    if (info.ignored || !info.inferredParser) continue
     const source = execFileSync('git', ['show', `:${filename}`], {
       cwd: root,
       encoding: 'utf8',

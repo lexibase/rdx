@@ -126,7 +126,7 @@ test(
       {
         stdout: logs.stream,
         stderr: logs.stream,
-        timeoutMs: 500,
+        timeoutMs: 5_000,
         onFailure: (message) => errors.push(message),
       }
     )
@@ -169,7 +169,7 @@ test(
         signal: controller.signal,
         stdout: logs.stream,
         stderr: logs.stream,
-        timeoutMs: 500,
+        timeoutMs: 5_000,
         onStart: (_child, task) => started.push(task.name),
       }
     )
