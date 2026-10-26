@@ -20,6 +20,10 @@ export function LocaleProvider({
   )
 }
 
+export function useInterfaceLocale() {
+  return useContext(LocaleContext)
+}
+
 export function useMessages() {
-  return getMessages(useContext(LocaleContext))
+  return getMessages(useInterfaceLocale())
 }

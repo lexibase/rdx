@@ -18,6 +18,7 @@ import { getMdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { getMessages, formatMessage } from '@lexibase/rdx-ui/lib/i18n'
 import { LocaleProvider } from '@lexibase/rdx-ui/providers/locale-provider'
 import { Navbar } from '@lexibase/rdx-ui/components/navbar'
+import { NotFound } from '@lexibase/rdx-ui/components/not-found'
 import {
   VersionDropdown,
   type VersionOption,
@@ -162,23 +163,12 @@ export function HomePage({ project }: { project: RdxProject }) {
   )
 }
 
-export function NotFoundPage({ config }: { config: RDXConfig }) {
-  const messages = getMessages(config.lang)
+export function NotFoundPage({ project }: { project: RdxProject }) {
   return (
-    <main
-      id="rdx-main"
-      tabIndex={-1}
-      className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center"
-    >
-      <p className="text-sm text-muted-foreground">404</p>
-      <h1 className="text-3xl font-bold">{messages.notFound}</h1>
-      <p className="text-sm text-muted-foreground">
-        {messages.notFoundDescription}
-      </p>
-      <Button href="/docs" variant="link">
-        {messages.backToDocs}
-      </Button>
-    </main>
+    <>
+      <RdxHeader project={project} />
+      <NotFound lang={project.config.lang} />
+    </>
   )
 }
 

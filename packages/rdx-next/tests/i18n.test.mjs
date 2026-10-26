@@ -27,6 +27,9 @@ const { VersionNotice } = await jiti.import(
   '../../rdx-ui/src/components/version-notice.tsx'
 )
 const { Navbar } = await jiti.import('../../rdx-ui/src/components/navbar.tsx')
+const { NotFound } = await jiti.import(
+  '../../rdx-ui/src/components/not-found.tsx'
+)
 const { getMdxComponents } = await jiti.import(
   '../../rdx-ui/src/components/mdx-components.tsx'
 )
@@ -65,6 +68,25 @@ test('interface locales have complete catalogs and predictable base-language and
 function localized(lang, content) {
   return renderToStaticMarkup(createElement(LocaleProvider, { lang }, content))
 }
+
+test('shared 404 preserves the development layout, translated guidance and native return links', () => {
+  for (const lang of ['en', 'pt-BR']) {
+    const messages = getMessages(lang)
+    const html = localized(
+      lang,
+      createElement(NotFound, { href: '/docs/1.0.0', lang })
+    )
+    assert.match(html, /data-rdx-not-found/)
+    assert.match(html, /id="rdx-main"/)
+    assert.match(html, /<h1\b[^>]*>404<\/h1>/)
+    assert.match(html, /text-9xl/)
+    assert.ok(html.includes(messages.notFound))
+    assert.ok(html.includes(messages.brokenLink))
+    assert.ok(html.includes(messages.backToDocs))
+    assert.match(html, /<a\b[^>]*href="\/docs\/1.0.0"/)
+    assert.doesNotMatch(html, /role="button"/)
+  }
+})
 
 test('server-rendered client labels use the configured language with no cross-render locale leakage', () => {
   const tab = createElement(

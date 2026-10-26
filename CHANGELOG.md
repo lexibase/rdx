@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Share the development website's custom 404 layout with generated projects,
+  including navigation, translated guidance, and a documentation return link.
+
 - Translate built-in interface labels from `lang`, with English and Brazilian
   Portuguese catalogs, predictable fallback, and consistent server/client rendering.
 - Localize search, heading navigation, copy feedback, version notices, credits,

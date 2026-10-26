@@ -58,6 +58,8 @@ const required = {
     'dist/ui/components/table.d.ts',
     'dist/ui/components/kbd.js',
     'dist/ui/components/kbd.d.ts',
+    'dist/ui/components/not-found.js',
+    'dist/ui/components/not-found.d.ts',
     'dist/ui/lib/i18n.js',
     'dist/ui/providers/locale-provider.js',
     'dist/styles.css',
@@ -77,6 +79,7 @@ const required = {
     'THIRD_PARTY_NOTICES.md',
     'src/components/table.tsx',
     'src/components/kbd.tsx',
+    'src/components/not-found.tsx',
     'src/styles/globals.css',
     'src/styles/globals.d.css.ts',
     'src/components/mdx-components.tsx',
@@ -525,6 +528,9 @@ async function verifySite(
       const missing = await (
         await request(base, '/docs/rdx-missing-page', 404)
       ).text()
+      assert.match(missing, /data-rdx-not-found/)
+      assert.match(missing, /data-rdx-navbar/)
+      assert.match(missing, /text-9xl/)
       assert.ok(
         missing.includes(
           locale === 'pt-BR' ? 'Página não encontrada' : 'Page not found'
