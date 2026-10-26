@@ -324,16 +324,15 @@ test('React tabs preserve Base UI state classes, native props and opt-in mounted
   assert.match(html, /Preserved content/)
 })
 
-test('tables keep native structure, column alignment and rich content with rounded striped styling', async () => {
+test('tables keep native structure, column alignment and rich content with the default shadcn style', async () => {
   const { content } = await compileDocumentation(
     '| Feature | Status | Count |\n| :--- | :---: | ---: |\n| **Markdown** | Ready | 1 |\n| [Guide](/docs/init/intro) | `code` | 2 |',
     mdxComponents
   )
   const html = renderToStaticMarkup(content)
   assert.match(html, /data-slot="mdx-table-scroll"/)
-  assert.match(html, /rounded-lg border/)
-  assert.match(html, /border-separate border-spacing-0/)
-  assert.match(html, /nth-child\(even\)/)
+  assert.doesNotMatch(html, /border-separate|nth-child\(even\)|border-r/)
+  assert.match(html, /hover:bg-muted\/50/)
   assert.match(html, /<thead\b[^>]*data-slot="table-header"/)
   assert.match(html, /<tbody\b[^>]*data-slot="table-body"/)
   assert.match(html, /data-slot="table"/)
@@ -644,4 +643,32 @@ test('MDX expressions and JSX expression attributes cannot execute project-serve
   } finally {
     delete globalThis.__rdxMdxSecurityProbe
   }
+})
+
+test('Button navigation keeps native anchor semantics and the link variant', async () => {
+  const { Button } = await jiti.import('../../rdx-ui/src/components/button.tsx')
+  const html = renderToStaticMarkup(
+    createElement(
+      Button,
+      {
+        href: '/docs',
+        variant: 'link',
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        'aria-label': 'Read documentation',
+      },
+      'Documentation'
+    )
+  )
+  assert.match(html, /<a\b/)
+  assert.match(html, /href="\/docs"/)
+  assert.match(html, /hover:underline/)
+  assert.match(html, /target="_blank"/)
+  assert.match(html, /aria-label="Read documentation"/)
+  assert.doesNotMatch(html, /role="button"|type="button"/)
+  const action = renderToStaticMarkup(
+    createElement(Button, { disabled: true }, 'Save')
+  )
+  assert.match(action, /<button\b/)
+  assert.match(action, /disabled=""/)
 })

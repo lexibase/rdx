@@ -8,7 +8,6 @@ import {
 } from '@lexibase/rdx-core'
 import type { RdxProject, RDXConfig } from '@lexibase/rdx-types'
 import { Button } from '@lexibase/rdx-ui/components/button'
-import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 import { DocsSidebar } from '@lexibase/rdx-ui/components/docs-sidebar'
 import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
 import { DocsSearch } from '@lexibase/rdx-ui/components/docs-search'
@@ -249,26 +248,22 @@ export async function DocsPage({
             <footer className="flex flex-col">
               <section className="flex items-center justify-between">
                 {previous ? (
-                  <ButtonLink
+                  <Button
                     variant="outline"
                     size="sm"
                     href={hrefFor(previous.slug)}
                   >
                     {previous.title}
-                  </ButtonLink>
+                  </Button>
                 ) : (
                   <Button variant="outline" size="sm" disabled>
                     Previous
                   </Button>
                 )}
                 {next ? (
-                  <ButtonLink
-                    variant="outline"
-                    size="sm"
-                    href={hrefFor(next.slug)}
-                  >
+                  <Button variant="outline" size="sm" href={hrefFor(next.slug)}>
                     {next.title}
-                  </ButtonLink>
+                  </Button>
                 ) : (
                   <Button variant="outline" size="sm" disabled>
                     Next

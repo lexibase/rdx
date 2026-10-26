@@ -71,9 +71,9 @@ is separately opt-in through `TOC: true`.
 
 ## Tables and keyboard shortcuts
 
-Markdown tables use the shadcn/ui base-nova Table composition. RDX adds its
-documentation layout: rounded borders, subtle alternating rows, column dividers,
-Markdown alignment and a focusable horizontal scroll container. The shared Table
+Markdown tables use the default shadcn/ui base-nova Table styling: horizontal row
+separators and compact cells. RDX supports Markdown alignment and a focusable
+horizontal scroll container. The shared Table
 primitives are also available from `@lexibase/rdx/ui/components/table` for custom
 React components and through their named tags in MDX.
 

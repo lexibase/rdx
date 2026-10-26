@@ -2,8 +2,10 @@
 
 ## Unreleased
 
+- Consolidate navigation in Button with native link semantics and remove ButtonLink.
+
 - Render Markdown tables with the shadcn/ui base-nova Table components while
-  preserving rounded borders, subtle row striping, alignment and keyboard scrolling.
+  using its default visual style, Markdown alignment and keyboard scrolling.
 - Add shadcn/ui Kbd and KbdGroup to MDX and public component exports, with
   keyboard shortcut examples in the official documentation and generated projects.
 

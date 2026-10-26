@@ -2,7 +2,6 @@
 
 import { useRef, useState } from 'react'
 import { Button } from '@lexibase/rdx-ui/components/button'
-import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 import { Separator } from '@lexibase/rdx-ui/components/separator'
 import {
   DropdownMenu,
@@ -27,9 +26,9 @@ export default function BaseUiHome() {
   return (
     <main>
       <h1>Project owned homepage</h1>
-      <ButtonLink href="/docs/init/intro" variant="outline">
+      <Button href="/docs/init/intro" variant="outline">
         Documentation link
-      </ButtonLink>
+      </Button>
       <Button disabled onClick={() => setAction('disabled clicked')}>
         Disabled button
       </Button>

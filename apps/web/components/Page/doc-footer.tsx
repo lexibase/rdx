@@ -1,5 +1,4 @@
 import { Button } from '@lexibase/rdx-ui/components/button'
-import { ButtonLink } from '@lexibase/rdx-ui/components/button-link'
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
 
 import { docsIndexer } from '@/lib/docs'
@@ -29,14 +28,14 @@ export async function DocFooter({
     <footer className="flex flex-col">
       <section className="flex items-center justify-between">
         {prevLink ? (
-          <ButtonLink
+          <Button
             variant="outline"
             size="sm"
             aria-label={prevLink.label}
             href={prevLink.href}
           >
             {prevLink.label}
-          </ButtonLink>
+          </Button>
         ) : (
           <Button
             variant="outline"
@@ -49,14 +48,14 @@ export async function DocFooter({
         )}
 
         {nextLink ? (
-          <ButtonLink
+          <Button
             variant="outline"
             size="sm"
             aria-label={nextLink.label}
             href={nextLink.href}
           >
             {nextLink.label}
-          </ButtonLink>
+          </Button>
         ) : (
           <Button variant="outline" size="sm" disabled aria-label="next link">
             Next
@@ -69,7 +68,7 @@ export async function DocFooter({
         since={config.metadata.since}
       >
         {'. Developed by '}
-        <ButtonLink
+        <Button
           variant="link"
           size="link"
           aria-label="go to github page from duhnunes"
@@ -78,7 +77,7 @@ export async function DocFooter({
           rel="noopener noreferrer"
         >
           {config.metadata.authors[0]?.name}
-        </ButtonLink>
+        </Button>
       </FooterCredit>
     </footer>
   )

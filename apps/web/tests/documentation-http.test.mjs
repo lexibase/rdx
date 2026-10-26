@@ -46,7 +46,11 @@ test(
         }
         const example = await fetch(`${base}/docs/canary/mdx-components`)
         const html = await example.text()
-        assert.match(html, /data-rdx-callout="warning"/)
+        assert.match(html, /Markdown \| RDX/)
+        assert.doesNotMatch(html, /data-rdx-callout="warning"/)
+        const callouts = await fetch(`${base}/docs/canary/callouts`)
+        assert.equal(callouts.status, 200)
+        assert.match(await callouts.text(), /data-rdx-callout="warning"/)
         assert.match(html, /data-slot="mdx-table-scroll"/)
         assert.match(html, /data-rdx-code-block/)
         assert.equal(

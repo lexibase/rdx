@@ -1,6 +1,6 @@
 ---
-title: Markdown and Callouts
-description: Markdown formatting, syntax highlighting, and contextual notes.
+title: Markdown
+description: Text formatting, tables, code blocks, and other Markdown features.
 link_position: 3
 ---
 
@@ -21,21 +21,21 @@ Use **strong text**, *emphasis*, ~~strikethrough~~ and `inline code`.
 | Feature | Available |
 | :------ | --------: |
 | Markdown tables | Yes |
-| Callouts | Yes |
+| Lists | Yes |
 | Code blocks | Yes |
 | Blockquotes | Yes |
 
 ### Five-column comparison
 
-Markdown tables use the shared shadcn/ui Table components, with the RDX
-documentation styling. Column alignment follows the Markdown separator row.
+Markdown tables use the default shadcn/ui Table styling. Column alignment
+follows the Markdown separator row.
 
 Wider tables scroll horizontally on small screens without widening the page.
 
 | Feature | Description | Status | Plugin | Example |
 | :------ | :---------- | :----: | :----: | :------ |
 | Markdown | Write headings, lists, and paragraphs | Included | Not required | `## Heading` |
-| Callout | Highlight contextual information | Included | Not required | `<Callout>` |
+| List | Organize related items | Included | Not required | `- First item` |
 | Code block | Display source code with a copy button | Included | Not required | `pnpm dev` |
 | Blockquote | Quote a passage or explanation | Included | Not required | `> A quotation` |
 
@@ -73,44 +73,3 @@ def greet(name):
 ##### Heading five
 
 ###### Heading six
-
----
-
-## Callouts
-
-<Callout title="A useful note">
-
-Callouts work without imports or plugins. They use the shared RDX theme.
-
-</Callout>
-
-<Callout variant="tip" title="A helpful tip">
-
-Keep **Markdown** and `inline code` inside the component.
-
-</Callout>
-
-<Callout variant="success" title="Ready to go">
-
-Your documentation is ready to share.
-
-</Callout>
-
-<Callout variant="warning" title="Before updating">
-
-- Read the release notes.
-- Test your changes before deploying.
-
-</Callout>
-
-<Callout variant="danger" title="Irreversible action">
-
-Deleting the source files permanently removes their content.
-
-</Callout>
-
-<Callout>
-
-You can also omit the title.
-
-</Callout>

@@ -867,7 +867,7 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
             rows.map((row) => getComputedStyle(row).backgroundColor)
           )
         assert.equal(tableColors.length, 4)
-        assert.notEqual(tableColors[0], tableColors[1])
+        assert.equal(tableColors[0], tableColors[1])
         assert.equal(tableColors[0], tableColors[2])
         assert.equal(tableColors[1], tableColors[3])
         for (const selector of ['thead tr', 'tbody tr:first-child']) {
@@ -878,13 +878,13 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
                 parseFloat(getComputedStyle(cell).borderRightWidth)
               )
             )
-          assert.ok(borders.slice(0, -1).every((width) => width > 0))
+          assert.ok(borders.every((width) => width === 0))
           assert.equal(borders.at(-1), 0)
         }
         assert.ok(
           await tableRegion.evaluate(
             (element) =>
-              parseFloat(getComputedStyle(element).borderTopLeftRadius) > 0
+              parseFloat(getComputedStyle(element).borderTopLeftRadius) === 0
           )
         )
         assert.equal(
@@ -941,7 +941,9 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
           await wideTable
             .locator('tbody tr:first-child td')
             .evaluateAll((cells) =>
-              cells.every((cell) => cell.getBoundingClientRect().width >= 160)
+              cells.every(
+                (cell) => getComputedStyle(cell).whiteSpace === 'nowrap'
+              )
             )
         )
         await wideTable.focus()

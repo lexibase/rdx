@@ -103,12 +103,9 @@ export const mdxComponents = {
         'aria-label': 'Table',
         tabIndex: 0,
         className:
-          'my-6 min-w-0 max-w-full rounded-lg border border-border bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+          'my-6 min-w-0 max-w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
       }}
-      className={cn(
-        'w-full border-separate border-spacing-0 text-sm [&_tbody>tr]:transition-colors motion-reduce:[&_tbody>tr]:transition-none [&_tbody>tr:nth-child(even)]:bg-muted/20 [&_tbody>tr:hover]:bg-muted/40 [&_tbody>tr:last-child>td]:border-b-0',
-        className
-      )}
+      className={className}
       {...props}
     />
   ),
@@ -118,24 +115,9 @@ export const mdxComponents = {
   tr: TableRow,
   caption: TableCaption,
   th: ({ className, scope = 'col', ...props }: ComponentProps<'th'>) => (
-    <TableHead
-      scope={scope}
-      className={cn(
-        'h-auto border-b border-r border-border bg-muted/40 px-4 py-3 whitespace-normal text-left text-xs font-semibold tracking-wide text-foreground/90 last:border-r-0',
-        className
-      )}
-      {...props}
-    />
+    <TableHead scope={scope} className={className} {...props} />
   ),
-  td: ({ className, ...props }: ComponentProps<'td'>) => (
-    <TableCell
-      className={cn(
-        'min-w-40 border-b border-r border-border/70 px-4 py-3 whitespace-normal align-top leading-6 last:border-r-0',
-        className
-      )}
-      {...props}
-    />
-  ),
+  td: TableCell,
   Kbd,
   KbdGroup,
   Table,

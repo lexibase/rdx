@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { ButtonLink } from './button-link'
+import { Button } from './button'
 
 /** Shared site identity and framework credit for documentation footers. */
 export function FooterCredit({
@@ -25,7 +25,7 @@ export function FooterCredit({
         {children}
         <span className="inline-block">
           {' · Powered by '}
-          <ButtonLink
+          <Button
             variant="link"
             size="link"
             href="https://github.com/lexibase/rdx"
@@ -33,7 +33,7 @@ export function FooterCredit({
             rel="noopener noreferrer"
           >
             RDX
-          </ButtonLink>
+          </Button>
         </span>
       </p>
     </section>
