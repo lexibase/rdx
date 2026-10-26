@@ -705,7 +705,7 @@ for (const [name, release] of releases) {
   }
   if (name === '@lexibase/rdx-next') {
     assert.equal(packed.dependencies?.['@lexibase/rdx-ui'], undefined)
-    assert.equal(packed.peerDependencies['@lexibase/rdx-ui'], '^2.0.0')
+    assert.equal(packed.peerDependencies['@lexibase/rdx-ui'], '^3.0.0')
   }
   const files = new Set(
     execFileSync('tar', ['-tf', archive], { encoding: 'utf8' })
