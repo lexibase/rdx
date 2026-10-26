@@ -1,5 +1,7 @@
 'use client'
 
+import { useMessages } from '../providers/locale-provider'
+
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { Search } from 'lucide-react'
@@ -20,6 +22,7 @@ export function DocsSearch({
   indexUrl: string
   version: string
 }) {
+  const messages = useMessages()
   const [open, setOpen] = useState(false)
   const [activated, setActivated] = useState(false)
   const trigger = useRef<HTMLButtonElement | null>(null)
@@ -51,14 +54,14 @@ export function DocsSearch({
         data-rdx-search-trigger
         variant="outline"
         size="sm"
-        aria-label="Search documentation"
+        aria-label={messages.searchDocumentation}
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={show}
         className="h-8 gap-2 px-2 text-muted-foreground sm:min-w-40 sm:justify-start"
       >
         <Search className="size-3.5" />
-        <span className="hidden sm:inline">Search…</span>
+        <span className="hidden sm:inline">{messages.search}</span>
         <Kbd
           className="ml-auto hidden h-auto rounded border bg-transparent px-1 text-[10px] text-muted-foreground sm:inline"
           aria-hidden="true"

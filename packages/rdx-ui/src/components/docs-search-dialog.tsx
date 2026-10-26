@@ -1,5 +1,7 @@
 'use client'
 
+import { useMessages } from '../providers/locale-provider'
+
 import {
   useDeferredValue,
   useEffect,
@@ -23,6 +25,8 @@ import {
   CommandItem,
   CommandList,
 } from './command'
+import { formatMessage } from '../lib/i18n'
+
 import { Button } from './button'
 
 const cache = new Map<string, PreparedSearch>()
@@ -40,6 +44,7 @@ export function DocsSearchDialog({
   onOpenChange: (value: boolean) => void
   triggerRef: RefObject<HTMLButtonElement | null>
 }) {
+  const messages = useMessages()
   const router = useRouter()
   const pathname = usePathname()
   const [query, setQuery] = useState('')
@@ -95,15 +100,16 @@ export function DocsSearchDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent finalFocus={triggerRef}>
-        <DialogTitle className="sr-only">Search documentation</DialogTitle>
+        <DialogTitle className="sr-only">
+          {messages.searchDocumentation}
+        </DialogTitle>
         <DialogDescription className="sr-only">
-          Search pages and sections in {version}. Use arrow keys to choose a
-          result and Enter to open it.
+          {formatMessage(messages.searchDescription, { version })}
         </DialogDescription>
-        <Command shouldFilter={false} label="Search documentation">
+        <Command shouldFilter={false} label={messages.searchDocumentation}>
           <CommandInput
-            aria-label="Search documentation"
-            placeholder="Search documentation…"
+            aria-label={messages.searchDocumentation}
+            placeholder={messages.searchPlaceholder}
             value={query}
             onValueChange={setQuery}
             maxLength={120}
@@ -111,21 +117,24 @@ export function DocsSearchDialog({
           <div className="px-2 pt-2 pb-1 text-[11px] text-muted-foreground">
             {version}
           </div>
-          <CommandList aria-busy={loading}>
+          <CommandList
+            aria-busy={loading}
+            aria-label={messages.searchDocumentation}
+          >
             {loading ? (
               <div
                 role="status"
                 className="flex justify-center gap-2 p-6 text-sm text-muted-foreground"
               >
                 <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" />
-                Loading search…
+                {messages.loadingSearch}
               </div>
             ) : state.error ? (
               <div
                 role="status"
                 className="p-4 text-center text-sm text-muted-foreground"
               >
-                Search is unavailable.{' '}
+                {messages.searchUnavailable}{' '}
                 <Button
                   variant="link"
                   size="sm"
@@ -134,16 +143,16 @@ export function DocsSearchDialog({
                     setRetry((value) => value + 1)
                   }}
                 >
-                  Try again
+                  {messages.tryAgain}
                 </Button>
               </div>
             ) : !query.trim() ? (
               <div className="px-4 py-6 text-center text-sm text-muted-foreground">
-                Type to search this documentation.
+                {messages.typeToSearch}
               </div>
             ) : (
               <>
-                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandEmpty>{messages.noResults}</CommandEmpty>
                 {results.map((entry) => (
                   <CommandItem
                     key={entry.href}
@@ -175,7 +184,8 @@ export function DocsSearchDialog({
             )}
           </CommandList>
           <div className="border-t px-2 py-2 text-[10px] text-muted-foreground">
-            ↑ ↓ Navigate <span className="mx-2">↵ Open</span> Esc Close
+            ↑ ↓ {messages.navigate}{' '}
+            <span className="mx-2">↵ {messages.open}</span> Esc {messages.close}
           </div>
         </Command>
       </DialogContent>

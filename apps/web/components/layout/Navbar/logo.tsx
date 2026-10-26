@@ -9,7 +9,7 @@ export function NavbarLogo() {
     <Button
       variant="ghost"
       size="icon"
-      aria-label="Logo"
+      aria-label={config.metadata.applicationName}
       href="/"
       className="cursor-default"
     >
@@ -19,7 +19,7 @@ export function NavbarLogo() {
     <Button
       variant="ghost"
       size="default"
-      aria-label={`Logo from ${config.navbar.title}`}
+      aria-label={config.navbar.title}
       href="/"
       className="cursor-default flex items-center gap-2"
     >

@@ -1,3 +1,4 @@
+import { getMessages } from '../lib/i18n'
 import type { ComponentProps } from 'react'
 
 import { cn } from '../lib/utils'
@@ -23,6 +24,23 @@ import {
 } from './table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs'
 import { Separator } from '@lexibase/rdx-ui/components/separator'
+
+function MdxTable({ lang, className, ...props }: ComponentProps<'table'>) {
+  return (
+    <Table
+      containerProps={{
+        'data-slot': 'mdx-table-scroll',
+        role: 'region',
+        'aria-label': getMessages(lang).table,
+        tabIndex: 0,
+        className:
+          'my-6 min-w-0 max-w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+      }}
+      className={className}
+      {...props}
+    />
+  )
+}
 
 export const mdxComponents = {
   h1: ({ className, ...props }: ComponentProps<'h1'>) => (
@@ -95,20 +113,7 @@ export const mdxComponents = {
       {...props}
     />
   ),
-  table: ({ className, ...props }: ComponentProps<'table'>) => (
-    <Table
-      containerProps={{
-        'data-slot': 'mdx-table-scroll',
-        role: 'region',
-        'aria-label': 'Table',
-        tabIndex: 0,
-        className:
-          'my-6 min-w-0 max-w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
-      }}
-      className={className}
-      {...props}
-    />
-  ),
+  table: MdxTable,
   thead: TableHeader,
   tbody: TableBody,
   tfoot: TableFooter,
@@ -147,4 +152,15 @@ export const mdxComponents = {
       {...props}
     />
   ),
+}
+
+/** Bind server-rendered MDX labels to the same locale as interactive components. */
+export function getMdxComponents(lang?: string) {
+  return {
+    ...mdxComponents,
+    pre: (props: ComponentProps<'pre'>) => <CodeBlock {...props} lang={lang} />,
+    table: (props: ComponentProps<'table'>) => (
+      <MdxTable {...props} lang={lang} />
+    ),
+  }
 }

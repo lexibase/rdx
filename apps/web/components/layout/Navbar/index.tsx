@@ -10,6 +10,7 @@ export function Navbar() {
   const BrandLogo = config.navbar.logo
   return (
     <SharedNavbar
+      lang={config.lang}
       title={config.navbar.title ?? ''}
       search={config.search ? <NavbarSearch /> : undefined}
       siteTitle={config.metadata.applicationName}

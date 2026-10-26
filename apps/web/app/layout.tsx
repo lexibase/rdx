@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Bebas_Neue, Space_Mono } from 'next/font/google'
 import '@lexibase/rdx-ui/globals.css'
+import { LocaleProvider } from '@lexibase/rdx-ui/providers/locale-provider'
 import { ThemeProvider } from '@lexibase/rdx-ui/providers/theme-provider'
 import { getRdxMetadata } from '@lexibase/rdx-next/runtime'
 
@@ -46,12 +47,14 @@ export default async function RootLayout({
           attribute="class"
           defaultTheme={config.theme?.defaultTheme ?? 'system'}
         >
-          <VersionProvider editions={editions}>
-            <div className="flex flex-col h-screen">
-              <Navbar />
-              {children}
-            </div>
-          </VersionProvider>
+          <LocaleProvider lang={config.lang}>
+            <VersionProvider editions={editions}>
+              <div className="flex flex-col h-screen">
+                <Navbar />
+                {children}
+              </div>
+            </VersionProvider>
+          </LocaleProvider>
         </ThemeProvider>
       </body>
     </html>

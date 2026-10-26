@@ -44,6 +44,16 @@ the current tab; real repository URLs open in a new tab. Existing project
 configurations are not modified. Unknown configuration keys fail with the field name rather than
 being silently ignored. Configuration paths must stay inside the project.
 
+## Interface language
+
+Set `lang: 'pt-BR'` for Brazilian Portuguese or `lang: 'en'` for English.
+This controls HTML language and built-in interface labels, including search,
+heading navigation, copy buttons, version notices, and footer credits. Portuguese
+locale variants use pt-BR; other unsupported languages use English labels while
+retaining the configured HTML language. Documents, titles, category names, and
+custom component text stay as authored. Rebuild and redeploy after changing the
+language in production.
+
 ## Optional homepage and navigation
 
 By default `/` redirects to `/docs`. Enable the built-in landing page explicitly:

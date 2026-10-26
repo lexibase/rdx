@@ -81,16 +81,13 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       demanda do índice. Sem serviço externo obrigatório. Não carregar índices
       de todas as versões na abertura de uma página nem gerar o índice quando
       a busca estiver desativada.
-- [ ] Internacionalização (i18n) dos textos internos da interface, guiada pelo
-      `lang` já existente no `rdx.config.ts`, por exemplo `lang: 'pt-BR'`.
-      Traduzir rótulos como “On this page”, “Developed by”, os futuros
-      “Powered by RDX”, textos da busca, botões, estados vazios e nomes
-      acessíveis. Usar catálogos internos compartilhados e fallback previsível
-      (localidade exata, idioma base, inglês), sem exigir configuração por texto.
-      Não traduzir automaticamente os documentos MDX nem introduzir rotas
-      multilíngues nesta etapa; o autor continua escrevendo o conteúdo no próprio
-      idioma. A ideia está registrada para uma atualização futura, não implementada.
-      Avaliar também perguntar o idioma durante a criação pela CLI, preenchendo
+- [x] Internacionalização (i18n) dos textos internos, guiada por `lang` no
+      `rdx.config.ts`, com catálogos compartilhados em inglês e português
+      brasileiro. Busca, TOC, navegação, cópia, créditos, avisos e nomes acessíveis
+      usam a mesma localidade no servidor e no navegador. Localidades portuguesas
+      usam pt-BR; idiomas sem catálogo usam inglês. Conteúdo MDX e nomes
+      personalizados permanecem como escritos pelo autor.
+- [ ] Avaliar perguntar o idioma durante a criação pela CLI, preenchendo
       `lang` automaticamente.
 - [ ] Documentação multilíngue e seletor opcional na navbar: planejar uma
       estrutura simples por idioma (por exemplo `lang/en/` e `lang/pt-BR/`, nomes

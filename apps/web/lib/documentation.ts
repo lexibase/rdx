@@ -1,13 +1,18 @@
 import path from 'node:path'
 
+import { getMessages, formatMessage } from '@lexibase/rdx-ui/lib/i18n'
 import { getDocument, getDocsIndex, getSourceOptions } from '@lexibase/rdx-core'
 import type { RdxProject } from '@lexibase/rdx-types'
 
 /** Only the official site's historical URL aliases differ from installed sites. */
 export function createDocumentation(project: RdxProject) {
+  const messages = getMessages(project.config.lang)
   const editions = project.sources.map((source) => ({
     id: source.id === 'current' ? 'canary' : source.routePrefix,
-    label: source.id === 'current' ? 'Canary' : `Version ${source.label}`,
+    label:
+      source.id === 'current'
+        ? 'Canary'
+        : formatMessage(messages.version, { version: source.label }),
     kind:
       source.id === 'current'
         ? ('live' as const)

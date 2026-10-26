@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { getPageMetadata } from '@lexibase/rdx-next/runtime'
-import { mdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
+import { getMdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
 import { notFound, redirect } from 'next/navigation'
 
@@ -44,7 +44,7 @@ export default async function DocPage({
   const result = await compileDocument(
     version,
     slug,
-    mdxComponents,
+    getMdxComponents(config.lang),
     documentation
   )
   if (!result) return notFound()
@@ -58,6 +58,7 @@ export default async function DocPage({
       <div className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1">
         <header className="mb-6">
           <VersionBanner
+            lang={config.lang}
             version={version}
             currentVersion={
               documentation.editions.find(
