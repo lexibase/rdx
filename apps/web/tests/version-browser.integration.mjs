@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const require = createRequire(path.join(root, 'package.json'))
+const { getMessages, formatMessage } = require('@lexibase/rdx-ui/lib/i18n')
 
 async function server(mode) {
   const socket = createServer()
@@ -88,6 +89,13 @@ test(
           )
           assert.equal(example.status, 200, `${mode}: showcase MDX example`)
           const exampleHtml = await example.text()
+          const messages = getMessages(
+            exampleHtml.match(/<html[^>]*lang="([^"]+)"/)?.[1]
+          )
+          const versionLabel = (version) =>
+            formatMessage(messages.version, { version })
+          const triggerLabel = (version) =>
+            formatMessage(messages.documentationVersion, { version })
           assert.match(exampleHtml, /Markdown \| RDX/)
           assert.doesNotMatch(exampleHtml, /data-rdx-callout="warning"/)
           assert.match(exampleHtml, /data-slot="mdx-table-scroll"/)
@@ -157,10 +165,10 @@ test(
           }
           await page.setViewportSize({ width: 1872, height: 955 })
           await page
-            .getByRole('button', { name: 'On this page', exact: true })
+            .getByRole('button', { name: messages.onThisPage, exact: true })
             .hover()
           const toc = page.getByRole('navigation', {
-            name: 'On this page',
+            name: messages.onThisPage,
             exact: true,
           })
           await toc
@@ -188,7 +196,7 @@ test(
           )
           await page.goto(running.base)
           await page
-            .getByRole('button', { name: 'Documentation version: Canary' })
+            .getByRole('button', { name: triggerLabel('Canary') })
             .waitFor()
           // A retired browser preference must not resurrect removed demo editions.
           await page.evaluate(() =>
@@ -197,7 +205,7 @@ test(
           await page.reload()
           await page
             .getByRole('button', {
-              name: 'Documentation version: Version 1.0.1',
+              name: triggerLabel(versionLabel('2.0.0')),
             })
             .click()
           await page.getByRole('menu').waitFor()
@@ -207,8 +215,12 @@ test(
             `${mode}: live and released editions have one divider`
           )
           assert.equal(
-            await page.getByRole('menuitem', { name: /^Version / }).count(),
-            1
+            await page
+              .getByRole('menuitem', {
+                name: new RegExp('^' + messages.version.split('{version}')[0]),
+              })
+              .count(),
+            2
           )
           await page.keyboard.press('Escape')
           await page.goto(`${running.base}/docs/canary/intro`)
@@ -217,11 +229,14 @@ test(
               new URL(response.url()).pathname === '/rdx-search/canary'
           )
           await page
-            .getByRole('button', { name: 'Search documentation', exact: true })
+            .getByRole('button', {
+              name: messages.searchDocumentation,
+              exact: true,
+            })
             .click()
           assert.equal((await liveIndex).status(), 200, running.logs())
           await page
-            .getByRole('dialog', { name: 'Search documentation' })
+            .getByRole('dialog', { name: messages.searchDocumentation })
             .waitFor()
           await page.keyboard.press('Escape')
           await page.goto(`${running.base}/docs/canary/mdx-components`)
@@ -249,10 +264,12 @@ test(
               .count()) > 0
           )
           const expectedCode = await code.locator('pre').textContent()
-          await code.getByRole('button', { name: 'Copy code' }).click()
+          await code.getByRole('button', { name: messages.copyCode }).click()
           await code.locator('button[data-status="copied"]').waitFor()
           assert.equal(
-            await code.getByRole('button', { name: 'Copy code' }).innerText(),
+            await code
+              .getByRole('button', { name: messages.copyCode })
+              .innerText(),
             ''
           )
           assert.equal(
@@ -264,10 +281,10 @@ test(
           )
           assert.deepEqual(errors, [], `${mode}: shared Markdown components`)
           await page
-            .getByRole('button', { name: 'Documentation version: Canary' })
+            .getByRole('button', { name: triggerLabel('Canary') })
             .click()
           await page
-            .getByRole('menuitem', { name: 'Version 1.0.1', exact: true })
+            .getByRole('menuitem', { name: versionLabel('1.0.1'), exact: true })
             .click()
           await page.waitForURL('**/docs/1.0.1/mdx-components')
           await page.waitForFunction(
@@ -278,7 +295,10 @@ test(
               new URL(response.url()).pathname === '/rdx-search/1.0.1'
           )
           await page
-            .getByRole('button', { name: 'Search documentation', exact: true })
+            .getByRole('button', {
+              name: messages.searchDocumentation,
+              exact: true,
+            })
             .click()
           assert.equal(
             (await releasedIndex).status(),
@@ -290,6 +310,37 @@ test(
             errors,
             [],
             `${mode}: switching to the released snapshot`
+          )
+          await page
+            .getByRole('button', {
+              name: triggerLabel(versionLabel('1.0.1')),
+            })
+            .click()
+          await page
+            .getByRole('menuitem', { name: versionLabel('2.0.0'), exact: true })
+            .click()
+          await page.waitForURL('**/docs/2.0.0/mdx-components')
+          await page.waitForFunction(() => document.title === 'Markdown | RDX')
+          const latestIndex = page.waitForResponse(
+            (response) =>
+              new URL(response.url()).pathname === '/rdx-search/2.0.0'
+          )
+          await page
+            .getByRole('button', {
+              name: messages.searchDocumentation,
+              exact: true,
+            })
+            .click()
+          assert.equal(
+            (await latestIndex).status(),
+            200,
+            mode + ': 2.0 search index'
+          )
+          await page.keyboard.press('Escape')
+          assert.deepEqual(
+            errors,
+            [],
+            mode + ': switching between released snapshots'
           )
           await context.close()
 
@@ -314,7 +365,7 @@ test(
           await blockedPage.goto(`${running.base}/docs/canary/intro`)
           await blockedPage
             .getByRole('button', {
-              name: 'Documentation version: Canary',
+              name: triggerLabel('Canary'),
             })
             .waitFor()
           assert.deepEqual(blockedErrors, [], `${mode}: blocked storage`)

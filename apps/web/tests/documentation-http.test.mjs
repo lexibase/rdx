@@ -91,10 +91,8 @@ test(
           '/rdx-search/unknown',
           '/docs/2.1.1/intro',
           '/docs/2.1.0/intro',
-          '/docs/2.0.0/intro',
           '/rdx-search/2.1.1',
           '/rdx-search/2.1.0',
-          '/rdx-search/2.0.0',
         ]) {
           assert.equal((await fetch(`${base}${route}`)).status, 404, route)
         }

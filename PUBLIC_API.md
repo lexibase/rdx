@@ -1,12 +1,15 @@
-# RDX — contrato público candidato à 1.0.0
+# RDX public API — 2.0
 
-Este documento consolida a API existente para revisão da primeira versão
-estável. Não anuncia uma publicação ou muda versões. A aprovação final para
-lançar continua no checklist de [RELEASE_READINESS.md](./RELEASE_READINESS.md).
+This document describes the public API prepared for RDX 2.0. Publication is
+manual; see the release instructions in [PUBLISHING.md](./PUBLISHING.md).
+
+RDX 2.0 removes the published `ButtonLink` module. Use `Button` with `href`
+from `@lexibase/rdx/ui/components/button`. See the
+[upgrade guide](apps/web/docs/cat-05/updating.mdx#upgrade-from-rdx-1x-to-2x).
 
 ## Configuração e autoria
 
-O usuário mantém `docs/`, `public/`, `rdx.config.ts` e, opcionalmente, `home.tsx`,
+O usuário mantém `docs/`, `public/`, `rdx.config.ts` e, opcionalmente, `components/`,
 `versions.json` e `versioned_docs/`. A CLI é executada na raiz do projeto.
 `.rdx/` é gerada; seus arquivos, estrutura interna e caches não são uma API de
 customização. Não editar templates internos instalados para configurar o site.
@@ -18,17 +21,17 @@ Chaves desconhecidas e tipos inválidos são erros, não opções ignoradas.
 
 Live documentation lives in the project's `docs/` folder.
 
-| Opção                      | Contrato e padrão                                                                                                               |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `metadata.applicationName` | Required non-empty string; the single site name for browser titles, social defaults and branding                                |
-| `metadata.since`           | Optional positive starting year, no later than the current year; the footer shows equal years once and earlier years as a range |
-| `description`              | String; padrão `''`                                                                                                             |
-| `lang`                     | String não vazia; padrão `'en'`; define o idioma HTML, ainda não traduz a interface                                             |
-| `TOC`, `search`            | Booleanos, ambos `false` por padrão; preservar a grafia `TOC`                                                                   |
-| `theme.defaultTheme`       | `'system'`, `'light'` ou `'dark'`; padrão `'system'`                                                                            |
-| `homepage`                 | Opcional e desativada por padrão; aceita conteúdo da Home padrão ou `component`                                                 |
-| `navbar`                   | Título, componente de logo e ações opcionais; o template explicita GitHub e alternância de tema                                 |
-| `plugins`                  | Array de objetos de plugins; padrão vazio; instalar um pacote não o ativa                                                       |
+| Opção                      | Contrato e padrão                                                                                                                |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `metadata.applicationName` | Required non-empty string; the single site name for browser titles, social defaults and branding                                 |
+| `metadata.since`           | Optional positive starting year, no later than the current year; the footer shows equal years once and earlier years as a range  |
+| `description`              | String; padrão `''`                                                                                                              |
+| `lang`                     | Non-empty string; defaults to `'en'`; selects HTML language and interface translations (`en` and `pt-BR`, with English fallback) |
+| `TOC`, `search`            | Booleanos, ambos `false` por padrão; preservar a grafia `TOC`                                                                    |
+| `theme.defaultTheme`       | `'system'`, `'light'` ou `'dark'`; padrão `'system'`                                                                             |
+| `homepage`                 | Opcional e desativada por padrão; aceita conteúdo da Home padrão ou `component`                                                  |
+| `navbar`                   | Título, componente de logo e ações opcionais; o template explicita GitHub e alternância de tema                                  |
+| `plugins`                  | Array de objetos de plugins; padrão vazio; instalar um pacote não o ativa                                                        |
 
 Detalhes e exemplos de propriedades aninhadas ficam em
 [CONFIGURATION.md](./CONFIGURATION.md). The canonical public type is `RDXConfig`.

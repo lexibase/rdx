@@ -1,6 +1,74 @@
 # Publishing RDX
 
-## Prepared CSS and TypeScript patch: runtime/framework 1.2.2 and creator 1.2.3
+## Prepared grouped release: RDX 2.0.0
+
+The 2.0 release removes the published ButtonLink module. Project-owned imports
+must migrate to Button with href; the implementation stays in button.tsx.
+See the [upgrade guide](apps/web/docs/cat-05/updating.mdx#upgrade-from-rdx-1x-to-2x).
+Existing MDX, content, public assets, configuration, and snapshots are preserved.
+
+| Package                  | Version | Reason                                                                     |
+| ------------------------ | ------- | -------------------------------------------------------------------------- |
+| @lexibase/rdx-types      | 1.1.1   | Updated configuration JSDocs for localization and social previews          |
+| @lexibase/rdx-core       | 1.1.1   | Align the dependency on types 1.1.1                                        |
+| @lexibase/rdx-ui         | 2.0.0   | Remove ButtonLink; add shadcn Table/Kbd, localization, and shared 404      |
+| @lexibase/rdx-versioning | 1.0.1   | Align optional plugin dependencies on core/types 1.1.1                     |
+| @lexibase/rdx-next       | 2.0.0   | Require UI ^2.0.0; deliver localized UI, document previews, and shared 404 |
+| @lexibase/rdx            | 2.0.0   | Select runtime 2.0.0 and UI 2.0.0                                          |
+| @lexibase/create-rdx     | 2.0.0   | Generate projects pinned to framework 2.0.0                                |
+
+Core and versioning receive dependency-only patches; the plugin remains optional.
+Workspace dependencies stay local during development and become exact versions
+in published archives. Do not pair runtime 2.x with UI 1.x.
+
+Run pnpm check and pnpm test:release --install. Check packed imports, the fresh
+project, existing framework updates, optional snapshots, English/Portuguese UI,
+custom 404s, production HTTP, and nested pnpm workspaces. The local release test
+uses archives and does not publish them. Preserve versioned_docs/version-1.0.1.
+The 2.0.0 documentation snapshot is prepared from the finalized live guides.
+
+Merge the preparation PR after Linux and Windows checks pass. From updated main,
+confirm npm whoami and publish ONE command at a time, waiting for each version
+to become readable before publishing its consumers:
+
+```powershell
+npm whoami
+pnpm --filter @lexibase/rdx-types publish --tag latest --access public
+npm view @lexibase/rdx-types@1.1.1 version
+pnpm --filter @lexibase/rdx-core publish --tag latest --access public
+npm view @lexibase/rdx-core@1.1.1 version
+pnpm --filter @lexibase/rdx-ui publish --tag latest --access public
+npm view @lexibase/rdx-ui@2.0.0 version
+pnpm --filter @lexibase/rdx-versioning publish --tag latest --access public
+npm view @lexibase/rdx-versioning@1.0.1 version
+pnpm --filter @lexibase/rdx-next publish --tag latest --access public
+npm view @lexibase/rdx-next@2.0.0 version
+pnpm --filter @lexibase/rdx publish --tag latest --access public
+npm view @lexibase/rdx@2.0.0 version
+pnpm --filter @lexibase/create-rdx publish --tag latest --access public
+npm view @lexibase/create-rdx@2.0.0 version
+```
+
+Confirm each latest tag matches the table. Validate creation inside and outside a
+pnpm workspace using the explicit creator release:
+
+```powershell
+pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@2.0.0 docs-validacao-2
+```
+
+If a release-age policy blocks the new release, review and approve its exact
+versions following the [policy guide](apps/web/docs/cat-05/troubleshooting.mdx#a-release-age-policy-blocks-installation),
+or wait for the configured age. A cache refresh does not override this policy.
+
+Existing main-package projects update with pnpm add @lexibase/rdx@latest after
+migrating any ButtonLink imports. If versioning is installed, its dependency
+patch can be updated separately with pnpm add @lexibase/rdx-versioning@latest.
+Run development, build, and production startup again; .rdx is refreshed by RDX.
+Record the publication date in CHANGELOG.md only after registry verification.
+
+## Published CSS and TypeScript patch: runtime/framework 1.2.2 and creator 1.2.3 (reference)
+
+Registry-verified publication: 2026-10-25. Do not republish these versions.
 
 This patch delivers the Tailwind build-output exclusion, transitive PostCSS plugin
 resolution for development workers, and a project-root
