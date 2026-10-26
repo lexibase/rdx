@@ -26,7 +26,12 @@ const en = {
   open: 'Open',
   close: 'Close',
   closeSearch: 'Close search',
+  enlargeImage: 'Enlarge image: {alt}',
+  closeImage: 'Close image',
+  imagePreviewDescription:
+    'Press Escape or use the close button to return to the document.',
   copyCode: 'Copy code',
+  wrapCode: 'Wrap lines',
   codeCopied: 'Code copied to clipboard.',
   copyCodeError: 'Could not copy. Select the code and copy it manually.',
   copyRetry: 'Could not copy. Try again or copy manually.',
@@ -35,6 +40,7 @@ const en = {
   tabCopied: 'Tab content copied to clipboard.',
   copyTabError: 'Could not copy. Select the tab content and copy it manually.',
   code: 'Code',
+  folderTree: 'Folder',
   table: 'Table',
   current: 'Current',
   version: 'Version {version}',
@@ -89,7 +95,12 @@ const ptBR = {
   open: 'Abrir',
   close: 'Fechar',
   closeSearch: 'Fechar busca',
+  enlargeImage: 'Ampliar imagem: {alt}',
+  closeImage: 'Fechar imagem',
+  imagePreviewDescription:
+    'Pressione Escape ou use o botão de fechar para voltar ao documento.',
   copyCode: 'Copiar código',
+  wrapCode: 'Quebrar linhas',
   codeCopied: 'Código copiado para a área de transferência.',
   copyCodeError:
     'Não foi possível copiar. Selecione o código e copie manualmente.',
@@ -100,6 +111,7 @@ const ptBR = {
   copyTabError:
     'Não foi possível copiar. Selecione o conteúdo da aba e copie manualmente.',
   code: 'Código',
+  folderTree: 'Pastas',
   table: 'Tabela',
   current: 'Atual',
   version: 'Versão {version}',

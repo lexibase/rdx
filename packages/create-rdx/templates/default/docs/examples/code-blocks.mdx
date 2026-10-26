@@ -1,0 +1,37 @@
+---
+title: Code blocks
+description: Highlight code, compare changes, and draw directory trees.
+link_position: 9
+---
+
+## Compare changes
+
+Use a `diff` fence. Prefix removed lines with `-`, added lines with `+`,
+and unchanged lines with a space. The copy button copies the patch as shown.
+
+```diff
+-const search = false
++const search = true
+ console.log(search)
+```
+
+## Draw a folder tree
+
+Use a `folder` fence with two spaces per level. End folder names with `/`.
+The diagram's branches are generated from those indents.
+
+```folder
+my-docs/
+  docs/
+    guides/
+      introduction.mdx
+  public/
+    images/
+      logo.svg
+  components/
+    home.tsx
+  rdx.config.ts
+```
+
+Use `text` instead to display a diagram you have already drawn. Long lines
+scroll inside the block. The icon in the header copies the rendered tree.

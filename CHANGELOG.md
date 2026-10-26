@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+- Open Markdown images in responsive shadcn dialogs with localized controls,
+  keyboard navigation and focus restoration. Linked images keep their navigation.
+
+- Add the shadcn wrap-lines action to Markdown code block headers, with independent
+  per-block state, localized labels, and unchanged clipboard output.
+
+- Add Git-style `diff` fences with added, removed, and hunk line backgrounds,
+  preserving the full patch when copying.
+- Add `folder` fences that turn indented lists into directory diagrams and copy
+  the generated tree, with localized header labels and safe text rendering.
+- Install the complete shadcn/ui Base UI Code Block, official highlighter and
+  useHighlightedCode hook. Integrate Markdown separately, using CodeBlockLine
+  variants for diffs and the official copy button with localized feedback.
+- React composition uses the official CodeBlock root API; custom callers of the
+  former pre wrapper can use MdxCodeBlock. Markdown fences remain automatic.
+
 ## 2.0.0 — Prepared
 
 ### Breaking change

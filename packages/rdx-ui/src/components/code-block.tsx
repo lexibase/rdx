@@ -1,58 +1,286 @@
-import { getMessages } from '../lib/i18n'
-import { Children, isValidElement, type ComponentProps } from 'react'
-import { CodeXml } from 'lucide-react'
+'use client'
 
+import * as React from 'react'
+import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../lib/utils'
-import { CopyCodeButton } from './copy-code-button'
 
-/** Keep the code server-rendered; only clipboard interaction needs JavaScript. */
-export function CodeBlock({
-  lang,
-  children,
+import { Button } from './button'
+import { CheckIcon, CopyIcon } from 'lucide-react'
+import { useMessages } from '../providers/locale-provider'
+
+const codeBlockVariants = cva(
+  'group/code-block relative flex w-full min-w-0 flex-col overflow-hidden rounded-lg text-sm has-[>[data-slot=code-block-content]:focus-visible]:ring-3 has-[>[data-slot=code-block-content]:focus-visible]:ring-ring/50 data-[size=sm]:text-xs',
+  {
+    variants: {
+      variant: {
+        default:
+          'border border-input text-foreground has-[>[data-slot=code-block-content]:focus-visible]:border-ring dark:bg-input/30',
+        destructive:
+          'border border-destructive/30 text-destructive dark:border-destructive/40',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+    },
+  }
+)
+
+function CodeBlock({
   className,
+  variant = 'default',
+  size = 'default',
   ...props
-}: ComponentProps<'pre'>) {
-  const messages = getMessages(lang)
-  const code = Children.toArray(children).find(
-    (child) =>
-      isValidElement<{ className?: string }>(child) &&
-      child.props.className?.includes('language-')
-  )
-  const language = isValidElement<{ className?: string }>(code)
-    ? code.props.className?.match(/(?:^|\s)language-([^\s]+)/)?.[1]
-    : undefined
+}: React.ComponentProps<'div'> &
+  VariantProps<typeof codeBlockVariants> & { size?: 'default' | 'sm' }) {
   return (
     <div
-      data-rdx-code-block
-      className="my-4 min-w-0 max-w-full overflow-hidden rounded-lg border border-border bg-muted/30 text-foreground"
-    >
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-b border-border/70 bg-muted/30 px-3 py-1.5">
-        <div className="flex min-w-0 items-center gap-2">
-          <span
-            aria-hidden="true"
-            className="flex size-6 shrink-0 items-center justify-center rounded-md border border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400"
-          >
-            <CodeXml className="size-3.5" />
-          </span>
-          <span
-            className="min-w-0 truncate font-mono text-xs font-medium text-muted-foreground"
-            title={language}
-          >
-            {language ?? messages.code}
-          </span>
-        </div>
-        <CopyCodeButton />
-      </div>
-      <pre
-        tabIndex={0}
-        className={cn(
-          'm-0 max-w-full overflow-x-auto p-3 font-mono text-[13px] leading-6 text-foreground/90 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring [&>code]:bg-transparent [&>code]:rounded-none [&>code]:p-0 [&>code]:[font-family:inherit] [&>code]:text-inherit',
-          className
-        )}
+      data-slot="code-block"
+      data-variant={variant}
+      data-size={size}
+      className={cn(codeBlockVariants({ variant }), className)}
+      {...props}
+    />
+  )
+}
+
+function CodeBlockHeader({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="code-block-header"
+      className={cn(
+        'flex min-w-0 shrink-0 items-center gap-2 px-3 pt-3 text-muted-foreground group-data-[size=sm]/code-block:px-2.5 group-data-[size=sm]/code-block:pt-2.5 group-data-[variant=destructive]/code-block:text-destructive *:has-[>[data-slot=code-block-title]]:min-w-0',
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function CodeBlockTitle({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="code-block-title"
+      className={cn(
+        "min-w-0 truncate font-sans text-sm font-medium text-foreground group-data-[size=sm]/code-block:text-xs group-data-[variant=destructive]/code-block:text-destructive [&_svg]:pointer-events-none [&_svg]:inline-block [&_svg]:align-middle [&_svg:not([class*='size-'])]:size-3.5 *:[svg]:me-1.5",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function CodeBlockActions({
+  className,
+  ...props
+}: React.ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="code-block-actions"
+      className={cn(
+        '-my-1 ms-auto -me-1.5 flex shrink-0 items-center gap-1 [[data-slot=code-block]>&]:absolute [[data-slot=code-block]>&]:end-2 [[data-slot=code-block]>&]:top-2 [[data-slot=code-block]>&]:z-10 [[data-slot=code-block]>&]:m-0 [[data-slot=code-block]>&]:opacity-0 [[data-slot=code-block]>&]:transition-opacity [[data-slot=code-block]>&]:group-focus-within/code-block:opacity-100 [[data-slot=code-block]>&]:group-hover/code-block:opacity-100 group-data-[size=sm]/code-block:[[data-slot=code-block]>&]:end-1.5 group-data-[size=sm]/code-block:[[data-slot=code-block]>&]:top-1.5 [[data-slot=code-block]>&]:pointer-coarse:opacity-100 [[data-slot=code-block]>&]:*:[button]:bg-background [[data-slot=code-block]>&]:*:[button]:ring-1 [[data-slot=code-block]>&]:*:[button]:ring-foreground/10',
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+// Locale and failure feedback are RDX integration; the shadcn composition/API stays intact.
+function CodeBlockCopyButton({
+  value,
+  variant = 'ghost',
+  size = 'icon-xs',
+  className,
+  onClick,
+  ...props
+}: Omit<
+  Extract<React.ComponentProps<typeof Button>, { href?: never }>,
+  'value'
+> & { value?: string }) {
+  const messages = useMessages()
+  const [copied, setCopied] = React.useState(false)
+  const [error, setError] = React.useState(false)
+  const pending = React.useRef(false)
+  const mounted = React.useRef(false)
+  React.useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+    }
+  }, [])
+  React.useEffect(() => {
+    if (!copied) return
+    const timeout = setTimeout(() => setCopied(false), 2000)
+    return () => clearTimeout(timeout)
+  }, [copied])
+  return (
+    <>
+      <Button
+        data-slot="code-block-copy-button"
+        data-copied={copied || undefined}
+        data-status={error ? 'error' : copied ? 'copied' : 'idle'}
+        variant={variant}
+        size={size}
+        aria-label={messages.copyCode}
+        title={
+          error
+            ? messages.copyRetry
+            : copied
+              ? messages.copied
+              : messages.copyCode
+        }
+        className={className}
+        onClick={async (event) => {
+          onClick?.(event)
+          if (event.defaultPrevented || pending.current) return
+          pending.current = true
+          setError(false)
+          try {
+            // The fallback retains the published standalone CopyCodeButton API.
+            const block = event.currentTarget.closest<HTMLElement>(
+              '[data-rdx-code-block]'
+            )
+            const text =
+              value ??
+              block?.dataset.rdxCodeValue ??
+              block?.querySelector('pre')?.textContent
+            if (text === undefined || !navigator.clipboard?.writeText)
+              throw new Error('Clipboard unavailable')
+            await navigator.clipboard.writeText(text)
+            if (mounted.current) setCopied(true)
+          } catch {
+            if (mounted.current) {
+              setCopied(false)
+              setError(true)
+            }
+          } finally {
+            pending.current = false
+          }
+        }}
         {...props}
       >
-        {children}
-      </pre>
-    </div>
+        {copied ? <CheckIcon /> : <CopyIcon />}
+      </Button>
+      <span
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className={error ? 'max-w-48 text-xs text-muted-foreground' : 'sr-only'}
+      >
+        {error ? messages.copyCodeError : copied ? messages.codeCopied : ''}
+      </span>
+    </>
   )
+}
+
+function CodeBlockContent({
+  className,
+  children,
+  style,
+  wrap = false,
+  lineNumbers = false,
+  startLine = 1,
+  ...props
+}: React.ComponentProps<'pre'> & {
+  wrap?: boolean
+  lineNumbers?: boolean
+  startLine?: number
+}) {
+  return (
+    <pre
+      data-slot="code-block-content"
+      data-wrap={wrap || undefined}
+      data-numbered={lineNumbers || undefined}
+      dir="ltr"
+      tabIndex={0}
+      style={{ counterReset: `line ${startLine - 1}`, ...style }}
+      className={cn(
+        'min-h-0 min-w-0 scroll-fade-x scrollbar-thin overflow-auto px-3 py-3 text-start font-mono leading-relaxed outline-none group-has-data-[slot=code-block-footer]/code-block:pb-2 group-has-data-[slot=code-block-header]/code-block:pt-2 group-data-[size=sm]/code-block:px-2.5 group-data-[size=sm]/code-block:py-2.5 group-data-[size=sm]/code-block:group-has-data-[slot=code-block-header]/code-block:pt-1.5 data-wrap:scroll-fade-y data-wrap:wrap-break-word data-wrap:whitespace-pre-wrap',
+        className
+      )}
+      {...props}
+    >
+      <code
+        data-slot="code-block-code"
+        className="grid min-h-lh min-w-max content-start in-data-numbered:grid-cols-[auto_1fr] in-data-wrap:min-w-0"
+      >
+        {lineNumbers && typeof children === 'string'
+          ? children
+              .replace(/\n$/, '')
+              .split('\n')
+              .map((line, index) => (
+                <CodeBlockLine key={index}>{line}</CodeBlockLine>
+              ))
+          : children}
+      </code>
+    </pre>
+  )
+}
+
+const codeBlockLineVariants = cva(
+  "relative -mx-3 block min-h-lh px-3 group-data-[size=sm]/code-block:-mx-2.5 group-data-[size=sm]/code-block:px-2.5 before:min-w-6 before:text-end before:text-muted-foreground after:absolute after:start-1 after:top-0 after:text-muted-foreground after:select-none in-data-numbered:col-span-2 in-data-numbered:grid in-data-numbered:grid-cols-subgrid in-data-numbered:gap-x-3 in-data-numbered:[counter-increment:line] in-data-numbered:before:content-[counter(line)] in-data-numbered:before:select-none in-data-numbered:supports-[content:counter(line)_/_'']:before:content-[counter(line)_/_'']",
+  {
+    variants: {
+      variant: {
+        default: '',
+        added: "bg-muted after:content-['+']",
+        removed: "bg-destructive/10 after:text-destructive after:content-['−']",
+        highlighted: 'bg-muted',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+    },
+  }
+)
+
+function CodeBlockLine({
+  className,
+  variant = 'default',
+  children,
+  ...props
+}: React.ComponentProps<'span'> & VariantProps<typeof codeBlockLineVariants>) {
+  // An empty line holds a newline so copying a selection keeps blank lines.
+  const empty =
+    children === undefined ||
+    children === null ||
+    children === '' ||
+    (Array.isArray(children) && children.length === 0)
+
+  return (
+    <span
+      data-slot="code-block-line"
+      data-variant={variant}
+      className={cn(codeBlockLineVariants({ variant }), className)}
+      {...props}
+    >
+      <span data-slot="code-block-line-content" className="min-w-0">
+        {empty ? '\n' : children}
+      </span>
+    </span>
+  )
+}
+
+function CodeBlockFooter({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="code-block-footer"
+      className={cn(
+        'flex min-w-0 shrink-0 items-center gap-2 px-3 pb-3 text-muted-foreground group-data-[size=sm]/code-block:px-2.5 group-data-[size=sm]/code-block:pb-2.5',
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+export {
+  CodeBlock,
+  CodeBlockHeader,
+  CodeBlockTitle,
+  CodeBlockActions,
+  CodeBlockCopyButton,
+  CodeBlockContent,
+  CodeBlockLine,
+  CodeBlockFooter,
 }

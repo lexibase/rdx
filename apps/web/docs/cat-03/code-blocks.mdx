@@ -28,6 +28,13 @@ the code remains selectable for manual copying.
 
 Clipboard access needs HTTPS or localhost and browser permission.
 
+## Wrap long lines
+
+On small screens, use the wrap-lines icon in the header to toggle line wrapping
+for that block.
+Wrapping starts disabled so indentation stays intact. The copy button keeps the
+original text and line breaks in either mode.
+
 ## Show Markdown source
 
 Use four backticks around a source example that contains triple backticks:
@@ -45,13 +52,14 @@ use [Tabs](./tabs.mdx) for related alternatives.
 
 ## Directory trees
 
-Use a `text` fence to display a directory structure:
+Use a `folder` fence with two spaces per level. End folder names with `/`;
+RDX generates the connecting branches from the indentation:
 
-```text
+```folder
 my-docs/
-├── docs/
-│   └── guides/
-│       └── introduction.mdx
-├── public/
-└── rdx.config.ts
+  docs/
+    guides/
+      introduction.mdx
+  public/
+  rdx.config.ts
 ```
