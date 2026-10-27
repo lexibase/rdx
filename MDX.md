@@ -53,6 +53,12 @@ newline for both block copying and copying a complete tab.
 On small screens (below 768px), each Markdown block shows the shadcn wrap-lines
 action. Wrapping is disabled initially, toggles independently per block, and does
 not change copied text.
+Long blocks automatically use the official CodeBlockFooter/Button Show More
+composition below 768px. A client-side measurement caps previews at about 12
+visible lines, taking font metrics, wrapping and resizing into account. Short
+blocks have no expansion action and desktop content remains uncapped. The full
+code stays server-rendered and is readable before hydration; copying always
+retains the complete source. Footer labels use the configured interface locale.
 
 ### Diff and folder fences
 

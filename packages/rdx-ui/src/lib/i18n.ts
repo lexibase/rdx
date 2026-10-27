@@ -32,6 +32,8 @@ const en = {
     'Press Escape or use the close button to return to the document.',
   copyCode: 'Copy code',
   wrapCode: 'Wrap lines',
+  showMore: 'Show more',
+  showLess: 'Show less',
   codeCopied: 'Code copied to clipboard.',
   copyCodeError: 'Could not copy. Select the code and copy it manually.',
   copyRetry: 'Could not copy. Try again or copy manually.',
@@ -101,6 +103,8 @@ const ptBR = {
     'Pressione Escape ou use o botão de fechar para voltar ao documento.',
   copyCode: 'Copiar código',
   wrapCode: 'Quebrar linhas',
+  showMore: 'Mostrar mais',
+  showLess: 'Mostrar menos',
   codeCopied: 'Código copiado para a área de transferência.',
   copyCodeError:
     'Não foi possível copiar. Selecione o código e copie manualmente.',

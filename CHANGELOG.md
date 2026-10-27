@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Automatically preview long Markdown code blocks on mobile with the official
+  shadcn footer's localized Show more/Show less action. Desktop and short blocks
+  remain fully visible; copying retains the complete source.
+
 - Add automatic folder and extension-based file icons to folder code blocks.
   Accept ASCII tree prefixes alongside indented lists, preserving literal names
   and copying the Unicode text diagram without icon markup.

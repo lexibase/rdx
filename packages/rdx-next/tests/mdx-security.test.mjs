@@ -353,6 +353,27 @@ test('folder fences draw nested branches and escaped filenames without changing 
     )
 })
 
+test('long Markdown blocks keep their complete server-rendered content before mobile enhancement', async () => {
+  const code =
+    Array.from(
+      { length: 30 },
+      (_, index) => `const value${index} = ${index}`
+    ).join('\n') + '\n'
+  const { content } = await compileDocumentation(
+    '```ts lineNumbers\n' + code + '```\n\n```text\nshort\n```',
+    mdxComponents
+  )
+  const html = renderToStaticMarkup(content)
+  assert.equal(html.match(/data-rdx-code-value="([^"]*)"/)?.[1], code)
+  assert.match(html, /value29/)
+  assert.doesNotMatch(html, /data-rdx-code-collapsed|max-height:|>Show more</)
+  const ids = [...html.matchAll(/<pre\b[^>]*\bid="([^"]+)"/g)].map(
+    (match) => match[1]
+  )
+  assert.equal(ids.length, 2)
+  assert.equal(new Set(ids).size, 2)
+})
+
 test('folder diagrams accept ASCII prefixes without rewriting literal filenames or copied trees', async () => {
   const source =
     'project/\n|- docs/\n|   |- intro.mdx\n|   |_ file|name.txt\n|\n|- package.json\n|- preview.PNG\n|- app.tsx\n|- json\n|_ <example>.unknown\n'
