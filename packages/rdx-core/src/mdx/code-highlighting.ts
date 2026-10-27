@@ -23,11 +23,11 @@ function codeOptions(meta: unknown): Record<string, string> {
       .trim()
     if (match[1] === 'title' && value) properties['data-rdx-code-title'] = value
     if (match[1] === 'lineNumbers') {
-      if (value !== undefined && value !== 'true' && value !== 'false')
+      if (value !== undefined)
         throw new Error(
-          'Invalid code fence metadata: lineNumbers must be true or false.'
+          'Invalid code fence metadata: lineNumbers must be a flag without a value.'
         )
-      properties['data-rdx-code-line-numbers'] = value ?? 'true'
+      properties['data-rdx-code-line-numbers'] = 'true'
     }
     if (match[1] === 'startLine') {
       if (
@@ -42,8 +42,6 @@ function codeOptions(meta: unknown): Record<string, string> {
       properties['data-rdx-code-start-line'] = String(Number(value))
     }
   }
-  if (properties['data-rdx-code-start-line'])
-    properties['data-rdx-code-line-numbers'] ??= 'true'
   return properties
 }
 

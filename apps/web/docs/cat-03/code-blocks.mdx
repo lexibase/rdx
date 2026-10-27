@@ -69,8 +69,9 @@ const enabled = true
 console.log(enabled)
 ```
 
-`startLine` must be a positive integer and also enables numbering on its own.
-Use `lineNumbers=false` to hide numbers explicitly. Numbering works with
+`lineNumbers` is a flag: include it to show numbers, or omit it to keep them hidden.
+`startLine` must be a positive integer and only sets the starting value when
+`lineNumbers` is present. Numbering works with
 highlighted code, plain text, `diff`, and `folder` fences. Blank lines count as
 lines; wrapping a long line keeps its original number. The copy button copies
 the original block content, without line numbers.

@@ -252,11 +252,10 @@ test('numbering flags are literal, opt-in and independent from titles and quoted
   for (const [meta, numbered, counter] of [
     ['', false, 0],
     ['lineNumbers', true, 0],
-    ['lineNumbers=true', true, 0],
-    ['lineNumbers="true" startLine="8"', true, 7],
-    ['startLine=20', true, 19],
-    ['startLine=20 lineNumbers=false', false, 19],
-    ['lineNumbers=false startLine=20', false, 19],
+    ['lineNumbers startLine="8"', true, 7],
+    ['startLine=20', false, 19],
+    ['startLine=20 lineNumbers', true, 19],
+    ['lineNumbers startLine=20', true, 19],
     ['title="lineNumbers startLine=200"', false, 0],
     ['caption="lineNumbers startLine=200" title="Example"', false, 0],
   ]) {
@@ -277,6 +276,9 @@ test('numbering flags are literal, opt-in and independent from titles and quoted
     'startLine=1e2',
     'startLine=9007199254740992',
     'lineNumbers=maybe',
+    'lineNumbers=true',
+    'lineNumbers=false',
+    'lineNumbers="true"',
   ])
     await assert.rejects(
       compileDocumentation(
