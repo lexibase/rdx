@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.0.0 — Prepared
+## 3.0.0 — 2026-10-26
 
 ### Breaking changes
 
@@ -14,6 +14,9 @@
 - The runtime requires UI ^3.0.0; the main framework selects matching releases.
 
 ### Included
+
+- Publish the 3.0.0 documentation snapshot with the React component migration
+  guide, retaining the 2.0.0 and 1.0.1 snapshots and Canary.
 
 - Open Markdown images in responsive shadcn dialogs with localized controls,
   keyboard navigation and focus restoration. Linked images keep their navigation.
@@ -31,10 +34,9 @@
 - React composition uses the official CodeBlock root API; custom callers of the
   former pre wrapper can use MdxCodeBlock. Markdown fences remain automatic.
 
-Core is prepared at 1.2.0 for the diff and folder transformations; optional
-versioning at 1.0.2 aligns its core dependency. Types remain at the published
-1.1.1. UI, runtime, framework and creator are prepared at 3.0.0. Publish packages
-and verify registry installation before releasing the 3.0.0 documentation snapshot.
+Core 1.2.0, optional versioning 1.0.2, and UI, runtime, framework and creator
+3.0.0 are published and registry-verified. Types remain at the published 1.1.1.
+The documentation snapshot follows package publication.
 
 ## 2.0.0 — Published
 

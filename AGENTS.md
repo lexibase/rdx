@@ -29,4 +29,4 @@
 - O usuário faz commits, merges e publicações pelo terminal. Não os execute automaticamente sem autorização explícita para essas ações.
 - Não publique pacotes nem incremente versões a cada ajuste; as publicações são agrupadas quando solicitadas.
 
-- Em releases, publique os pacotes primeiro e confirme sua disponibilidade no npm antes de lançar a documentação correspondente em produção. Prepare os guias junto com a implementação, mas só publique os guias e o snapshot da versão após validar as versões e a instalação pelo registro. Se o merge dispara deploy automático, separe a entrega pública da documentação para respeitar essa ordem.
+- Prepare cada release em uma única PR, reunindo implementação, versões dos pacotes, migrações, changelog, guias e snapshot da documentação. Valide tudo junto. Após o merge, o deploy da documentação pode ocorrer automaticamente; o usuário publica os pacotes no npm e confirma as versões, tags e instalação pelo registro. Não crie uma segunda PR apenas para liberar a documentação nem condicione o snapshot à publicação prévia no npm. Esta preferência substitui o fluxo anterior de pacotes primeiro e documentação separada.

@@ -1,0 +1,75 @@
+---
+title: Development
+description: Work on the framework locally before publishing packages.
+link_position: 5
+---
+
+## Get the source
+
+```bash
+git clone https://github.com/lexibase/rdx.git
+cd rdx
+```
+
+The framework repository uses pnpm workspaces. Install the pnpm version declared
+in its `packageManager` field, then run these commands from the repository root:
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Install and develop the RDX workspace">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">pnpm install pnpm dev</TabsContent>
+</Tabs>
+
+Use a Node.js version supported by the repository's `engines` field. The tested
+CI environments use Linux/Node 22 and Windows/Node 24.
+
+## What runs locally?
+
+`apps/web` is the official documentation and development site.
+It consumes framework packages through `workspace:*`, not published npm copies.
+
+Shared UI lives in `packages/rdx-ui`; content, configuration, MDX, and search
+logic live in `packages/rdx-core`. The Next adapter and creator are separate
+packages. The versioning plugin remains optional for generated projects.
+
+The development coordinator rebuilds local packages and watches changes.
+Use one Ctrl+C to stop its processes in the same terminal.
+
+## Validate a change
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Validate the RDX workspace">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">pnpm check pnpm test:release --install</TabsContent>
+</Tabs>
+
+The first command runs lint, type checks, builds, and tests. The second packs
+local packages, installs their archives into a disposable generated project,
+and checks production behavior without publishing to npm.
+
+Release test artifacts are retained for inspection under
+`.rdx-package-smoke/`; use the final path printed by the command.
+
+## Documentation editions
+
+Canary is the live documentation in `apps/web/docs/`. To save a documentation
+snapshot for a release, run:
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Create an RDX documentation snapshot">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">pnpm --filter web docs:version 1.0.0</TabsContent>
+</Tabs>
+
+Do not run this on every commit or deployment. Subsequent work continues in
+Canary while the released snapshot remains unchanged.
+
+## Contribution scope
+
+Keep the foundation **Next.js + Tailwind CSS + shadcn/ui Base UI**.
+Build shared improvements in the packages, then integrate them into the official
+website and generated projects. Preserve the approved minimal interface and
+validate accessibility as well as appearance.

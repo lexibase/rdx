@@ -3,6 +3,7 @@ import test from 'node:test'
 import process from 'node:process'
 
 import { getDocumentation } from '../lib/docs.ts'
+import config from '../rdx.config.ts'
 
 const base = process.env.RDX_PUBLIC_TEST_URL
 
@@ -21,9 +22,9 @@ test(
     assert.match(await home.text(), /<title>RDX<\/title>/)
     const root = await request('/docs')
     assert.equal(root.status, 200)
-    assert.equal(new URL(root.url).pathname, '/docs/2.0.0/intro')
+    assert.equal(new URL(root.url).pathname, '/docs/3.0.0/intro')
     const html = await root.text()
-    assert.match(html, /<html[^>]*lang="en"/)
+    assert.equal(html.match(/<html[^>]*lang="([^"]+)"/)?.[1], config.lang)
     assert.match(html, /data-rdx-sidebar/)
     assert.match(html, /Introduction \| RDX/)
     assert.doesNotMatch(html, /Version 2\.1\.[01]|mdxRenderDocs/)

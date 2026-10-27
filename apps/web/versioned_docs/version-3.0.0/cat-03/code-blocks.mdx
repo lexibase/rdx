@@ -1,0 +1,118 @@
+---
+title: Code blocks
+description: Highlight code, compare changes, and draw directory trees.
+link_position: 5
+---
+
+## Highlight a language
+
+Add the language after the opening triple backticks. For example, use
+`ts`, `tsx`, `js`, `json`, `bash`, `py`, `css`, or `sql`.
+
+```ts
+const site = {
+  name: 'My documentation',
+  search: true,
+}
+```
+
+Highlighting runs on the server with Shiki. Its palette follows the light/dark
+theme. Unknown languages and unlabelled fences remain readable as plain text;
+inline code is not highlighted.
+
+## Copy a block
+
+The icon in the header copies only the code, preserving indentation and line
+breaks. A checkmark confirms success. If clipboard permission is unavailable,
+the code remains selectable for manual copying.
+
+Clipboard access needs HTTPS or localhost and browser permission.
+
+## Wrap long lines
+
+On small screens, use the wrap-lines icon in the header to toggle line wrapping
+for that block.
+Wrapping starts disabled so indentation stays intact. The copy button keeps the
+original text and line breaks in either mode.
+
+## Show Markdown source
+
+Use four backticks around a source example that contains triple backticks:
+
+````md
+```tsx
+export function Welcome() {
+  return <h1>Hello, RDX</h1>
+}
+```
+````
+
+Long blocks scroll horizontally inside their container. Keep examples focused;
+use [Tabs](./tabs.mdx) for related alternatives.
+
+## Directory trees
+
+Use a `folder` fence with two spaces per level. End folder names with `/`;
+RDX generates the connecting branches from the indentation:
+
+```folder
+my-docs/
+  docs/
+    guides/
+      introduction.mdx
+  public/
+  rdx.config.ts
+```
+
+The copy button copies the generated tree. Use a `text` fence for diagrams whose
+branches you have already drawn.
+
+## Compare changes
+
+Use a `diff` fence. Prefix removed lines with `-`, added lines with `+`, and
+unchanged lines with a space:
+
+```diff
+-const search = false
++const search = true
+ console.log(search)
+```
+
+Removed and added lines use distinct backgrounds and markers. The copy button
+preserves the full patch, including its markers and original line breaks.
+
+## React composition
+
+Custom React components can compose the shadcn Code Block directly:
+
+```tsx
+import {
+  CodeBlock,
+  CodeBlockActions,
+  CodeBlockContent,
+  CodeBlockCopyButton,
+  CodeBlockHeader,
+  CodeBlockTitle,
+} from '@lexibase/rdx/ui/components/code-block'
+
+const code = 'const search = true'
+
+export function SearchExample() {
+  return (
+    <CodeBlock>
+      <CodeBlockHeader>
+        <CodeBlockTitle>config.ts</CodeBlockTitle>
+        <CodeBlockActions>
+          <CodeBlockCopyButton value={code} />
+        </CodeBlockActions>
+      </CodeBlockHeader>
+      <CodeBlockContent lineNumbers>{code}</CodeBlockContent>
+    </CodeBlock>
+  )
+}
+```
+
+`CodeBlockContent` accepts `wrap`, `lineNumbers`, and `startLine`. Use
+`CodeBlockLine` for individual lines with `added`, `removed`, or `highlighted`
+variants, and `CodeBlockFooter` for supporting text. Markdown fences use this
+composition automatically.

@@ -1,28 +1,37 @@
 # Publishing RDX
 
-## Release order: packages before documentation
+## Release workflow: one PR
 
-Prepare code and documentation together, but release them in this order:
+Prepare each release in a single PR containing the implementation, package
+versions, migration guidance, changelog, updated guides and documentation
+snapshot. Validate the workspace and installed archives together before merging.
 
-1. Publish the packages to npm in dependency order.
-2. Allow time for registry propagation. Query each exact version and its intended
-   dist-tag until both return the expected release; elapsed time alone is not
-   confirmation.
-3. Verify a fresh installation from the public registry. Refresh the creator's
-   local cache when needed with `pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@latest`.
+1. Merge the tested release PR into `main`. The documentation deployment can run
+   automatically from that merge.
+2. Publish the packages from the merged release in dependency order. The user
+   performs publication through the terminal.
+3. Verify each exact version and its intended dist-tag in npm, allowing for
+   registry propagation. Elapsed time alone is not confirmation.
+4. Verify a fresh public-registry installation. Refresh the creator's local cache
+   when needed with `pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@latest`.
    This refresh does not bypass pnpm release-age policies.
-4. Only then deploy the corresponding official guides and versioned documentation
-   snapshot to production.
 
-The documentation must describe an update users can already install. If merging
-into `main` automatically deploys the website, keep release-specific documentation
-and snapshot changes in a separate PR and merge it after registry and installation
-verification. Drafts and preview deployments can be prepared alongside the code.
+Do not open a second PR solely to release the documentation or wait for npm
+publication before creating the snapshot. Code and documentation ship in the
+same PR; npm publication follows the merge. Record confirmed publication details
+with the next appropriate change rather than requiring another documentation-only
+release PR.
 
-This order applies to future releases and takes precedence over the historical
-release checklists below.
+This workflow supersedes the former packages-first, separate-documentation-PR
+process and takes precedence over the historical checklists below.
 
-## Prepared grouped component release: RDX 3.0.0
+## Published grouped component release: RDX 3.0.0 (reference)
+
+The six releases below are published; their exact versions and latest tags were
+verified against npm on 2026-10-26. Do not republish them. The documentation
+snapshot at `apps/web/versioned_docs/version-3.0.0` is prepared after package
+publication, retaining 2.0.0 and 1.0.1. The checklist below records the release
+procedure for reference.
 
 The complete shadcn Code Block changes the public React composition from a pre
 wrapper to the official root/content API. DialogContent also adopts the official
@@ -78,12 +87,11 @@ disable the policy globally. Existing projects update the framework with
 `pnpm add @lexibase/rdx@latest`; update the optional versioning plugin separately
 when installed. Migrate direct React CodeBlock callers before rebuilding.
 
-After registry and fresh-install verification, prepare the public 3.0 upgrade
-guide and finalize the component guides in a documentation PR. Create its
-snapshot with `pnpm --filter web docs:version 3.0.0`, preserving the 2.0.0 and
-1.0.1 snapshots. Validate the website and snapshot before merging that PR and
-deploying production. Record the verified publication date in CHANGELOG.md.
-Do not create or advertise the new snapshot during package preparation.
+The 3.0 upgrade guide and snapshot belong to this release's documentation. The
+snapshot command is `pnpm --filter web docs:version 3.0.0`; existing 2.0.0 and
+1.0.1 snapshots are preserved. For future releases, prepare the corresponding
+guides and snapshot in the same PR as the package updates, following the workflow
+above. Do not run the snapshot command again for an existing version.
 
 ## Published grouped release: RDX 2.0.0 (reference)
 

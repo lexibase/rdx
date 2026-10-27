@@ -1,7 +1,7 @@
 # RDX public API — 3.0
 
-This document describes the public API prepared for RDX 3.0. Publication is
-manual; see the release instructions in [PUBLISHING.md](./PUBLISHING.md).
+This document describes the public API of RDX 3.0. See the release instructions
+in [PUBLISHING.md](./PUBLISHING.md).
 
 RDX 3.0 installs the complete shadcn Code Block and Dialog compositions. Markdown
 fences and image syntax stay unchanged. Custom React callers of the former

@@ -15,15 +15,9 @@ package from the project root:
     <TabsTrigger value="npm">npm</TabsTrigger>
     <TabsTrigger value="yarn">yarn</TabsTrigger>
   </TabsList>
-  <TabsContent value="pnpm">
-pnpm add @lexibase/rdx@latest
-  </TabsContent>
-  <TabsContent value="npm">
-npm install @lexibase/rdx@latest
-  </TabsContent>
-  <TabsContent value="yarn">
-yarn add @lexibase/rdx@latest
-  </TabsContent>
+  <TabsContent value="pnpm">pnpm add @lexibase/rdx@latest</TabsContent>
+  <TabsContent value="npm">npm install @lexibase/rdx@latest</TabsContent>
+  <TabsContent value="yarn">yarn add @lexibase/rdx@latest</TabsContent>
 </Tabs>
 
 The main package selects compatible runtime and UI versions. You do not need to
@@ -32,6 +26,66 @@ configuration and custom components are not replaced by this operation.
 
 Check the release notes for migrations and any required Next.js, React or Node.js
 updates. Those requirements are separate from updating RDX itself.
+
+## Upgrade from RDX 2.x to 3.x
+
+RDX 3 includes the complete shadcn Code Block, diff and folder fences, responsive
+image previews, and the complete shadcn Dialog composition. Update the main
+package using the commands above. Standard Markdown fences and images continue
+working automatically.
+
+### Custom Code Block components
+
+The React `CodeBlock` export is now the root of the shadcn composition, with a
+separate `CodeBlockContent`. If your custom React components use the former pre
+wrapper, replace that import with the Markdown adapter:
+
+```tsx
+import { MdxCodeBlock } from '@lexibase/rdx/ui/components/mdx-code-block'
+
+export function Example() {
+  return (
+    <MdxCodeBlock>
+      <code className="language-ts">{'const search = true'}</code>
+    </MdxCodeBlock>
+  )
+}
+```
+
+You can also use the [official React composition](../cat-03/code-blocks.mdx#react-composition).
+Pass pre-specific props, wrapping and line-number options to `CodeBlockContent`;
+pass the exact clipboard text to `CodeBlockCopyButton` through `value`.
+
+### Custom Dialog components
+
+`DialogContent` uses the centered shadcn layout. Custom callers can set their
+position, width and padding through `className`, and control the built-in close
+button with `showCloseButton`. The built-in search retains its existing layout.
+
+### Direct runtime and UI dependencies in 3.x
+
+The main framework selects matching runtime and UI versions. If you maintain
+direct dependencies on these packages, update both to 3.x together:
+
+<Tabs defaultValue="pnpm">
+  <TabsList aria-label="Update direct runtime and UI dependencies to RDX 3">
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+    pnpm add @lexibase/rdx-next@3 @lexibase/rdx-ui@3
+  </TabsContent>
+  <TabsContent value="npm">
+    npm install @lexibase/rdx-next@3 @lexibase/rdx-ui@3
+  </TabsContent>
+  <TabsContent value="yarn">
+    yarn add @lexibase/rdx-next@3 @lexibase/rdx-ui@3
+  </TabsContent>
+</Tabs>
+
+Keep your existing content, configuration, public assets and snapshots. Optional
+plugins remain separate dependencies.
 
 ## Upgrade from RDX 1.x to 2.x
 
@@ -76,13 +130,13 @@ update both to 2.x together:
     <TabsTrigger value="yarn">yarn</TabsTrigger>
   </TabsList>
   <TabsContent value="pnpm">
-pnpm add @lexibase/rdx-next@2 @lexibase/rdx-ui@2
+    pnpm add @lexibase/rdx-next@2 @lexibase/rdx-ui@2
   </TabsContent>
   <TabsContent value="npm">
-npm install @lexibase/rdx-next@2 @lexibase/rdx-ui@2
+    npm install @lexibase/rdx-next@2 @lexibase/rdx-ui@2
   </TabsContent>
   <TabsContent value="yarn">
-yarn add @lexibase/rdx-next@2 @lexibase/rdx-ui@2
+    yarn add @lexibase/rdx-next@2 @lexibase/rdx-ui@2
   </TabsContent>
 </Tabs>
 
@@ -114,13 +168,13 @@ notes recommend a compatible update:
     <TabsTrigger value="yarn">yarn</TabsTrigger>
   </TabsList>
   <TabsContent value="pnpm">
-pnpm add @lexibase/rdx-versioning@latest
+    pnpm add @lexibase/rdx-versioning@latest
   </TabsContent>
   <TabsContent value="npm">
-npm install @lexibase/rdx-versioning@latest
+    npm install @lexibase/rdx-versioning@latest
   </TabsContent>
   <TabsContent value="yarn">
-yarn add @lexibase/rdx-versioning@latest
+    yarn add @lexibase/rdx-versioning@latest
   </TabsContent>
 </Tabs>
 
@@ -136,18 +190,9 @@ Restart the development server to check your documentation. For production:
     <TabsTrigger value="npm">npm</TabsTrigger>
     <TabsTrigger value="yarn">yarn</TabsTrigger>
   </TabsList>
-  <TabsContent value="pnpm">
-pnpm build  
-pnpm start
-  </TabsContent>
-  <TabsContent value="npm">
-npm run build  
-npm run start
-  </TabsContent>
-  <TabsContent value="yarn">
-yarn build  
-yarn start
-  </TabsContent>
+  <TabsContent value="pnpm">pnpm build pnpm start</TabsContent>
+  <TabsContent value="npm">npm run build npm run start</TabsContent>
+  <TabsContent value="yarn">yarn build yarn start</TabsContent>
 </Tabs>
 
 Check documents, relative links, components, assets, search and snapshots before
@@ -173,13 +218,13 @@ After migrating those imports, remove direct runtime and UI dependencies:
     <TabsTrigger value="yarn">yarn</TabsTrigger>
   </TabsList>
   <TabsContent value="pnpm">
-pnpm remove @lexibase/rdx-next @lexibase/rdx-ui
+    pnpm remove @lexibase/rdx-next @lexibase/rdx-ui
   </TabsContent>
   <TabsContent value="npm">
-npm uninstall @lexibase/rdx-next @lexibase/rdx-ui
+    npm uninstall @lexibase/rdx-next @lexibase/rdx-ui
   </TabsContent>
   <TabsContent value="yarn">
-yarn remove @lexibase/rdx-next @lexibase/rdx-ui
+    yarn remove @lexibase/rdx-next @lexibase/rdx-ui
   </TabsContent>
 </Tabs>
 
