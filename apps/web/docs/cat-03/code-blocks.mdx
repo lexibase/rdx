@@ -160,8 +160,6 @@ This happens automatically, including when wrapping makes a block taller.
 
 Short blocks and desktop views show the complete content. The copy button
 always copies the full block, including the portion beyond the preview.
-The [React composition example](#react-composition) below is long enough to
-demonstrate the preview on mobile.
 
 ## Show Markdown source
 
@@ -242,39 +240,3 @@ unchanged lines with a space:
 
 Removed and added lines use distinct backgrounds and markers. The copy button
 preserves the full patch, including its markers and original line breaks.
-
-## React composition
-
-Custom React components can compose the shadcn Code Block directly:
-
-```tsx
-import {
-  CodeBlock,
-  CodeBlockActions,
-  CodeBlockContent,
-  CodeBlockCopyButton,
-  CodeBlockHeader,
-  CodeBlockTitle,
-} from '@lexibase/rdx/ui/components/code-block'
-
-const code = 'const search = true'
-
-export function SearchExample() {
-  return (
-    <CodeBlock>
-      <CodeBlockHeader>
-        <CodeBlockTitle>config.ts</CodeBlockTitle>
-        <CodeBlockActions>
-          <CodeBlockCopyButton value={code} />
-        </CodeBlockActions>
-      </CodeBlockHeader>
-      <CodeBlockContent lineNumbers>{code}</CodeBlockContent>
-    </CodeBlock>
-  )
-}
-```
-
-`CodeBlockContent` accepts `wrap`, `lineNumbers`, and `startLine`. Use
-`CodeBlockLine` for individual lines with `added`, `removed`, or `highlighted`
-variants, and `CodeBlockFooter` for supporting text. Markdown fences use this
-composition automatically.
