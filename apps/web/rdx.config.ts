@@ -53,7 +53,7 @@ const config = {
     },
   },
   // HTML and interface language: 'en' or 'pt-BR'. Your documents stay as written.
-  lang: 'pt-br',
+  lang: 'en',
   // When disabled, '/' redirects to '/docs'. A custom component can be provided.
   homepage: { enabled: true },
   // Installed plugins only become active when registered here.

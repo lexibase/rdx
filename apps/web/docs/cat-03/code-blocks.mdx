@@ -4,15 +4,41 @@ description: Highlight code, compare changes, and draw directory trees.
 link_position: 5
 ---
 
+All fence options are optional. Use a plain block, add a language for highlighting,
+or combine the options below when they help explain an example.
+
+## Plain code
+
+Write a fence without a language or options:
+
+````md
+```
+Hello, RDX!
+```
+````
+
+```
+Hello, RDX!
+```
+
+The header uses the default code label, with no syntax highlighting or line numbers.
+
 ## Highlight a language
 
 Add the language after the opening triple backticks. For example, use
 `ts`, `tsx`, `js`, `json`, `bash`, `py`, `css`, or `sql`.
 
-```ts
-const site = {
-  name: 'My documentation',
-  search: true,
+````md
+```tsx
+export function Welcome() {
+  return <h1>Hello, RDX!</h1>
+}
+```
+````
+
+```tsx
+export function Welcome() {
+  return <h1>Hello, RDX!</h1>
 }
 ```
 
@@ -52,29 +78,64 @@ Without a title, the header shows the language or the default block label.
 
 ## Number lines
 
-Add `lineNumbers` to display line numbers, starting at 1. Set `startLine=20`
-when the example is a fragment of a larger file:
+Add only `lineNumbers` after the language to display numbers starting at 1.
+A title and starting value are optional:
 
 ````md
-```ts title="example.ts" lineNumbers startLine=20
+```tsx lineNumbers
+export function Welcome() {
+  return <h1>Hello, RDX!</h1>
+}
+```
+````
+
+```tsx lineNumbers
+export function Welcome() {
+  return <h1>Hello, RDX!</h1>
+}
+```
+
+Omit `lineNumbers` to keep numbers hidden. Numbering works with highlighted code,
+plain text, `diff`, and `folder` fences. The copy button excludes the numbers.
+
+## Set the starting line
+
+Add `startLine=20` alongside `lineNumbers` for a fragment from a larger file.
+You can leave out the title:
+
+````md
+```ts lineNumbers startLine=20
 const enabled = true
 
 console.log(enabled)
 ```
 ````
 
-```ts title="example.ts" lineNumbers startLine=20
+```ts lineNumbers startLine=20
 const enabled = true
 
 console.log(enabled)
 ```
 
-`lineNumbers` is a flag: include it to show numbers, or omit it to keep them hidden.
-`startLine` must be a positive integer and only sets the starting value when
-`lineNumbers` is present. Numbering works with
-highlighted code, plain text, `diff`, and `folder` fences. Blank lines count as
-lines; wrapping a long line keeps its original number. The copy button copies
-the original block content, without line numbers.
+`startLine` must be a positive integer. Omit it to start at 1; it only sets the
+starting value when `lineNumbers` is present. Blank lines in code count as lines,
+and wrapping a long line keeps its original number.
+
+## Combine options
+
+Add a title when you want the filename alongside the custom starting line:
+
+````md
+```ts title="example.ts" lineNumbers startLine=20
+const enabled = true
+console.log(enabled)
+```
+````
+
+```ts title="example.ts" lineNumbers startLine=20
+const enabled = true
+console.log(enabled)
+```
 
 ## Copy a block
 

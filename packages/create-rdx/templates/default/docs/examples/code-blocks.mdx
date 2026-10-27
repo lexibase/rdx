@@ -4,6 +4,37 @@ description: Highlight code, compare changes, and draw directory trees.
 link_position: 9
 ---
 
+All fence options are optional. These examples show each one separately before
+combining them.
+
+## Plain code
+
+````md
+```
+Hello, RDX!
+```
+````
+
+```
+Hello, RDX!
+```
+
+The header uses the default code label. Add a language for highlighting:
+
+````md
+```tsx
+export function Welcome() {
+  return <h1>Hello, RDX!</h1>
+}
+```
+````
+
+```tsx
+export function Welcome() {
+  return <h1>Hello, RDX!</h1>
+}
+```
+
 ## Show a filename
 
 Place `title="filename"` after the fence language:
@@ -23,7 +54,46 @@ use quotes, such as `title="Install dependencies"`.
 
 ## Number lines
 
-Add `lineNumbers` to start at 1, or use `startLine` for a fragment of a larger file:
+Add only `lineNumbers` to start at 1, with no title or custom starting value:
+
+````md
+```tsx lineNumbers
+export function Welcome() {
+  return <h1>Hello, RDX!</h1>
+}
+```
+````
+
+```tsx lineNumbers
+export function Welcome() {
+  return <h1>Hello, RDX!</h1>
+}
+```
+
+Omit the flag to keep numbers hidden. Copying excludes the line numbers.
+
+## Set the starting line
+
+Use `startLine` alongside `lineNumbers` for a fragment of a larger file:
+
+````md
+```ts lineNumbers startLine=20
+const enabled = true
+console.log(enabled)
+```
+````
+
+```ts lineNumbers startLine=20
+const enabled = true
+console.log(enabled)
+```
+
+`startLine` is a positive integer. Omit it to start at 1. It sets the starting
+value without enabling numbering by itself.
+
+## Combine options
+
+Add a title when a filename helps explain the fragment:
 
 ````md
 ```ts title="example.ts" lineNumbers startLine=20
@@ -36,10 +106,6 @@ console.log(enabled)
 const enabled = true
 console.log(enabled)
 ```
-
-`lineNumbers` enables numbering when present; omit it to keep numbers hidden.
-`startLine` is a positive integer that sets the starting value when numbering
-is enabled. Copying excludes the line numbers.
 
 ## Compare changes
 
