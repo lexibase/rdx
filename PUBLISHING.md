@@ -22,7 +22,13 @@ verification. Drafts and preview deployments can be prepared alongside the code.
 This order applies to future releases and takes precedence over the historical
 release checklists below.
 
-## Prepared grouped component release: RDX 3.0.0
+## Published grouped component release: RDX 3.0.0 (reference)
+
+The six releases below are published; their exact versions and latest tags were
+verified against npm on 2026-10-26. Do not republish them. The documentation
+snapshot at `apps/web/versioned_docs/version-3.0.0` is prepared after package
+publication, retaining 2.0.0 and 1.0.1. The checklist below records the release
+procedure for reference.
 
 The complete shadcn Code Block changes the public React composition from a pre
 wrapper to the official root/content API. DialogContent also adopts the official

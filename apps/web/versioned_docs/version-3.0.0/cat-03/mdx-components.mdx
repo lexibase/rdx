@@ -1,0 +1,75 @@
+---
+title: Markdown
+description: Text formatting, tables, code blocks, and other Markdown features.
+link_position: 3
+---
+
+## Native Markdown
+
+Use **strong text**, _emphasis_, ~~strikethrough~~ and `inline code`.
+
+> A quotation uses the same muted colors as the rest of the RDX theme.
+>
+> Keep **important context**, [links](../cat-01/intro.mdx), and `inline code` close to the content they explain.
+
+1. Write an `.mdx` page.
+2. Add it to a category folder.
+
+- [x] Shared documentation components
+- [ ] Review the page
+
+| Feature         | Available |
+| :-------------- | --------: |
+| Markdown tables |       Yes |
+| Lists           |       Yes |
+| Code blocks     |       Yes |
+| Blockquotes     |       Yes |
+
+### Five-column comparison
+
+Markdown tables use the default shadcn/ui Table styling. Column alignment
+follows the Markdown separator row.
+
+Wider tables scroll horizontally on small screens without widening the page.
+
+| Feature    | Description                            |  Status  |    Plugin    | Example         |
+| :--------- | :------------------------------------- | :------: | :----------: | :-------------- |
+| Markdown   | Write headings, lists, and paragraphs  | Included | Not required | `## Heading`    |
+| List       | Organize related items                 | Included | Not required | `- First item`  |
+| Code block | Display source code with a copy button | Included | Not required | `pnpm dev`      |
+| Blockquote | Quote a passage or explanation         | Included | Not required | `> A quotation` |
+
+Table cells can contain [keyboard shortcut components](./keyboard-shortcuts.mdx)
+such as `<Kbd>Esc</Kbd>`.
+
+```ts
+const framework = 'RDX'
+```
+
+### Syntax highlighting
+
+Set the language after the opening fence. Highlighting follows the light/dark
+theme automatically, without changing how code is copied.
+
+```tsx
+export function Welcome() {
+  return <h1 className="text-xl">Welcome to RDX</h1>
+}
+```
+
+```py
+def greet(name):
+    return f"Hello, {name}!"
+```
+
+```json
+{ "framework": "RDX", "minimal": true }
+```
+
+### Heading three
+
+#### Heading four
+
+##### Heading five
+
+###### Heading six
