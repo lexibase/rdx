@@ -1,7 +1,32 @@
 type Entry = { name: string; children: Entry[] }
 
-/** An indented list becomes a text diagram; no project files are accessed. */
+const branch = /^([ \t|│]*)(\|-|\|_|├──|└──)(?:[ \t]+(.*))?$/
+const guide = /^[ \t|│]*[|│][ \t|│]*$/
+
+/** Convert diagram prefixes only; pipes within filenames remain literal. */
+function explicitTree(source: string): string | undefined {
+  const lines = source.split(/\r?\n/)
+  if (!lines.some((line) => branch.test(line) || guide.test(line))) return
+  return lines
+    .map((line) => {
+      const match = line.match(branch)
+      if (match) {
+        const prefix = match[1]!.replaceAll('|', '│').replaceAll('\t', '    ')
+        const connector =
+          match[2] === '|-' ? '├──' : match[2] === '|_' ? '└──' : match[2]
+        return `${prefix}${connector}${match[3] ? ' ' + match[3].trimEnd() : ''}`
+      }
+      return guide.test(line)
+        ? line.replaceAll('|', '│').replaceAll('\t', '    ')
+        : line.trimEnd()
+    })
+    .join('\n')
+}
+
+/** Indented lists and explicit diagrams are text only; no files are accessed. */
 export function formatFolderTree(source: string): string {
+  const diagram = explicitTree(source)
+  if (diagram !== undefined) return diagram
   const roots: Entry[] = []
   const parents: Entry[] = []
   for (const [index, line] of source.split(/\r?\n/).entries()) {

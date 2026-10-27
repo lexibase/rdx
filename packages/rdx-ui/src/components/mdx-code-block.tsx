@@ -9,6 +9,7 @@ import {
 import { getMessages } from '../lib/i18n'
 import { CodeBlockLine } from './code-block'
 import { MdxCodeBlockView } from './mdx-code-block-view'
+import { MdxFolderTree } from './mdx-folder-tree'
 
 function textOf(children: ReactNode): string {
   return Children.toArray(children)
@@ -86,46 +87,48 @@ export function MdxCodeBlock({
   )
   const lastLine = lines.at(-1)
   const content =
-    (mode === 'diff' || lineNumbers) && typeof raw !== 'string'
-      ? nodes.map((node) => {
-          if (lineNumbers && node === '\n') return null
-          if (!isValidElement<LineProps>(node)) return node
-          const variant = node.props['data-rdx-line-variant']
-          if (
-            !variant &&
-            !(
-              lineNumbers && node.props.className?.split(/\s+/).includes('line')
-            )
-          )
-            return node
-          // A final newline terminates the last source line; intentional blank
-          // lines before it still receive the official component's own number.
-          if (
-            lineNumbers &&
-            lines.length > 1 &&
-            node === lastLine &&
-            value.endsWith('\n') &&
-            textOf(node.props.children) === ''
-          )
-            return null
-          return (
-            <CodeBlockLine
-              key={node.key}
-              variant={
-                variant === 'added' || variant === 'removed'
-                  ? variant
-                  : variant === 'hunk'
-                    ? 'highlighted'
-                    : 'default'
-              }
-            >
-              {variant === 'added' || variant === 'removed'
-                ? withoutMarker(node.props.children)
-                : node.props.children}
-            </CodeBlockLine>
-          )
-        })
-      : raw
+    mode === 'folder' ? (
+      <MdxFolderTree value={value} />
+    ) : (mode === 'diff' || lineNumbers) && typeof raw !== 'string' ? (
+      nodes.map((node) => {
+        if (lineNumbers && node === '\n') return null
+        if (!isValidElement<LineProps>(node)) return node
+        const variant = node.props['data-rdx-line-variant']
+        if (
+          !variant &&
+          !(lineNumbers && node.props.className?.split(/\s+/).includes('line'))
+        )
+          return node
+        // A final newline terminates the last source line; intentional blank
+        // lines before it still receive the official component's own number.
+        if (
+          lineNumbers &&
+          lines.length > 1 &&
+          node === lastLine &&
+          value.endsWith('\n') &&
+          textOf(node.props.children) === ''
+        )
+          return null
+        return (
+          <CodeBlockLine
+            key={node.key}
+            variant={
+              variant === 'added' || variant === 'removed'
+                ? variant
+                : variant === 'hunk'
+                  ? 'highlighted'
+                  : 'default'
+            }
+          >
+            {variant === 'added' || variant === 'removed'
+              ? withoutMarker(node.props.children)
+              : node.props.children}
+          </CodeBlockLine>
+        )
+      })
+    ) : (
+      raw
+    )
   return (
     <MdxCodeBlockView
       label={label}

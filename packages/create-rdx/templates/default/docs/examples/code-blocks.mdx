@@ -136,5 +136,31 @@ my-docs/
   rdx.config.ts
 ```
 
-Use `text` instead to display a diagram you have already drawn. Long lines
-scroll inside the block. The icon in the header copies the rendered tree.
+Folder names ending in `/` receive a folder icon. File icons follow their
+extension, with a generic file icon for other names.
+
+## Type ASCII branches
+
+Use `|-` for `├──`, `|_` for `└──`, and `|` for `│` in the tree prefixes:
+
+````md
+```folder title="Project files"
+my-docs/
+|- docs/
+|   |_ intro.mdx
+|- package.json
+|_ logo.svg
+```
+````
+
+```folder title="Project files"
+my-docs/
+|- docs/
+|   |_ intro.mdx
+|- package.json
+|_ logo.svg
+```
+
+Leave a space between each branch marker and the name. Existing Unicode trees
+also work. Copying produces the text diagram without icons; a `text` fence
+preserves the original ASCII characters. Long lines scroll inside the block.

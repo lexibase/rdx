@@ -181,8 +181,42 @@ my-docs/
   rdx.config.ts
 ```
 
-The copy button copies the generated tree. Use a `text` fence for diagrams whose
-branches you have already drawn.
+Names ending in `/` receive a folder icon. File icons follow their extension:
+code, JSON, images, text documents, or a generic file icon. Names without an
+extension use the generic icon.
+
+### ASCII branches
+
+To type the branches explicitly, use these prefixes with a space before the name:
+
+| Type | Rendered branch |
+| ---- | --------------- | ----- |
+| `    | -`              | `├──` |
+| `    | \_`             | `└──` |
+| `    | `               | `│`   |
+
+````md
+```folder title="Project files"
+my-docs/
+|- docs/
+|   |_ intro.mdx
+|- package.json
+|_ logo.svg
+```
+````
+
+```folder title="Project files"
+my-docs/
+|- docs/
+|   |_ intro.mdx
+|- package.json
+|_ logo.svg
+```
+
+Prefixes are converted at the start of tree lines; characters inside filenames
+stay literal. You can also paste a tree that already uses Unicode branches.
+The copy button copies the Unicode text diagram without icons. A `text` fence
+keeps the original characters unchanged.
 
 ## Compare changes
 

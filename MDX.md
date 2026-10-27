@@ -77,9 +77,17 @@ complete patch, including its markers, indentation, and final newline.
 
 Use `folder` to generate tree branches from indentation. Two spaces or one tab
 define a level. Parent folder names end with `/`; levels cannot be skipped.
-Blank lines are ignored. Names are rendered as text, and no filesystem access
-is performed. Copying produces the rendered diagram. Existing hand-drawn trees
-can continue to use `text` fences.
+Blank lines in indented lists are ignored. Names are rendered as text, and no
+filesystem access is performed. Names ending in `/` receive a folder icon; other
+entries use extension-based code, JSON, image, text or generic file icons. The
+extensionless fallback is also a generic file.
+
+Explicit tree prefixes accept `|- name`, `|_ name` and vertical `|` guides,
+converting only those prefixes to `├──`, `└──` and `│`. Existing Unicode trees
+can be pasted directly. Names containing pipes remain literal. The shared
+MdxFolderTree adapter composes CodeBlockLine and Lucide icons, preserving optional
+title, numbering and wrap/copy actions. Copying produces the Unicode diagram
+without SVG markup. A `text` fence preserves an ASCII diagram unchanged.
 
 ````md
 ```folder

@@ -353,6 +353,43 @@ test('folder fences draw nested branches and escaped filenames without changing 
     )
 })
 
+test('folder diagrams accept ASCII prefixes without rewriting literal filenames or copied trees', async () => {
+  const source =
+    'project/\n|- docs/\n|   |- intro.mdx\n|   |_ file|name.txt\n|\n|- package.json\n|- preview.PNG\n|- app.tsx\n|- json\n|_ <example>.unknown\n'
+  const diagram =
+    'project/\n├── docs/\n│   ├── intro.mdx\n│   └── file|name.txt\n│\n├── package.json\n├── preview.PNG\n├── app.tsx\n├── json\n└── <example>.unknown\n'
+  for (const input of [source, diagram]) {
+    const { content } = await compileDocumentation(
+      '```folder title="Project files" lineNumbers startLine=5\n' +
+        input +
+        '```',
+      mdxComponents
+    )
+    const html = renderToStaticMarkup(content)
+    assert.equal(renderedCodeText(html), diagram)
+    assert.match(html, /counter-reset:line 4/)
+    assert.match(html, /data-numbered="true"/)
+    assert.equal((html.match(/data-rdx-folder-kind="folder"/g) ?? []).length, 2)
+    assert.equal((html.match(/data-rdx-folder-kind="text"/g) ?? []).length, 2)
+    assert.equal((html.match(/data-rdx-folder-kind="json"/g) ?? []).length, 1)
+    assert.equal((html.match(/data-rdx-folder-kind="image"/g) ?? []).length, 1)
+    assert.equal((html.match(/data-rdx-folder-kind="code"/g) ?? []).length, 1)
+    assert.equal((html.match(/data-rdx-folder-kind="file"/g) ?? []).length, 2)
+    assert.equal((html.match(/data-slot="code-block-line"/g) ?? []).length, 10)
+    assert.doesNotMatch(html, /<example>/)
+    const copy = html.match(/data-rdx-code-value="([^"]*)"/)?.[1]
+    assert.equal(copy?.replaceAll('&lt;', '<').replaceAll('&gt;', '>'), diagram)
+    assert.match(html, /<svg[^>]+aria-hidden="true"/)
+  }
+  const plain = await compileDocumentation(
+    '```text\n' + source + '```',
+    mdxComponents
+  )
+  const html = renderToStaticMarkup(plain.content)
+  assert.equal(renderedCodeText(html), source)
+  assert.doesNotMatch(html, /data-rdx-folder-kind/)
+})
+
 test('all starter documents compile with their real filesystem link context', async () => {
   const { getDocsIndex, getDocument } = await jiti.import(
     '../../rdx-core/src/index.ts'

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add automatic folder and extension-based file icons to folder code blocks.
+  Accept ASCII tree prefixes alongside indented lists, preserving literal names
+  and copying the Unicode text diagram without icon markup.
+
 - Support `lineNumbers` and `startLine` in Markdown fences through the official
   shadcn Code Block composition, preserving blank lines, wrapping and clipboard
   output across highlighted code, plain text, diff and folder blocks.
