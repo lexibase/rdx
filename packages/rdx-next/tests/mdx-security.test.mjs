@@ -205,6 +205,88 @@ test('fence titles stay literal, support either quote style and ignore nested or
   }
 })
 
+test('Markdown numbering uses the official line composition, respects starting values and preserves copied source', async () => {
+  for (const language of [
+    'ts',
+    'text',
+    'unknown-rdx-language',
+    'diff',
+    'folder',
+  ]) {
+    const code =
+      language === 'folder'
+        ? 'root/\n  index.mdx\n'
+        : language === 'diff'
+          ? '-old\n+new\n'
+          : 'const first = true\n\nconst last = false\n'
+    const { content } = await compileDocumentation(
+      '```' +
+        language +
+        ' title="Example" lineNumbers startLine=20\n' +
+        code +
+        '```',
+      mdxComponents
+    )
+    const html = renderToStaticMarkup(content)
+    assert.match(html, /data-numbered="true"/)
+    assert.match(html, /counter-reset:line 19/)
+    assert.equal(
+      (html.match(/data-slot="code-block-line"/g) ?? []).length,
+      language === 'folder' || language === 'diff' ? 2 : 3,
+      language
+    )
+    assert.match(html, /title="Example"/)
+    assert.equal(
+      html.match(/data-rdx-code-value="([^"]*)"/)?.[1],
+      language === 'folder' ? 'root/\n└── index.mdx\n' : code
+    )
+    if (language === 'ts') assert.match(html, /--shiki-light:/)
+    if (language === 'diff') {
+      assert.equal((html.match(/data-variant="added"/g) ?? []).length, 1)
+      assert.equal((html.match(/data-variant="removed"/g) ?? []).length, 1)
+    }
+  }
+})
+
+test('numbering flags are literal, opt-in and independent from titles and quoted metadata', async () => {
+  for (const [meta, numbered, counter] of [
+    ['', false, 0],
+    ['lineNumbers', true, 0],
+    ['lineNumbers=true', true, 0],
+    ['lineNumbers="true" startLine="8"', true, 7],
+    ['startLine=20', true, 19],
+    ['startLine=20 lineNumbers=false', false, 19],
+    ['lineNumbers=false startLine=20', false, 19],
+    ['title="lineNumbers startLine=200"', false, 0],
+    ['caption="lineNumbers startLine=200" title="Example"', false, 0],
+  ]) {
+    const { content } = await compileDocumentation(
+      '```ts ' + meta + '\nconst ready = true\n```',
+      mdxComponents
+    )
+    const html = renderToStaticMarkup(content)
+    assert.equal(html.includes('data-numbered="true"'), numbered, meta)
+    assert.ok(html.includes('counter-reset:line ' + counter), meta)
+  }
+  for (const meta of [
+    'startLine',
+    'startLine=0',
+    'startLine=-1',
+    'startLine=1.5',
+    'startLine=Infinity',
+    'startLine=1e2',
+    'startLine=9007199254740992',
+    'lineNumbers=maybe',
+  ])
+    await assert.rejects(
+      compileDocumentation(
+        '```ts ' + meta + '\nconst ready = true\n```',
+        mdxComponents
+      ),
+      /Invalid code fence metadata: (startLine|lineNumbers) must be/
+    )
+})
+
 test('diff fences distinguish patch content from headers and preserve the exact copyable patch', async () => {
   const patch =
     'diff --git a/app.ts b/app.ts\n--- a/app.ts\n+++ b/app.ts\n@@ -1,2 +1,3 @@\n-const enabled = false\n+const enabled = true\n+const label = "<script> & RDX"\n console.log(enabled)\n'

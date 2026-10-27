@@ -21,6 +21,25 @@ const search = true
 The title appears in the header; copying keeps only the code. Titles with spaces
 use quotes, such as `title="Install dependencies"`.
 
+## Number lines
+
+Add `lineNumbers` to start at 1, or use `startLine` for a fragment of a larger file:
+
+````md
+```ts title="example.ts" lineNumbers startLine=20
+const enabled = true
+console.log(enabled)
+```
+````
+
+```ts title="example.ts" lineNumbers startLine=20
+const enabled = true
+console.log(enabled)
+```
+
+`startLine` is a positive integer and also enables numbering on its own.
+Use `lineNumbers=false` to hide numbers. Copying excludes the line numbers.
+
 ## Compare changes
 
 Use a `diff` fence. Prefix removed lines with `-`, added lines with `+`,

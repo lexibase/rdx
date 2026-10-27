@@ -19,12 +19,16 @@ export function MdxCodeBlockView({
   label,
   mode,
   value,
+  lineNumbers,
+  startLine,
   preProps,
   children,
 }: {
   label: string
   mode?: 'folder' | 'diff'
   value: string
+  lineNumbers?: boolean
+  startLine?: number
   preProps: ComponentProps<'pre'>
   children: ReactNode
 }) {
@@ -66,6 +70,8 @@ export function MdxCodeBlockView({
       <CodeBlockContent
         {...preProps}
         wrap={wrap}
+        lineNumbers={lineNumbers}
+        startLine={startLine}
         className={[preProps.className, 'data-wrap:wrap-anywhere']
           .filter(Boolean)
           .join(' ')}

@@ -12,17 +12,39 @@ type CodeNode = {
 }
 
 /** Read literal fence attributes; quoted values may contain spaces or escapes. */
-function codeTitle(meta: unknown): string | undefined {
-  if (typeof meta !== 'string') return
+function codeOptions(meta: unknown): Record<string, string> {
+  const properties: Record<string, string> = {}
+  if (typeof meta !== 'string') return properties
   const attributes =
-    /(?:^|\s)([\w-]+)=(?:"((?:\\.|[^"\\])*)"|'((?:\\.|[^'\\])*)'|([^\s"']+))(?=\s|$)/g
+    /(?:^|\s)([\w-]+)(?:=(?:"((?:\\.|[^"\\])*)"|'((?:\\.|[^'\\])*)'|([^\s"']+)))?(?=\s|$)/g
   for (const match of meta.matchAll(attributes)) {
-    if (match[1] !== 'title') continue
-    return (
-      (match[2] ?? match[3] ?? match[4])?.replace(/\\(["'\\])/g, '$1').trim() ||
-      undefined
-    )
+    const value = (match[2] ?? match[3] ?? match[4])
+      ?.replace(/\\(["'\\])/g, '$1')
+      .trim()
+    if (match[1] === 'title' && value) properties['data-rdx-code-title'] = value
+    if (match[1] === 'lineNumbers') {
+      if (value !== undefined && value !== 'true' && value !== 'false')
+        throw new Error(
+          'Invalid code fence metadata: lineNumbers must be true or false.'
+        )
+      properties['data-rdx-code-line-numbers'] = value ?? 'true'
+    }
+    if (match[1] === 'startLine') {
+      if (
+        !value ||
+        !/^\d+$/.test(value) ||
+        !Number.isSafeInteger(Number(value)) ||
+        Number(value) < 1
+      )
+        throw new Error(
+          'Invalid code fence metadata: startLine must be a positive safe integer.'
+        )
+      properties['data-rdx-code-start-line'] = String(Number(value))
+    }
   }
+  if (properties['data-rdx-code-start-line'])
+    properties['data-rdx-code-line-numbers'] ??= 'true'
+  return properties
 }
 
 function prepareCodeBlocks(node: CodeNode) {
@@ -30,9 +52,11 @@ function prepareCodeBlocks(node: CodeNode) {
   const data = code?.data
   const meta =
     data && typeof data === 'object' && 'meta' in data ? data.meta : undefined
-  const title = codeTitle(meta ?? code?.properties?.metastring)
-  if (title)
-    node.properties = { ...node.properties, 'data-rdx-code-title': title }
+  if (code)
+    node.properties = {
+      ...node.properties,
+      ...codeOptions(meta ?? code.properties?.metastring),
+    }
   const classes = code?.properties?.className
   if (
     code &&
@@ -76,8 +100,7 @@ export function rehypeDocumentationCode(
       {
         name: 'rdx:diff-lines',
         pre(node) {
-          const title = codeTitle(this.options.meta?.__raw)
-          if (title) node.properties['data-rdx-code-title'] = title
+          Object.assign(node.properties, codeOptions(this.options.meta?.__raw))
           if (this.options.lang === 'diff')
             node.properties['data-rdx-code-mode'] = 'diff'
         },

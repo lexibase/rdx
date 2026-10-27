@@ -50,6 +50,31 @@ Titles also work with `text`, `diff`, and `folder` fences. The language continue
 to control highlighting, and the copy button copies only the block content.
 Without a title, the header shows the language or the default block label.
 
+## Number lines
+
+Add `lineNumbers` to display line numbers, starting at 1. Set `startLine=20`
+when the example is a fragment of a larger file:
+
+````md
+```ts title="example.ts" lineNumbers startLine=20
+const enabled = true
+
+console.log(enabled)
+```
+````
+
+```ts title="example.ts" lineNumbers startLine=20
+const enabled = true
+
+console.log(enabled)
+```
+
+`startLine` must be a positive integer and also enables numbering on its own.
+Use `lineNumbers=false` to hide numbers explicitly. Numbering works with
+highlighted code, plain text, `diff`, and `folder` fences. Blank lines count as
+lines; wrapping a long line keeps its original number. The copy button copies
+the original block content, without line numbers.
+
 ## Copy a block
 
 The icon in the header copies only the code, preserving indentation and line

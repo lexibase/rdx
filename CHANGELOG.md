@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Support `lineNumbers` and `startLine` in Markdown fences through the official
+  shadcn Code Block composition, preserving blank lines, wrapping and clipboard
+  output across highlighted code, plain text, diff and folder blocks.
+
 - Support optional `title="filename"` metadata on Markdown code fences, using
   the shadcn CodeBlockTitle header without changing highlighted or copied code.
 

@@ -27,6 +27,12 @@ Add `title="rdx.config.ts"` after the fence language to display a filename or
 label in the header. Titles work with highlighted code, plain text, diff and
 folder fences. Quoted values support spaces. The title is literal text and is
 excluded from clipboard output; the language still controls highlighting.
+Fence metadata also accepts `lineNumbers` (or `lineNumbers=true/false`) and
+`startLine=20`. The starting value must be a positive safe integer; specifying
+it enables numbering unless `lineNumbers=false` is explicit. Highlighted lines
+use the official CodeBlockLine composition; plain strings use CodeBlockContent's
+built-in splitting. Blank lines keep their numbers, and clipboard output stays
+unchanged. Wrapped continuations retain the original line number.
 Copying preserves the code's indentation, line breaks and trailing newline,
 without copying the header. Success is announced only after the clipboard write
 finishes (the operating system may normalize LF/CRLF line endings),

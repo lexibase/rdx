@@ -48,10 +48,14 @@ export function MdxCodeBlock({
   children,
   'data-rdx-code-mode': mode,
   'data-rdx-code-title': title,
+  'data-rdx-code-line-numbers': numbered,
+  'data-rdx-code-start-line': firstLine,
   ...props
 }: ComponentProps<'pre'> & {
   'data-rdx-code-mode'?: 'folder' | 'diff'
   'data-rdx-code-title'?: string
+  'data-rdx-code-line-numbers'?: string
+  'data-rdx-code-start-line'?: string
 }) {
   const messages = getMessages(lang)
   const code = Children.toArray(children).find((child) => isValidElement(child))
@@ -66,20 +70,47 @@ export function MdxCodeBlock({
   const label =
     title ||
     (mode === 'folder' ? messages.folderTree : (language ?? messages.code))
+  const lineNumbers = numbered === 'true'
+  const raw = codeProps?.children ?? children
+  const nodes = Children.toArray(raw)
+  type LineProps = {
+    children?: ReactNode
+    className?: string
+    'data-rdx-line-variant'?: string
+  }
+  const lines = nodes.filter(
+    (node) =>
+      isValidElement<LineProps>(node) &&
+      (node.props['data-rdx-line-variant'] ||
+        node.props.className?.split(/\s+/).includes('line'))
+  )
+  const lastLine = lines.at(-1)
   const content =
-    mode === 'diff'
-      ? Children.map(codeProps?.children, (node) => {
+    (mode === 'diff' || lineNumbers) && typeof raw !== 'string'
+      ? nodes.map((node) => {
+          if (lineNumbers && node === '\n') return null
+          if (!isValidElement<LineProps>(node)) return node
+          const variant = node.props['data-rdx-line-variant']
           if (
-            !isValidElement<{
-              children?: ReactNode
-              'data-rdx-line-variant'?: string
-            }>(node)
+            !variant &&
+            !(
+              lineNumbers && node.props.className?.split(/\s+/).includes('line')
+            )
           )
             return node
-          const variant = node.props['data-rdx-line-variant']
-          if (!variant) return node
+          // A final newline terminates the last source line; intentional blank
+          // lines before it still receive the official component's own number.
+          if (
+            lineNumbers &&
+            lines.length > 1 &&
+            node === lastLine &&
+            value.endsWith('\n') &&
+            textOf(node.props.children) === ''
+          )
+            return null
           return (
             <CodeBlockLine
+              key={node.key}
               variant={
                 variant === 'added' || variant === 'removed'
                   ? variant
@@ -94,12 +125,14 @@ export function MdxCodeBlock({
             </CodeBlockLine>
           )
         })
-      : (codeProps?.children ?? children)
+      : raw
   return (
     <MdxCodeBlockView
       label={label}
       mode={mode}
       value={value}
+      lineNumbers={lineNumbers}
+      startLine={firstLine === undefined ? undefined : Number(firstLine)}
       preProps={{
         ...props,
         className: [props.className, language && `language-${language}`]
