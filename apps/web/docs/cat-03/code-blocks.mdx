@@ -20,6 +20,36 @@ Highlighting runs on the server with Shiki. Its palette follows the light/dark
 theme. Unknown languages and unlabelled fences remain readable as plain text;
 inline code is not highlighted.
 
+## Show a filename
+
+Add `title="rdx.config.ts"` after the language to display a filename or label in
+the header:
+
+````md
+```ts title="rdx.config.ts"
+import { defineConfig } from '@lexibase/rdx'
+
+export default defineConfig({
+  metadata: { applicationName: 'My documentation' },
+  search: true,
+})
+```
+````
+
+```ts title="rdx.config.ts"
+import { defineConfig } from '@lexibase/rdx'
+
+export default defineConfig({
+  metadata: { applicationName: 'My documentation' },
+  search: true,
+})
+```
+
+Use quotes for titles with spaces, such as `title="Install dependencies"`.
+Titles also work with `text`, `diff`, and `folder` fences. The language continues
+to control highlighting, and the copy button copies only the block content.
+Without a title, the header shows the language or the default block label.
+
 ## Copy a block
 
 The icon in the header copies only the code, preserving indentation and line
@@ -73,8 +103,8 @@ Use a `diff` fence. Prefix removed lines with `-`, added lines with `+`, and
 unchanged lines with a space:
 
 ```diff
--const search = false
-+const search = true
+- const search = false
++ const search = true
  console.log(search)
 ```
 

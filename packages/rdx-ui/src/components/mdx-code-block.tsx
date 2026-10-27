@@ -47,8 +47,12 @@ export function MdxCodeBlock({
   lang,
   children,
   'data-rdx-code-mode': mode,
+  'data-rdx-code-title': title,
   ...props
-}: ComponentProps<'pre'> & { 'data-rdx-code-mode'?: 'folder' | 'diff' }) {
+}: ComponentProps<'pre'> & {
+  'data-rdx-code-mode'?: 'folder' | 'diff'
+  'data-rdx-code-title'?: string
+}) {
   const messages = getMessages(lang)
   const code = Children.toArray(children).find((child) => isValidElement(child))
   const codeProps = isValidElement<{
@@ -60,7 +64,8 @@ export function MdxCodeBlock({
   const language = codeProps?.className?.match(/(?:^|\s)language-([^\s]+)/)?.[1]
   const value = textOf(codeProps?.children ?? children)
   const label =
-    mode === 'folder' ? messages.folderTree : (language ?? messages.code)
+    title ||
+    (mode === 'folder' ? messages.folderTree : (language ?? messages.code))
   const content =
     mode === 'diff'
       ? Children.map(codeProps?.children, (node) => {

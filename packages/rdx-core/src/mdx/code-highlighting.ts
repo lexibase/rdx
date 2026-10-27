@@ -8,10 +8,31 @@ type CodeNode = {
   properties?: Record<string, unknown>
   children?: CodeNode[]
   value?: string
+  data?: unknown
 }
 
-function prepareFolders(node: CodeNode) {
+/** Read literal fence attributes; quoted values may contain spaces or escapes. */
+function codeTitle(meta: unknown): string | undefined {
+  if (typeof meta !== 'string') return
+  const attributes =
+    /(?:^|\s)([\w-]+)=(?:"((?:\\.|[^"\\])*)"|'((?:\\.|[^'\\])*)'|([^\s"']+))(?=\s|$)/g
+  for (const match of meta.matchAll(attributes)) {
+    if (match[1] !== 'title') continue
+    return (
+      (match[2] ?? match[3] ?? match[4])?.replace(/\\(["'\\])/g, '$1').trim() ||
+      undefined
+    )
+  }
+}
+
+function prepareCodeBlocks(node: CodeNode) {
   const code = node.tagName === 'pre' ? node.children?.[0] : undefined
+  const data = code?.data
+  const meta =
+    data && typeof data === 'object' && 'meta' in data ? data.meta : undefined
+  const title = codeTitle(meta ?? code?.properties?.metastring)
+  if (title)
+    node.properties = { ...node.properties, 'data-rdx-code-title': title }
   const classes = code?.properties?.className
   if (
     code &&
@@ -32,7 +53,7 @@ function prepareFolders(node: CodeNode) {
     ]
     return
   }
-  node.children?.forEach(prepareFolders)
+  node.children?.forEach(prepareCodeBlocks)
 }
 
 /** shadcn's Shiki/GitHub palette, applied to MDX on the server. */
@@ -55,6 +76,8 @@ export function rehypeDocumentationCode(
       {
         name: 'rdx:diff-lines',
         pre(node) {
+          const title = codeTitle(this.options.meta?.__raw)
+          if (title) node.properties['data-rdx-code-title'] = title
           if (this.options.lang === 'diff')
             node.properties['data-rdx-code-mode'] = 'diff'
         },
@@ -91,7 +114,7 @@ export function rehypeDocumentationCode(
   if (typeof highlight !== 'function') return highlight
   // Three named parameters make unified expect a callback instead of a Promise.
   return (tree, ...args) => {
-    prepareFolders(tree)
+    prepareCodeBlocks(tree)
     return highlight(tree, ...args)
   }
 }

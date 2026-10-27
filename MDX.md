@@ -23,6 +23,10 @@ and restore focus. Linked images navigate normally; empty-alt images remain
 decorative. The preview fits the viewport on desktop and mobile.
 Fenced code displays its language (or "Code" when omitted) and an icon-only copy
 button with an accessible name, a tooltip and a checkmark on success.
+Add `title="rdx.config.ts"` after the fence language to display a filename or
+label in the header. Titles work with highlighted code, plain text, diff and
+folder fences. Quoted values support spaces. The title is literal text and is
+excluded from clipboard output; the language still controls highlighting.
 Copying preserves the code's indentation, line breaks and trailing newline,
 without copying the header. Success is announced only after the clipboard write
 finishes (the operating system may normalize LF/CRLF line endings),

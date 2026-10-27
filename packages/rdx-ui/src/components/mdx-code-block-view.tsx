@@ -45,7 +45,7 @@ export function MdxCodeBlockView({
       className="my-4 max-w-full"
     >
       <CodeBlockHeader>
-        <CodeBlockTitle>
+        <CodeBlockTitle title={label}>
           <Icon aria-hidden="true" /> {label}
         </CodeBlockTitle>
         <CodeBlockActions>

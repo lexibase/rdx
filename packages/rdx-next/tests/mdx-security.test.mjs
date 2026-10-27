@@ -145,6 +145,66 @@ test('unknown, text and unlabelled fences remain readable; inline code stays unc
   }
 })
 
+test('fence titles reach the shadcn header across highlighted, plain, diff and folder blocks without entering copied code', async () => {
+  for (const [language, code, expected] of [
+    ['ts', 'const search = true\n', 'const search = true\n'],
+    ['text', 'plain code\n', 'plain code\n'],
+    ['unknown-rdx-language', 'plain code\n', 'plain code\n'],
+    ['diff', '-old\n+new\n', 'old\nnew\n'],
+    ['folder', 'root/\n  intro.mdx\n', 'root/\n└── intro.mdx\n'],
+  ]) {
+    const { content } = await compileDocumentation(
+      '```' + language + ' title="Project example.ts"\n' + code + '```',
+      mdxComponents
+    )
+    const html = renderToStaticMarkup(content)
+    assert.match(
+      html,
+      /data-slot="code-block-title"[^>]*title="Project example.ts"/
+    )
+    assert.match(html, /Project example.ts<\/div>/)
+    const baseline = await compileDocumentation(
+      '```' + language + '\n' + code + '```',
+      mdxComponents
+    )
+    assert.equal(
+      renderedCodeText(html),
+      renderedCodeText(renderToStaticMarkup(baseline.content)),
+      language
+    )
+    const copyValue = html.match(/data-rdx-code-value="([^"]*)"/)?.[1]
+    assert.equal(copyValue, language === 'folder' ? expected : code, language)
+    if (language === 'ts') assert.match(html, /--shiki-light:/)
+  }
+})
+
+test('fence titles stay literal, support either quote style and ignore nested or incomplete attributes', async () => {
+  const cases = [
+    [`title='Say "Hello".tsx'`, 'Say &quot;Hello&quot;.tsx'],
+    ["title='Project notes.txt'", 'Project notes.txt'],
+    ['title=example.ts', 'example.ts'],
+    ['caption="title=wrong.ts" title="right.ts"', 'right.ts'],
+    [
+      'title="<script>alert(1)</script> & file.ts"',
+      '&lt;script&gt;alert(1)&lt;/script&gt; &amp; file.ts',
+    ],
+    ['title=""', 'ts'],
+    ['title="   "', 'ts'],
+    ['title="incomplete', 'ts'],
+    ['caption="example title=wrong.ts"', 'ts'],
+  ]
+  for (const [meta, expected] of cases) {
+    const { content } = await compileDocumentation(
+      '```ts ' + meta + '\nconst search = true\n```',
+      mdxComponents
+    )
+    const html = renderToStaticMarkup(content)
+    assert.ok(html.includes(`title="${expected}"`), meta)
+    assert.doesNotMatch(html, /<script>/)
+    assert.equal(renderedCodeText(html), 'const search = true\n')
+  }
+})
+
 test('diff fences distinguish patch content from headers and preserve the exact copyable patch', async () => {
   const patch =
     'diff --git a/app.ts b/app.ts\n--- a/app.ts\n+++ b/app.ts\n@@ -1,2 +1,3 @@\n-const enabled = false\n+const enabled = true\n+const label = "<script> & RDX"\n console.log(enabled)\n'

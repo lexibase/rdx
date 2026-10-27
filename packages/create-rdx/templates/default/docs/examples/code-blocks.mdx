@@ -4,6 +4,23 @@ description: Highlight code, compare changes, and draw directory trees.
 link_position: 9
 ---
 
+## Show a filename
+
+Place `title="filename"` after the fence language:
+
+````md
+```ts title="rdx.config.ts"
+const search = true
+```
+````
+
+```ts title="rdx.config.ts"
+const search = true
+```
+
+The title appears in the header; copying keeps only the code. Titles with spaces
+use quotes, such as `title="Install dependencies"`.
+
 ## Compare changes
 
 Use a `diff` fence. Prefix removed lines with `-`, added lines with `+`,

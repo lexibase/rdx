@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Support optional `title="filename"` metadata on Markdown code fences, using
+  the shadcn CodeBlockTitle header without changing highlighted or copied code.
+
 ## 3.0.0 — 2026-10-26
 
 ### Breaking changes
