@@ -4,6 +4,23 @@ export async function verifyMobilePageTransitions(page, base) {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.emulateMedia({ reducedMotion: 'no-preference' })
   await page.goto(`${base}/docs/init/intro`)
+  const scroller = page.locator('[data-rdx-docs-scroll]')
+  await page.waitForFunction(() =>
+    document
+      .querySelector('[data-rdx-docs-scroll]')
+      ?.classList.contains('xl:motion-safe:scroll-smooth')
+  )
+  const scrollBehavior = () =>
+    scroller.evaluate((element) => getComputedStyle(element).scrollBehavior)
+  for (const width of [390, 767, 768, 1279]) {
+    await page.setViewportSize({ width, height: 844 })
+    assert.equal(
+      await scrollBehavior(),
+      'auto',
+      'Hidden TOC must not smooth page navigation'
+    )
+  }
+  await page.setViewportSize({ width: 390, height: 844 })
   const next = page.locator('footer a[href^="/docs/"]').last()
   const nextHref = await next.getAttribute('href')
 
@@ -92,5 +109,9 @@ export async function verifyMobilePageTransitions(page, base) {
   )
   await page.emulateMedia({ reducedMotion: 'no-preference' })
   await page.setViewportSize({ width: 1280, height: 900 })
+  assert.equal(await scrollBehavior(), 'smooth')
   assert.equal((await trace(() => next.click(), nextHref)).length, 0)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  assert.equal(await scrollBehavior(), 'auto')
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
 }

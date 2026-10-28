@@ -716,7 +716,7 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         await page.mouse.move(700, 100)
         await tocTrigger.hover()
         await tocNav.waitFor()
-        const tocScroller = page.locator('.motion-safe\\:scroll-smooth').first()
+        const tocScroller = page.locator('[data-rdx-docs-scroll]').first()
         assert.equal(
           await tocScroller.evaluate(
             (element) => getComputedStyle(element).scrollBehavior

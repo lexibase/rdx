@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Limit smooth document scrolling to the TOC's desktop breakpoint so it does
+  not compete with mobile page transitions.
+
 - Add directional mobile document transitions to previous/next and sidebar
   navigation, preserving desktop behavior and reduced motion preferences.
 
