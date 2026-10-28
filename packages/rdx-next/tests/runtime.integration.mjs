@@ -21,6 +21,7 @@ import { verifyMobileSidebarMotion } from './helpers/mobile-sidebar-browser.mjs'
 import { verifyCodePreviewMotion } from './helpers/code-preview-browser.mjs'
 import { verifyMobilePageTransitions } from './helpers/page-transition-browser.mjs'
 import { verifyMobilePageSwipe } from './helpers/page-swipe-browser.mjs'
+import { verifyHighlighting } from './helpers/highlighting-browser.mjs'
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url))
 const require = createRequire(path.join(packageRoot, 'package.json'))
@@ -187,6 +188,13 @@ test(
     await writeFile(
       path.join(rootDir, 'docs/init/mermaid.mdx'),
       await readFile(new URL('./fixtures/mermaid.mdx', import.meta.url), 'utf8')
+    )
+    await writeFile(
+      path.join(rootDir, 'docs/init/highlighting.mdx'),
+      await readFile(
+        new URL('./fixtures/highlighting.mdx', import.meta.url),
+        'utf8'
+      )
     )
     await writeFile(
       path.join(rootDir, 'docs/init/short-end.mdx'),
@@ -405,7 +413,7 @@ test(
     await writeFile(
       configPath,
       `import { versioning } from '@lexibase/rdx-versioning'
-export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, homepage: { enabled: true }, navbar: { title: '', actions: { github: { visible: true, url: 'https://github.com/lexibase/rdx' } } }, plugins: [versioning()] }`
+export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, homepage: { enabled: true }, navbar: { title: '', actions: { showToggleMode: true, github: { visible: true, url: 'https://github.com/lexibase/rdx' } } }, plugins: [versioning()] }`
     )
     await command(rootDir, cli, ['prepare'])
     await command(rootDir, cli, ['version', '1.0.0'])
@@ -1824,6 +1832,7 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         await verifyMobileSidebarMotion(page, running.base)
         await verifyMobilePageTransitions(page, running.base)
         await verifyMobilePageSwipe(page, running.base)
+        await verifyHighlighting(page, running.base)
         await verifyMermaid(page, running.base)
         assert.deepEqual(errors, [])
       } finally {

@@ -52,14 +52,11 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       Canary, URLs e snapshots. O adaptador de URLs do site é intencional; ele
       mantém os endereços antigos sem duplicar o motor ou mudar o visual.
 
-- [ ] Personalização das cores de destaque (highlighting) da documentação.
-      Oferecer paletas prontas e avaliar cores personalizadas pelo autor via
-      `rdx.config.ts`, com escolha opcional durante a criação pela CLI. Definir
-      quais elementos acompanham a cor (links, estados ativos, realces etc.) e
-      se os temas de syntax highlighting dos code blocks serão uma opção
-      separada. Preservar contraste, foco acessível, modos claro/escuro e a base
-      shadcn/ui + Tailwind, sem exigir edição de `.rdx/`. A interface e o formato
-      da configuração ainda serão definidos; melhoria futura, fora da 1.0.0.
+- [x] Personalização das cores de destaque por `rdx.css` opcional, usando
+      `--rdx-highlighting` em `:root` e `.dark`. Integrar links, foco e estados
+      selecionados aos tokens do shadcn/ui, preservando os padrões existentes,
+      as cores semânticas dos Callouts e o tema de syntax highlighting.
+- [ ] Avaliar paletas prontas e escolha opcional da cor durante a criação pela CLI.
 - [ ] Evoluir Markdown/MDX e componentes próprios: tabelas, listas de tarefas,
       código com destaque/cópia, Callout, Tabs, Steps e Cards.
 - [ ] Syntax highlighting personalizado nos code blocks — adiado para uma

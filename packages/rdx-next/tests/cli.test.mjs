@@ -77,6 +77,28 @@ test('prepare loads typed config with defineConfig without loading a Next server
   assert.ok(config.exclude.includes('public'))
 })
 
+test('prepare discovers project CSS without creating or replacing user styles', async (t) => {
+  const root = await fixture(
+    t,
+    "export default { metadata: { applicationName: 'Styled docs' } }"
+  )
+  let result = run(root, 'prepare')
+  assert.equal(result.status, 0, result.stderr)
+  await assert.rejects(access(path.join(root, 'rdx.css')))
+  const source = ':root { --rdx-highlighting: #7c3aed }'
+  await writeFile(path.join(root, 'rdx.css'), source)
+  for (let attempt = 0; attempt < 2; attempt++) {
+    result = run(root, 'prepare')
+    assert.equal(result.status, 0, result.stderr)
+    const generated = await readFile(
+      path.join(root, '.rdx/app/globals.css'),
+      'utf8'
+    )
+    assert.equal(generated.match(/@import "\.\.\/\.\.\/rdx\.css";/g)?.length, 1)
+    assert.equal(await readFile(path.join(root, 'rdx.css'), 'utf8'), source)
+  }
+})
+
 test('preflight rejects invalid config before creating .rdx', async (t) => {
   const rootDir = await fixture(
     t,

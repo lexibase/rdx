@@ -10,6 +10,7 @@ import { createJiti } from 'jiti'
 
 import postcssConfig from '../postcss.config.mjs'
 import { preparePublicAssets } from './public-assets.mjs'
+import { prepareProjectStyles } from './project-styles.mjs'
 
 export async function runRdxCli({ templateDir } = {}) {
   const supportedCommands = new Set(['dev', 'build', 'start'])
@@ -31,6 +32,7 @@ export async function runRdxCli({ templateDir } = {}) {
       force: true,
       recursive: true,
     })
+    await prepareProjectStyles(projectRoot, runtimeDirectory)
     // Resolve in Node before Next processes this file: UI may be transitive,
     // and native Tailwind plugins must stay outside the Turbopack module graph.
     const resolvePlugin = createRequire(import.meta.url)

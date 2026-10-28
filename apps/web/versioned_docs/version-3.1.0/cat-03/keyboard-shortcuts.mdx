@@ -1,0 +1,45 @@
+---
+title: Keyboard shortcuts
+description: Describe keys and shortcut combinations with Markdown.
+link_position: 9
+---
+
+## Display a key
+
+Write `:kbd[Key]` in your `.mdx` pages. No import or plugin is required:
+
+Press :kbd[Esc] to close a dialog or :kbd[Enter] to confirm.
+
+```md
+Press :kbd[Esc] to close a dialog or :kbd[Enter] to confirm.
+```
+
+## Write a shortcut
+
+Write the separator as ordinary text between the keys:
+
+Press :kbd[Ctrl] + :kbd[K] to open search.
+
+```md
+Press :kbd[Ctrl] + :kbd[K] to open search.
+```
+
+## Shortcut reference tables
+
+| Action         | Shortcut             |
+| :------------- | :------------------- |
+| Open search    | :kbd[Ctrl] + :kbd[K] |
+| Save           | :kbd[Ctrl] + :kbd[S] |
+| Close a dialog | :kbd[Esc]            |
+
+```md
+| Action         | Shortcut             |
+| :------------- | :------------------- |
+| Open search    | :kbd[Ctrl] + :kbd[K] |
+| Save           | :kbd[Ctrl] + :kbd[S] |
+| Close a dialog | :kbd[Esc]            |
+```
+
+These shared shadcn/ui components render semantic `<kbd>` elements and follow
+the site's light and dark themes. Use them to describe shortcuts supported by
+your application. See [Search](../cat-04/search.mdx) for RDX's search shortcut.

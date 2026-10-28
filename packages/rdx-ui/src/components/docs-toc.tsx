@@ -54,7 +54,7 @@ function HeadingLinks({
             className={cn(
               'block rounded-md py-1.5 pr-2 text-xs leading-5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               heading.id === activeId &&
-                'bg-accent/60 font-medium text-foreground'
+                'bg-accent/60 font-medium text-rdx-selected'
             )}
           >
             {heading.title}
@@ -197,7 +197,7 @@ function PageToc({ contentId }: { contentId: string }) {
               className={cn(
                 'h-0.5 shrink-0 rounded-full bg-current transition-colors',
                 heading.depth === baseDepth ? 'w-5' : 'w-3',
-                heading.id === activeId && 'text-foreground'
+                heading.id === activeId && 'text-rdx-selected'
               )}
             />
           ))}

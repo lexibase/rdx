@@ -1,0 +1,76 @@
+---
+title: Writing pages
+description: Add categories, order pages, and write your first document.
+link_position: 2
+---
+
+## Create a category
+
+Create `docs/guides/`, then add an optional `_category.json`:
+
+```json
+{
+  "title": "Guides",
+  "sidebar_position": 1
+}
+```
+
+Without this file, RDX derives a label from the folder name. Each top-level
+folder defines a sidebar category.
+
+## Create a page
+
+Add `docs/guides/first-page.mdx`:
+
+```mdx
+---
+title: First page
+description: Everything you need to begin.
+link_position: 1
+---
+
+## Before you begin
+
+Install the tools for your project.
+
+## Your first example
+
+Write a short, useful example.
+```
+
+The page title and description appear in the document header. Use `##` for the
+first section below that header. `link_position` sets the page order within its
+category. Lower positions come first; ties and pages without positions use slug
+ordering. The filename supplies the fallback title when one is not provided.
+
+## Write for readers
+
+Use paragraphs, headings, lists, links, and code fences. The shared renderer
+handles their styling. Add [Callouts](./callouts.mdx), [Tabs](./tabs.mdx),
+or an [Accordion](./accordion.mdx) when the content benefits from them.
+
+Write these components with Markdown: `> [!TIP]` for a Callout, `:::tabs` for
+Tabs, `:::accordion` for an Accordion, and `:kbd[Enter]` for a keyboard key.
+No imports are required in your pages.
+
+```md
+> [!TIP] Keep examples useful
+> Explain the next step and show the reader what to expect.
+```
+
+For a custom homepage or logo, create `components/home.tsx` or
+`components/logo.tsx` and reference the component in `rdx.config.ts`.
+
+## Page navigation
+
+On mobile, swipe left across the page text to open the next document, or right
+to return to the previous one. Page order follows the sidebar. Start away from
+the screen edges; code blocks, tables and interactive components keep their own
+touch interactions. The previous and next buttons also remain available.
+
+## Preview and publish
+
+Save the file while `pnpm dev` is running. Use
+[relative document links](./document-links.mdx) to connect pages.
+Run a production build before deploying; missing relative document links fail
+compilation rather than silently sending readers to another version.

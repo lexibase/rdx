@@ -29,7 +29,7 @@ The official CodeBlock root uses div props; pass wrapping and line-number option
 to `CodeBlockContent` and explicit clipboard values to `CodeBlockCopyButton`.
 `DialogContent` defaults to the official centered layout; set `className` for
 custom positioning/sizing and `showCloseButton` for the native close control.
-Runtime 3.x requires UI ^3.0.0. The main package selects matching versions.
+Runtime 3.1 requires UI ^3.1.0. The main package selects matching versions.
 
 RDX 2.0 removes the published `ButtonLink` module. Use `Button` with `href`
 from `@lexibase/rdx/ui/components/button`. See the

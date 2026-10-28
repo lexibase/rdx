@@ -86,7 +86,7 @@ export function DocsSidebar({
               }
               onClick={() => actions.current?.close()}
               aria-current={pathname === link.href ? 'page' : undefined}
-              className="justify-start text-sm text-primary"
+              className={`justify-start text-sm ${pathname === link.href ? 'text-accent-foreground' : 'text-primary'}`}
             >
               {link.label}
             </Button>
