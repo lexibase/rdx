@@ -6,6 +6,14 @@ the default. No Markdown-specific plugin needs to be configured by the author.
 
 ## Markdown support
 
+- Mermaid fences render diagrams through the official Mermaid engine, loaded
+  in the browser when the block becomes visible. The shared Code Block composes
+  source/diagram switching, original-source copying and a larger Dialog view.
+  Themes follow the site; optional `title`, `lineNumbers` and `startLine` apply
+  to the header/source. Before hydration and on errors the source stays readable.
+  Rendering uses strict security, fixed site settings and isolated SVG images;
+  definition callbacks do not execute. `accTitle`/`accDescr` describe the image.
+
 - Callouts: begin a quote with `> [!NOTE]`, `> [!TIP]`, `> [!SUCCESS]`,
   `> [!WARNING]` or `> [!DANGER]`. An optional title follows the marker on the
   same line; quoted lines below contain the Markdown body.

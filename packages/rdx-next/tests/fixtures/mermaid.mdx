@@ -1,0 +1,62 @@
+---
+title: Mermaid test
+---
+
+## Flow
+
+```mermaid title="Request flow" lineNumbers startLine=8
+flowchart TD
+    accTitle: Documentation request
+    accDescr: A document is written, previewed, and published.
+    A[Write Markdown] --> B[Preview]
+    B --> C{Ready?}
+    C -->|Yes| D[Publish]
+    C -->|No| A
+```
+
+## Sequence
+
+```mermaid title="Request sequence"
+sequenceDiagram
+    Reader->>Site: Open documentation
+    Site-->>Reader: Return the document
+```
+
+## Invalid source
+
+```mermaid title="Invalid definition"
+this is not a Mermaid diagram
+```
+
+## Recovery
+
+```mermaid title="After invalid definition"
+flowchart LR
+    A[The queue] --> B[Still works]
+```
+
+## Strict rendering
+
+```mermaid title="Strict diagram"
+%%{init: {"securityLevel":"loose","htmlLabels":true,"themeCSS":"body { display: none }"}}%%
+flowchart LR
+    A[Safe label] --> B[Other label]
+    click A href "javascript:alert(1)"
+```
+
+## Diagram in a tab
+
+:::tabs
+
+### Overview
+
+Choose the diagram tab to render its content.
+
+### Diagram example
+
+```mermaid title="Tab diagram"
+flowchart LR
+    A[Inside] --> B[A tab]
+```
+
+:::

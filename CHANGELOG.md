@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Render Mermaid fences as diagrams with theme-aware colors, source preview,
+  definition copying and expansion through the shared shadcn Code Block/Dialog.
+  Load the renderer on demand and retain readable source on errors or without JS.
+
 - Add Markdown authoring for Callouts (`> [!NOTE]` and the existing variants),
   Tabs (`:::tabs`), Accordion (`:::accordion`), and keyboard keys (`:kbd[Ctrl]`).
   Render the shared components, preserve JSX usage and document links, and index
