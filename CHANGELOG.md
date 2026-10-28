@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Animate mobile code preview expansion and collapse with Motion, honoring
+  reduced motion preferences and retaining full source copying.
+
 - Restore Motion-based mobile sidebar entry/exit from the left in the shared
   theme, using the shadcn Base UI Sheet. Keep navigation visible through exit,
   support Escape, focus restoration and responsive closure, and honor reduced
