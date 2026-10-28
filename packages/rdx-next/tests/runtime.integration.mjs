@@ -17,6 +17,10 @@ import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
 import { verifyMermaid } from './helpers/mermaid-browser.mjs'
+import { verifyMobileSidebarMotion } from './helpers/mobile-sidebar-browser.mjs'
+import { verifyCodePreviewMotion } from './helpers/code-preview-browser.mjs'
+import { verifyMobilePageTransitions } from './helpers/page-transition-browser.mjs'
+import { verifyMobilePageSwipe } from './helpers/page-swipe-browser.mjs'
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url))
 const require = createRequire(path.join(packageRoot, 'package.json'))
@@ -713,7 +717,7 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         await page.mouse.move(700, 100)
         await tocTrigger.hover()
         await tocNav.waitFor()
-        const tocScroller = page.locator('.motion-safe\\:scroll-smooth').first()
+        const tocScroller = page.locator('[data-rdx-docs-scroll]').first()
         assert.equal(
           await tocScroller.evaluate(
             (element) => getComputedStyle(element).scrollBehavior
@@ -1673,6 +1677,7 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
           exact: true,
         })
         await showMore.waitFor()
+        await verifyCodePreviewMotion(page, longBlock)
         assert.equal(await showMore.getAttribute('aria-expanded'), 'false')
         assert.equal(
           await showMore.getAttribute('aria-controls'),
@@ -1816,6 +1821,9 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         await navigation.waitFor()
         await page.keyboard.press('Escape')
         await navigation.waitFor({ state: 'hidden' })
+        await verifyMobileSidebarMotion(page, running.base)
+        await verifyMobilePageTransitions(page, running.base)
+        await verifyMobilePageSwipe(page, running.base)
         await verifyMermaid(page, running.base)
         assert.deepEqual(errors, [])
       } finally {

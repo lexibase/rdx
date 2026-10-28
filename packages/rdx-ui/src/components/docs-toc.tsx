@@ -98,12 +98,12 @@ function PageToc({ contentId }: { contentId: string }) {
     }
     const scrollTarget = scrollRoot ?? window
     // Keep native fragment links/history; smooth the actual document scroller.
-    // Tailwind's motion-safe variant leaves reduced-motion navigation instant.
+    // Match the TOC's xl visibility and leave reduced-motion navigation instant.
     const scrollElement = scrollRoot ?? document.documentElement
     const alreadySmooth = scrollElement.classList.contains(
-      'motion-safe:scroll-smooth'
+      'xl:motion-safe:scroll-smooth'
     )
-    scrollElement.classList.add('motion-safe:scroll-smooth')
+    scrollElement.classList.add('xl:motion-safe:scroll-smooth')
     function updateActive() {
       frame = 0
       const top = (scrollRoot?.getBoundingClientRect().top ?? 0) + 96
@@ -172,7 +172,7 @@ function PageToc({ contentId }: { contentId: string }) {
       cancelAnimationFrame(frame)
       cancelAnimationFrame(initialFrame)
       if (!alreadySmooth)
-        scrollElement.classList.remove('motion-safe:scroll-smooth')
+        scrollElement.classList.remove('xl:motion-safe:scroll-smooth')
     }
   }, [contentId])
 

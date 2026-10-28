@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from 'react'
 import { CodeXml, FolderTree, GitCompareArrows, WrapText } from 'lucide-react'
+import { motion } from 'motion/react'
 
 import { useMessages } from '../providers/locale-provider'
 import { Button } from './button'
@@ -22,6 +23,16 @@ import {
   CodeBlockTitle,
   CodeBlockFooter,
 } from './code-block'
+
+// Keep native pre events separate from Motion's gesture event props.
+const AnimatedCodeBlockContent = motion.create(function PreviewContent({
+  preProps,
+  ...props
+}: ComponentProps<typeof CodeBlockContent> & {
+  preProps: ComponentProps<'pre'>
+}) {
+  return <CodeBlockContent {...preProps} {...props} />
+})
 
 /** The wrap action follows shadcn's stateful Code Block composition. */
 export function MdxCodeBlockView({
@@ -44,15 +55,18 @@ export function MdxCodeBlockView({
   const [wrap, setWrap] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const [previewHeight, setPreviewHeight] = useState<number | null>(null)
+  const [fullHeight, setFullHeight] = useState(0)
+  const [animateSize, setAnimateSize] = useState(false)
   const blockRef = useRef<HTMLDivElement>(null)
   const generatedId = useId()
   const contentId = preProps.id ?? generatedId
   const collapsed = previewHeight !== null && !expanded
-  const contentStyle: CSSProperties & { '--rdx-code-preview-height'?: string } =
-    {
-      ...preProps.style,
-      '--rdx-code-preview-height': collapsed ? `${previewHeight}px` : undefined,
-    }
+  const contentStyle: CSSProperties = {
+    ...preProps.style,
+    ...(previewHeight !== null && {
+      height: 'var(--rdx-code-preview-height)',
+    }),
+  }
   const messages = useMessages()
 
   useEffect(() => {
@@ -72,15 +86,16 @@ export function MdxCodeBlockView({
         parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
       if (!Number.isFinite(lineHeight)) return
       const limit = lineHeight * 12 + padding
-      setPreviewHeight(
-        code.getBoundingClientRect().height + padding > limit + 1 ? limit : null
-      )
+      const height = code.getBoundingClientRect().height + padding
+      setFullHeight(height)
+      setPreviewHeight(height > limit + 1 ? limit : null)
     }
     const schedule = () => {
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(measure)
     }
     const updateViewport = () => {
+      setAnimateSize(false)
       observer?.disconnect()
       cancelAnimationFrame(frame)
       if (desktop.matches) {
@@ -128,15 +143,26 @@ export function MdxCodeBlockView({
             aria-label={messages.wrapCode}
             title={messages.wrapCode}
             aria-pressed={wrap}
-            onClick={() => setWrap(!wrap)}
+            onClick={() => {
+              setAnimateSize(false)
+              setWrap(!wrap)
+            }}
           >
             <WrapText aria-hidden="true" />
           </Button>
           <CodeBlockCopyButton value={value} />
         </CodeBlockActions>
       </CodeBlockHeader>
-      <CodeBlockContent
-        {...preProps}
+      <AnimatedCodeBlockContent
+        preProps={preProps}
+        initial={false}
+        animate={{
+          '--rdx-code-preview-height': `${previewHeight === null ? 0 : expanded ? fullHeight : previewHeight}px`,
+        }}
+        transition={{
+          duration: animateSize ? 0.28 : 0,
+          ease: [0.22, 1, 0.36, 1],
+        }}
         id={contentId}
         style={contentStyle}
         wrap={wrap}
@@ -145,14 +171,14 @@ export function MdxCodeBlockView({
         className={[
           preProps.className,
           'data-wrap:wrap-anywhere',
-          collapsed &&
-            'max-h-[var(--rdx-code-preview-height)] overflow-y-hidden scroll-fade-y md:max-h-none md:overflow-y-auto',
+          previewHeight !== null && 'overflow-y-hidden',
+          collapsed && 'scroll-fade-y',
         ]
           .filter(Boolean)
           .join(' ')}
       >
         {children}
-      </CodeBlockContent>
+      </AnimatedCodeBlockContent>
       {previewHeight !== null && (
         <CodeBlockFooter className="justify-center md:hidden">
           <Button
@@ -161,7 +187,12 @@ export function MdxCodeBlockView({
             className="h-6 px-2 text-xs"
             aria-expanded={expanded}
             aria-controls={contentId}
-            onClick={() => setExpanded(!expanded)}
+            onClick={() => {
+              setAnimateSize(
+                !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+              )
+              setExpanded(!expanded)
+            }}
           >
             {expanded ? messages.showLess : messages.showMore}
           </Button>

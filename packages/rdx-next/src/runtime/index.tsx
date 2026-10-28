@@ -10,6 +10,7 @@ import type { RdxProject, RDXConfig } from '@lexibase/rdx-types'
 import { Button } from '@lexibase/rdx-ui/components/button'
 import { DocsSidebar } from '@lexibase/rdx-ui/components/docs-sidebar'
 import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
+import { DocsPageTransition } from '@lexibase/rdx-ui/components/docs-page-transition'
 import { DocsSearch } from '@lexibase/rdx-ui/components/docs-search'
 import { Home } from '@lexibase/rdx-ui/components/home'
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
@@ -244,68 +245,79 @@ export async function DocsPage({
           className="relative flex-1 min-w-0 h-full overflow-y-auto pt-12 md:pt-0 outline-none"
         >
           {project.config.TOC && <DocsToc key={hrefFor(currentSlug)} />}
-          <section
-            className={`w-full min-h-full px-7 flex flex-col gap-5 pb-8 md:py-8 ${project.config.TOC ? 'xl:pr-20' : ''}`}
+          <DocsPageTransition
+            previousHref={previous ? hrefFor(previous.slug) : undefined}
+            nextHref={next ? hrefFor(next.slug) : undefined}
           >
-            <div className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1">
-              <header className="mb-6">
-                {source.badge && (
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {source.badge === 'Archived'
-                      ? messages.archivedVersion
-                      : source.badge}
-                  </p>
-                )}
-                <span className="text-xs text-zinc-600 font-semibold uppercase block -mb-0.5">
-                  {category?.title}
-                </span>
-                <h1 className="text-4xl uppercase font-bold mb-2">{title}</h1>
-                {description && (
-                  <p className="text-sm text-ring max-w-[726px]">
-                    {description}
-                  </p>
-                )}
-              </header>
-              <main
-                id="rdx-main"
-                tabIndex={-1}
-                className="h-full w-full flex-1 max-w-[960px]"
-              >
-                {content}
-              </main>
-            </div>
-            <footer className="flex flex-col">
-              <section className="flex items-center justify-between">
-                {previous ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    href={hrefFor(previous.slug)}
-                  >
-                    {previous.title}
-                  </Button>
-                ) : (
-                  <Button variant="outline" size="sm" disabled>
-                    {messages.previous}
-                  </Button>
-                )}
-                {next ? (
-                  <Button variant="outline" size="sm" href={hrefFor(next.slug)}>
-                    {next.title}
-                  </Button>
-                ) : (
-                  <Button variant="outline" size="sm" disabled>
-                    {messages.next}
-                  </Button>
-                )}
-              </section>
-              <FooterCredit
-                lang={project.config.lang}
-                name={project.config.metadata.applicationName}
-                since={project.config.metadata.since}
-              />
-            </footer>
-          </section>
+            <section
+              className={`w-full min-h-full bg-background px-7 flex flex-col gap-5 pb-8 md:py-8 ${project.config.TOC ? 'xl:pr-20' : ''}`}
+            >
+              <div className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1">
+                <header className="mb-6">
+                  {source.badge && (
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {source.badge === 'Archived'
+                        ? messages.archivedVersion
+                        : source.badge}
+                    </p>
+                  )}
+                  <span className="text-xs text-zinc-600 font-semibold uppercase block -mb-0.5">
+                    {category?.title}
+                  </span>
+                  <h1 className="text-4xl uppercase font-bold mb-2">{title}</h1>
+                  {description && (
+                    <p className="text-sm text-ring max-w-[726px]">
+                      {description}
+                    </p>
+                  )}
+                </header>
+                <main
+                  id="rdx-main"
+                  tabIndex={-1}
+                  className="h-full w-full flex-1 max-w-[960px]"
+                >
+                  {content}
+                </main>
+              </div>
+              <footer className="flex flex-col">
+                <section className="flex items-center justify-between">
+                  {previous ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      href={hrefFor(previous.slug)}
+                      transitionTypes={['rdx-doc-back']}
+                    >
+                      {previous.title}
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="sm" disabled>
+                      {messages.previous}
+                    </Button>
+                  )}
+                  {next ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      href={hrefFor(next.slug)}
+                      transitionTypes={['rdx-doc-forward']}
+                    >
+                      {next.title}
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="sm" disabled>
+                      {messages.next}
+                    </Button>
+                  )}
+                </section>
+                <FooterCredit
+                  lang={project.config.lang}
+                  name={project.config.metadata.applicationName}
+                  since={project.config.metadata.since}
+                />
+              </footer>
+            </section>
+          </DocsPageTransition>
         </div>
       </div>
     </>

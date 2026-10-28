@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getPageMetadata } from '@lexibase/rdx-next/runtime'
 import { getMdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
+import { DocsPageTransition } from '@lexibase/rdx-ui/components/docs-page-transition'
 import { notFound, redirect } from 'next/navigation'
 
 import config from '@/rdx.config'
@@ -49,30 +50,42 @@ export default async function DocPage({
   )
   if (!result) return notFound()
   const { content } = result
+  const pages = documentation
+    .categories(version)
+    .flatMap((category) => category.links)
+  const href = `/docs/${version}/${filename}`
+  const pageIndex = pages.findIndex((page) => page.href === href)
 
   return (
-    <section
-      className={`w-full min-h-full px-7 flex flex-col gap-5 pb-8 md:py-8 ${config.TOC ? 'xl:pr-20' : ''}`}
-    >
+    <>
       {config.TOC && <DocsToc key={`${version}/${doc.join('/')}`} />}
-      <div className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1">
-        <header className="mb-6">
-          <VersionBanner
-            lang={config.lang}
-            version={version}
-            currentVersion={
-              documentation.editions.find(
-                (edition) => edition.kind === 'version'
-              )?.id
-            }
-          />
-          <DocHeader version={version} filename={filename} />
-        </header>
-        <main id="rdx-main" className="h-full w-full flex-1 max-w-[960px]">
-          {content}
-        </main>
-      </div>
-      <DocFooter version={version} filename={filename} />
-    </section>
+      <DocsPageTransition
+        previousHref={pages[pageIndex - 1]?.href}
+        nextHref={pages[pageIndex + 1]?.href}
+      >
+        <section
+          className={`w-full min-h-full bg-background px-7 flex flex-col gap-5 pb-8 md:py-8 ${config.TOC ? 'xl:pr-20' : ''}`}
+        >
+          <div className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1">
+            <header className="mb-6">
+              <VersionBanner
+                lang={config.lang}
+                version={version}
+                currentVersion={
+                  documentation.editions.find(
+                    (edition) => edition.kind === 'version'
+                  )?.id
+                }
+              />
+              <DocHeader version={version} filename={filename} />
+            </header>
+            <main id="rdx-main" className="h-full w-full flex-1 max-w-[960px]">
+              {content}
+            </main>
+          </div>
+          <DocFooter version={version} filename={filename} />
+        </section>
+      </DocsPageTransition>
+    </>
   )
 }

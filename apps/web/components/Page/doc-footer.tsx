@@ -35,6 +35,7 @@ export async function DocFooter({
             size="sm"
             aria-label={prevLink.label}
             href={prevLink.href}
+            transitionTypes={['rdx-doc-back']}
           >
             {prevLink.label}
           </Button>
@@ -55,6 +56,7 @@ export async function DocFooter({
             size="sm"
             aria-label={nextLink.label}
             href={nextLink.href}
+            transitionTypes={['rdx-doc-forward']}
           >
             {nextLink.label}
           </Button>
