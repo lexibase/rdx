@@ -68,16 +68,35 @@ is at `/docs/1.0.0/init/intro`.
 
 The navbar dropdown lets readers switch editions. RDX keeps the same document
 when it exists in the destination; otherwise it opens that edition's first page.
-Pre-release and outdated edition notices provide context. Search stays scoped
-to the selected version.
+Pre-release and outdated edition notices provide context. Search returns results
+only from the selected edition, including when reading an archived edition.
+Switch editions in the navbar to search a different version.
 
 The official RDX development site calls its live edition **Canary**. Generated
 projects call theirs **Current**.
 
 ## Archive an older edition
 
-Move its label from `active` to `archived` in `versions.json`, keeping the
-snapshot directory intact:
+Archive a published snapshot:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx archive 1.0.0
+
+### npm
+
+npm exec -- rdx archive 1.0.0
+
+### yarn
+
+yarn rdx archive 1.0.0
+
+:::
+
+The command moves its label from `active` to `archived` in `versions.json`,
+keeping the snapshot directory intact:
 
 ```json
 {
@@ -89,6 +108,30 @@ snapshot directory intact:
 This example requires both snapshots to exist. The first active entry is the
 current published edition. Archived content remains accessible and searchable
 within its edition; archiving is not deletion or access control.
+
+## Restore an archived edition
+
+:::tabs
+
+### pnpm
+
+pnpm rdx unarchive 1.0.0
+
+### npm
+
+npm exec -- rdx unarchive 1.0.0
+
+### yarn
+
+yarn rdx unarchive 1.0.0
+
+:::
+
+The version returns to the end of the active list. The existing first active
+entry remains the current published edition. Both commands preserve snapshot
+contents and URLs. Repeating a command for a version already in that state
+leaves the manifest unchanged. You can also move entries manually between the
+two arrays in `versions.json`.
 
 ## Assets and deployment
 

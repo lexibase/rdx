@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add optional versioning commands `rdx archive` and `rdx unarchive` to move
+  existing editions between manifest lists while preserving snapshots and URLs.
+  Restored editions do not replace the current published version.
 - Support horizontal touch swipes between adjacent mobile documentation pages,
   preserving vertical scrolling, selection, interactive content and edge gestures.
 

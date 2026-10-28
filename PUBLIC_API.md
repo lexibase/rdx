@@ -80,6 +80,10 @@ estão em [MDX.md](./MDX.md).
   ativa explicitamente o plugin e prepara o projeto.
 - `rdx version <versão>`: só existe se o plugin de versionamento estiver ativado;
   cria uma cópia da documentação e nunca sobrescreve uma versão existente.
+- `rdx archive <versão>` e `rdx unarchive <versão>`: comandos do plugin de
+  versionamento que movem versões existentes entre `active` e `archived`, sem
+  alterar snapshots ou URLs. Restaurar adiciona ao fim de `active`, preservando
+  a primeira entrada como edição publicada atual.
 - `rdx --help`/`rdx help`: mostra a ajuda do runtime. As flags do gerador não
   implicam que o runtime exponha exatamente as mesmas flags.
 

@@ -119,21 +119,29 @@ configured plugin preparation. It does not create a documentation snapshot.
 ### pnpm
 
 pnpm rdx add versioning\
-pnpm rdx version 1.0.0
+pnpm rdx version 1.0.0\
+pnpm rdx archive 1.0.0\
+pnpm rdx unarchive 1.0.0
 
 ### npm
 
 npm exec -- rdx add versioning\
-npm exec -- rdx version 1.0.0
+npm exec -- rdx version 1.0.0\
+npm exec -- rdx archive 1.0.0\
+npm exec -- rdx unarchive 1.0.0
 
 ### yarn
 
 yarn rdx add versioning\
-yarn rdx version 1.0.0
+yarn rdx version 1.0.0\
+yarn rdx archive 1.0.0\
+yarn rdx unarchive 1.0.0
 
 :::
 
-`version` is registered only after the versioning plugin is configured.
+`version`, `archive`, and `unarchive` are registered only after the versioning
+plugin is configured. Archiving and restoring update the manifest without
+modifying snapshot contents.
 See [Plugins](../cat-04/plugins.mdx) and [Versioning](../cat-04/versioning.mdx)
 before creating snapshots. `rdx --help` lists the built-in command usage.
 
