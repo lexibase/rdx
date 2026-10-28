@@ -6,6 +6,20 @@ the default. No Markdown-specific plugin needs to be configured by the author.
 
 ## Markdown support
 
+- Callouts: begin a quote with `> [!NOTE]`, `> [!TIP]`, `> [!SUCCESS]`,
+  `> [!WARNING]` or `> [!DANGER]`. An optional title follows the marker on the
+  same line; quoted lines below contain the Markdown body.
+- Tabs and Accordion: wrap content in `:::tabs` or `:::accordion`, ending with
+  `:::`. Each direct `### Title` starts an item; use `####` for body headings.
+  The first tab is selected; accordion items start closed and open one at a time.
+  Nested containers use more colons on the outer fence (for example
+  `::::accordion` around `:::tabs`).
+- Keyboard keys: use `:kbd[Ctrl] + :kbd[K]` in prose or tables. Each directive
+  renders the existing semantic Kbd component.
+- These forms use `remarkDocumentationComponents` in both renderers and search.
+  They adapt Markdown to the existing shared components without evaluating JS.
+  JSX composition remains available for additional component options.
+
 - Headings `#` through `######`, paragraphs, ordered/unordered lists and quotations.
 - Links, images from `public/`, horizontal rules, inline code and fenced code.
 - GFM tables, task lists and strikethrough through

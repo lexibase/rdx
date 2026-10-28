@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add Markdown authoring for Callouts (`> [!NOTE]` and the existing variants),
+  Tabs (`:::tabs`), Accordion (`:::accordion`), and keyboard keys (`:kbd[Ctrl]`).
+  Render the shared components, preserve JSX usage and document links, and index
+  panel content under reachable search sections.
+
 - Use thin native scrollbars throughout the shared documentation theme.
 
 - Automatically preview long Markdown code blocks on mobile with the official

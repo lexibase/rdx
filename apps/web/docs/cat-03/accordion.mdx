@@ -6,124 +6,89 @@ link_position: 7
 
 ## Frequently asked questions
 
-Expand a question to read its answer. Use Enter or Space to toggle and Tab to
-move between questions and links.
+Wrap questions in `:::accordion` and start each item with `### Question`.
+The answer continues until the next direct `###` or the closing `:::`.
 
-<Accordion>
-  <AccordionItem value="content">
-    <AccordionTrigger>Where do I write my documentation?</AccordionTrigger>
-    <AccordionContent>
+::::accordion
+
+### Where do I write my documentation?
 
 Create folders and `.mdx` files inside **docs/**. Each folder becomes a category
 and each file becomes a page.
 
-    </AccordionContent>
-  </AccordionItem>
-  <AccordionItem value="preview">
-    <AccordionTrigger>How do I preview my changes?</AccordionTrigger>
-    <AccordionContent>
+### How do I preview my changes?
 
-Run the development server:
+Start the development server from your documentation project root:
 
-<Tabs defaultValue="pnpm">
-  <TabsList aria-label="Preview your documentation">
-    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
-    <TabsTrigger value="npm">npm</TabsTrigger>
-    <TabsTrigger value="yarn">yarn</TabsTrigger>
-  </TabsList>
-  <TabsContent value="pnpm">
+:::tabs
+
+### pnpm
+
 pnpm dev
-  </TabsContent>
-  <TabsContent value="npm">
+
+### npm
+
 npm run dev
-  </TabsContent>
-  <TabsContent value="yarn">
+
+### yarn
+
 yarn dev
-  </TabsContent>
-</Tabs>
 
-<Callout variant="tip" title="Live updates">
+:::
 
-Keep the server running while editing your documentation.
+> [!TIP] Live updates
+> Keep the server running while editing your documentation.
 
-</Callout>
-
-    </AccordionContent>
-  </AccordionItem>
-</Accordion>
+::::
 
 ## Write an Accordion
 
-```mdx
-<Accordion>
-  <AccordionItem value="preview">
-    <AccordionTrigger>How do I preview my docs?</AccordionTrigger>
-    <AccordionContent>
+```md
+:::accordion
+
+### Where do I write my docs?
+
+Create folders and Markdown files inside **docs/**.
+
+### How do I preview my changes?
 
 Start the development server from your documentation project root.
 
-    </AccordionContent>
-  </AccordionItem>
-</Accordion>
+:::
 ```
 
-No import or plugin is required. Use unique item values. One item opens at a time
-by default; add the literal boolean attribute `multiple` to allow several open
-items. Keep essential steps visible rather than hiding the whole guide in panels.
+No import or plugin is required. Items start closed, and opening one closes the
+previous item in the same group. Use Enter or Space to toggle and Tab to move
+between questions and links. Keep essential steps visible rather than hiding
+the whole guide in panels.
 
-## Production example
+## Nest components
 
-Opening an answer closes the previous one in the same group.
+Answers support Markdown and RDX components. When Tabs are inside an Accordion,
+open the outer Accordion with **four colons** (`::::accordion`) and close it with
+`::::`. The inner Tabs use **three colons** (`:::tabs`) and close with `:::`.
+The extra colon keeps the inner closing fence from closing the outer component.
+For each additional nesting level, use one more colon on the outer container:
 
-<Accordion>
-  <AccordionItem value="build">
-    <AccordionTrigger>Build for production</AccordionTrigger>
-    <AccordionContent>
+```md
+::::accordion
 
-Generate the production site:
+### Which environment should I use?
 
-<Tabs defaultValue="pnpm">
-  <TabsList aria-label="Build the documentation">
-    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
-    <TabsTrigger value="npm">npm</TabsTrigger>
-    <TabsTrigger value="yarn">yarn</TabsTrigger>
-  </TabsList>
-  <TabsContent value="pnpm">
-pnpm build
-  </TabsContent>
-  <TabsContent value="npm">
-npm run build
-  </TabsContent>
-  <TabsContent value="yarn">
-yarn build
-  </TabsContent>
-</Tabs>
+:::tabs
 
-    </AccordionContent>
-  </AccordionItem>
-  <AccordionItem value="start">
-    <AccordionTrigger>Check the production site</AccordionTrigger>
-    <AccordionContent>
+### Development
 
-After a successful build, start the production server:
+Preview changes locally.
 
-<Tabs defaultValue="pnpm">
-  <TabsList aria-label="Serve the documentation">
-    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
-    <TabsTrigger value="npm">npm</TabsTrigger>
-    <TabsTrigger value="yarn">yarn</TabsTrigger>
-  </TabsList>
-  <TabsContent value="pnpm">
-pnpm start
-  </TabsContent>
-  <TabsContent value="npm">
-npm run start
-  </TabsContent>
-  <TabsContent value="yarn">
-yarn start
-  </TabsContent>
-</Tabs>
+### Production
 
-    </AccordionContent>
-  </AccordionItem>
-</Accordion>
+Build and deploy the site.
+
+:::
+
+::::
+```
+
+Use `####` or deeper headings for subsections inside an answer. Direct `###`
+headings define item titles in the current container.

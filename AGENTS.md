@@ -19,6 +19,7 @@
 ## Documentação
 
 - A documentação pública ensina o comportamento disponível, com exemplos utilizáveis.
+- Nas abas de gerenciadores de pacotes (`pnpm`, `npm` e `yarn`), escreva comandos simples como texto direto no painel. Use a cópia da própria aba, sem envolver esses comandos em code blocks nem duplicar controles de cópia.
 - Não inclua promessas, roadmap, histórico privado de desenvolvimento ou explicações sobre opções removidas nos guias de uso. Registre planejamento em `ROADMAP.md` e histórico em `CHANGELOG.md`.
 - Explique limitações operacionais e de segurança quando forem necessárias para usar a RDX corretamente.
 - Textos da documentação oficial seguem `LICENSE-docs`; código, exemplos e templates da CLI seguem MIT. Isso não define a licença da documentação criada pelos usuários.

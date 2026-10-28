@@ -2,6 +2,7 @@ import { compileMDX } from 'next-mdx-remote/rsc'
 import remarkGfm from 'remark-gfm'
 import {
   remarkDocumentLinks,
+  remarkDocumentationComponents,
   rehypeDocumentationHeadings,
   rehypeDocumentationCode,
 } from '@lexibase/rdx-core/mdx'
@@ -27,6 +28,7 @@ export async function compileDocument(
       mdxOptions: {
         remarkPlugins: [
           remarkGfm,
+          remarkDocumentationComponents,
           [
             remarkDocumentLinks,
             {

@@ -14,7 +14,7 @@ Intro with **bold**, [a link](https://secret.example) and ![Helpful image](/priv
 
 Configure the project.
 
-<Callout title="Not indexed attribute">
+<Callout title="Searchable note">
 
 ### Nested section
 
@@ -61,7 +61,7 @@ Final duplicate.
   assert.match(index.entries[2].text, /Literal content and inline code/)
   assert.doesNotMatch(
     JSON.stringify(index),
-    /private-module|secret\.example|private-image|Not indexed attribute|secretScript|__rdxSearchExecuted/
+    /private-module|secret\.example|private-image|secretScript|__rdxSearchExecuted/
   )
 })
 
@@ -98,4 +98,30 @@ test('content in interactive panels is searchable without pointing at unmounted 
   assert.match(index.entries[1].text, /Hidden Searchable hidden text/)
   assert.equal(index.entries[2].href, '/docs/tabs#hidden-1')
   assert.equal(index.entries.length, 3)
+})
+
+test('natural Markdown components index labels and hidden content under reachable sections', () => {
+  const index = buildSearchIndex([
+    {
+      title: 'Guide',
+      category: 'Docs',
+      href: '/docs/1.0/guide',
+      content:
+        '## Usage\n\n> [!TIP] Useful title\n> Press :kbd[Enter].\n\n:::tabs\n\n### pnpm\n\nFirst command\n\n### npm\n\n#### Hidden detail\n\nSecond command\n\n:::\n\n:::accordion\n\n### Question\n\nAnswer\n\n:::\n\n## Hidden detail\n\nVisible section',
+    },
+  ])
+  assert.deepEqual(
+    index.entries.map((entry) => entry.href),
+    [
+      '/docs/1.0/guide',
+      '/docs/1.0/guide#usage',
+      '/docs/1.0/guide#hidden-detail-1',
+    ]
+  )
+  assert.match(index.entries[1].text, /Useful title Press Enter/)
+  assert.match(
+    index.entries[1].text,
+    /pnpm npm First command Hidden detail Second command Question Answer/
+  )
+  assert.doesNotMatch(index.entries[1].text, /:::|\[!TIP\]|:kbd|item-1/)
 })

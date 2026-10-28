@@ -4,6 +4,7 @@ import remarkMdx from 'remark-mdx'
 import remarkParse from 'remark-parse'
 import { unified } from 'unified'
 import type { RdxSearchIndex } from '@lexibase/rdx-types'
+import { remarkDocumentationComponents } from '../mdx/markdown-components'
 
 type Node = {
   type: string
@@ -12,9 +13,14 @@ type Node = {
   alt?: string
   depth?: number
   children?: Node[]
+  attributes?: { type: string; name?: string; value?: unknown }[]
 }
 
-const parser = unified().use(remarkParse).use(remarkGfm).use(remarkMdx)
+const parser = unified()
+  .use(remarkParse)
+  .use(remarkGfm)
+  .use(remarkMdx)
+  .use(remarkDocumentationComponents)
 
 function text(node: Node): string {
   if (node.type === 'break') return ' '
@@ -71,7 +77,9 @@ export function buildSearchIndex(documents: SearchDocument[]): RdxSearchIndex {
   for (const document of documents) {
     const firstEntry = entries.length
     const slugger = new GithubSlugger()
-    const tree = parser.parse(document.content) as Node
+    const tree = parser.runSync(parser.parse(document.content), {
+      value: document.content,
+    }) as Node
     let current = {
       href: document.href,
       title: document.title,
@@ -117,6 +125,13 @@ export function buildSearchIndex(documents: SearchDocument[]): RdxSearchIndex {
           interactive ||
           node.name === 'TabsContent' ||
           node.name === 'AccordionContent'
+        if (node.name === 'Callout') {
+          const title = node.attributes?.find(
+            (attribute) =>
+              attribute.type === 'mdxJsxAttribute' && attribute.name === 'title'
+          )?.value
+          if (typeof title === 'string') current.text += ` ${title}`
+        }
         node.children?.forEach((child) => visit(child, nestedInteractive))
       } else {
         current.text += ` ${text(node)}`

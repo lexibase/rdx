@@ -1,69 +1,114 @@
 ---
 title: Accordion
-description: Keep optional explanations close without crowding the page.
+description: Optional explanations, without crowding your documentation.
 link_position: 6
 ---
 
 ## Frequently asked questions
 
-Use Enter or Space to expand an item. Tab moves between questions and links.
-One item opens at a time; selecting it again closes it.
+Wrap questions in `:::accordion` and start each item with `### Question`.
+The answer continues until the next direct `###` or the closing `:::`.
 
-<Accordion>
-  <AccordionItem value="content">
-    <AccordionTrigger>Where do I write my documentation?</AccordionTrigger>
-    <AccordionContent>
+::::accordion
+
+### Where do I write my documentation?
 
 Create folders and `.mdx` files inside **docs/**. Each folder becomes a category
 and each file becomes a page.
 
-Read the [introduction](/docs/init/intro) to get started.
+### How do I preview my changes?
 
-    </AccordionContent>
-  </AccordionItem>
-  <AccordionItem value="preview">
-    <AccordionTrigger>How do I preview my changes?</AccordionTrigger>
-    <AccordionContent>
+Start the development server from your documentation project root:
 
-Run the development server:
+:::tabs
 
-```bash
+### pnpm
+
 pnpm dev
+
+### npm
+
+npm run dev
+
+### yarn
+
+yarn dev
+
+:::
+
+> [!TIP] Live updates
+> Keep the server running while editing your documentation.
+
+::::
+
+## Write an Accordion
+
+```md
+:::accordion
+
+### Where do I write my docs?
+
+Create folders and Markdown files inside **docs/**.
+
+### How do I preview my changes?
+
+Start the development server from your documentation project root.
+
+:::
 ```
 
-<Callout variant="tip" title="Live updates">
+No import or plugin is required. Items start closed, and opening one closes the
+previous item in the same group. Use Enter or Space to toggle and Tab to move
+between questions and links. Keep essential steps visible rather than hiding
+the whole guide in panels.
 
-Keep the server running while editing your documentation.
+## Nest components
 
-</Callout>
+Answers support Markdown and RDX components. When Tabs are inside an Accordion,
+open the outer Accordion with **four colons** (`::::accordion`) and close it with
+`::::`. The inner Tabs use **three colons** (`:::tabs`) and close with `:::`.
+The extra colon keeps the inner closing fence from closing the outer component.
+For each additional nesting level, use one more colon on the outer container:
 
-    </AccordionContent>
-  </AccordionItem>
-  <AccordionItem value="disabled" disabled>
-    <AccordionTrigger>Disabled example</AccordionTrigger>
-    <AccordionContent>This item demonstrates the disabled state.</AccordionContent>
-  </AccordionItem>
-</Accordion>
+```md
+::::accordion
 
-## Production checklist
+### Which environment should I use?
 
-Opening an answer closes the previous one in the same group.
+:::tabs
 
-<Accordion>
-  <AccordionItem value="build">
-    <AccordionTrigger>Build for production</AccordionTrigger>
+### Development
+
+Preview changes locally.
+
+### Production
+
+Build and deploy the site.
+
+:::
+
+::::
+```
+
+Use `####` or deeper headings for subsections inside an answer. Direct `###`
+headings define item titles in the current container.
+
+## JSX syntax
+
+Use JSX for explicit values or to allow several items open at once:
+
+```mdx
+<Accordion multiple>
+  <AccordionItem value="preview">
+    <AccordionTrigger>How do I preview my docs?</AccordionTrigger>
     <AccordionContent>
 
-Run `pnpm build` to generate the production site.
+Start the development server from your documentation project root.
 
     </AccordionContent>
-  </AccordionItem>
-  <AccordionItem value="start">
-    <AccordionTrigger>Check the production site</AccordionTrigger>
-    <AccordionContent>
 
-Run `pnpm start` after a successful build.
-
-    </AccordionContent>
   </AccordionItem>
 </Accordion>
+```
+
+Use unique item values and blank lines around Markdown inside JSX.

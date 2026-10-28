@@ -2,6 +2,7 @@ import { compileMDX } from 'next-mdx-remote/rsc'
 import remarkGfm from 'remark-gfm'
 import {
   remarkDocumentLinks,
+  remarkDocumentationComponents,
   rehypeDocumentationHeadings,
   rehypeDocumentationCode,
   type DocumentLinkOptions,
@@ -19,7 +20,11 @@ export function compileDocumentation(
       blockJS: true,
       blockDangerousJS: true,
       mdxOptions: {
-        remarkPlugins: [remarkGfm, [remarkDocumentLinks, links]],
+        remarkPlugins: [
+          remarkGfm,
+          remarkDocumentationComponents,
+          [remarkDocumentLinks, links],
+        ],
         rehypePlugins: [rehypeDocumentationHeadings, rehypeDocumentationCode],
       },
     },

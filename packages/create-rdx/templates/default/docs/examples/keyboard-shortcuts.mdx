@@ -1,31 +1,75 @@
 ---
 title: Keyboard shortcuts
-description: Display keys and shortcut combinations with Kbd.
+description: Describe keys and shortcut combinations with Kbd and KbdGroup.
 link_position: 8
 ---
 
-## Single keys
+## Display a key
 
-Press <Kbd>Enter</Kbd> to confirm or <Kbd>Esc</Kbd> to close a dialog.
+Write `:kbd[Key]` in your `.mdx` pages. No import or plugin is required:
 
-## Shortcut reference
+Press :kbd[Esc] to close a dialog or :kbd[Enter] to confirm.
 
-Use `KbdGroup` to keep keys together when describing your application's shortcuts:
-
-| Action | Shortcut |
-| :----- | :------- |
-| Search | <KbdGroup><Kbd>Ctrl</Kbd>+<Kbd>K</Kbd></KbdGroup> |
-| Save | <KbdGroup><Kbd>Ctrl</Kbd>+<Kbd>S</Kbd></KbdGroup> |
-| Close | <Kbd>Esc</Kbd> |
-
-```mdx
-<KbdGroup aria-label="Control plus K">
-  <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd>
-</KbdGroup>
+```md
+Press :kbd[Esc] to close a dialog or :kbd[Enter] to confirm.
 ```
 
-For a macOS shortcut:
+## Write a shortcut
+
+Write the separator as ordinary text between the keys:
+
+Press :kbd[Ctrl] + :kbd[K] to open search.
+
+```md
+Press :kbd[Ctrl] + :kbd[K] to open search.
+```
+
+## Shortcut reference tables
+
+| Action         | Shortcut             |
+| :------------- | :------------------- |
+| Open search    | :kbd[Ctrl] + :kbd[K] |
+| Save           | :kbd[Ctrl] + :kbd[S] |
+| Close a dialog | :kbd[Esc]            |
+
+```md
+| Action         | Shortcut             |
+| :------------- | :------------------- |
+| Open search    | :kbd[Ctrl] + :kbd[K] |
+| Save           | :kbd[Ctrl] + :kbd[S] |
+| Close a dialog | :kbd[Esc]            |
+```
+
+These shared shadcn/ui components render semantic `<kbd>` elements and follow
+the site's light and dark themes. Use them to describe shortcuts supported by
+your application.
+
+## JSX syntax
+
+Use `KbdGroup` to keep a combination together. Add accessible names for symbols:
 
 <KbdGroup aria-label="Command plus K">
   <Kbd aria-label="Command">⌘</Kbd>+<Kbd>K</Kbd>
 </KbdGroup>
+
+```mdx
+<KbdGroup aria-label="Command plus K">
+  <Kbd aria-label="Command">⌘</Kbd>+<Kbd>K</Kbd>
+</KbdGroup>
+```
+
+## Use in custom React components
+
+Import the shared components in your own `components/` files:
+
+```tsx
+import { Kbd, KbdGroup } from '@lexibase/rdx/ui/components/kbd'
+
+export function SearchShortcut() {
+  return (
+    <KbdGroup aria-label="Control plus K">
+      <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd>
+    </KbdGroup>
+  )
+}
+```

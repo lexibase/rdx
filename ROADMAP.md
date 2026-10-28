@@ -96,7 +96,8 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
 
 ## Final da lista
 
-- [ ] Avaliar uma sintaxe própria sobre o pipeline Markdown/MDX. Por exemplo,
-      transformar delimitadores personalizados em componentes. Primeiro definir
-      os componentes e depois desenhar sintaxe, escapes, compatibilidade com
-      Markdown e mensagens de erro. Nenhum delimitador foi escolhido ainda.
+- [x] Primeira camada de autoria Markdown sobre os componentes existentes:
+      Callouts com `> [!NOTE]`, `TIP`, `SUCCESS`, `WARNING` e `DANGER`;
+      `:::tabs` e `:::accordion` com títulos `###`; teclas com `:kbd[Ctrl]`.
+      Preservar JSX, escapes, exemplos em fences, links e busca por versão.
+- [ ] Avaliar outras extensões de Markdown conforme as necessidades de autoria.

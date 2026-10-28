@@ -39,6 +39,7 @@ const en = {
   copyRetry: 'Could not copy. Try again or copy manually.',
   copied: 'Copied!',
   copyTab: 'Copy active tab',
+  documentationTabs: 'Documentation tabs',
   tabCopied: 'Tab content copied to clipboard.',
   copyTabError: 'Could not copy. Select the tab content and copy it manually.',
   code: 'Code',
@@ -111,6 +112,7 @@ const ptBR = {
   copyRetry: 'Não foi possível copiar. Tente novamente ou copie manualmente.',
   copied: 'Copiado!',
   copyTab: 'Copiar aba ativa',
+  documentationTabs: 'Abas da documentação',
   tabCopied: 'Conteúdo da aba copiado para a área de transferência.',
   copyTabError:
     'Não foi possível copiar. Selecione o conteúdo da aba e copie manualmente.',

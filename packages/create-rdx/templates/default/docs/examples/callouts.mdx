@@ -1,56 +1,100 @@
 ---
 title: Callouts
-description: Highlight notes, tips and important information.
+description: Notes, tips, and warnings that fit the documentation.
 link_position: 4
 ---
 
-## Highlight important information
+## Write a Callout
 
-Callouts are included in RDX. No import or plugin is required.
+Start a blockquote with `[!TYPE]`. Add an optional title on the same line and
+write the body on the following quoted lines:
 
-<Callout title="A useful note">
+```md
+> [!TIP] A useful shortcut
+> Use **Markdown**, inline code, links, and lists in the body.
+```
 
-Keep supporting information close to the documentation it explains.
+> [!TIP] A useful shortcut
+> Use **Markdown**, inline code, links, and lists in the body.
 
-</Callout>
+No import or plugin is required. Choose one of the five uppercase markers:
 
-<Callout variant="tip" title="A helpful tip">
+## Try the variants
 
-You can use **Markdown**, [documentation links](/docs/init/intro), and `inline code` inside a callout.
+> [!NOTE] A useful note
+> Explain a detail without interrupting the main instructions.
 
-</Callout>
+> [!TIP] Keep it short
+> Use a Callout when the context changes how the reader should proceed.
 
-<Callout variant="success" title="Ready to go">
+> [!SUCCESS] Ready to continue
+> Your documentation is ready for the next step.
 
-Your documentation is ready to share.
+> [!WARNING] Before updating
+> Read the release notes and validate your production build.
 
-</Callout>
+> [!DANGER] Review destructive changes
+> Confirm the exact files before deleting source content.
 
-<Callout variant="warning" title="Before updating">
+```md
+> [!NOTE] A useful note
+> Explain a detail.
 
-- Read the release notes.
-- Test your changes before deploying.
+> [!TIP] Keep it short
+> Share a useful shortcut.
 
-</Callout>
+> [!SUCCESS] Ready to continue
+> Confirm a successful step.
 
-<Callout variant="danger" title="Irreversible action">
+> [!WARNING] Before updating
+> Read the release notes.
 
-Deleting the source files permanently removes their content.
+> [!DANGER] Review destructive changes
+> Confirm the exact files before deleting them.
+```
 
-</Callout>
+## Optional titles and rich content
 
-<Callout>
+Leave the title out for a compact note. Continue the quote with a blank quoted
+line before a list or another paragraph:
 
-A title is optional. The default variant is `note`.
+```md
+> [!NOTE]
+> Before continuing:
+>
+> - Review your configuration.
+> - Run a production build.
+```
 
-</Callout>
+> [!NOTE]
+> Before continuing:
+>
+> - Review your configuration.
+> - Run a production build.
 
-## Syntax
+## JSX syntax
+
+Use the shared component directly when you prefer JSX:
 
 ```mdx
-<Callout variant="warning" title="Before updating">
+<Callout variant="tip" title="A useful shortcut">
 
-Test your changes before deploying.
+Use **Markdown** inside the component.
 
 </Callout>
+```
+
+The variants are `note` (the default), `tip`, `success`, `warning`, and `danger`.
+Keep blank lines around Markdown inside JSX.
+
+## Use in React
+
+Import the component in your own `components/` files:
+
+```tsx
+import { Callout } from '@lexibase/rdx/ui/components/callout'
+
+export default function Notice() {
+  return <Callout title="Welcome">Read the guide to get started.</Callout>
+}
 ```
