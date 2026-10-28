@@ -62,6 +62,16 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       da configuração ainda serão definidos; melhoria futura, fora da 1.0.0.
 - [ ] Evoluir Markdown/MDX e componentes próprios: tabelas, listas de tarefas,
       código com destaque/cópia, Callout, Tabs, Steps e Cards.
+- [ ] Syntax highlighting personalizado nos code blocks — adiado para uma
+      atualização futura. Permitir registrar gramáticas TextMate e temas
+      claro/escuro do Shiki pelo `rdx.config.ts`, com arquivos do projeto
+      organizados, por exemplo, em `syntax/`. O nome registrado deve funcionar
+      como linguagem do fence Markdown, sem imports na página nem edição de
+      `.rdx/`. Definir a API e validar arquivos, aliases, dependências entre
+      gramáticas e cores antes da implementação. Semantic Highlighting de
+      extensões VS Code não é uma gramática TextMate: avaliar separadamente
+      adaptações que aproveitem as regras da linguagem, sem prometer conversão
+      automática ou exigir um language server para renderizar a documentação.
 - [x] Modo `folder` nos code blocks: listas com dois espaços por nível geram
       árvores com linhas de conexão. Visual compacto e cópia do desenho gerado.
       Implementado; aguarda publicação agrupada e lançamento dos guias públicos.
