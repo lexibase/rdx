@@ -36,6 +36,12 @@ export function DocsSidebar({
   )
   const previousPath = useRef(pathname)
   const reducedMotion = useReducedMotion()
+  const pageOrder = new Map(
+    categories
+      .flatMap((category) => category.links)
+      .map((page, index) => [page.href, index])
+  )
+  const currentIndex = pageOrder.get(pathname) ?? -1
 
   // Route changes (including browser history) must use the same closing phase
   // as Escape and the close button, keeping the content mounted until exit ends.
@@ -69,6 +75,15 @@ export function DocsSidebar({
               active={pathname === link.href}
               aria-label={link.label}
               href={link.href}
+              transitionTypes={
+                currentIndex < 0 || link.href === pathname
+                  ? undefined
+                  : [
+                      pageOrder.get(link.href)! < currentIndex
+                        ? 'rdx-doc-back'
+                        : 'rdx-doc-forward',
+                    ]
+              }
               onClick={() => actions.current?.close()}
               aria-current={pathname === link.href ? 'page' : undefined}
               className="justify-start text-sm text-primary"

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add directional mobile document transitions to previous/next and sidebar
+  navigation, preserving desktop behavior and reduced motion preferences.
+
 - Animate mobile code preview expansion and collapse with Motion, honoring
   reduced motion preferences and retaining full source copying.
 
