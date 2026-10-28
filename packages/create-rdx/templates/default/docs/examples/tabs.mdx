@@ -8,7 +8,7 @@ link_position: 5
 
 Wrap related examples in `:::tabs`. Each direct `### Title` creates a tab;
 its content continues until the next title or the closing `:::`.
-The first tab is selected initially. No import or plugin is required.
+The first enabled tab is selected initially. No import or plugin is required.
 
 :::tabs
 
@@ -70,29 +70,42 @@ headings are reserved for tab labels within the container.
 
 :::
 
-## JSX syntax
+## Disable a tab
 
-Use JSX for explicit values, a custom accessible label or disabled tabs:
+Add `{disabled}` after the tab title. The label stays visible and the tab cannot
+be activated. The first enabled tab is selected automatically; each group must
+have at least one enabled tab.
 
-```mdx
-<Tabs defaultValue="development">
-  <TabsList aria-label="Environment">
-    <TabsTrigger value="development">Development</TabsTrigger>
-    <TabsTrigger value="production">Production</TabsTrigger>
-    <TabsTrigger value="preview" disabled>Preview</TabsTrigger>
-  </TabsList>
-  <TabsContent value="development">
+```md
+:::tabs
 
-Keep the development server running.
+### pnpm
 
-  </TabsContent>
-  <TabsContent value="production">
+pnpm dev
 
-Build and check your production site.
+### npm {disabled}
 
-  </TabsContent>
-</Tabs>
+npm run dev
+
+### yarn {disabled}
+
+yarn dev
+
+:::
 ```
 
-Use matching, unique values for triggers and panels. Set `defaultValue` to an
-enabled tab. Keep blank lines around Markdown inside JSX.
+:::tabs
+
+### pnpm
+
+pnpm dev
+
+### npm {disabled}
+
+npm run dev
+
+### yarn {disabled}
+
+yarn dev
+
+:::

@@ -8,28 +8,27 @@ link_position: 2
 
 From the directory containing `package.json` and `rdx.config.ts`:
 
-<Tabs defaultValue="pnpm">
-  <TabsList aria-label="Build and serve the production site">
-    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
-    <TabsTrigger value="npm">npm</TabsTrigger>
-    <TabsTrigger value="yarn">yarn</TabsTrigger>
-  </TabsList>
-  <TabsContent value="pnpm">
-    pnpm build
-    <br />
+:::tabs
+
+### pnpm
+
+pnpm build
+
     pnpm start
-  </TabsContent>
-  <TabsContent value="npm">
-    npm run build
-    <br />
+
+### npm
+
+npm run build
+
     npm run start
-  </TabsContent>
-  <TabsContent value="yarn">
-    yarn build
-    <br />
+
+### yarn
+
+yarn build
+
     yarn start
-  </TabsContent>
-</Tabs>
+
+:::
 
 The generated scripts call
 `rdx build` and `rdx start`; they run Next.js against the internal `.rdx/` app.
@@ -109,28 +108,30 @@ The framework traces configured documentation and plugin runtime files into the
 server build. Keep your source content available during the build; do not create
 snapshots inside a serverless request.
 
-<Callout title="Check your deployed site">
-
-After deploying, open a document URL directly, test search and assets, refresh a
-nested page, and check that a missing page returns 404.
-
-</Callout>
+> [!NOTE] Check your deployed site
+> After deploying, open a document URL directly, test search and assets, refresh a
+> nested page, and check that a missing page returns 404.
 
 ## Node.js hosting
 
 On a Node.js server, install dependencies, run the build, and start the generated
 project:
 
-<Tabs defaultValue="pnpm">
-  <TabsList aria-label="Start the production server">
-    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
-    <TabsTrigger value="npm">npm</TabsTrigger>
-    <TabsTrigger value="yarn">yarn</TabsTrigger>
-  </TabsList>
-  <TabsContent value="pnpm">pnpm start</TabsContent>
-  <TabsContent value="npm">npm run start</TabsContent>
-  <TabsContent value="yarn">yarn start</TabsContent>
-</Tabs>
+:::tabs
+
+### pnpm
+
+pnpm start
+
+### npm
+
+npm run start
+
+### yarn
+
+yarn start
+
+:::
 
 Configure HTTPS, a process supervisor, and the host's network settings. Keep the
 complete project available to the runtime.

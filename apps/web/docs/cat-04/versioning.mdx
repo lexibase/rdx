@@ -8,22 +8,21 @@ link_position: 5
 
 Versioning is optional. A new project works without `versions.json` or snapshots.
 
-<Tabs defaultValue="pnpm">
-  <TabsList aria-label="Activate versioning">
-    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
-    <TabsTrigger value="npm">npm</TabsTrigger>
-    <TabsTrigger value="yarn">yarn</TabsTrigger>
-  </TabsList>
-  <TabsContent value="pnpm">
+:::tabs
+
+### pnpm
+
 pnpm rdx add versioning
-  </TabsContent>
-  <TabsContent value="npm">
+
+### npm
+
 npm exec -- rdx add versioning
-  </TabsContent>
-  <TabsContent value="yarn">
+
+### yarn
+
 yarn rdx add versioning
-  </TabsContent>
-</Tabs>
+
+:::
 
 This activates the plugin in your configuration. For manual setup, see
 [Plugins](./plugins.mdx).
@@ -32,22 +31,21 @@ This activates the plugin in your configuration. For manual setup, see
 
 When the current documentation is ready for a release:
 
-<Tabs defaultValue="pnpm">
-  <TabsList aria-label="Create a release snapshot">
-    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
-    <TabsTrigger value="npm">npm</TabsTrigger>
-    <TabsTrigger value="yarn">yarn</TabsTrigger>
-  </TabsList>
-  <TabsContent value="pnpm">
+:::tabs
+
+### pnpm
+
 pnpm rdx version 1.0.0
-  </TabsContent>
-  <TabsContent value="npm">
+
+### npm
+
 npm exec -- rdx version 1.0.0
-  </TabsContent>
-  <TabsContent value="yarn">
+
+### yarn
+
 yarn rdx version 1.0.0
-  </TabsContent>
-</Tabs>
+
+:::
 
 RDX copies `docs/` into `versioned_docs/version-1.0.0/` and adds the version to
 `versions.json`:

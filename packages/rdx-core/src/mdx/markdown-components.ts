@@ -9,11 +9,11 @@ type Node = {
   attributes?: Record<string, string | null> | Attribute[]
   position?: { start: { offset?: number }; end: { offset?: number } }
 }
-type Attribute = { type: 'mdxJsxAttribute'; name: string; value: string }
+type Attribute = { type: 'mdxJsxAttribute'; name: string; value: string | null }
 
 function component(
   name: string,
-  attributes: Record<string, string>,
+  attributes: Record<string, string | null>,
   children: Node[],
   inline = false
 ): Node {
@@ -113,16 +113,33 @@ function callout(node: Node, source: string): Node | undefined {
   )
 }
 
-function container(node: Node): Node {
-  const groups: { title: string; children: Node[] }[] = []
+function container(node: Node, source: string): Node {
+  const groups: { title: string; disabled: boolean; children: Node[] }[] = []
   for (const child of node.children ?? []) {
     if (child.type === 'heading' && child.depth === 3) {
-      const title = label(child.children ?? [])
+      const children = [...(child.children ?? [])]
+      const marker = children.at(-1)
+      const beforeMarker = children.at(-2)
+      // Recognize only the exact literal flag in a tab heading, never arbitrary
+      // MDX expressions, inline code, or escaped braces.
+      const disabled =
+        node.name === 'tabs' &&
+        marker?.type === 'mdxTextExpression' &&
+        marker.value === 'disabled' &&
+        source.slice(
+          marker.position?.start.offset,
+          marker.position?.end.offset
+        ) === '{disabled}' &&
+        (!beforeMarker ||
+          (beforeMarker.type === 'text' &&
+            /\s$/.test(beforeMarker.value ?? '')))
+      if (disabled) children.pop()
+      const title = label(children)
       if (!title)
         throw new Error(
           `[RDX] :::${node.name} requires a nonempty ### title for each item.`
         )
-      groups.push({ title, children: [] })
+      groups.push({ title, disabled, children: [] })
     } else {
       const group = groups.at(-1)
       if (!group)
@@ -135,18 +152,36 @@ function container(node: Node): Node {
       `[RDX] :::${node.name} requires at least one ### Title and its content.`
     )
   if (node.name === 'tabs') {
-    return component('Tabs', { defaultValue: 'item-1' }, [
+    const firstEnabled = groups.findIndex((group) => !group.disabled)
+    if (firstEnabled < 0)
+      throw new Error('[RDX] :::tabs requires at least one enabled tab.')
+    return component('Tabs', { defaultValue: `item-${firstEnabled + 1}` }, [
       component(
         'TabsList',
         {},
         groups.map((group, index) =>
-          component('TabsTrigger', { value: `item-${index + 1}` }, [
-            { type: 'text', value: group.title },
-          ])
+          component(
+            'TabsTrigger',
+            {
+              value: `item-${index + 1}`,
+              ...(group.disabled ? { disabled: null } : {}),
+            },
+            [{ type: 'text', value: group.title }]
+          )
         )
       ),
-      ...groups.map((group, index) =>
-        component('TabsContent', { value: `item-${index + 1}` }, group.children)
+      // Disabled choices have no reachable panel; keep their content out of
+      // both rendering and the search index built from this same tree.
+      ...groups.flatMap((group, index) =>
+        group.disabled
+          ? []
+          : [
+              component(
+                'TabsContent',
+                { value: `item-${index + 1}` },
+                group.children
+              ),
+            ]
       ),
     ])
   }
@@ -203,7 +238,7 @@ export function remarkDocumentationComponents(
           throw new Error(
             `[RDX] Write ${node.name} as a :::${node.name} block with ### item titles.`
           )
-        return transform(container(node))
+        return transform(container(node, source))
       }
       if (node.children) node.children = node.children.map(transform)
       return node

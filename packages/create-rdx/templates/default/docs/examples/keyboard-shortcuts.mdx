@@ -1,6 +1,6 @@
 ---
 title: Keyboard shortcuts
-description: Describe keys and shortcut combinations with Kbd and KbdGroup.
+description: Describe keys and shortcut combinations with Markdown.
 link_position: 8
 ---
 
@@ -43,33 +43,3 @@ Press :kbd[Ctrl] + :kbd[K] to open search.
 These shared shadcn/ui components render semantic `<kbd>` elements and follow
 the site's light and dark themes. Use them to describe shortcuts supported by
 your application.
-
-## JSX syntax
-
-Use `KbdGroup` to keep a combination together. Add accessible names for symbols:
-
-<KbdGroup aria-label="Command plus K">
-  <Kbd aria-label="Command">⌘</Kbd>+<Kbd>K</Kbd>
-</KbdGroup>
-
-```mdx
-<KbdGroup aria-label="Command plus K">
-  <Kbd aria-label="Command">⌘</Kbd>+<Kbd>K</Kbd>
-</KbdGroup>
-```
-
-## Use in custom React components
-
-Import the shared components in your own `components/` files:
-
-```tsx
-import { Kbd, KbdGroup } from '@lexibase/rdx/ui/components/kbd'
-
-export function SearchShortcut() {
-  return (
-    <KbdGroup aria-label="Control plus K">
-      <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd>
-    </KbdGroup>
-  )
-}
-```

@@ -8,7 +8,7 @@ link_position: 6
 
 Wrap related examples in `:::tabs`. Each direct `### Title` creates a tab;
 its content continues until the next title or the closing `:::`.
-The first tab is selected initially. No import or plugin is required.
+The first enabled tab is selected initially. No import or plugin is required.
 
 :::tabs
 
@@ -67,5 +67,45 @@ headings are reserved for tab labels within the container.
 
 1. Build your documentation.
 2. Start the production server to check the result.
+
+:::
+
+## Disable a tab
+
+Add `{disabled}` after the tab title. The label stays visible and the tab cannot
+be activated. The first enabled tab is selected automatically; each group must
+have at least one enabled tab.
+
+```md
+:::tabs
+
+### pnpm
+
+pnpm dev
+
+### npm {disabled}
+
+npm run dev
+
+### yarn {disabled}
+
+yarn dev
+
+:::
+```
+
+:::tabs
+
+### pnpm
+
+pnpm dev
+
+### npm {disabled}
+
+npm run dev
+
+### yarn {disabled}
+
+yarn dev
 
 :::

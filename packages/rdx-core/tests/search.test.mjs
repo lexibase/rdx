@@ -125,3 +125,18 @@ test('natural Markdown components index labels and hidden content under reachabl
   )
   assert.doesNotMatch(index.entries[1].text, /:::|\[!TIP\]|:kbd|item-1/)
 })
+
+test('disabled tab metadata and unreachable panels do not enter search or shift heading IDs', () => {
+  const index = buildSearchIndex([
+    {
+      title: 'Guide',
+      href: '/docs/guide',
+      category: 'Docs',
+      content:
+        '## Commands\n\n:::tabs\n\n### npm {disabled}\n\n#### Hidden\n\nUnavailable command\n\n### pnpm\n\npnpm dev\n\n:::\n\n## Hidden\n\nVisible text',
+    },
+  ])
+  assert.match(index.entries[1].text, /npm pnpm pnpm dev/)
+  assert.doesNotMatch(JSON.stringify(index), /disabled|Unavailable command/)
+  assert.equal(index.entries[2].href, '/docs/guide#hidden')
+})

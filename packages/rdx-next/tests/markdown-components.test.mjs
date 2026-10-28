@@ -90,6 +90,37 @@ test('generated tab lists follow the configured interface language', async () =>
   assert.match(html, /aria-label="Abas da documentação"/)
 })
 
+test('literal disabled markers produce boolean disabled tabs and select the first enabled panel', async () => {
+  const html = await render(
+    ':::tabs\n\n### npm {disabled}\n\nUnavailable example.\n\n### pnpm\n\npnpm dev\n\n### yarn {disabled}\n\nyarn dev\n\n:::'
+  )
+  const buttons = [...html.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)]
+  const npm = buttons.find((match) => match[2] === 'npm')
+  const pnpm = buttons.find((match) => match[2] === 'pnpm')
+  const yarn = buttons.find((match) => match[2] === 'yarn')
+  assert.match(npm[1], /disabled=""/)
+  assert.match(yarn[1], /disabled=""/)
+  assert.match(pnpm[1], /aria-selected="true"/)
+  assert.match(html, /pnpm dev/)
+  assert.doesNotMatch(html, /\{disabled\}|Unavailable example/)
+  await assert.rejects(
+    render(':::tabs\n### npm {disabled}\nContent\n:::'),
+    /at least one enabled tab/
+  )
+  await assert.rejects(
+    render(':::tabs\n### npm {disabled=true}\nContent\n:::'),
+    /titles must contain text/
+  )
+  assert.match(
+    await render(':::tabs\n### npm \\{disabled}\nContent\n:::'),
+    /npm \{disabled\}/
+  )
+  assert.match(
+    await render(':::tabs\n### npm `{disabled}`\nContent\n:::'),
+    /npm \{disabled\}/
+  )
+})
+
 test('invalid component syntax gives useful errors, and JavaScript stays blocked', async () => {
   for (const [source, message] of [
     [':::tabs\nText before a title\n:::', /Start :::tabs items with ###/],

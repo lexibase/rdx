@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Support `{disabled}` on Markdown tab headings, select the first enabled tab,
+  and omit unavailable panels from rendering/search. Update current guides and
+  starter examples to teach component authoring through Markdown.
+
 - Render Mermaid fences as diagrams with theme-aware colors, source preview,
   definition copying and expansion through the shared shadcn Code Block/Dialog.
   Load the renderer on demand and retain readable source on errors or without JS.

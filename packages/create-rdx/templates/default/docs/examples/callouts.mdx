@@ -71,30 +71,3 @@ line before a list or another paragraph:
 >
 > - Review your configuration.
 > - Run a production build.
-
-## JSX syntax
-
-Use the shared component directly when you prefer JSX:
-
-```mdx
-<Callout variant="tip" title="A useful shortcut">
-
-Use **Markdown** inside the component.
-
-</Callout>
-```
-
-The variants are `note` (the default), `tip`, `success`, `warning`, and `danger`.
-Keep blank lines around Markdown inside JSX.
-
-## Use in React
-
-Import the component in your own `components/` files:
-
-```tsx
-import { Callout } from '@lexibase/rdx/ui/components/callout'
-
-export default function Notice() {
-  return <Callout title="Welcome">Read the guide to get started.</Callout>
-}
-```
