@@ -113,8 +113,11 @@ exato das mensagens, logs do Next.js ou localização dos caches como API estáv
   `getProjectDocsPaths`).
 - `@lexibase/rdx-core/config`: as cinco funções/classes de configuração acima,
   sem carregar o renderizador MDX ou servidor Next.
-- `@lexibase/rdx-core/mdx`: `remarkDocumentLinks`, `rehypeDocumentationHeadings`
-  e `rehypeDocumentationCode`, para integração no pipeline MDX.
+- `@lexibase/rdx-core/mdx`: `remarkDocumentationComponents`,
+  `remarkDocumentLinks`, `rehypeDocumentationHeadings` e
+  `rehypeDocumentationCode`, para integração no pipeline MDX. O primeiro adapta
+  Callouts, Tabs, Accordion e Kbd escritos em Markdown aos componentes
+  compartilhados; deve preceder o processamento dos links de documentos.
 - `@lexibase/rdx-core/search`: `buildSearchIndex` e o tipo `SearchDocument`;
   o índice JSON tem `schemaVersion: 1` e deve ser validado pelo consumidor.
 - `@lexibase/rdx-types`: **somente tipos**, incluindo configuração, plugins,

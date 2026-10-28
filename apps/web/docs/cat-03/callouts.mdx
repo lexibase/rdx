@@ -4,64 +4,78 @@ description: Notes, tips, and warnings that fit the documentation.
 link_position: 4
 ---
 
-## Try the variants
-
-<Callout title="A useful note">
-
-Explain a detail without interrupting the main instructions.
-
-</Callout>
-
-<Callout variant="tip" title="Keep it short">
-
-Use a Callout when the context changes how the reader should proceed.
-
-</Callout>
-
-<Callout variant="success" title="Ready to continue">
-
-Your documentation is ready for the next step.
-
-</Callout>
-
-<Callout variant="warning" title="Before updating">
-
-Read the release notes and validate your production build.
-
-</Callout>
-
-<Callout variant="danger" title="Review destructive changes">
-
-Confirm the exact files before deleting source content.
-
-</Callout>
-
 ## Write a Callout
 
-No import or plugin is required:
+Start a blockquote with `[!TYPE]`. Add an optional title on the same line and
+write the body on the following quoted lines:
 
-```mdx
-<Callout variant="tip" title="A useful shortcut">
-
-Use **Markdown**, `inline code`, links, and lists inside the component.
-
-</Callout>
+```md
+> [!TIP] A useful shortcut
+> Use **Markdown**, inline code, links, and lists in the body.
 ```
 
-Variants are `note` (the default), `tip`, `success`, `warning`, and `danger`.
-The title is optional. Keep blank lines around Markdown content.
+> [!TIP] A useful shortcut
+> Use **Markdown**, inline code, links, and lists in the body.
 
-## Use in React
+No import or plugin is required. Choose one of the five uppercase markers:
 
-In a project-owned React file, import the shared component normally:
+## Try the variants
 
-```tsx
-import { Callout } from '@lexibase/rdx/ui/components/callout'
-
-export default function Notice() {
-  return <Callout title="Welcome">Read the guide to get started.</Callout>
-}
+```md
+> [!NOTE] A useful note
+> Explain a detail without interrupting the main instructions.
 ```
 
-Callouts are static notes, not live alerts. Use ordinary paragraphs for essential
-instructions; do not turn every paragraph into a box.
+> [!NOTE] A useful note
+> Explain a detail without interrupting the main instructions.
+
+```md
+> [!TIP] Keep it short
+> Use a Callout when the context changes how the reader should proceed.
+```
+
+> [!TIP] Keep it short
+> Use a Callout when the context changes how the reader should proceed.
+
+```md
+> [!SUCCESS] Ready to continue
+> Your documentation is ready for the next step.
+```
+
+> [!SUCCESS] Ready to continue
+> Your documentation is ready for the next step.
+
+```md
+> [!WARNING] Before updating
+> Read the release notes and validate your production build.
+```
+
+> [!WARNING] Before updating
+> Read the release notes and validate your production build.
+
+```md
+> [!DANGER] Review destructive changes
+> Confirm the exact files before deleting source content.
+```
+
+> [!DANGER] Review destructive changes
+> Confirm the exact files before deleting source content.
+
+## Optional titles and rich content
+
+Leave the title out for a compact note. Continue the quote with a blank quoted
+line before a list or another paragraph:
+
+```md
+> [!NOTE]
+> Before continuing:
+>
+> - Review your configuration.
+> - Run a production build.
+```
+
+> [!NOTE]
+> Before continuing:
+>
+> - Review your configuration.
+> - Run a production build.

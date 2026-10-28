@@ -10,6 +10,7 @@ import { getMessages } from '../lib/i18n'
 import { CodeBlockLine } from './code-block'
 import { MdxCodeBlockView } from './mdx-code-block-view'
 import { MdxFolderTree } from './mdx-folder-tree'
+import { MdxMermaid } from './mdx-mermaid'
 
 function textOf(children: ReactNode): string {
   return Children.toArray(children)
@@ -53,7 +54,7 @@ export function MdxCodeBlock({
   'data-rdx-code-start-line': firstLine,
   ...props
 }: ComponentProps<'pre'> & {
-  'data-rdx-code-mode'?: 'folder' | 'diff'
+  'data-rdx-code-mode'?: 'folder' | 'diff' | 'mermaid'
   'data-rdx-code-title'?: string
   'data-rdx-code-line-numbers'?: string
   'data-rdx-code-start-line'?: string
@@ -68,6 +69,17 @@ export function MdxCodeBlock({
     : undefined
   const language = codeProps?.className?.match(/(?:^|\s)language-([^\s]+)/)?.[1]
   const value = textOf(codeProps?.children ?? children)
+  if (mode === 'mermaid' || language?.toLowerCase() === 'mermaid') {
+    return (
+      <MdxMermaid
+        value={value}
+        title={title}
+        lineNumbers={numbered === 'true'}
+        startLine={firstLine === undefined ? undefined : Number(firstLine)}
+        preProps={props}
+      />
+    )
+  }
   const label =
     title ||
     (mode === 'folder' ? messages.folderTree : (language ?? messages.code))

@@ -6,6 +6,28 @@ the default. No Markdown-specific plugin needs to be configured by the author.
 
 ## Markdown support
 
+- Mermaid fences render diagrams through the official Mermaid engine, loaded
+  in the browser when the block becomes visible. The shared Code Block composes
+  source/diagram switching, original-source copying and a larger Dialog view.
+  Themes follow the site; optional `title`, `lineNumbers` and `startLine` apply
+  to the header/source. Before hydration and on errors the source stays readable.
+  Rendering uses strict security, fixed site settings and isolated SVG images;
+  definition callbacks do not execute. `accTitle`/`accDescr` describe the image.
+
+- Callouts: begin a quote with `> [!NOTE]`, `> [!TIP]`, `> [!SUCCESS]`,
+  `> [!WARNING]` or `> [!DANGER]`. An optional title follows the marker on the
+  same line; quoted lines below contain the Markdown body.
+- Tabs and Accordion: wrap content in `:::tabs` or `:::accordion`, ending with
+  `:::`. Each direct `### Title` starts an item; use `####` for body headings.
+  The first tab is selected; accordion items start closed and open one at a time.
+  Nested containers use more colons on the outer fence (for example
+  `::::accordion` around `:::tabs`).
+- Keyboard keys: use `:kbd[Ctrl] + :kbd[K]` in prose or tables. Each directive
+  renders the existing semantic Kbd component.
+- These forms use `remarkDocumentationComponents` in both renderers and search.
+  They adapt Markdown to the existing shared components without evaluating JS.
+  Component authoring uses the Markdown forms described below.
+
 - Headings `#` through `######`, paragraphs, ordered/unordered lists and quotations.
 - Links, images from `public/`, horizontal rules, inline code and fenced code.
 - GFM tables, task lists and strikethrough through
@@ -142,153 +164,105 @@ is separately opt-in through `TOC: true`.
 
 ## Tables and keyboard shortcuts
 
-Markdown tables use the default shadcn/ui base-nova Table styling: horizontal row
-separators and compact cells. RDX supports Markdown alignment and a focusable
-horizontal scroll container. The shared Table
-primitives are also available from `@lexibase/rdx/ui/components/table` for custom
-React components and through their named tags in MDX.
+Write tables with Markdown columns and separator rows. Alignment follows the
+separator row, and wide tables scroll within the document.
 
-Use shadcn/ui `Kbd` and `KbdGroup` directly in MDX to document keyboard input:
+Write individual keys and combinations directly in Markdown:
 
-```mdx
-<KbdGroup aria-label="Control plus K">
-  <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd>
-</KbdGroup>
+```md
+Press :kbd[Ctrl] + :kbd[K] to open search.
 ```
 
-These components render native `<kbd>` elements and can be used inside paragraphs
-and table cells. Import them from `@lexibase/rdx/ui/components/kbd` in custom React
-components. Standard lowercase `<kbd>` JSX keeps its native HTML rendering.
+The keys render with the shared shadcn/ui Kbd component, including in table cells.
 
 ## Callout
 
-Use directly in any `.mdx` page, without an import:
+Start a quote with a supported uppercase marker and an optional title:
 
-```mdx
-<Callout variant="warning" title="Before updating">
-
-Read **release notes** and test your changes before deploying.
-
-- Keep your source files.
-- Check your documentation locally.
-
-</Callout>
+```md
+> [!WARNING] Before updating
+> Read **release notes** and test your changes before deploying.
+>
+> - Keep your source files.
+> - Check your documentation locally.
 ```
 
-Keep blank lines around Markdown inside the JSX component. Available variants:
-`note` (default), `tip`, `success`, `warning` and `danger`. The `title` is optional;
-the component also accepts standard `<aside>` attributes and `className`.
-Unknown variants fail with an explicit RDX error rather than silently choosing a
-different tone. Icons are decorative; the note has a text-based accessible name.
-Callouts are static content, not live alerts, and need no Base UI interactive
-primitive or client-side state.
-
-In a project-owned React component such as `home.tsx`, import it normally:
-
-```tsx
-import { Callout } from '@lexibase/rdx-ui/components/callout'
-
-export default function Home() {
-  return (
-    <Callout title="Welcome">Read our documentation to get started.</Callout>
-  )
-}
-```
+Markers are `NOTE`, `TIP`, `SUCCESS`, `WARNING`, and `DANGER`. The body accepts
+Markdown paragraphs, lists, links and code. Titles are optional.
 
 ## Tabs
 
-Tabs use Base UI and are available in every MDX page without an import:
+Each direct `###` heading in a `:::tabs` container defines a tab:
 
-```mdx
-<Tabs defaultValue="pnpm">
-  <TabsList aria-label="Package manager">
-    <TabsTrigger value="npm">npm</TabsTrigger>
-    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
-  </TabsList>
-  <TabsContent value="npm">
+```md
+:::tabs
 
-Run `npm install`.
+### pnpm
 
-  </TabsContent>
-  <TabsContent value="pnpm">
+pnpm install
 
-Run `pnpm install`.
+### npm {disabled}
 
-  </TabsContent>
-</Tabs>
+npm install
+
+### yarn
+
+yarn install
+
+:::
 ```
 
-Give each list an accessible `aria-label`, and use matching, unique string
-values for its triggers and panels. Set `defaultValue` explicitly to an enabled
-tab so the selected panel is also present in server-rendered HTML. Keep blank
-lines around Markdown content. Panels accept fenced code, lists and Callouts.
-Each group maintains its own selection; choices are not synchronized or stored.
+Append the literal `{disabled}` flag to a title to disable that tab. The first
+enabled tab is selected initially; at least one tab must be enabled. Disabled
+panel content is omitted from rendering and search. Escape the opening brace or
+use inline code to display the marker literally in a tab label. Arbitrary
+expressions are not accepted as metadata.
 
-Arrow keys move focus; Enter or Space selects the focused tab. Home and End move
-to the first and last tabs. Disabled triggers remain focusable so readers can
-discover them, following Base UI's behavior, but cannot be activated. Tab moves out
-of the tab list into the selected panel. Inactive panels unmount by default;
-React authors can use `keepMounted` on `TabsContent` to preserve local state.
-Long tab lists scroll horizontally on small screens.
-The icon-only button at the right of the tab header copies the active panel as
-plain text, without tab labels, code headers or copy-button text. Code indentation
-and internal line breaks are retained; outer blank lines are omitted. It uses the
-same clipboard permissions as code blocks and announces success or failure.
-
-React components can import `Tabs`, `TabsList`, `TabsTrigger` and `TabsContent`
-from `@lexibase/rdx-ui/components/tabs`. The wrappers preserve Base UI props,
-refs and state-based `className` callbacks. See `docs/examples/tabs.mdx` for
-package-manager examples.
+Tabs use the shared Base UI component for keyboard interaction. The icon-only
+copy button copies the active panel, preserving code indentation and internal
+line breaks. Lists scroll horizontally on small screens. Each group maintains
+its own selection. Use `####` or deeper headings for panel subsections.
 
 ## Accordion
 
-Use an Accordion for optional explanations and FAQs. Keep essential instructions
-visible in the page. The default layout is a question, a small chevron and a thin
-divider, with no card or extra container background.
+Use `:::accordion` for optional explanations and FAQs, with one item per direct
+`###` heading:
 
-```mdx
-<Accordion>
-  <AccordionItem value="preview">
-    <AccordionTrigger>How do I preview my documentation?</AccordionTrigger>
-    <AccordionContent>
+```md
+:::accordion
 
-Run `pnpm dev` and open the local site.
+### How do I preview my documentation?
 
-    </AccordionContent>
+Start the development server from the documentation project root.
 
-  </AccordionItem>
-</Accordion>
+### Where do I write pages?
+
+Create folders and `.mdx` files inside `docs/`.
+
+:::
 ```
 
-The implementation follows shadcn/ui's Base UI `base-nova` Accordion, with
-animated opening and closing using Base UI's measured panel height. Motion is
-disabled when the reader prefers reduced motion. One item opens at a time and
-can be closed again. Add the boolean `multiple`
-attribute to `Accordion` to allow several open answers. Use unique string values
-inside each group. Keep blank lines around Markdown; panels support code blocks,
-links, lists and Callouts. Each trigger is a native button inside an `h3` heading.
-Tab follows normal document focus order; Enter and Space toggle the focused item.
-There is no custom arrow-key navigation. Disabled items cannot be activated.
+The shared shadcn/ui Base UI Accordion supplies keyboard controls and animated
+panels. One item opens at a time; Enter or Space toggles it. Motion respects the
+reader's reduced-motion preference. Keep essential instructions visible.
 
-React authors can import `Accordion`, `AccordionItem`, `AccordionTrigger` and
-`AccordionContent` from `@lexibase/rdx-ui/components/accordion`. The wrappers
-preserve Base UI props, refs and state-based class callbacks. React files can use
-`defaultValue={['preview']}` or controlled `value`/`onValueChange`; JavaScript
-expressions remain blocked in documentation MDX. Closed panels unmount by default;
-`keepMounted` preserves them, and `hiddenUntilFound` enables browser find-in-page
-discovery of collapsed content. No additional plugin is needed for this built-in
-component.
+For nested containers, use an extra colon for each outer level, such as
+`::::accordion` around `:::tabs`. Match each closing fence to its opening count.
 
 ## Authoring boundaries
 
-Documentation MDX retains `blockJS` and `blockDangerousJS`. Components are
-registered by the framework; the author uses literal string attributes and
-Markdown content. JavaScript expressions, imports and arbitrary event handlers
-are not an authoring API. This is not a general HTML sanitizer: only compile
-documentation from trusted project sources, and review externally supplied MDX.
+Documentation pages use Markdown, directives, and code fences. The framework
+maps these forms to shared components and retains `blockJS` and
+`blockDangerousJS`. The exact `{disabled}` tab marker is literal metadata.
 
-Examples live in `apps/web/docs/cat-03/mdx-components.mdx` and the
-generated project's `docs/examples/callouts.mdx`.
+React files such as `components/home.tsx` and `components/logo.tsx` provide the
+custom homepage and logo configured in `rdx.config.ts`. JavaScript expressions,
+imports and event handlers are not a documentation authoring API. This pipeline
+is not a general HTML sanitizer: compile trusted project sources and review
+externally supplied MDX.
+
+Examples live in `apps/web/docs/cat-03/` and the generated project's
+`docs/examples/`.
 
 ## Floating table of contents
 

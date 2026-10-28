@@ -1,56 +1,73 @@
 ---
 title: Callouts
-description: Highlight notes, tips and important information.
+description: Notes, tips, and warnings that fit the documentation.
 link_position: 4
 ---
 
-## Highlight important information
+## Write a Callout
 
-Callouts are included in RDX. No import or plugin is required.
+Start a blockquote with `[!TYPE]`. Add an optional title on the same line and
+write the body on the following quoted lines:
 
-<Callout title="A useful note">
-
-Keep supporting information close to the documentation it explains.
-
-</Callout>
-
-<Callout variant="tip" title="A helpful tip">
-
-You can use **Markdown**, [documentation links](/docs/init/intro), and `inline code` inside a callout.
-
-</Callout>
-
-<Callout variant="success" title="Ready to go">
-
-Your documentation is ready to share.
-
-</Callout>
-
-<Callout variant="warning" title="Before updating">
-
-- Read the release notes.
-- Test your changes before deploying.
-
-</Callout>
-
-<Callout variant="danger" title="Irreversible action">
-
-Deleting the source files permanently removes their content.
-
-</Callout>
-
-<Callout>
-
-A title is optional. The default variant is `note`.
-
-</Callout>
-
-## Syntax
-
-```mdx
-<Callout variant="warning" title="Before updating">
-
-Test your changes before deploying.
-
-</Callout>
+```md
+> [!TIP] A useful shortcut
+> Use **Markdown**, inline code, links, and lists in the body.
 ```
+
+> [!TIP] A useful shortcut
+> Use **Markdown**, inline code, links, and lists in the body.
+
+No import or plugin is required. Choose one of the five uppercase markers:
+
+## Try the variants
+
+> [!NOTE] A useful note
+> Explain a detail without interrupting the main instructions.
+
+> [!TIP] Keep it short
+> Use a Callout when the context changes how the reader should proceed.
+
+> [!SUCCESS] Ready to continue
+> Your documentation is ready for the next step.
+
+> [!WARNING] Before updating
+> Read the release notes and validate your production build.
+
+> [!DANGER] Review destructive changes
+> Confirm the exact files before deleting source content.
+
+```md
+> [!NOTE] A useful note
+> Explain a detail.
+
+> [!TIP] Keep it short
+> Share a useful shortcut.
+
+> [!SUCCESS] Ready to continue
+> Confirm a successful step.
+
+> [!WARNING] Before updating
+> Read the release notes.
+
+> [!DANGER] Review destructive changes
+> Confirm the exact files before deleting them.
+```
+
+## Optional titles and rich content
+
+Leave the title out for a compact note. Continue the quote with a blank quoted
+line before a list or another paragraph:
+
+```md
+> [!NOTE]
+> Before continuing:
+>
+> - Review your configuration.
+> - Run a production build.
+```
+
+> [!NOTE]
+> Before continuing:
+>
+> - Review your configuration.
+> - Run a production build.

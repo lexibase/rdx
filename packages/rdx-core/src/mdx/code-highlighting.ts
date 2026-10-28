@@ -59,6 +59,18 @@ function prepareCodeBlocks(node: CodeNode) {
   if (
     code &&
     Array.isArray(classes) &&
+    classes.some((name) => /^language-mermaid$/i.test(String(name)))
+  ) {
+    node.properties = { ...node.properties, 'data-rdx-code-mode': 'mermaid' }
+    // Keep the definition literal; the browser loads Mermaid when needed.
+    code.properties!.className = classes.filter(
+      (name) => !/^language-mermaid$/i.test(String(name))
+    )
+    return
+  }
+  if (
+    code &&
+    Array.isArray(classes) &&
     classes.some((name) => /^language-folder$/i.test(String(name)))
   ) {
     node.properties = { ...node.properties, 'data-rdx-code-mode': 'folder' }

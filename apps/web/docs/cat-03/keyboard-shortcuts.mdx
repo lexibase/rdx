@@ -1,74 +1,45 @@
 ---
 title: Keyboard shortcuts
-description: Describe keys and shortcut combinations with Kbd and KbdGroup.
+description: Describe keys and shortcut combinations with Markdown.
 link_position: 9
 ---
 
 ## Display a key
 
-Use `Kbd` directly in your `.mdx` pages to describe keyboard input:
+Write `:kbd[Key]` in your `.mdx` pages. No import or plugin is required:
 
-Press <Kbd>Esc</Kbd> to close a dialog or <Kbd>Enter</Kbd> to confirm.
+Press :kbd[Esc] to close a dialog or :kbd[Enter] to confirm.
 
-```mdx
-Press <Kbd>Esc</Kbd> to close a dialog or <Kbd>Enter</Kbd> to confirm.
+```md
+Press :kbd[Esc] to close a dialog or :kbd[Enter] to confirm.
 ```
 
-## Group a shortcut
+## Write a shortcut
 
-Use `KbdGroup` to keep a combination together. Write the separator as text:
+Write the separator as ordinary text between the keys:
 
-<KbdGroup aria-label="Control plus K">
-  <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd>
-</KbdGroup>
+Press :kbd[Ctrl] + :kbd[K] to open search.
 
-```mdx
-<KbdGroup aria-label="Control plus K">
-  <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd>
-</KbdGroup>
+```md
+Press :kbd[Ctrl] + :kbd[K] to open search.
 ```
-
-For macOS symbols, give the key an accessible name:
-
-<KbdGroup aria-label="Command plus K">
-  <Kbd aria-label="Command">⌘</Kbd>+<Kbd>K</Kbd>
-</KbdGroup>
 
 ## Shortcut reference tables
 
-Combine the components with a Markdown table to describe your application's
-shortcuts:
+| Action         | Shortcut             |
+| :------------- | :------------------- |
+| Open search    | :kbd[Ctrl] + :kbd[K] |
+| Save           | :kbd[Ctrl] + :kbd[S] |
+| Close a dialog | :kbd[Esc]            |
 
-| Action | Shortcut |
-| :----- | :------- |
-| Open search | <KbdGroup><Kbd>Ctrl</Kbd>+<Kbd>K</Kbd></KbdGroup> |
-| Save | <KbdGroup><Kbd>Ctrl</Kbd>+<Kbd>S</Kbd></KbdGroup> |
-| Close a dialog | <Kbd>Esc</Kbd> |
-
-```mdx
-| Action | Shortcut |
-| :----- | :------- |
-| Open search | <KbdGroup><Kbd>Ctrl</Kbd>+<Kbd>K</Kbd></KbdGroup> |
-| Save | <KbdGroup><Kbd>Ctrl</Kbd>+<Kbd>S</Kbd></KbdGroup> |
-| Close a dialog | <Kbd>Esc</Kbd> |
+```md
+| Action         | Shortcut             |
+| :------------- | :------------------- |
+| Open search    | :kbd[Ctrl] + :kbd[K] |
+| Save           | :kbd[Ctrl] + :kbd[S] |
+| Close a dialog | :kbd[Esc]            |
 ```
 
-These shadcn/ui Base UI components render semantic `<kbd>` elements and follow
+These shared shadcn/ui components render semantic `<kbd>` elements and follow
 the site's light and dark themes. Use them to describe shortcuts supported by
 your application. See [Search](../cat-04/search.mdx) for RDX's search shortcut.
-
-## Use in custom React components
-
-Import the shared components when building your own `components/` files:
-
-```tsx
-import { Kbd, KbdGroup } from '@lexibase/rdx/ui/components/kbd'
-
-export function SearchShortcut() {
-  return (
-    <KbdGroup aria-label="Control plus K">
-      <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd>
-    </KbdGroup>
-  )
-}
-```

@@ -49,11 +49,17 @@ Use paragraphs, headings, lists, links, and code fences. The shared renderer
 handles their styling. Add [Callouts](./callouts.mdx), [Tabs](./tabs.mdx),
 or an [Accordion](./accordion.mdx) when the content benefits from them.
 
-Leave blank lines around Markdown inside JSX components. Use literal props such
-as `title="Note"` and `variant="tip"`. Built-in documentation components are
-available directly in MDX. Put React logic in project-owned components such as
-`components/home.tsx`; documentation MDX uses Markdown and literal component
-attributes.
+Write these components with Markdown: `> [!TIP]` for a Callout, `:::tabs` for
+Tabs, `:::accordion` for an Accordion, and `:kbd[Enter]` for a keyboard key.
+No imports are required in your pages.
+
+```md
+> [!TIP] Keep examples useful
+> Explain the next step and show the reader what to expect.
+```
+
+For a custom homepage or logo, create `components/home.tsx` or
+`components/logo.tsx` and reference the component in `rdx.config.ts`.
 
 ## Preview and publish
 
@@ -61,4 +67,3 @@ Save the file while `pnpm dev` is running. Use
 [relative document links](./document-links.mdx) to connect pages.
 Run a production build before deploying; missing relative document links fail
 compilation rather than silently sending readers to another version.
-

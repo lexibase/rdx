@@ -16,6 +16,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
+import { verifyMermaid } from './helpers/mermaid-browser.mjs'
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url))
 const require = createRequire(path.join(packageRoot, 'package.json'))
@@ -179,6 +180,10 @@ test(
       JSON.stringify({ title: 'Init', sidebar_position: 0 })
     )
     const configPath = path.join(rootDir, 'rdx.config.ts')
+    await writeFile(
+      path.join(rootDir, 'docs/init/mermaid.mdx'),
+      await readFile(new URL('./fixtures/mermaid.mdx', import.meta.url), 'utf8')
+    )
     await writeFile(
       path.join(rootDir, 'docs/init/short-end.mdx'),
       '---\ntitle: Short ending\n---\n## Start\n\n' +
@@ -1811,6 +1816,7 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         await navigation.waitFor()
         await page.keyboard.press('Escape')
         await navigation.waitFor({ state: 'hidden' })
+        await verifyMermaid(page, running.base)
         assert.deepEqual(errors, [])
       } finally {
         await browser.close()

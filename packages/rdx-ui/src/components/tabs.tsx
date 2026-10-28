@@ -144,6 +144,7 @@ function Tabs({ className, ...props }: TabsPrimitive.Root.Props) {
 }
 
 function TabsList({ className, ...props }: TabsPrimitive.List.Props) {
+  const messages = useMessages()
   return (
     <div
       data-slot="tabs-header"
@@ -151,6 +152,9 @@ function TabsList({ className, ...props }: TabsPrimitive.List.Props) {
     >
       <TabsPrimitive.List
         data-slot="tabs-list"
+        aria-label={
+          props['aria-labelledby'] ? undefined : messages.documentationTabs
+        }
         className={mergeStateClassName(
           'flex min-w-0 flex-1 gap-0.5 overflow-x-auto p-1.5 data-[orientation=vertical]:flex-col',
           className

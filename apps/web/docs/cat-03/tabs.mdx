@@ -6,74 +6,106 @@ link_position: 6
 
 ## Choose your package manager
 
-Use the arrow keys to move between tabs and Enter or Space to select one.
-Tabs are included in RDX without imports or plugins.
+Wrap related examples in `:::tabs`. Each direct `### Title` creates a tab;
+its content continues until the next title or the closing `:::`.
+The first enabled tab is selected initially. No import or plugin is required.
 
-<Tabs defaultValue="pnpm">
-  <TabsList aria-label="Package manager">
-    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
-    <TabsTrigger value="npm">npm</TabsTrigger>
-    <TabsTrigger value="yarn">yarn</TabsTrigger>
-  </TabsList>
-  <TabsContent value="npm">
-npm install
-  </TabsContent>
-  <TabsContent value="pnpm">
+:::tabs
+
+### pnpm
+
 pnpm install
-  </TabsContent>
-  <TabsContent value="yarn">
+
+### npm
+
+npm install
+
+### yarn
+
 yarn install
-  </TabsContent>
-</Tabs>
+
+:::
 
 ## Write your own tabs
 
-```mdx
-<Tabs defaultValue="pnpm">
-  <TabsList aria-label="Package manager">
-    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
-    <TabsTrigger value="npm">npm</TabsTrigger>
-    <TabsTrigger value="yarn">yarn</TabsTrigger>
-  </TabsList>
-  <TabsContent value="npm">
-npm install
-  </TabsContent>
-  <TabsContent value="pnpm">
+```md
+:::tabs
+
+### pnpm
+
 pnpm install
-  </TabsContent>
-  <TabsContent value="yarn">
+
+### npm
+
+npm install
+
+### yarn
+
 yarn install
-  </TabsContent>
-</Tabs>
+
+:::
 ```
 
-Use matching, unique values for triggers and panels. Set `defaultValue` to an
-enabled tab and give the list an accessible label. The icon-only copy button
-copies the selected panel as plain text, without its tab label or button text.
+Use the arrow keys to move between tabs and Enter or Space to select one.
+The icon-only copy button copies the selected panel as plain text, including
+complete code blocks. Each group maintains its own selection.
 
 ## Combine with Markdown
 
-Each group maintains its own selection. Panels support normal Markdown and RDX components.
+Panels support paragraphs, lists, code blocks, Callouts and other RDX components.
+Use `####` or deeper headings for subsections inside a panel. Direct `###`
+headings are reserved for tab labels within the container.
 
-<Tabs defaultValue="development">
-  <TabsList aria-label="Environment">
-    <TabsTrigger value="development">Development</TabsTrigger>
-    <TabsTrigger value="production">Production</TabsTrigger>
-    <TabsTrigger value="preview" disabled>Disabled example</TabsTrigger>
-  </TabsList>
-  <TabsContent value="development">
+:::tabs
 
-<Callout variant="tip" title="Live updates">
+### Development
 
-Run `pnpm dev` and edit your documentation to see changes locally.
+> [!TIP] Live updates
+> Keep the development server running while editing your documentation.
 
-</Callout>
+### Production
 
-  </TabsContent>
-  <TabsContent value="production">
+1. Build your documentation.
+2. Start the production server to check the result.
 
-1. Run `pnpm build`.
-2. Run `pnpm start` to check the production site.
+:::
 
-  </TabsContent>
-</Tabs>
+## Disable a tab
+
+Add `{disabled}` after the tab title. The label stays visible and the tab cannot
+be activated. The first enabled tab is selected automatically; each group must
+have at least one enabled tab.
+
+```md
+:::tabs
+
+### pnpm
+
+pnpm dev
+
+### npm {disabled}
+
+npm run dev
+
+### yarn {disabled}
+
+yarn dev
+
+:::
+```
+
+:::tabs
+
+### pnpm
+
+pnpm dev
+
+### npm {disabled}
+
+npm run dev
+
+### yarn {disabled}
+
+yarn dev
+
+:::
