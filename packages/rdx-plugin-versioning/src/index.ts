@@ -57,6 +57,18 @@ function parseVersions(filename: string): Versions {
   return value as Versions
 }
 
+function writeVersions(filename: string, versions: Versions) {
+  const temporaryFile = `${filename}.${randomUUID()}.tmp`
+  try {
+    fs.writeFileSync(temporaryFile, JSON.stringify(versions, null, 2) + '\n', {
+      flag: 'wx',
+    })
+    fs.renameSync(temporaryFile, filename)
+  } finally {
+    if (fs.existsSync(temporaryFile)) fs.unlinkSync(temporaryFile)
+  }
+}
+
 function inside(parent: string, child: string) {
   const relative = path.relative(parent, child)
   return (
@@ -209,25 +221,62 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
               }
             )
           }
-          const temporaryFile = `${versionsFile}.${randomUUID()}.tmp`
-          fs.writeFileSync(
-            temporaryFile,
-            JSON.stringify(
-              {
-                active: [version, ...versions.active],
-                archived: versions.archived,
-              },
-              null,
-              2
-            ) + '\n',
-            { flag: 'wx' }
-          )
-          fs.renameSync(temporaryFile, versionsFile)
+          writeVersions(versionsFile, {
+            active: [version, ...versions.active],
+            archived: versions.archived,
+          })
           console.log(
             `RDX version ${version} created in ${path.relative(context.rootDir, snapshotDir)}`
           )
         },
       },
+      ...(['archive', 'unarchive'] as const).map((name) => ({
+        name,
+        description: `${name === 'archive' ? 'Archive' : 'Restore'} a documentation snapshot: rdx ${name} <version>`,
+        run(context: RdxPluginContext & { args: string[] }) {
+          if (context.args.length !== 1)
+            throw new Error(`Usage: rdx ${name} <version>`)
+          const version = context.args[0]
+          validateVersion(version)
+          const { versionsFile, versionsDir } = locations(context, options)
+          const versions = parseVersions(versionsFile)
+          const from = name === 'archive' ? 'active' : 'archived'
+          const to = name === 'archive' ? 'archived' : 'active'
+          if (
+            !versions[from].includes(version) &&
+            !versions[to].includes(version)
+          )
+            throw new Error(
+              `Version "${version}" does not exist in ${versionsFile}.`
+            )
+          const snapshotDir = path.join(
+            /* turbopackIgnore: true */ versionsDir,
+            `version-${version}`
+          )
+          if (
+            !fs.existsSync(/* turbopackIgnore: true */ snapshotDir) ||
+            !fs.statSync(/* turbopackIgnore: true */ snapshotDir).isDirectory()
+          )
+            throw new Error(
+              `Snapshot for "${version}" is missing at ${snapshotDir}. Restore the snapshot before running "rdx ${name}".`
+            )
+          if (versions[to].includes(version)) {
+            console.log(
+              `RDX version ${version} is already ${to === 'archived' ? 'archived' : 'active'}.`
+            )
+            return
+          }
+          writeVersions(versionsFile, {
+            ...versions,
+            [from]: versions[from].filter((entry) => entry !== version),
+            // Restoring an old snapshot must not promote it to the current edition.
+            [to]: [...versions[to], version],
+          })
+          console.log(
+            `RDX version ${version} ${name === 'archive' ? 'archived' : 'restored to active versions'}.`
+          )
+        },
+      })),
     ],
   }
 }
