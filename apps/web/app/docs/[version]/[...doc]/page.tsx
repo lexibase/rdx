@@ -50,11 +50,19 @@ export default async function DocPage({
   )
   if (!result) return notFound()
   const { content } = result
+  const pages = documentation
+    .categories(version)
+    .flatMap((category) => category.links)
+  const href = `/docs/${version}/${filename}`
+  const pageIndex = pages.findIndex((page) => page.href === href)
 
   return (
     <>
       {config.TOC && <DocsToc key={`${version}/${doc.join('/')}`} />}
-      <DocsPageTransition>
+      <DocsPageTransition
+        previousHref={pages[pageIndex - 1]?.href}
+        nextHref={pages[pageIndex + 1]?.href}
+      >
         <section
           className={`w-full min-h-full bg-background px-7 flex flex-col gap-5 pb-8 md:py-8 ${config.TOC ? 'xl:pr-20' : ''}`}
         >

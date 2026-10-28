@@ -245,7 +245,10 @@ export async function DocsPage({
           className="relative flex-1 min-w-0 h-full overflow-y-auto pt-12 md:pt-0 outline-none"
         >
           {project.config.TOC && <DocsToc key={hrefFor(currentSlug)} />}
-          <DocsPageTransition>
+          <DocsPageTransition
+            previousHref={previous ? hrefFor(previous.slug) : undefined}
+            nextHref={next ? hrefFor(next.slug) : undefined}
+          >
             <section
               className={`w-full min-h-full bg-background px-7 flex flex-col gap-5 pb-8 md:py-8 ${project.config.TOC ? 'xl:pr-20' : ''}`}
             >

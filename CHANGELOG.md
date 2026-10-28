@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Support horizontal touch swipes between adjacent mobile documentation pages,
+  preserving vertical scrolling, selection, interactive content and edge gestures.
+
 - Limit smooth document scrolling to the TOC's desktop breakpoint so it does
   not compete with mobile page transitions.
 
