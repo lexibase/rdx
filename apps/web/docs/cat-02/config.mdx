@@ -71,18 +71,21 @@ export default defineConfig({
 })
 ```
 
-| Option | Default | Purpose |
-| :----- | :------ | :------ |
-| `description` | Empty | Default site description |
-| `lang` | `en` | HTML and interface language |
-| `search` | `false` | Navbar search dialog |
-| `TOC` | `false` | Floating heading navigation |
-| `homepage.enabled` | `false` | Homepage instead of redirecting to docs |
-| `theme.defaultTheme` | `system` | `system`, `light`, or `dark` |
-| `plugins` | Empty array | Explicitly activated plugins |
+| Option               | Default     | Purpose                                 |
+| :------------------- | :---------- | :-------------------------------------- |
+| `description`        | Empty       | Default site description                |
+| `lang`               | `en`        | HTML and interface language             |
+| `search`             | `false`     | Navbar search dialog                    |
+| `TOC`                | `false`     | Floating heading navigation             |
+| `homepage.enabled`   | `false`     | Homepage instead of redirecting to docs |
+| `theme.defaultTheme` | `system`    | `system`, `light`, or `dark`            |
+| `plugins`            | Empty array | Explicitly activated plugins            |
 
 The creator includes the GitHub action with a `#` placeholder and the theme
 toggle enabled. Replace the placeholder with your own repository URL.
+
+Use an optional [rdx.css stylesheet](../cat-04/appearance.mdx) to customize the
+highlight color for light and dark themes.
 
 `lang` sets the HTML language and translates built-in interface labels:
 
@@ -164,4 +167,3 @@ to install and configure the optional versioning feature.
 Write your documentation in `docs/`.
 Do not edit files inside `.rdx/`. Restart development after changing configuration,
 and rebuild/redeploy for production.
-

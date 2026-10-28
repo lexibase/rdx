@@ -116,6 +116,7 @@ const required = {
     'bin/rdx.mjs',
     'bin/add-plugin.mjs',
     'bin/public-assets.mjs',
+    'bin/project-styles.mjs',
     'dist/runtime/index.js',
     'dist/runtime/index.d.ts',
     'templates/runtime/app/rdx-search/[source]/route.ts',

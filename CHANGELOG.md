@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Load an optional project-owned rdx.css, with --rdx-highlighting overrides for
+  links, focus and selected states in light and dark themes without replacing
+  user files or changing the approved default theme.
+
 - Support horizontal touch swipes between adjacent mobile documentation pages,
   preserving vertical scrolling, selection, interactive content and edge gestures.
 

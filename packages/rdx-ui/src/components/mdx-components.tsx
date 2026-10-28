@@ -105,10 +105,7 @@ export const mdxComponents = {
     />
   ),
   a: ({ className, children, ...props }: ComponentProps<'a'>) => (
-    <a
-      className={cn('underline text-chart-1 text-blue-500', className)}
-      {...props}
-    >
+    <a className={cn('underline text-rdx-highlighting', className)} {...props}>
       {linkedImages(children)}
     </a>
   ),
