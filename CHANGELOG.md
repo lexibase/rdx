@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Restore Motion-based mobile sidebar entry/exit from the left in the shared
+  theme, using the shadcn Base UI Sheet. Keep navigation visible through exit,
+  support Escape, focus restoration and responsive closure, and honor reduced
+  motion preferences.
+
 - Support `{disabled}` on Markdown tab headings, select the first enabled tab,
   and omit unavailable panels from rendering/search. Update current guides and
   starter examples to teach component authoring through Markdown.

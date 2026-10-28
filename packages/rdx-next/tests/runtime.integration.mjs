@@ -17,6 +17,7 @@ import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
 import { verifyMermaid } from './helpers/mermaid-browser.mjs'
+import { verifyMobileSidebarMotion } from './helpers/mobile-sidebar-browser.mjs'
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url))
 const require = createRequire(path.join(packageRoot, 'package.json'))
@@ -1816,6 +1817,7 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         await navigation.waitFor()
         await page.keyboard.press('Escape')
         await navigation.waitFor({ state: 'hidden' })
+        await verifyMobileSidebarMotion(page, running.base)
         await verifyMermaid(page, running.base)
         assert.deepEqual(errors, [])
       } finally {

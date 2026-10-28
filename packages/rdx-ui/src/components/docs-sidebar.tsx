@@ -4,9 +4,17 @@ import { useMessages } from '../providers/locale-provider'
 
 import { useEffect, useRef, useState } from 'react'
 import { SidebarClose, SidebarOpen } from 'lucide-react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 
 import { Button } from './button'
 import { Separator } from './separator'
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from './sheet'
 
 export type SidebarCategory = {
   title: string
@@ -21,13 +29,28 @@ export function DocsSidebar({
   pathname: string
 }) {
   const messages = useMessages()
-  const [openPath, setOpenPath] = useState<string | null>(null)
-  const isOpen = openPath === pathname
-  const dialog = useRef<HTMLDialogElement>(null)
+  const [isOpen, setOpen] = useState(false)
+  const open = useRef(false)
+  const actions = useRef<{ close: () => void; unmount: () => void } | null>(
+    null
+  )
+  const previousPath = useRef(pathname)
+  const reducedMotion = useReducedMotion()
+
+  // Route changes (including browser history) must use the same closing phase
+  // as Escape and the close button, keeping the content mounted until exit ends.
   useEffect(() => {
-    if (isOpen && !dialog.current?.open) dialog.current?.showModal()
-    if (!isOpen && dialog.current?.open) dialog.current?.close()
-  }, [isOpen])
+    if (previousPath.current !== pathname) actions.current?.close()
+    previousPath.current = pathname
+  }, [pathname])
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 768px)')
+    const closeOnDesktop = () => {
+      if (desktop.matches) actions.current?.close()
+    }
+    desktop.addEventListener('change', closeOnDesktop)
+    return () => desktop.removeEventListener('change', closeOnDesktop)
+  }, [])
   const content = (
     <nav aria-label={messages.documentationPages}>
       {categories.map((category, index) => (
@@ -46,7 +69,7 @@ export function DocsSidebar({
               active={pathname === link.href}
               aria-label={link.label}
               href={link.href}
-              onClick={() => setOpenPath(null)}
+              onClick={() => actions.current?.close()}
               aria-current={pathname === link.href ? 'page' : undefined}
               className="justify-start text-sm text-primary"
             >
@@ -59,15 +82,22 @@ export function DocsSidebar({
     </nav>
   )
   return (
-    <>
+    <Sheet
+      open={isOpen}
+      actionsRef={actions}
+      onOpenChange={(nextOpen, details) => {
+        if (!nextOpen) details.preventUnmountOnClose()
+        open.current = nextOpen
+        setOpen(nextOpen)
+      }}
+    >
       <div className="md:hidden absolute top-2 left-4 z-30">
-        <Button
-          variant="ghost"
-          onClick={() => setOpenPath(pathname)}
+        <SheetTrigger
+          render={<Button variant="ghost" />}
           aria-label={messages.openSidebar}
         >
           <SidebarOpen className="size-4" />
-        </Button>
+        </SheetTrigger>
       </div>
       <aside
         data-rdx-sidebar
@@ -75,23 +105,51 @@ export function DocsSidebar({
       >
         {content}
       </aside>
-      <dialog
-        ref={dialog}
-        aria-label={messages.documentationNavigation}
-        onClose={() => setOpenPath(null)}
-        className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none bg-background text-foreground border-0 p-4 backdrop:bg-black/40"
-      >
-        <div className="flex justify-end mb-4">
-          <Button
-            variant="ghost"
-            onClick={() => setOpenPath(null)}
-            aria-label={messages.closeSidebar}
+      <AnimatePresence>
+        {isOpen && (
+          <SheetContent
+            key="mobile-sidebar"
+            side="left"
+            showCloseButton={false}
+            portalProps={{ keepMounted: true }}
+            data-rdx-mobile-sidebar
+            className="md:hidden w-full! max-w-none! h-dvh border-0 bg-background text-foreground gap-0 p-4 overflow-y-auto translate-none! opacity-100! transition-none!"
+            render={
+              <motion.div
+                initial="closed"
+                animate="open"
+                exit="closed"
+                variants={{
+                  closed: { x: reducedMotion ? 0 : '-100%' },
+                  open: { x: 0 },
+                }}
+                transition={
+                  reducedMotion
+                    ? { duration: 0 }
+                    : { type: 'spring', stiffness: 300, damping: 30 }
+                }
+                onAnimationComplete={(phase) => {
+                  if (phase === 'closed' && !open.current)
+                    actions.current?.unmount()
+                }}
+              />
+            }
           >
-            <SidebarClose className="size-4" />
-          </Button>
-        </div>
-        {isOpen && content}
-      </dialog>
-    </>
+            <SheetTitle className="sr-only">
+              {messages.documentationNavigation}
+            </SheetTitle>
+            <div className="flex justify-end mb-4">
+              <SheetClose
+                render={<Button variant="ghost" />}
+                aria-label={messages.closeSidebar}
+              >
+                <SidebarClose className="size-4" />
+              </SheetClose>
+            </div>
+            {content}
+          </SheetContent>
+        )}
+      </AnimatePresence>
+    </Sheet>
   )
 }
