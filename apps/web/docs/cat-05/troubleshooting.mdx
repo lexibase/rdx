@@ -49,6 +49,11 @@ see the [pnpm 11.9 release notes](https://github.com/pnpm/pnpm/releases/tag/v11.
 Run `pnpm install`, then retry your original command. The package manager
 applies the updated approvals while retaining the age policy for other releases.
 
+For a persistent exception covering all versions of Lexibase packages, use the
+`'@lexibase/*'` pattern described in [pnpm workspaces](../cat-02/installation.mdx#pnpm-workspaces).
+This includes RDX's internal packages and creator, so the exclusion can stay the
+same across updates. Packages outside that scope retain their age policy.
+
 If `rdx add versioning` fails, inspect the reported error and any package or
 lockfile changes before retrying activation.
 
