@@ -45,7 +45,7 @@ export function Home() {
     : '/* RDX uses its default highlights without an override. */'
 
   return (
-    <main
+    <div
       data-rdx-home
       className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
     >
@@ -265,6 +265,6 @@ export function Home() {
           </Button>
         </div>
       </section>
-    </main>
+    </div>
   )
 }

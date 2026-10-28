@@ -4,6 +4,7 @@ import '@lexibase/rdx-ui/globals.css'
 import '../rdx.css'
 import { LocaleProvider } from '@lexibase/rdx-ui/providers/locale-provider'
 import { ThemeProvider } from '@lexibase/rdx-ui/providers/theme-provider'
+import { SkipLink } from '@lexibase/rdx-ui/components/skip-link'
 import { getRdxMetadata } from '@lexibase/rdx-next/runtime'
 
 import { Navbar } from '@/components/layout/Navbar'
@@ -49,6 +50,7 @@ export default async function RootLayout({
           defaultTheme={config.theme?.defaultTheme ?? 'system'}
         >
           <LocaleProvider lang={config.lang}>
+            <SkipLink lang={config.lang} />
             <VersionProvider editions={editions}>
               <div className="flex flex-col h-screen">
                 <Navbar />

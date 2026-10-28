@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Share a localized skip-to-content link between the official site and generated
+  projects. Include the document heading in its focus target and provide the
+  same keyboard destination on the homepage.
+
 - Render complete Markdown keyboard shortcuts such as `:kbd[Ctrl + K]` using
   shared shadcn keys and a single localized text alternative. Preserve separate
   key syntax, literal plus keys, search text and tab clipboard content.

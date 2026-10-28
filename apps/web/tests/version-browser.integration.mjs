@@ -8,6 +8,7 @@ import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 
 import { verifyHomePreview } from './helpers/home-browser.mjs'
+import { verifySkipLink } from '../../../packages/rdx-next/tests/helpers/skip-link-browser.mjs'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const require = createRequire(path.join(root, 'package.json'))
@@ -110,6 +111,8 @@ test(
           const errors = []
           page.on('pageerror', (error) => errors.push(error.message))
           await page.setViewportSize({ width: 1872, height: 955 })
+          await verifySkipLink(page, running.base, '/docs/canary/docs')
+          await verifySkipLink(page, running.base, '/')
           await page.goto(`${running.base}/docs/canary/docs`)
           const versionTrigger = page.locator('[data-rdx-version-trigger]')
           for (const width of [360, 390, 640, 1280]) {

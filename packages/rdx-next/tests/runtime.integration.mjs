@@ -23,6 +23,7 @@ import { verifyMobilePageTransitions } from './helpers/page-transition-browser.m
 import { verifyMobilePageSwipe } from './helpers/page-swipe-browser.mjs'
 import { verifyHighlighting } from './helpers/highlighting-browser.mjs'
 import { verifyKeyboardShortcuts } from './helpers/keyboard-browser.mjs'
+import { verifySkipLink } from './helpers/skip-link-browser.mjs'
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url))
 const require = createRequire(path.join(packageRoot, 'package.json'))
@@ -1843,6 +1844,7 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         await verifyHighlighting(page, running.base)
         await verifyMermaid(page, running.base)
         await verifyKeyboardShortcuts(page, running.base)
+        await verifySkipLink(page, running.base)
         assert.deepEqual(errors, [])
       } finally {
         await browser.close()
