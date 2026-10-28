@@ -3,6 +3,8 @@ import type { RDXConfig } from '@lexibase/rdx-types'
 import { versioning } from '@lexibase/rdx-versioning'
 import { Logo } from '@lexibase/rdx-ui/components/logo'
 
+import { Home } from './components/home'
+
 const config = {
   // Site identity, SEO and link previews. '/' paths refer to files in public/.
   metadata: {
@@ -55,7 +57,7 @@ const config = {
   // HTML and interface language: 'en' or 'pt-BR'. Your documents stay as written.
   lang: 'en',
   // When disabled, '/' redirects to '/docs'. A custom component can be provided.
-  homepage: { enabled: true },
+  homepage: { enabled: true, component: Home },
   // Installed plugins only become active when registered here.
   plugins: [versioning()],
   // Floating heading navigation; shown only on pages with enough sections.

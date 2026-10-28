@@ -7,6 +7,8 @@ import process from 'node:process'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 
+import { verifyHomePreview } from './helpers/home-browser.mjs'
+
 const root = fileURLToPath(new URL('../', import.meta.url))
 const require = createRequire(path.join(root, 'package.json'))
 const { getMessages, formatMessage } = require('@lexibase/rdx-ui/lib/i18n')
@@ -195,6 +197,7 @@ test(
             `${mode}: short final section keeps the documentation viewport in place`
           )
           await page.goto(running.base)
+          await verifyHomePreview(page, running.base)
           await page
             .getByRole('button', { name: triggerLabel('Canary') })
             .waitFor()

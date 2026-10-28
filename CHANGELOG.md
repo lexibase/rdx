@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Keep production timeout checks valid when a slow process has not printed its
+  startup log before the deadline, while checking cleanup for initialized processes.
+
+- Add an interactive highlight palette preview to the RDX website homepage,
+  using shared documentation components and copyable project CSS.
+
 - Load an optional project-owned rdx.css, with --rdx-highlighting overrides for
   links, focus and selected states in light and dark themes without replacing
   user files or changing the approved default theme.

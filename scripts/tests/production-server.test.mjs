@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { createServer } from 'node:net'
 import path from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
 
@@ -112,6 +113,7 @@ test(
   'production harness bounds startup waits and stops an unready process',
   { timeout: 20_000 },
   async () => {
+    const started = performance.now()
     await assert.rejects(
       withProductionServer(
         path.join(cwd, 'waiting-server.mjs'),
@@ -119,7 +121,21 @@ test(
         () => assert.fail('must not verify'),
         { timeoutMs: 2_000 }
       ),
-      /did not become ready[\s\S]*Intentional startup timeout/
+      (error) => {
+        assert.match(error.message, /did not become ready within 2000ms/)
+        // A slow machine may time out before Node executes the fixture at all.
+        // Log capture is covered separately by the startup-failure test.
+        const pid = error.message.match(
+          /Intentional startup timeout \(PID (\d+)\)/
+        )?.[1]
+        if (pid)
+          assert.throws(() => process.kill(Number(pid), 0), { code: 'ESRCH' })
+        return true
+      }
+    )
+    assert.ok(
+      performance.now() - started < 15_000,
+      'Startup and cleanup remain bounded'
     )
   }
 )

@@ -1,1 +1,86 @@
 /* Project-owned styles are loaded after the shared RDX theme. */
+/* Rebind aliases at the preview boundary: inherited root aliases have already
+   resolved their variables and would otherwise retain the site's colors. */
+.rdx-home-preview {
+  --rdx-highlighting: var(--preview-light);
+  --preview-default-accent: oklch(0.97 0 0);
+  --preview-default-ring: oklch(0.708 0 0);
+  --rdx-highlighting-soft: color-mix(
+    in oklab,
+    var(--rdx-highlighting) 14%,
+    var(--background)
+  );
+  --accent: var(--rdx-highlighting-soft, var(--preview-default-accent));
+  --accent-foreground: var(--rdx-highlighting, var(--foreground));
+  --ring: var(--rdx-highlighting, var(--preview-default-ring));
+}
+
+.dark .rdx-home-preview {
+  --rdx-highlighting: var(--preview-dark);
+  --preview-default-accent: oklch(0.269 0 0);
+  --preview-default-ring: oklch(0.556 0 0);
+}
+
+.rdx-home-stage {
+  position: relative;
+  isolation: isolate;
+}
+
+.rdx-home-copy,
+.rdx-home-css {
+  position: relative;
+  z-index: 1;
+}
+
+.rdx-home-preview-shell {
+  width: calc(100% + 2rem);
+  transform: perspective(1400px) rotateY(-12deg) rotateX(4deg) rotateZ(1deg);
+  transform-origin: center;
+}
+
+@media (max-width: 1023px) {
+  .rdx-home-stage {
+    overflow: clip;
+    row-gap: 1.25rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .rdx-home-copy {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .rdx-home-preview-shell {
+    position: absolute;
+    z-index: 0;
+    top: 1.5rem;
+    left: max(13rem, calc(100% - 8.5rem));
+    width: 40rem;
+    height: 33rem;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0.95;
+    transform: perspective(1400px) rotateY(-12deg) rotateX(4deg) rotateZ(1deg)
+      scale(0.56);
+    transform-origin: top left;
+    mask-image: linear-gradient(to bottom, black, black 65%, transparent);
+  }
+
+  .rdx-home-preview-shell > p {
+    display: none;
+  }
+
+  .rdx-home-preview-sidebar {
+    display: block;
+  }
+}
+
+@media (max-width: 374px), (max-width: 1023px) and (max-height: 740px) {
+  .rdx-home-preview-shell {
+    transform: perspective(1400px) rotateY(-12deg) rotateX(4deg) rotateZ(1deg)
+      scale(0.48);
+  }
+}
