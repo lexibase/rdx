@@ -701,6 +701,10 @@ Native markup: <kbd>Enter</kbd>.
   assert.equal((html.match(/data-slot="kbd-group"/g) ?? []).length, 2)
   assert.match(html, /<kbd\b[^>]*data-slot="kbd"[^>]*>Esc<\/kbd>/)
   assert.match(html, /aria-label="Control plus K"/)
+  assert.match(
+    html,
+    /data-slot="kbd-group"[^>]*role="group"[^>]*aria-label="Control plus K"/
+  )
   assert.match(html, /h-5 w-fit min-w-5/)
   assert.match(html, /<td\b[^>]*>[\s\S]*data-slot="kbd-group"/)
   assert.match(html, /<kbd>Enter<\/kbd>/)

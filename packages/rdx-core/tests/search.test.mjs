@@ -107,7 +107,7 @@ test('natural Markdown components index labels and hidden content under reachabl
       category: 'Docs',
       href: '/docs/1.0/guide',
       content:
-        '## Usage\n\n> [!TIP] Useful title\n> Press :kbd[Enter].\n\n:::tabs\n\n### pnpm\n\nFirst command\n\n### npm\n\n#### Hidden detail\n\nSecond command\n\n:::\n\n:::accordion\n\n### Question\n\nAnswer\n\n:::\n\n## Hidden detail\n\nVisible section',
+        '## Usage\n\n> [!TIP] Useful title\n> Press :kbd[Enter] or :kbd[Ctrl + K].\n\n:::tabs\n\n### pnpm\n\nFirst command\n\n### npm\n\n#### Hidden detail\n\nSecond command\n\n:::\n\n:::accordion\n\n### Question\n\nAnswer\n\n:::\n\n## Hidden detail\n\nVisible section',
     },
   ])
   assert.deepEqual(
@@ -119,6 +119,7 @@ test('natural Markdown components index labels and hidden content under reachabl
     ]
   )
   assert.match(index.entries[1].text, /Useful title Press Enter/)
+  assert.match(index.entries[1].text, /Ctrl \+ K/)
   assert.match(
     index.entries[1].text,
     /pnpm npm First command Hidden detail Second command Question Answer/

@@ -232,7 +232,12 @@ export function remarkDocumentationComponents(
             throw new Error('[RDX] Write keyboard keys as :kbd[Ctrl].')
           const key = label(node.children ?? [])
           if (!key) throw new Error('[RDX] :kbd[...] requires a key name.')
-          return component('Kbd', {}, [{ type: 'text', value: key }], true)
+          return component(
+            /\s+\+\s+/.test(key) ? 'KeyboardShortcut' : 'Kbd',
+            {},
+            [{ type: 'text', value: key }],
+            true
+          )
         }
         if (node.type !== 'containerDirective')
           throw new Error(

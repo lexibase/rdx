@@ -25,6 +25,7 @@ function panelText(node: Node): string {
     )
   )
     return ''
+  if (node.dataset.rdxKbdValue !== undefined) return node.dataset.rdxKbdValue
   if (node.matches('[data-rdx-code-block], [data-slot="code-block"]')) {
     const pre = node.querySelector('pre')
     const lines = pre?.querySelectorAll('[data-slot="code-block-line-content"]')

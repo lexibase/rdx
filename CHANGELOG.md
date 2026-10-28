@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Render complete Markdown keyboard shortcuts such as `:kbd[Ctrl + K]` using
+  shared shadcn keys and a single localized text alternative. Preserve separate
+  key syntax, literal plus keys, search text and tab clipboard content.
+  Give explicitly named KbdGroup compositions a group role that supports naming.
+
 ## 3.1.0 — Prepared
 
 - Keep production timeout checks valid when a slow process has not printed its

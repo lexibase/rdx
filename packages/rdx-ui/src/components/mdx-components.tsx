@@ -29,6 +29,7 @@ import {
 } from './code-block'
 import { MdxCodeBlock } from './mdx-code-block'
 import { Kbd, KbdGroup } from './kbd'
+import { MdxKeyboardShortcut } from './mdx-keyboard-shortcut'
 import {
   Table,
   TableBody,
@@ -154,6 +155,7 @@ export const mdxComponents = {
   CodeBlockTitle,
   Kbd,
   KbdGroup,
+  KeyboardShortcut: MdxKeyboardShortcut,
   Table,
   TableHeader,
   TableBody,
@@ -187,6 +189,9 @@ export const mdxComponents = {
 export function getMdxComponents(lang?: string) {
   return {
     ...mdxComponents,
+    KeyboardShortcut: (props: { children?: ReactNode }) => (
+      <MdxKeyboardShortcut {...props} lang={lang} />
+    ),
     pre: (props: ComponentProps<'pre'>) => (
       <MdxCodeBlock {...props} lang={lang} />
     ),

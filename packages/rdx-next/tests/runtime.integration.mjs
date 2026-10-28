@@ -22,6 +22,7 @@ import { verifyCodePreviewMotion } from './helpers/code-preview-browser.mjs'
 import { verifyMobilePageTransitions } from './helpers/page-transition-browser.mjs'
 import { verifyMobilePageSwipe } from './helpers/page-swipe-browser.mjs'
 import { verifyHighlighting } from './helpers/highlighting-browser.mjs'
+import { verifyKeyboardShortcuts } from './helpers/keyboard-browser.mjs'
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url))
 const require = createRequire(path.join(packageRoot, 'package.json'))
@@ -185,6 +186,13 @@ test(
       JSON.stringify({ title: 'Init', sidebar_position: 0 })
     )
     const configPath = path.join(rootDir, 'rdx.config.ts')
+    await writeFile(
+      path.join(rootDir, 'docs/init/keyboard.mdx'),
+      await readFile(
+        new URL('./fixtures/keyboard.mdx', import.meta.url),
+        'utf8'
+      )
+    )
     await writeFile(
       path.join(rootDir, 'docs/init/mermaid.mdx'),
       await readFile(new URL('./fixtures/mermaid.mdx', import.meta.url), 'utf8')
@@ -1834,6 +1842,7 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         await verifyMobilePageSwipe(page, running.base)
         await verifyHighlighting(page, running.base)
         await verifyMermaid(page, running.base)
+        await verifyKeyboardShortcuts(page, running.base)
         assert.deepEqual(errors, [])
       } finally {
         await browser.close()
