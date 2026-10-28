@@ -253,7 +253,7 @@ test(
         '\n\n| Wide column | Status |\n| --- | --- |\n| ' +
         'LongTableValue'.repeat(30) +
         ' | Ready |\n\n```text\n' +
-        'LongCodeValue'.repeat(30) +
+        'LongCodeValue'.repeat(60) +
         '\n```\n'
     )
     await writeFile(
@@ -1663,6 +1663,26 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         })
         await longWrap.click()
         await longBlock.locator('pre[data-wrap="true"]').waitFor()
+        const showMore = longBlock.getByRole('button', {
+          name: 'Show more',
+          exact: true,
+        })
+        await showMore.waitFor()
+        assert.equal(await showMore.getAttribute('aria-expanded'), 'false')
+        assert.equal(
+          await showMore.getAttribute('aria-controls'),
+          await longBlock.locator('pre').getAttribute('id')
+        )
+        await showMore.focus()
+        await page.keyboard.press('Enter')
+        const showLess = longBlock.getByRole('button', {
+          name: 'Show less',
+          exact: true,
+        })
+        await showLess.waitFor()
+        assert.equal(await showLess.getAttribute('aria-expanded'), 'true')
+        await page.keyboard.press('Enter')
+        await showMore.waitFor()
         assert.ok(
           await longBlock
             .locator('pre')

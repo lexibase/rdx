@@ -4,21 +4,138 @@ description: Highlight code, compare changes, and draw directory trees.
 link_position: 5
 ---
 
+All fence options are optional. Use a plain block, add a language for highlighting,
+or combine the options below when they help explain an example.
+
+## Plain code
+
+Write a fence without a language or options:
+
+````md
+```
+Hello, RDX!
+```
+````
+
+```
+Hello, RDX!
+```
+
+The header uses the default code label, with no syntax highlighting or line numbers.
+
 ## Highlight a language
 
 Add the language after the opening triple backticks. For example, use
 `ts`, `tsx`, `js`, `json`, `bash`, `py`, `css`, or `sql`.
 
-```ts
-const site = {
-  name: 'My documentation',
-  search: true,
+````md
+```tsx
+export function Welcome() {
+  return <h1>Hello, RDX!</h1>
+}
+```
+````
+
+```tsx
+export function Welcome() {
+  return <h1>Hello, RDX!</h1>
 }
 ```
 
 Highlighting runs on the server with Shiki. Its palette follows the light/dark
 theme. Unknown languages and unlabelled fences remain readable as plain text;
 inline code is not highlighted.
+
+## Show a filename
+
+Add `title="rdx.config.ts"` after the language to display a filename or label in
+the header:
+
+````md
+```ts title="rdx.config.ts"
+import { defineConfig } from '@lexibase/rdx'
+
+export default defineConfig({
+  metadata: { applicationName: 'My documentation' },
+  search: true,
+})
+```
+````
+
+```ts title="rdx.config.ts"
+import { defineConfig } from '@lexibase/rdx'
+
+export default defineConfig({
+  metadata: { applicationName: 'My documentation' },
+  search: true,
+})
+```
+
+Use quotes for titles with spaces, such as `title="Install dependencies"`.
+Titles also work with `text`, `diff`, and `folder` fences. The language continues
+to control highlighting, and the copy button copies only the block content.
+Without a title, the header shows the language or the default block label.
+
+## Number lines
+
+Add only `lineNumbers` after the language to display numbers starting at 1.
+A title and starting value are optional:
+
+````md
+```tsx lineNumbers
+export function Welcome() {
+  return <h1>Hello, RDX!</h1>
+}
+```
+````
+
+```tsx lineNumbers
+export function Welcome() {
+  return <h1>Hello, RDX!</h1>
+}
+```
+
+Omit `lineNumbers` to keep numbers hidden. Numbering works with highlighted code,
+plain text, `diff`, and `folder` fences. The copy button excludes the numbers.
+
+## Set the starting line
+
+Add `startLine=20` alongside `lineNumbers` for a fragment from a larger file.
+You can leave out the title:
+
+````md
+```ts lineNumbers startLine=20
+const enabled = true
+
+console.log(enabled)
+```
+````
+
+```ts lineNumbers startLine=20
+const enabled = true
+
+console.log(enabled)
+```
+
+`startLine` must be a positive integer. Omit it to start at 1; it only sets the
+starting value when `lineNumbers` is present. Blank lines in code count as lines,
+and wrapping a long line keeps its original number.
+
+## Combine options
+
+Add a title when you want the filename alongside the custom starting line:
+
+````md
+```ts title="example.ts" lineNumbers startLine=20
+const enabled = true
+console.log(enabled)
+```
+````
+
+```ts title="example.ts" lineNumbers startLine=20
+const enabled = true
+console.log(enabled)
+```
 
 ## Copy a block
 
@@ -34,6 +151,15 @@ On small screens, use the wrap-lines icon in the header to toggle line wrapping
 for that block.
 Wrapping starts disabled so indentation stays intact. The copy button keeps the
 original text and line breaks in either mode.
+
+## Long blocks on mobile
+
+On screens narrower than 768px, blocks taller than about 12 visible lines show
+a preview with a **Show more** button. Use **Show less** to return to the preview.
+This happens automatically, including when wrapping makes a block taller.
+
+Short blocks and desktop views show the complete content. The copy button
+always copies the full block, including the portion beyond the preview.
 
 ## Show Markdown source
 
@@ -64,8 +190,42 @@ my-docs/
   rdx.config.ts
 ```
 
-The copy button copies the generated tree. Use a `text` fence for diagrams whose
-branches you have already drawn.
+Names ending in `/` receive a folder icon. File icons follow their extension:
+code, JSON, images, text documents, or a generic file icon. Names without an
+extension use the generic icon.
+
+### ASCII branches
+
+To type the branches explicitly, use these prefixes with a space before the name:
+
+| Type  | Rendered branch |
+| ----- | --------------- |
+| `\|-` | `├──`           |
+| `\|_` | `└──`           |
+| `\|`  | `│`             |
+
+````md
+```folder title="Project files"
+my-docs/
+|- docs/
+|   |_ intro.mdx
+|- package.json
+|_ logo.svg
+```
+````
+
+```folder title="Project files"
+my-docs/
+|- docs/
+|   |_ intro.mdx
+|- package.json
+|_ logo.svg
+```
+
+Prefixes are converted at the start of tree lines; characters inside filenames
+stay literal. You can also paste a tree that already uses Unicode branches.
+The copy button copies the Unicode text diagram without icons. A `text` fence
+keeps the original characters unchanged.
 
 ## Compare changes
 
@@ -73,46 +233,10 @@ Use a `diff` fence. Prefix removed lines with `-`, added lines with `+`, and
 unchanged lines with a space:
 
 ```diff
--const search = false
-+const search = true
+- const search = false
++ const search = true
  console.log(search)
 ```
 
 Removed and added lines use distinct backgrounds and markers. The copy button
 preserves the full patch, including its markers and original line breaks.
-
-## React composition
-
-Custom React components can compose the shadcn Code Block directly:
-
-```tsx
-import {
-  CodeBlock,
-  CodeBlockActions,
-  CodeBlockContent,
-  CodeBlockCopyButton,
-  CodeBlockHeader,
-  CodeBlockTitle,
-} from '@lexibase/rdx/ui/components/code-block'
-
-const code = 'const search = true'
-
-export function SearchExample() {
-  return (
-    <CodeBlock>
-      <CodeBlockHeader>
-        <CodeBlockTitle>config.ts</CodeBlockTitle>
-        <CodeBlockActions>
-          <CodeBlockCopyButton value={code} />
-        </CodeBlockActions>
-      </CodeBlockHeader>
-      <CodeBlockContent lineNumbers>{code}</CodeBlockContent>
-    </CodeBlock>
-  )
-}
-```
-
-`CodeBlockContent` accepts `wrap`, `lineNumbers`, and `startLine`. Use
-`CodeBlockLine` for individual lines with `added`, `removed`, or `highlighted`
-variants, and `CodeBlockFooter` for supporting text. Markdown fences use this
-composition automatically.

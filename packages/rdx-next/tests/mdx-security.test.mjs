@@ -145,6 +145,150 @@ test('unknown, text and unlabelled fences remain readable; inline code stays unc
   }
 })
 
+test('fence titles reach the shadcn header across highlighted, plain, diff and folder blocks without entering copied code', async () => {
+  for (const [language, code, expected] of [
+    ['ts', 'const search = true\n', 'const search = true\n'],
+    ['text', 'plain code\n', 'plain code\n'],
+    ['unknown-rdx-language', 'plain code\n', 'plain code\n'],
+    ['diff', '-old\n+new\n', 'old\nnew\n'],
+    ['folder', 'root/\n  intro.mdx\n', 'root/\n└── intro.mdx\n'],
+  ]) {
+    const { content } = await compileDocumentation(
+      '```' + language + ' title="Project example.ts"\n' + code + '```',
+      mdxComponents
+    )
+    const html = renderToStaticMarkup(content)
+    assert.match(
+      html,
+      /data-slot="code-block-title"[^>]*title="Project example.ts"/
+    )
+    assert.match(html, /Project example.ts<\/div>/)
+    const baseline = await compileDocumentation(
+      '```' + language + '\n' + code + '```',
+      mdxComponents
+    )
+    assert.equal(
+      renderedCodeText(html),
+      renderedCodeText(renderToStaticMarkup(baseline.content)),
+      language
+    )
+    const copyValue = html.match(/data-rdx-code-value="([^"]*)"/)?.[1]
+    assert.equal(copyValue, language === 'folder' ? expected : code, language)
+    if (language === 'ts') assert.match(html, /--shiki-light:/)
+  }
+})
+
+test('fence titles stay literal, support either quote style and ignore nested or incomplete attributes', async () => {
+  const cases = [
+    [`title='Say "Hello".tsx'`, 'Say &quot;Hello&quot;.tsx'],
+    ["title='Project notes.txt'", 'Project notes.txt'],
+    ['title=example.ts', 'example.ts'],
+    ['caption="title=wrong.ts" title="right.ts"', 'right.ts'],
+    [
+      'title="<script>alert(1)</script> & file.ts"',
+      '&lt;script&gt;alert(1)&lt;/script&gt; &amp; file.ts',
+    ],
+    ['title=""', 'ts'],
+    ['title="   "', 'ts'],
+    ['title="incomplete', 'ts'],
+    ['caption="example title=wrong.ts"', 'ts'],
+  ]
+  for (const [meta, expected] of cases) {
+    const { content } = await compileDocumentation(
+      '```ts ' + meta + '\nconst search = true\n```',
+      mdxComponents
+    )
+    const html = renderToStaticMarkup(content)
+    assert.ok(html.includes(`title="${expected}"`), meta)
+    assert.doesNotMatch(html, /<script>/)
+    assert.equal(renderedCodeText(html), 'const search = true\n')
+  }
+})
+
+test('Markdown numbering uses the official line composition, respects starting values and preserves copied source', async () => {
+  for (const language of [
+    'ts',
+    'text',
+    'unknown-rdx-language',
+    'diff',
+    'folder',
+  ]) {
+    const code =
+      language === 'folder'
+        ? 'root/\n  index.mdx\n'
+        : language === 'diff'
+          ? '-old\n+new\n'
+          : 'const first = true\n\nconst last = false\n'
+    const { content } = await compileDocumentation(
+      '```' +
+        language +
+        ' title="Example" lineNumbers startLine=20\n' +
+        code +
+        '```',
+      mdxComponents
+    )
+    const html = renderToStaticMarkup(content)
+    assert.match(html, /data-numbered="true"/)
+    assert.match(html, /counter-reset:line 19/)
+    assert.equal(
+      (html.match(/data-slot="code-block-line"/g) ?? []).length,
+      language === 'folder' || language === 'diff' ? 2 : 3,
+      language
+    )
+    assert.match(html, /title="Example"/)
+    assert.equal(
+      html.match(/data-rdx-code-value="([^"]*)"/)?.[1],
+      language === 'folder' ? 'root/\n└── index.mdx\n' : code
+    )
+    if (language === 'ts') assert.match(html, /--shiki-light:/)
+    if (language === 'diff') {
+      assert.equal((html.match(/data-variant="added"/g) ?? []).length, 1)
+      assert.equal((html.match(/data-variant="removed"/g) ?? []).length, 1)
+    }
+  }
+})
+
+test('numbering flags are literal, opt-in and independent from titles and quoted metadata', async () => {
+  for (const [meta, numbered, counter] of [
+    ['', false, 0],
+    ['lineNumbers', true, 0],
+    ['lineNumbers startLine="8"', true, 7],
+    ['startLine=20', false, 19],
+    ['startLine=20 lineNumbers', true, 19],
+    ['lineNumbers startLine=20', true, 19],
+    ['title="lineNumbers startLine=200"', false, 0],
+    ['caption="lineNumbers startLine=200" title="Example"', false, 0],
+  ]) {
+    const { content } = await compileDocumentation(
+      '```ts ' + meta + '\nconst ready = true\n```',
+      mdxComponents
+    )
+    const html = renderToStaticMarkup(content)
+    assert.equal(html.includes('data-numbered="true"'), numbered, meta)
+    assert.ok(html.includes('counter-reset:line ' + counter), meta)
+  }
+  for (const meta of [
+    'startLine',
+    'startLine=0',
+    'startLine=-1',
+    'startLine=1.5',
+    'startLine=Infinity',
+    'startLine=1e2',
+    'startLine=9007199254740992',
+    'lineNumbers=maybe',
+    'lineNumbers=true',
+    'lineNumbers=false',
+    'lineNumbers="true"',
+  ])
+    await assert.rejects(
+      compileDocumentation(
+        '```ts ' + meta + '\nconst ready = true\n```',
+        mdxComponents
+      ),
+      /Invalid code fence metadata: (startLine|lineNumbers) must be/
+    )
+})
+
 test('diff fences distinguish patch content from headers and preserve the exact copyable patch', async () => {
   const patch =
     'diff --git a/app.ts b/app.ts\n--- a/app.ts\n+++ b/app.ts\n@@ -1,2 +1,3 @@\n-const enabled = false\n+const enabled = true\n+const label = "<script> & RDX"\n console.log(enabled)\n'
@@ -207,6 +351,64 @@ test('folder fences draw nested branches and escaped filenames without changing 
       compileDocumentation('```folder\n' + invalid + '```', mdxComponents),
       /Invalid folder fence at line 2/
     )
+})
+
+test('long Markdown blocks keep their complete server-rendered content before mobile enhancement', async () => {
+  const code =
+    Array.from(
+      { length: 30 },
+      (_, index) => `const value${index} = ${index}`
+    ).join('\n') + '\n'
+  const { content } = await compileDocumentation(
+    '```ts lineNumbers\n' + code + '```\n\n```text\nshort\n```',
+    mdxComponents
+  )
+  const html = renderToStaticMarkup(content)
+  assert.equal(html.match(/data-rdx-code-value="([^"]*)"/)?.[1], code)
+  assert.match(html, /value29/)
+  assert.doesNotMatch(html, /data-rdx-code-collapsed|max-height:|>Show more</)
+  const ids = [...html.matchAll(/<pre\b[^>]*\bid="([^"]+)"/g)].map(
+    (match) => match[1]
+  )
+  assert.equal(ids.length, 2)
+  assert.equal(new Set(ids).size, 2)
+})
+
+test('folder diagrams accept ASCII prefixes without rewriting literal filenames or copied trees', async () => {
+  const source =
+    'project/\n|- docs/\n|   |- intro.mdx\n|   |_ file|name.txt\n|\n|- package.json\n|- preview.PNG\n|- app.tsx\n|- json\n|_ <example>.unknown\n'
+  const diagram =
+    'project/\n├── docs/\n│   ├── intro.mdx\n│   └── file|name.txt\n│\n├── package.json\n├── preview.PNG\n├── app.tsx\n├── json\n└── <example>.unknown\n'
+  for (const input of [source, diagram]) {
+    const { content } = await compileDocumentation(
+      '```folder title="Project files" lineNumbers startLine=5\n' +
+        input +
+        '```',
+      mdxComponents
+    )
+    const html = renderToStaticMarkup(content)
+    assert.equal(renderedCodeText(html), diagram)
+    assert.match(html, /counter-reset:line 4/)
+    assert.match(html, /data-numbered="true"/)
+    assert.equal((html.match(/data-rdx-folder-kind="folder"/g) ?? []).length, 2)
+    assert.equal((html.match(/data-rdx-folder-kind="text"/g) ?? []).length, 2)
+    assert.equal((html.match(/data-rdx-folder-kind="json"/g) ?? []).length, 1)
+    assert.equal((html.match(/data-rdx-folder-kind="image"/g) ?? []).length, 1)
+    assert.equal((html.match(/data-rdx-folder-kind="code"/g) ?? []).length, 1)
+    assert.equal((html.match(/data-rdx-folder-kind="file"/g) ?? []).length, 2)
+    assert.equal((html.match(/data-slot="code-block-line"/g) ?? []).length, 10)
+    assert.doesNotMatch(html, /<example>/)
+    const copy = html.match(/data-rdx-code-value="([^"]*)"/)?.[1]
+    assert.equal(copy?.replaceAll('&lt;', '<').replaceAll('&gt;', '>'), diagram)
+    assert.match(html, /<svg[^>]+aria-hidden="true"/)
+  }
+  const plain = await compileDocumentation(
+    '```text\n' + source + '```',
+    mdxComponents
+  )
+  const html = renderToStaticMarkup(plain.content)
+  assert.equal(renderedCodeText(html), source)
+  assert.doesNotMatch(html, /data-rdx-folder-kind/)
 })
 
 test('all starter documents compile with their real filesystem link context', async () => {

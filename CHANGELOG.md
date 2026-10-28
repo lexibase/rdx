@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased
+
+- Use thin native scrollbars throughout the shared documentation theme.
+
+- Automatically preview long Markdown code blocks on mobile with the official
+  shadcn footer's localized Show more/Show less action. Desktop and short blocks
+  remain fully visible; copying retains the complete source.
+
+- Add automatic folder and extension-based file icons to folder code blocks.
+  Accept ASCII tree prefixes alongside indented lists, preserving literal names
+  and copying the Unicode text diagram without icon markup.
+
+- Support `lineNumbers` and `startLine` in Markdown fences through the official
+  shadcn Code Block composition, preserving blank lines, wrapping and clipboard
+  output across highlighted code, plain text, diff and folder blocks.
+
+- Support optional `title="filename"` metadata on Markdown code fences, using
+  the shadcn CodeBlockTitle header without changing highlighted or copied code.
+
 ## 3.0.0 — 2026-10-26
 
 ### Breaking changes

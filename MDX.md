@@ -23,6 +23,17 @@ and restore focus. Linked images navigate normally; empty-alt images remain
 decorative. The preview fits the viewport on desktop and mobile.
 Fenced code displays its language (or "Code" when omitted) and an icon-only copy
 button with an accessible name, a tooltip and a checkmark on success.
+Add `title="rdx.config.ts"` after the fence language to display a filename or
+label in the header. Titles work with highlighted code, plain text, diff and
+folder fences. Quoted values support spaces. The title is literal text and is
+excluded from clipboard output; the language still controls highlighting.
+Fence metadata also accepts the bare `lineNumbers` flag and `startLine=20`.
+Only the presence of `lineNumbers` enables numbering. `startLine` must be a
+positive safe integer and sets the initial value without enabling numbers.
+Highlighted lines
+use the official CodeBlockLine composition; plain strings use CodeBlockContent's
+built-in splitting. Blank lines keep their numbers, and clipboard output stays
+unchanged. Wrapped continuations retain the original line number.
 Copying preserves the code's indentation, line breaks and trailing newline,
 without copying the header. Success is announced only after the clipboard write
 finishes (the operating system may normalize LF/CRLF line endings),
@@ -42,6 +53,12 @@ newline for both block copying and copying a complete tab.
 On small screens (below 768px), each Markdown block shows the shadcn wrap-lines
 action. Wrapping is disabled initially, toggles independently per block, and does
 not change copied text.
+Long blocks automatically use the official CodeBlockFooter/Button Show More
+composition below 768px. A client-side measurement caps previews at about 12
+visible lines, taking font metrics, wrapping and resizing into account. Short
+blocks have no expansion action and desktop content remains uncapped. The full
+code stays server-rendered and is readable before hydration; copying always
+retains the complete source. Footer labels use the configured interface locale.
 
 ### Diff and folder fences
 
@@ -66,9 +83,17 @@ complete patch, including its markers, indentation, and final newline.
 
 Use `folder` to generate tree branches from indentation. Two spaces or one tab
 define a level. Parent folder names end with `/`; levels cannot be skipped.
-Blank lines are ignored. Names are rendered as text, and no filesystem access
-is performed. Copying produces the rendered diagram. Existing hand-drawn trees
-can continue to use `text` fences.
+Blank lines in indented lists are ignored. Names are rendered as text, and no
+filesystem access is performed. Names ending in `/` receive a folder icon; other
+entries use extension-based code, JSON, image, text or generic file icons. The
+extensionless fallback is also a generic file.
+
+Explicit tree prefixes accept `|- name`, `|_ name` and vertical `|` guides,
+converting only those prefixes to `├──`, `└──` and `│`. Existing Unicode trees
+can be pasted directly. Names containing pipes remain literal. The shared
+MdxFolderTree adapter composes CodeBlockLine and Lucide icons, preserving optional
+title, numbering and wrap/copy actions. Copying produces the Unicode diagram
+without SVG markup. A `text` fence preserves an ASCII diagram unchanged.
 
 ````md
 ```folder
