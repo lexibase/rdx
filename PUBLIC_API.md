@@ -29,7 +29,7 @@ The official CodeBlock root uses div props; pass wrapping and line-number option
 to `CodeBlockContent` and explicit clipboard values to `CodeBlockCopyButton`.
 `DialogContent` defaults to the official centered layout; set `className` for
 custom positioning/sizing and `showCloseButton` for the native close control.
-Runtime 3.x requires UI ^3.0.0. The main package selects matching versions.
+Runtime 3.1 requires UI ^3.1.0. The main package selects matching versions.
 
 RDX 2.0 removes the published `ButtonLink` module. Use `Button` with `href`
 from `@lexibase/rdx/ui/components/button`. See the
@@ -80,6 +80,10 @@ estão em [MDX.md](./MDX.md).
   ativa explicitamente o plugin e prepara o projeto.
 - `rdx version <versão>`: só existe se o plugin de versionamento estiver ativado;
   cria uma cópia da documentação e nunca sobrescreve uma versão existente.
+- `rdx archive <versão>` e `rdx unarchive <versão>`: comandos do plugin de
+  versionamento que movem versões existentes entre `active` e `archived`, sem
+  alterar snapshots ou URLs. Restaurar adiciona ao fim de `active`, preservando
+  a primeira entrada como edição publicada atual.
 - `rdx --help`/`rdx help`: mostra a ajuda do runtime. As flags do gerador não
   implicam que o runtime exponha exatamente as mesmas flags.
 

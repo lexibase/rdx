@@ -72,6 +72,19 @@ pnpm --filter web docs:version 1.0.0
 Do not run this on every commit or deployment. Subsequent work continues in
 Canary while the released snapshot remains unchanged.
 
+Manage the official site's snapshots with the same versioning plugin:
+
+:::tabs
+
+### pnpm
+
+pnpm --filter web docs:archive 1.0.0\
+pnpm --filter web docs:unarchive 1.0.0
+
+:::
+
+Archiving and restoring change the manifest while preserving snapshot contents.
+
 ## Contribution scope
 
 Keep the foundation **Next.js + Tailwind CSS + shadcn/ui Base UI**.

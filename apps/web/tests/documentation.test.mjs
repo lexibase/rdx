@@ -131,7 +131,7 @@ test('showcase compilation preserves relative links, missing-document handling a
   }
 })
 
-test('the website exposes Canary and the 3.0.0, 2.0.0 and 1.0.1 snapshots', async () => {
+test('the website exposes Canary and the 3.1.0, 3.0.0, 2.0.0 and 1.0.1 snapshots', async () => {
   const docs = createDocumentation(
     await createRdxProject(config, { rootDir: root })
   )
@@ -139,12 +139,13 @@ test('the website exposes Canary and the 3.0.0, 2.0.0 and 1.0.1 snapshots', asyn
     docs.editions.map(({ id, kind }) => ({ id, kind })),
     [
       { id: 'canary', kind: 'live' },
+      { id: '3.1.0', kind: 'version' },
       { id: '3.0.0', kind: 'version' },
       { id: '2.0.0', kind: 'version' },
       { id: '1.0.1', kind: 'version' },
     ]
   )
-  for (const version of ['canary', '3.0.0', '2.0.0', '1.0.1']) {
+  for (const version of ['canary', '3.1.0', '3.0.0', '2.0.0', '1.0.1']) {
     const pages = docs.pages(version)
     assert.ok(pages.length > 0, version)
     assert.ok(docs.document(version, 'intro'), version)

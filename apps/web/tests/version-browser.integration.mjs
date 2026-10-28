@@ -208,7 +208,7 @@ test(
           await page.reload()
           await page
             .getByRole('button', {
-              name: triggerLabel(versionLabel('3.0.0')),
+              name: triggerLabel(versionLabel('3.1.0')),
             })
             .click()
           await page.getByRole('menu').waitFor()
@@ -223,7 +223,7 @@ test(
                 name: new RegExp('^' + messages.version.split('{version}')[0]),
               })
               .count(),
-            3
+            4
           )
           await page.keyboard.press('Escape')
           await page.goto(`${running.base}/docs/canary/intro`)

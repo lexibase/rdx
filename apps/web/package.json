@@ -16,7 +16,9 @@
     "test:runtime": "node --test tests/version-browser.integration.mjs",
     "test:deployment": "node --import tsx --test tests/deployment.integration.mjs",
     "docs:prepare": "tsx scripts/project.ts prepare",
-    "docs:version": "tsx scripts/project.ts version"
+    "docs:version": "tsx scripts/project.ts version",
+    "docs:archive": "tsx scripts/project.ts archive",
+    "docs:unarchive": "tsx scripts/project.ts unarchive"
   },
   "dependencies": {
     "@lexibase/rdx-next": "workspace:*",

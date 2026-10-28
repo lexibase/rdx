@@ -137,6 +137,48 @@ test('plugin commands are registered only through config', async (t) => {
   const unavailable = run(rootDir, 'version', '1.0.0')
   assert.equal(unavailable.status, 1)
   assert.match(unavailable.stderr, /Unknown command.*version/)
+  for (const command of ['archive', 'unarchive']) {
+    const missing = run(rootDir, command, '1.0.0')
+    assert.equal(missing.status, 1)
+    assert.match(missing.stderr, new RegExp(`Unknown command.*${command}`))
+  }
+})
+
+test('versioning archive commands work through the CLI without preparing a runtime', async (t) => {
+  const plugin = new URL(
+    '../../rdx-plugin-versioning/dist/index.js',
+    import.meta.url
+  ).href
+  const rootDir = await fixture(
+    t,
+    `import { versioning } from '${plugin}'; export default { metadata: { applicationName: 'Docs' }, plugins: [versioning()] }`
+  )
+  await mkdir(path.join(rootDir, 'docs'))
+  await writeFile(path.join(rootDir, 'docs/intro.mdx'), 'Preserved snapshot')
+  for (const command of ['version', 'archive', 'unarchive']) {
+    const result = run(rootDir, command, '1.0.0')
+    assert.equal(result.status, 0, result.stderr)
+    const manifest = JSON.parse(
+      await readFile(path.join(rootDir, 'versions.json'), 'utf8')
+    )
+    assert.deepEqual(
+      manifest,
+      command === 'archive'
+        ? { active: [], archived: ['1.0.0'] }
+        : { active: ['1.0.0'], archived: [] }
+    )
+  }
+  assert.equal(
+    await readFile(
+      path.join(rootDir, 'versioned_docs/version-1.0.0/intro.mdx'),
+      'utf8'
+    ),
+    'Preserved snapshot'
+  )
+  await assert.rejects(access(path.join(rootDir, '.rdx')))
+  const invalid = run(rootDir, 'archive', '9.0.0')
+  assert.equal(invalid.status, 1)
+  assert.match(invalid.stderr, /does not exist/)
 })
 
 test('missing configuration and missing plugin packages fail with actionable messages', async (t) => {

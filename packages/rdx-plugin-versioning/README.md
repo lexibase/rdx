@@ -22,8 +22,11 @@ Run `pnpm rdx prepare` to initialize `versions.json`, then
 `versioned_docs/version-1.0.0/`. Read snapshots at `/docs/1.0.0/<page>`.
 Current docs stay at `/docs/<page>`.
 
-Manifest: `{ "active": ["1.0.0"], "archived": [] }`. To archive a version,
-move its label to `archived` and retain its snapshot directory. Existing
+Manifest: `{ "active": ["1.0.0"], "archived": [] }`. Run
+`pnpm rdx archive 1.0.0` to archive a snapshot and
+`pnpm rdx unarchive 1.0.0` to restore it at the end of the active list.
+Both commands retain the snapshot directory and URLs. Entries can also be moved
+manually between the two arrays. Existing
 snapshots are never overwritten. Removing the plugin does not delete content.
 
 Options: `versionsFile` (default `versions.json`) and `versionsDir` (default

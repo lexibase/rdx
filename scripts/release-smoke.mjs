@@ -714,7 +714,7 @@ for (const [name, release] of releases) {
   }
   if (name === '@lexibase/rdx-next') {
     assert.equal(packed.dependencies?.['@lexibase/rdx-ui'], undefined)
-    assert.equal(packed.peerDependencies['@lexibase/rdx-ui'], '^3.0.0')
+    assert.equal(packed.peerDependencies['@lexibase/rdx-ui'], '^3.1.0')
   }
   const files = new Set(
     execFileSync('tar', ['-tf', archive], { encoding: 'utf8' })
@@ -821,7 +821,16 @@ if (process.argv.includes('--install')) {
   const introPath = path.join(project, 'docs/init/intro.mdx')
   const intro = `${await readFile(introPath, 'utf8')}\n\n${original}\n`
   await writeFile(introPath, intro)
+  const projectStyles =
+    ':root { --rdx-highlighting: #7c3aed; }\n.dark { --rdx-highlighting: #a78bfa; }\n'
+  const stylesPath = path.join(project, 'rdx.css')
+  await writeFile(stylesPath, projectStyles)
   buildProject(project)
+  assert.match(
+    await readFile(path.join(project, '.rdx/app/globals.css'), 'utf8'),
+    /@import "\.\.\/\.\.\/rdx\.css";/
+  )
+  assert.equal(await readFile(stylesPath, 'utf8'), projectStyles)
   await verifyDeploymentTrace(project, false)
   await verifySite(project, { original, current: original })
   await verifySite(project, { original, current: original, runtimeCwd: true })
@@ -841,6 +850,23 @@ if (process.argv.includes('--install')) {
     'pnpm',
   ])
   pnpm(project, ['exec', 'rdx', 'version', '1.0.0'])
+  const versionsFile = path.join(project, 'versions.json')
+  const snapshotFile = path.join(
+    project,
+    'versioned_docs/version-1.0.0/init/intro.mdx'
+  )
+  const snapshotBefore = await readFile(snapshotFile, 'utf8')
+  pnpm(project, ['exec', 'rdx', 'archive', '1.0.0'])
+  assert.deepEqual(JSON.parse(await readFile(versionsFile, 'utf8')), {
+    active: [],
+    archived: ['1.0.0'],
+  })
+  pnpm(project, ['exec', 'rdx', 'unarchive', '1.0.0'])
+  assert.deepEqual(JSON.parse(await readFile(versionsFile, 'utf8')), {
+    active: ['1.0.0'],
+    archived: [],
+  })
+  assert.equal(await readFile(snapshotFile, 'utf8'), snapshotBefore)
   await writeFile(
     path.join(project, 'versioned_docs/version-1.0.0/init/intro.mdx'),
     intro

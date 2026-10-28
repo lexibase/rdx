@@ -25,6 +25,62 @@ release PR.
 This workflow supersedes the former packages-first, separate-documentation-PR
 process and takes precedence over the historical checklists below.
 
+## Prepared grouped release: RDX 3.1.0
+
+This release is prepared, not yet published. Keep its package versions, updated
+guides and `apps/web/versioned_docs/version-3.1.0` snapshot in the same PR.
+No required migration is introduced for existing 3.0 projects.
+
+| Package                  | Version | Changes                                                                    |
+| ------------------------ | ------- | -------------------------------------------------------------------------- |
+| @lexibase/rdx-core       | 1.3.0   | Natural Markdown components, heading/search integration and fence metadata |
+| @lexibase/rdx-ui         | 3.1.0   | Mermaid, enhanced code fences, mobile motion/swipes and highlight tokens   |
+| @lexibase/rdx-versioning | 1.1.0   | Archive and restore commands; compatible core dependency                   |
+| @lexibase/rdx-next       | 3.1.0   | Project CSS loading and integration with UI ^3.1.0                         |
+| @lexibase/rdx            | 3.1.0   | Select the compatible runtime and UI releases                              |
+| @lexibase/create-rdx     | 3.1.0   | Pin framework 3.1.0 for new projects                                       |
+
+Types stay at 1.1.1 and must not be republished. Workspace dependencies stay
+local and become exact versions during packing. The versioning plugin remains
+optional and is updated separately in existing projects.
+
+Before merging, run `pnpm check` and `pnpm test:release --install`. Verify the
+fresh and upgraded installations, plain and versioned documentation, archive
+commands, search, assets, styles and production HTTP responses.
+
+After merging, use updated `main`, run `pnpm install --frozen-lockfile` and
+`pnpm build`, then publish one package at a time. This ensures the local archives
+match the merged sources. Confirm each exact version is readable before
+publishing its consumers:
+
+```powershell
+npm whoami
+pnpm --filter @lexibase/rdx-core publish --tag latest --access public
+npm view @lexibase/rdx-core@1.3.0 version
+pnpm --filter @lexibase/rdx-ui publish --tag latest --access public
+npm view @lexibase/rdx-ui@3.1.0 version
+pnpm --filter @lexibase/rdx-versioning publish --tag latest --access public
+npm view @lexibase/rdx-versioning@1.1.0 version
+pnpm --filter @lexibase/rdx-next publish --tag latest --access public
+npm view @lexibase/rdx-next@3.1.0 version
+pnpm --filter @lexibase/rdx publish --tag latest --access public
+npm view @lexibase/rdx@3.1.0 version
+pnpm --filter @lexibase/create-rdx publish --tag latest --access public
+npm view @lexibase/create-rdx@3.1.0 version
+```
+
+Confirm every package's `latest` tag matches the table. Validate a fresh public
+installation inside and outside a pnpm workspace:
+
+```powershell
+pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@latest docs-validacao-3-1
+```
+
+For existing sites, update `@lexibase/rdx@latest` and, when installed,
+`@lexibase/rdx-versioning@latest`. Preserve authored content and configuration.
+Follow the installation policy guide if pnpm blocks newly published releases;
+refreshing the creator cache does not bypass release-age policy.
+
 ## Published grouped component release: RDX 3.0.0 (reference)
 
 The six releases below are published; their exact versions and latest tags were

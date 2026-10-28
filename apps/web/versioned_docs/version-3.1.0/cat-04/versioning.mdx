@@ -1,0 +1,142 @@
+---
+title: Versioning
+description: Keep released documentation separate from your current work.
+link_position: 5
+---
+
+## Activate the plugin
+
+Versioning is optional. A new project works without `versions.json` or snapshots.
+
+:::tabs
+
+### pnpm
+
+pnpm rdx add versioning
+
+### npm
+
+npm exec -- rdx add versioning
+
+### yarn
+
+yarn rdx add versioning
+
+:::
+
+This activates the plugin in your configuration. For manual setup, see
+[Plugins](./plugins.mdx).
+
+## Create a release snapshot
+
+When the current documentation is ready for a release:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx version 1.0.0
+
+### npm
+
+npm exec -- rdx version 1.0.0
+
+### yarn
+
+yarn rdx version 1.0.0
+
+:::
+
+RDX copies `docs/` into `versioned_docs/version-1.0.0/` and adds the version to
+`versions.json`:
+
+```json
+{
+  "active": ["1.0.0"],
+  "archived": []
+}
+```
+
+Snapshots are not overwritten. Continue editing `docs/` for your next release;
+the snapshot retains its previous content. This command versions documentation,
+not npm packages, Git tags, or your application's source.
+
+## Read and switch editions
+
+In a generated project, the live page stays at `/docs/init/intro`; its snapshot
+is at `/docs/1.0.0/init/intro`.
+
+The navbar dropdown lets readers switch editions. RDX keeps the same document
+when it exists in the destination; otherwise it opens that edition's first page.
+Pre-release and outdated edition notices provide context. Search returns results
+only from the selected edition, including when reading an archived edition.
+Switch editions in the navbar to search a different version.
+
+The official RDX development site calls its live edition **Canary**. Generated
+projects call theirs **Current**.
+
+## Archive an older edition
+
+Archive a published snapshot:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx archive 1.0.0
+
+### npm
+
+npm exec -- rdx archive 1.0.0
+
+### yarn
+
+yarn rdx archive 1.0.0
+
+:::
+
+The command moves its label from `active` to `archived` in `versions.json`,
+keeping the snapshot directory intact:
+
+```json
+{
+  "active": ["1.1.0"],
+  "archived": ["1.0.0"]
+}
+```
+
+This example requires both snapshots to exist. The first active entry is the
+current published edition. Archived content remains accessible and searchable
+within its edition; archiving is not deletion or access control.
+
+## Restore an archived edition
+
+:::tabs
+
+### pnpm
+
+pnpm rdx unarchive 1.0.0
+
+### npm
+
+npm exec -- rdx unarchive 1.0.0
+
+### yarn
+
+yarn rdx unarchive 1.0.0
+
+:::
+
+The version returns to the end of the active list. The existing first active
+entry remains the current published edition. Both commands preserve snapshot
+contents and URLs. Repeating a command for a version already in that state
+leaves the manifest unchanged. You can also move entries manually between the
+two arrays in `versions.json`.
+
+## Assets and deployment
+
+Snapshots contain documentation, not copies of `public/`. Use distinct asset
+filenames when an older image must remain unchanged.
+
+Commit your manifest and snapshots with the source content. Rebuild and redeploy
+after changing versions. Do not run snapshot creation on every build or request.

@@ -32,6 +32,42 @@ configuration and custom components are not replaced by this operation.
 Check the release notes for migrations and any required Next.js, React or Node.js
 updates. Those requirements are separate from updating RDX itself.
 
+## Update from RDX 3.0 to 3.1
+
+Update the main framework with the commands above. RDX 3.1 includes natural
+Markdown syntax for Callouts, Tabs, Accordion and keyboard keys; Mermaid diagrams;
+code block titles, line numbers and file trees; mobile navigation motion; and
+custom highlights through `rdx.css`.
+
+Existing Markdown and React component imports remain usable. Create `rdx.css`
+beside `rdx.config.ts` to [customize highlight colors](../cat-04/appearance.mdx).
+See [Writing pages](../cat-03/create-docs.mdx) for component authoring and
+[Code blocks](../cat-03/code-blocks.mdx) for fence options.
+
+If the optional versioning plugin is installed, update it separately to use
+the archive and restore commands:
+
+:::tabs
+
+### pnpm
+
+pnpm add @lexibase/rdx-versioning@latest
+
+### npm
+
+npm install @lexibase/rdx-versioning@latest
+
+### yarn
+
+yarn add @lexibase/rdx-versioning@latest
+
+:::
+
+Versioning 1.1 provides `rdx archive <version>` and `rdx unarchive <version>`.
+Both preserve snapshot contents and URLs. Follow [Versioning](../cat-04/versioning.mdx)
+for the complete workflow. Direct runtime/UI users should update the runtime
+and UI to 3.1 together; the main framework handles that pairing automatically.
+
 ## Upgrade from RDX 2.x to 3.x
 
 RDX 3 includes the complete shadcn Code Block, diff and folder fences, responsive
