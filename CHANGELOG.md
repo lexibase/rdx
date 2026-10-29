@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Wrap long sidebar labels and category names within the available width,
+  preserving complete text and keyboard navigation at narrow viewport sizes.
+
 - Share a localized skip-to-content link between the official site and generated
   projects. Include the document heading in its focus target and provide the
   same keyboard destination on the homepage.
