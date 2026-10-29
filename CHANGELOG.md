@@ -4,6 +4,9 @@
 
 ## 3.2.0 — Prepared
 
+- Wait for Windows test-server closure before treating taskkill worker races as
+  cleanup failures. Continue reporting shutdown failures when the server is alive.
+
 - Publish one documentation edition per major. Patch and minor releases advance
   its number and content from live docs; new majors preserve previous editions.
   Keep Canary/Current independent, retain historical files, and redirect replaced
