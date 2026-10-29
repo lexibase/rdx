@@ -66,7 +66,11 @@ export default async function DocPage({
         <section
           className={`w-full min-h-full bg-background px-7 flex flex-col gap-5 pb-8 md:py-8 ${config.TOC ? 'xl:pr-20' : ''}`}
         >
-          <div className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1">
+          <main
+            id="rdx-main"
+            tabIndex={-1}
+            className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1 outline-none"
+          >
             <header className="mb-6">
               <VersionBanner
                 lang={config.lang}
@@ -79,10 +83,8 @@ export default async function DocPage({
               />
               <DocHeader version={version} filename={filename} />
             </header>
-            <main id="rdx-main" className="h-full w-full flex-1 max-w-[960px]">
-              {content}
-            </main>
-          </div>
+            <div className="h-full w-full flex-1 max-w-[960px]">{content}</div>
+          </main>
           <DocFooter version={version} filename={filename} />
         </section>
       </DocsPageTransition>

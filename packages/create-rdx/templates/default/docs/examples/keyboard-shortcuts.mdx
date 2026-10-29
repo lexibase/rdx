@@ -16,28 +16,44 @@ Press :kbd[Esc] to close a dialog or :kbd[Enter] to confirm.
 
 ## Write a shortcut
 
-Write the separator as ordinary text between the keys:
+Write the complete combination inside one directive, separating keys with `+`:
 
-Press :kbd[Ctrl] + :kbd[K] to open search.
+Press :kbd[Ctrl + K] to open search.
 
 ```md
-Press :kbd[Ctrl] + :kbd[K] to open search.
+Press :kbd[Ctrl + K] to open search.
 ```
+
+Use spaces around the separator. RDX shows each key separately and provides a
+single text alternative for assistive technology, using the interface language
+from `lang` in `rdx.config.ts`. The English alternative for this example is
+"Control plus K"; in Brazilian Portuguese it is "Control mais K".
+
+Multiple modifiers and the plus key work the same way:
+
+:kbd[Ctrl + Shift + P] or :kbd[Ctrl + +].
+
+```md
+:kbd[Ctrl + Shift + P] or :kbd[Ctrl + +].
+```
+
+Write individual keys separately when they describe independent actions:
+:kbd[Enter] to confirm and :kbd[Esc] to close.
 
 ## Shortcut reference tables
 
-| Action         | Shortcut             |
-| :------------- | :------------------- |
-| Open search    | :kbd[Ctrl] + :kbd[K] |
-| Save           | :kbd[Ctrl] + :kbd[S] |
-| Close a dialog | :kbd[Esc]            |
+| Action         | Shortcut       |
+| :------------- | :------------- |
+| Open search    | :kbd[Ctrl + K] |
+| Save           | :kbd[Ctrl + S] |
+| Close a dialog | :kbd[Esc]      |
 
 ```md
-| Action         | Shortcut             |
-| :------------- | :------------------- |
-| Open search    | :kbd[Ctrl] + :kbd[K] |
-| Save           | :kbd[Ctrl] + :kbd[S] |
-| Close a dialog | :kbd[Esc]            |
+| Action         | Shortcut       |
+| :------------- | :------------- |
+| Open search    | :kbd[Ctrl + K] |
+| Save           | :kbd[Ctrl + S] |
+| Close a dialog | :kbd[Esc]      |
 ```
 
 These shared shadcn/ui components render semantic `<kbd>` elements and follow

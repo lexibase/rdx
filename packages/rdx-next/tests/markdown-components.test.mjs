@@ -10,7 +10,7 @@ const jiti = createJiti(import.meta.url, {
   jsx: { runtime: 'automatic' },
 })
 const { compileDocumentation } = await jiti.import('../src/runtime/mdx.ts')
-const { mdxComponents } = await jiti.import(
+const { mdxComponents, getMdxComponents } = await jiti.import(
   '../../rdx-ui/src/components/mdx-components.tsx'
 )
 const { LocaleProvider } = await jiti.import(
@@ -77,6 +77,64 @@ test('keyboard directives work in prose and tables even beside link definitions'
     /:widget\[Text\]/
   )
   assert.doesNotMatch(await render('`:kbd[Ctrl]` and \\:kbd[Esc]'), /<kbd/)
+})
+
+test('complete keyboard shortcuts expose one localized text alternative and preserve shadcn composition', async () => {
+  for (const [lang, expected] of [
+    ['en', 'Control plus K'],
+    ['pt-BR', 'Control mais K'],
+    ['fr-FR', 'Control plus K'],
+  ]) {
+    const { content } = await compileDocumentation(
+      'Press :kbd[Ctrl + K].',
+      getMdxComponents(lang)
+    )
+    const html = renderToStaticMarkup(content)
+    assert.ok(
+      html.includes(`<span class="sr-only select-none">${expected}</span>`)
+    )
+    assert.match(html, /data-rdx-kbd-value="Ctrl \+ K"/)
+    assert.match(html, /<kbd[^>]*data-slot="kbd-group"[^>]*aria-hidden="true"/)
+    assert.equal((html.match(/data-slot="kbd"/g) ?? []).length, 2)
+    assert.doesNotMatch(html, /aria-label=|tabindex=|role="button"/)
+  }
+})
+
+test('explicitly named shadcn keyboard groups support accessible names without changing unnamed or custom-role compositions', () => {
+  const group = (props) =>
+    renderToStaticMarkup(
+      createElement(
+        mdxComponents.KbdGroup,
+        props,
+        createElement(mdxComponents.Kbd, null, 'Ctrl')
+      )
+    )
+  assert.match(group({ 'aria-label': 'Control plus K' }), /role="group"/)
+  assert.match(group({ 'aria-labelledby': 'shortcut-label' }), /role="group"/)
+  assert.doesNotMatch(group({}), /role=/)
+  assert.match(group({ role: 'img', 'aria-label': 'Shortcut' }), /role="img"/)
+})
+
+test('shortcut aliases, repeated keys and literal plus signs stay readable without interpreting arbitrary text', async () => {
+  for (const [value, expected] of [
+    ['⌘ + ⇧ + K', 'Command plus Shift plus K'],
+    ['Ctrl + +', 'Control plus Plus'],
+    ['Alt + Space', 'Alt plus Space'],
+    ['Ctrl + ↑', 'Control plus Up arrow'],
+    ['K + K', 'K plus K'],
+    ['constructor + toString', 'constructor plus toString'],
+  ]) {
+    const html = await render(`:kbd[${value}]`)
+    assert.ok(
+      html.includes(`<span class="sr-only select-none">${expected}</span>`),
+      value
+    )
+  }
+  for (const key of ['+', 'C++', 'Ctrl+K', 'Enter']) {
+    const html = await render(`:kbd[${key}]`)
+    assert.doesNotMatch(html, /data-rdx-kbd-value/)
+    assert.equal((html.match(/<kbd/g) ?? []).length, 1)
+  }
 })
 
 test('generated tab lists follow the configured interface language', async () => {

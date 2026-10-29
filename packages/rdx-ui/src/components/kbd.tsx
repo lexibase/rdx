@@ -16,10 +16,17 @@ function Kbd({ className, ...props }: ComponentProps<'kbd'>) {
   )
 }
 
-function KbdGroup({ className, ...props }: ComponentProps<'div'>) {
+function KbdGroup({ className, role, ...props }: ComponentProps<'div'>) {
   return (
     <kbd
       data-slot="kbd-group"
+      role={
+        role ??
+        (props['aria-label'] !== undefined ||
+        props['aria-labelledby'] !== undefined
+          ? 'group'
+          : undefined)
+      }
       className={cn('inline-flex items-center gap-1', className)}
       {...props}
     />

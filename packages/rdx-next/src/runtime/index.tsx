@@ -13,6 +13,7 @@ import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
 import { DocsPageTransition } from '@lexibase/rdx-ui/components/docs-page-transition'
 import { DocsSearch } from '@lexibase/rdx-ui/components/docs-search'
 import { Home } from '@lexibase/rdx-ui/components/home'
+import { SkipLink } from '@lexibase/rdx-ui/components/skip-link'
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
 import { Logo } from '@lexibase/rdx-ui/components/logo'
 import { getMdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
@@ -46,7 +47,6 @@ export function RdxLayout({
   config: RDXConfig
   bodyClassName?: string
 }) {
-  const messages = getMessages(config.lang)
   return (
     <html suppressHydrationWarning lang={config.lang ?? 'en'}>
       <body className={bodyClassName}>
@@ -57,9 +57,7 @@ export function RdxLayout({
           defaultTheme={config.theme?.defaultTheme ?? 'system'}
         >
           <LocaleProvider lang={config.lang}>
-            <a className="rdx-skip-link" href="#rdx-main">
-              {messages.skipContent}
-            </a>
+            <SkipLink lang={config.lang} />
             <div className="flex flex-col h-dvh">{children}</div>
           </LocaleProvider>
         </ThemeProvider>
@@ -252,7 +250,11 @@ export async function DocsPage({
             <section
               className={`w-full min-h-full bg-background px-7 flex flex-col gap-5 pb-8 md:py-8 ${project.config.TOC ? 'xl:pr-20' : ''}`}
             >
-              <div className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1">
+              <main
+                id="rdx-main"
+                tabIndex={-1}
+                className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1 outline-none"
+              >
                 <header className="mb-6">
                   {source.badge && (
                     <p className="text-sm text-muted-foreground mb-4">
@@ -271,14 +273,10 @@ export async function DocsPage({
                     </p>
                   )}
                 </header>
-                <main
-                  id="rdx-main"
-                  tabIndex={-1}
-                  className="h-full w-full flex-1 max-w-[960px]"
-                >
+                <div className="h-full w-full flex-1 max-w-[960px]">
                   {content}
-                </main>
-              </div>
+                </div>
+              </main>
               <footer className="flex flex-col">
                 <section className="flex items-center justify-between">
                   {previous ? (
