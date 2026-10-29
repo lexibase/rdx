@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { createRdxProject } from '@lexibase/rdx-core'
 import { versioning } from '@lexibase/rdx-versioning'
+import { checkDocumentation } from '@lexibase/rdx-core/check'
 
 import { createDocumentation } from '../lib/documentation.ts'
 import { compileDocument } from '../lib/compile-documentation.ts'
@@ -16,6 +17,39 @@ import config from '../rdx.config.ts'
 import { runProjectCommand } from '../lib/project-command.ts'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
+
+test('documentation checks honor official short and full aliases and aggregate malformed frontmatter', async (t) => {
+  const temporary = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'rdx-showcase-check-')
+  )
+  t.after(() => fs.rmSync(temporary, { recursive: true, force: true }))
+  fs.mkdirSync(path.join(temporary, 'docs/guides'), { recursive: true })
+  fs.writeFileSync(
+    path.join(temporary, 'docs/guides/intro.mdx'),
+    '# Hello\n[Short](/docs/canary/intro#hello)\n[Full](/docs/canary/guides/intro#hello)\n[Wrong](/docs/guides/intro)'
+  )
+  fs.writeFileSync(
+    path.join(temporary, 'docs/bad.mdx'),
+    '---\ntitle: [invalid\n---\nHello'
+  )
+  const input = { metadata: { applicationName: 'Test' } }
+  const project = await createRdxProject(input, {
+    rootDir: temporary,
+    command: 'check',
+  })
+  const report = checkDocumentation(
+    project,
+    createDocumentation(project).checkOptions()
+  )
+  assert.deepEqual(report.diagnostics.map(({ code }) => code).sort(), [
+    'page',
+    'syntax',
+  ])
+  await assert.rejects(
+    runProjectCommand(temporary, input, 'check'),
+    /RDX check failed: 2 pages checked, 2 problems/
+  )
+})
 
 test('official sitemap uses the same edition policy and short URLs as its document routes', async () => {
   const temporary = fs.mkdtempSync(

@@ -91,6 +91,30 @@ yarn rdx start --hostname 127.0.0.1 --port 3001
 
 :::
 
+## Check documentation
+
+:::tabs
+
+### pnpm
+
+pnpm rdx check
+
+### npm
+
+npm exec -- rdx check
+
+### yarn
+
+yarn rdx check
+
+:::
+
+Validate static document links, section anchors and local assets without building
+or preparing the site. Problems include their file, line and column. The command
+exits with `1` if problems are found and `0` when the content passes. Use
+`rdx check --help` for usage. See
+[Checking documentation](../cat-03/checking.mdx) for scope and examples.
+
 ## Prepare without starting a server
 
 :::tabs

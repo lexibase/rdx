@@ -364,7 +364,7 @@ uses the project directory as its bundler root, including project-owned
 default theme.
 
 The development workspace runs ESLint separately (`pnpm lint`). `pnpm check`
-validates lint, types, builds and tests. `apps/web` also generates route types
+validates lint, types, documentation links/assets, builds and tests. `apps/web` also generates route types
 before standalone type checking.
 
 The MDX renderer uses `next-mdx-remote` 6 with `blockJS` and `blockDangerousJS`

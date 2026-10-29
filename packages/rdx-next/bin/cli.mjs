@@ -50,12 +50,30 @@ export async function runRdxCli({ templateDir } = {}) {
 
   async function main() {
     if (!command || command === 'help' || command === '--help') {
-      console.log('Usage: rdx <dev|build|start|prepare|add|plugin-command>')
+      console.log(
+        'Usage: rdx <dev|build|start|prepare|check|add|plugin-command>'
+      )
+      console.log(
+        '  rdx check: validate documentation links, sections and local assets'
+      )
       console.log('  rdx add versioning [--package-manager npm|pnpm|yarn]')
       console.log(
         'Plugin commands are registered through plugins in rdx.config.ts.'
       )
       return
+    }
+
+    if (command === 'check') {
+      if (
+        commandArgs.length === 1 &&
+        ['--help', '-h'].includes(commandArgs[0])
+      ) {
+        console.log(
+          'Usage: rdx check\nValidate static MDX links, section anchors and local public/ files without building the site.'
+        )
+        return
+      }
+      if (commandArgs.length) throw new Error('Usage: rdx check')
     }
 
     if (command === 'add') {
@@ -96,6 +114,17 @@ export async function runRdxCli({ templateDir } = {}) {
       rootDir: projectRoot,
       command,
     })
+    if (command === 'check') {
+      const { checkDocumentation, formatDocumentationCheck } =
+        await import('@lexibase/rdx-core/check')
+      const report = checkDocumentation(project)
+      const output = formatDocumentationCheck(report)
+      if (report.diagnostics.length) {
+        console.error(output)
+        process.exitCode = 1
+      } else console.log(output)
+      return
+    }
     if (command === 'prepare') {
       await prepareRuntime()
       console.log('RDX runtime prepared in .rdx/')
@@ -107,7 +136,7 @@ export async function runRdxCli({ templateDir } = {}) {
       )
       if (!pluginCommand)
         throw new Error(
-          `Unknown command "${command}". Available: dev, build, start, prepare, add${project.commands.map((entry) => `, ${entry.name}`).join('')}. Install and configure the plugin that provides this command.`
+          `Unknown command "${command}". Available: dev, build, start, prepare, check, add${project.commands.map((entry) => `, ${entry.name}`).join('')}. Install and configure the plugin that provides this command.`
         )
       await pluginCommand.run({
         rootDir: projectRoot,

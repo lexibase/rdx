@@ -84,6 +84,8 @@ const required = {
     'dist/mdx/index.js',
     'dist/search/index.js',
     'dist/search/index.d.ts',
+    'dist/check/index.js',
+    'dist/check/index.d.ts',
   ],
   'rdx-ui': [
     'THIRD_PARTY_NOTICES.md',
@@ -929,6 +931,7 @@ if (process.argv.includes('--install')) {
     ':root { --rdx-highlighting: #7c3aed; }\n.dark { --rdx-highlighting: #a78bfa; }\n'
   const stylesPath = path.join(project, 'rdx.css')
   await writeFile(stylesPath, projectStyles)
+  pnpm(project, ['exec', 'rdx', 'check'])
   buildProject(project)
   assert.match(
     await readFile(path.join(project, '.rdx/app/globals.css'), 'utf8'),
@@ -954,6 +957,7 @@ if (process.argv.includes('--install')) {
     'pnpm',
   ])
   pnpm(project, ['exec', 'rdx', 'version', '1.0.0'])
+  pnpm(project, ['exec', 'rdx', 'check'])
   const versionsFile = path.join(project, 'versions.json')
   const snapshotFile = path.join(
     project,

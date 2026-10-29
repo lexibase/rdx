@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 import matter from 'gray-matter'
+import { parseStaticDocument } from './static-source'
 import type {
   RdxDocCategory,
   RdxDocFrontmatter,
@@ -91,10 +92,13 @@ function isSafeSlug(slug: string) {
  * Reads the documentation tree from the user's project. The URL slug always
  * preserves the full path, so `guides/intro.mdx` and `api/intro.mdx` never
  * collide.
+ * With onError, static readers collect per-file failures and retain fallback
+ * route metadata. Default callers keep the existing fail-fast behavior.
  */
-export function getDocsIndex({
-  docsDir,
-}: RdxDocsOptions = {}): RdxDocCategory[] {
+export function getDocsIndex(
+  { docsDir }: RdxDocsOptions = {},
+  onError?: (error: unknown, sourcePath: string) => void
+): RdxDocCategory[] {
   const docsRoot = getDocsRoot(docsDir)
   if (!fs.existsSync(docsRoot)) return []
 
@@ -127,9 +131,15 @@ export function getDocsIndex({
       category = createdCategory
     }
 
-    const source = fs.readFileSync(filePath, 'utf8')
-    const parsed = matter(source)
-    const frontmatter = isRecord(parsed.data) ? parsed.data : {}
+    let frontmatter: Record<string, unknown> = {}
+    try {
+      const raw = fs.readFileSync(filePath, 'utf8')
+      const parsed = onError ? parseStaticDocument(raw) : matter(raw)
+      frontmatter = isRecord(parsed.data) ? parsed.data : {}
+    } catch (error) {
+      if (!onError) throw error
+      onError(error, filePath)
+    }
     const slug = slugFromRelativePath(relativePath)
     const fallbackTitle = toTitle(path.basename(slug))
 

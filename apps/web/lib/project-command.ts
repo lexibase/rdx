@@ -8,9 +8,26 @@ export async function runProjectCommand(
   command: string,
   args: string[] = []
 ) {
-  if (command === 'prepare' && args.length)
-    throw new Error('Usage: docs:prepare')
+  if (['prepare', 'check'].includes(command) && args.length)
+    throw new Error(`Usage: docs:${command}`)
   const project = await createRdxProject(config, { rootDir, command })
+  if (command === 'check') {
+    const [
+      { checkDocumentation, formatDocumentationCheck },
+      { createDocumentation },
+    ] = await Promise.all([
+      import('@lexibase/rdx-core/check'),
+      import('./documentation'),
+    ])
+    const report = checkDocumentation(
+      project,
+      createDocumentation(project).checkOptions()
+    )
+    const output = formatDocumentationCheck(report)
+    if (report.diagnostics.length) throw new Error(output)
+    console.log(output)
+    return project
+  }
   if (command !== 'prepare') {
     const entry = project.commands.find((entry) => entry.name === command)
     if (!entry) throw new Error(`Unknown documentation command: ${command}`)

@@ -8,7 +8,11 @@ export interface DocumentLinkOptions {
 }
 
 export class RdxDocumentLinkError extends Error {
-  constructor(sourcePath: string, href: string, reason: string) {
+  constructor(
+    sourcePath: string,
+    href: string,
+    readonly reason: string
+  ) {
     super(`[RDX] Invalid document link "${href}" in ${sourcePath}: ${reason}`)
     this.name = 'RdxDocumentLinkError'
   }

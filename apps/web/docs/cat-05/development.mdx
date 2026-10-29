@@ -49,9 +49,13 @@ pnpm test:release --install
 
 :::
 
-The first command runs lint, type checks, builds, and tests. The second packs
+The first command runs lint, type checks, documentation checks, builds, and tests. The second packs
 local packages, installs their archives into a disposable generated project,
 and checks production behavior without publishing to npm.
+
+Use `pnpm docs:check` from the repository root to check the official site's live,
+published and archived content on its own. This uses the same checker as
+`rdx check`, with the official site's URL aliases.
 
 Release test artifacts are retained for inspection under
 `.rdx-package-smoke/`; use the final path printed by the command.

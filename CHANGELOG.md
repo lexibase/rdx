@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add `rdx check` for static documentation links, heading fragments and local
+  assets, with aggregated file/line/column diagnostics and nonzero error status.
+  Check live, published and archived sources without generating the runtime or
+  evaluating documents. Share heading IDs with search and preserve host aliases.
+- Include the official documentation check in workspace validation and repair
+  stale code-block reference links in live and 3.2.0 upgrade guides.
 - Generate sitemap.xml and robots.txt from the configured public URL and apply
   automatic indexing directives to published, live and archived documentation.
   Exclude redirect aliases and internal search from search engine indexes while

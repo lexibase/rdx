@@ -3,6 +3,7 @@ import path from 'node:path'
 import { getMessages, formatMessage } from '@lexibase/rdx-ui/lib/i18n'
 import { getDocument, getDocsIndex, getSourceOptions } from '@lexibase/rdx-core'
 import type { RdxProject } from '@lexibase/rdx-types'
+import type { DocumentationCheckOptions } from '@lexibase/rdx-core/check'
 import { getSourceRobots, getRdxSitemap } from '@lexibase/rdx-next/runtime'
 
 /** Only the official site's historical URL aliases differ from installed sites. */
@@ -52,8 +53,7 @@ export function createDocumentation(project: RdxProject) {
     return index(version).flatMap((category) => category.pages)
   }
 
-  function routePages(version: string) {
-    const entries = pages(version)
+  function routePages(version: string, entries = pages(version)) {
     const counts = new Map<string, number>()
     for (const page of entries) {
       const name = path.posix.basename(page.slug)
@@ -93,6 +93,33 @@ export function createDocumentation(project: RdxProject) {
   }
 
   return {
+    checkOptions(): DocumentationCheckOptions {
+      const published =
+        editions.find((edition) => edition.kind === 'version') ?? editions[0]!
+      const routes = new Map<string, Map<string, string>>()
+      return {
+        sourceRoute: (entry) =>
+          `/docs/${entry.id === 'current' ? 'canary' : entry.routePrefix}`,
+        documentRoutes(entry, page, entries) {
+          const version = entry.id === 'current' ? 'canary' : entry.routePrefix
+          if (!routes.has(version))
+            routes.set(
+              version,
+              new Map(
+                routePages(version, [...entries]).map((page) => [
+                  page.sourcePath,
+                  page.slug,
+                ])
+              )
+            )
+          return [routes.get(version)!.get(page.sourcePath)!, page.slug].map(
+            (slug) =>
+              `/docs/${version}/${slug.split('/').map(encodeURIComponent).join('/')}`
+          )
+        },
+        redirects: { '/docs': published.href },
+      }
+    },
     robots(version: string) {
       const entry = contentSource(version)
       return entry
