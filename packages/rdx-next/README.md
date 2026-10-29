@@ -16,6 +16,10 @@ must still be trusted project-owned content, not untrusted uploads.
 It exposes the `rdx` command used by generated projects to create their
 internal `.rdx` application and run Next.js.
 
+Run `pnpm rdx check` to validate static documentation links, heading fragments
+and local files in public/ before deployment. It reports source locations and
+exits nonzero for problems, without preparing the runtime or rendering documents.
+
 Run `pnpm rdx add versioning` (or `npm exec -- rdx add versioning`) from a
 documentation project to install and activate the official optional plugin.
 The command detects the package manager, preserves config and plugin options,

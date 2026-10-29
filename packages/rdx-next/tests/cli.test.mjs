@@ -8,6 +8,7 @@ import {
   rm,
   access,
   mkdir,
+  cp,
   symlink,
 } from 'node:fs/promises'
 import os from 'node:os'
@@ -27,6 +28,77 @@ async function fixture(t, config) {
 function run(cwd, ...args) {
   return spawnSync(process.execPath, [cli, ...args], { cwd, encoding: 'utf8' })
 }
+
+test('check aggregates content errors and never prepares runtime, assets or a Next server', async (t) => {
+  const rootDir = await fixture(
+    t,
+    `export default { metadata: { applicationName: 'Docs' } }`
+  )
+  await mkdir(path.join(rootDir, 'docs'))
+  await writeFile(
+    path.join(rootDir, 'docs/intro.mdx'),
+    '---\ntitle: Intro\n---\n\n[Missing](missing.mdx)\n\n![Image](/missing.png)'
+  )
+  let result = run(rootDir, 'check')
+  assert.equal(result.status, 1, result.stdout)
+  assert.match(result.stderr, /docs\/intro.mdx:5:1 \[page\]/)
+  assert.match(result.stderr, /docs\/intro.mdx:7:1 \[asset\]/)
+  assert.match(result.stderr, /2 problems/)
+  await writeFile(
+    path.join(rootDir, 'docs/intro.mdx'),
+    '## Hello\n\n[Section](#hello)'
+  )
+  result = run(rootDir, 'check')
+  assert.equal(result.status, 0, result.stderr)
+  assert.match(result.stdout, /1 page checked, 0 problems/)
+  for (const filename of ['.rdx', 'public', 'versions.json'])
+    await assert.rejects(access(path.join(rootDir, filename)))
+})
+
+test('check help and invalid arguments are handled before reading configuration', async (t) => {
+  const rootDir = await fixture(t)
+  assert.equal(run(rootDir, 'check', '--help').status, 0)
+  const result = run(rootDir, 'check', '--fix')
+  assert.equal(result.status, 1)
+  assert.match(result.stderr, /Usage: rdx check/)
+  assert.doesNotMatch(result.stderr, /Missing .*rdx.config/)
+})
+
+test('all creator documentation examples pass the public check command', async (t) => {
+  const rootDir = await fixture(
+    t,
+    `export default { metadata: { applicationName: 'Docs' } }`
+  )
+  const template = new URL(
+    '../../create-rdx/templates/default/',
+    import.meta.url
+  )
+  for (const directory of ['docs', 'public']) {
+    await cp(new URL(directory, template), path.join(rootDir, directory), {
+      recursive: true,
+    })
+  }
+  const result = run(rootDir, 'check')
+  assert.equal(result.status, 0, result.stderr)
+  assert.match(result.stdout, /0 problems/)
+  await assert.rejects(access(path.join(rootDir, '.rdx')))
+})
+
+test('checking versioned content never initializes a missing manifest', async (t) => {
+  const plugin = new URL(
+    '../../rdx-plugin-versioning/dist/index.js',
+    import.meta.url
+  ).href
+  const rootDir = await fixture(
+    t,
+    `import { versioning } from '${plugin}'; export default { metadata: { applicationName: 'Docs' }, plugins: [versioning()] }`
+  )
+  const result = run(rootDir, 'check')
+  assert.equal(result.status, 1)
+  assert.match(result.stderr, /Run "rdx prepare"/)
+  await assert.rejects(access(path.join(rootDir, 'versions.json')))
+  await assert.rejects(access(path.join(rootDir, '.rdx')))
+})
 
 test('prepare loads typed config with defineConfig without loading a Next server or versioning', async (t) => {
   const rootDir = await fixture(

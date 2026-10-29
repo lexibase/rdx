@@ -82,6 +82,11 @@ estão em [MDX.md](./MDX.md).
 - `rdx dev`, `rdx build`, `rdx start`: preparam o runtime e executam o Next.js;
   argumentos adicionais são encaminhados ao respectivo comando Next.
 - `rdx prepare`: valida a configuração e prepara `.rdx/` e arquivos públicos.
+- `rdx check`: validates static MDX links, heading fragments and local public
+  assets; reports all discovered problems with source locations and exits 1 on
+  errors. Does not prepare or build the runtime or request external URLs.
+  The optional `@lexibase/rdx-core/check` entry exposes `checkDocumentation`,
+  `formatDocumentationCheck` and host-route adapter options.
 - `rdx add versioning [--package-manager npm|pnpm|yarn]`: instala/restaura,
   ativa explicitamente o plugin e prepara o projeto.
 - `rdx version <versão>`: só existe se o plugin de versionamento estiver ativado;

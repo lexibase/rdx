@@ -5,6 +5,7 @@ import remarkParse from 'remark-parse'
 import { unified } from 'unified'
 import type { RdxSearchIndex } from '@lexibase/rdx-types'
 import { remarkDocumentationComponents } from '../mdx/markdown-components'
+import { headingText } from '../mdx/heading-text'
 
 type Node = {
   type: string
@@ -54,13 +55,6 @@ function text(node: Node): string {
 
 function plain(value: string) {
   return value.replace(/\s+/g, ' ').trim()
-}
-
-// rehype-slug reads rendered heading text: image alt and <br> are not text nodes.
-function headingText(node: Node): string {
-  if (['image', 'imageReference', 'break'].includes(node.type)) return ''
-  if (node.children) return node.children.map(headingText).join('')
-  return text(node)
 }
 
 export interface SearchDocument {

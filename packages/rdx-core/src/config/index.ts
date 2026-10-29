@@ -277,6 +277,7 @@ export async function createRdxProject(
     'build',
     'start',
     'prepare',
+    'check',
     'help',
     'add',
   ])

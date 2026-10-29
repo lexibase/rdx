@@ -10,7 +10,7 @@ merge. Não exige tokens ou secrets de publicação.
   não uma matriz de todas as versões de Node em todos os sistemas.
 - A versão do pnpm declarada em `packageManager`, sem atualizar o gerenciador.
 - Instalação com `--frozen-lockfile`: divergências do lockfile falham o check.
-- `pnpm check`: lint, tipos, builds e testes unitários existentes.
+- `pnpm check`: lint, tipos, verificação estática da documentação, builds e testes.
   O lint de `web` depende do build de `rdx-core`, pois seus imports públicos
   apontam para `dist/`. O Turbo prepara esse pacote também em checkouts limpos.
 - `pnpm test:release --install`: empacota os seis pacotes públicos, confere

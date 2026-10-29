@@ -43,6 +43,8 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       destinos existentes e recuperação de falhas; conclusão completa depende
       das validações interativas e documentação da release.
 - [x] Metadados por página, sitemap e documentação de deploy na framework.
+- [x] `rdx check`: links, âncoras e arquivos locais, com diagnósticos por arquivo,
+      linha e coluna; compartilhado com a validação da documentação oficial.
 
 ## Depois da consolidação da base
 
