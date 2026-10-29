@@ -72,13 +72,24 @@ export async function withProductionServer(
               timeout: 10_000,
             }
           )
+          // spawnSync blocks delivery of Node's exit/close events. taskkill /T
+          // can report a disappearing worker as an error after killing the tree.
+          // Yield for confirmed closure before deciding whether shutdown failed.
+          if (result.status !== 0)
+            await Promise.race([closed, delay(5_000, false, { ref: false })])
           if (
             result.status !== 0 &&
             child.exitCode === null &&
             child.signalCode === null
           )
             throw new Error(
-              `Could not stop production fixture PID ${child.pid}: ${result.error?.message ?? result.stderr ?? result.stdout}`
+              `Could not stop production fixture PID ${child.pid}: ${[
+                result.error?.message,
+                result.stderr,
+                result.stdout,
+              ]
+                .filter(Boolean)
+                .join('\n')}`
             )
         }
       } else {
@@ -123,7 +134,9 @@ export async function withProductionServer(
       )
       try {
         const response = await fetch(`${base}${readyPath}`, {
-          signal: AbortSignal.timeout(Math.min(mode === 'dev' ? 30_000 : 3_000, timeoutMs)),
+          signal: AbortSignal.timeout(
+            Math.min(mode === 'dev' ? 30_000 : 3_000, timeoutMs)
+          ),
         })
         await response.arrayBuffer()
         if (response.status >= 500)

@@ -64,6 +64,8 @@ const required = {
     'dist/ui/components/table.d.ts',
     'dist/ui/components/kbd.js',
     'dist/ui/components/kbd.d.ts',
+    'dist/ui/components/mdx-keyboard-shortcut.js',
+    'dist/ui/components/skip-link.js',
     'dist/ui/components/not-found.js',
     'dist/ui/components/not-found.d.ts',
     'dist/ui/lib/i18n.js',
@@ -93,6 +95,8 @@ const required = {
     'src/hooks/use-highlighted-code.ts',
     'src/lib/highlighter.tsx',
     'src/components/kbd.tsx',
+    'src/components/mdx-keyboard-shortcut.tsx',
+    'src/components/skip-link.tsx',
     'src/components/not-found.tsx',
     'src/styles/globals.css',
     'src/styles/shadcn.css',
@@ -507,6 +511,18 @@ async function verifySite(
       const markdown = await (
         await request(base, '/docs/examples/markdown')
       ).text()
+      const keyboard = await (
+        await request(base, '/docs/examples/keyboard-shortcuts')
+      ).text()
+      assert.ok(
+        keyboard.includes(
+          locale === 'pt-BR' ? 'Control mais K' : 'Control plus K'
+        )
+      )
+      assert.match(
+        html,
+        /<main[^>]*id="rdx-main"[^>]*tabindex="-1"[^>]*>[\s\S]*?<h1\b/
+      )
       assert.ok(
         markdown.includes(locale === 'pt-BR' ? 'Copiar código' : 'Copy code')
       )
@@ -657,6 +673,68 @@ async function verifySite(
     `OK production HTTP: ${versioned ? 'versioned' : 'plain'} project, search ${search ? 'enabled' : 'disabled'}, cwd ${runtimeCwd ? '.rdx' : 'project root'}, pages, assets, bundles and 404s`
   )
 }
+async function verifyRollingEditions(project) {
+  const introPath = path.join(project, 'docs/init/intro.mdx')
+  const configPath = path.join(project, 'rdx.config.ts')
+  const intro = await readFile(introPath, 'utf8')
+  await writeFile(introPath, `${intro}\n\nRollingMinorPublishedMarker\n`)
+  pnpm(project, ['exec', 'rdx', 'version', '1.1.0'])
+  await writeFile(introPath, `${intro}\n\nRollingMajorPublishedMarker\n`)
+  pnpm(project, ['exec', 'rdx', 'version', '2.0.0'])
+  await writeFile(introPath, `${intro}\n\nRollingLiveDevelopmentMarker\n`)
+  await writeFile(
+    configPath,
+    (await readFile(configPath, 'utf8')).replace(
+      'search: false',
+      'search: true'
+    )
+  )
+  const manifest = JSON.parse(
+    await readFile(path.join(project, 'versions.json'), 'utf8')
+  )
+  assert.deepEqual(manifest, {
+    active: ['2.0.0', '1.1.0'],
+    archived: [],
+    redirects: { '1.0.0': '1.1.0' },
+  })
+  buildProject(project)
+  await withProductionServer(
+    path.join(project, 'node_modules/@lexibase/rdx/bin/rdx.mjs'),
+    project,
+    async (base) => {
+      const live = await (await request(base, '/docs/init/intro')).text()
+      assert.match(live, /RollingLiveDevelopmentMarker/)
+      const minor = await (await request(base, '/docs/1.1.0/init/intro')).text()
+      assert.match(minor, /RollingMinorPublishedMarker/)
+      assert.doesNotMatch(
+        minor,
+        /RollingLiveDevelopmentMarker|RollingMajorPublishedMarker/
+      )
+      const major = await (await request(base, '/docs/2.0.0/init/intro')).text()
+      assert.match(major, /RollingMajorPublishedMarker/)
+      assert.doesNotMatch(major, /RollingLiveDevelopmentMarker/)
+      for (const suffix of ['', '/init/intro', '/init/intro?from=old']) {
+        const response = await request(base, `/docs/1.0.0${suffix}`, 308)
+        assert.equal(response.headers.get('location'), `/docs/1.1.0${suffix}`)
+        await response.arrayBuffer()
+      }
+      await (await request(base, '/rdx-search/1.0.0', 404)).arrayBuffer()
+      const index = await (await request(base, '/rdx-search/1.1.0')).json()
+      assert.ok(
+        index.entries.every((entry) => entry.href.startsWith('/docs/1.1.0/'))
+      )
+      assert.match(JSON.stringify(index), /RollingMinorPublishedMarker/)
+      assert.doesNotMatch(
+        JSON.stringify(index),
+        /RollingLiveDevelopmentMarker|RollingMajorPublishedMarker/
+      )
+    }
+  )
+  console.log(
+    'OK installed archives: same-major edition update, preserved previous major, independent live docs, native redirects and isolated search'
+  )
+}
+
 const releases = new Map()
 for (const directory of directories) {
   const manifest = JSON.parse(
@@ -714,7 +792,7 @@ for (const [name, release] of releases) {
   }
   if (name === '@lexibase/rdx-next') {
     assert.equal(packed.dependencies?.['@lexibase/rdx-ui'], undefined)
-    assert.equal(packed.peerDependencies['@lexibase/rdx-ui'], '^3.1.0')
+    assert.equal(packed.peerDependencies['@lexibase/rdx-ui'], '^3.2.0')
   }
   const files = new Set(
     execFileSync('tar', ['-tf', archive], { encoding: 'utf8' })
@@ -998,5 +1076,6 @@ if (process.argv.includes('--install')) {
   console.log(
     'OK pnpm workspace apps/docs with parent dependencies and direct runtime/UI remains supported'
   )
+  await verifyRollingEditions(project)
 }
 console.log(`Release artifacts retained for inspection: ${temporary}`)

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 3.2.0 — Prepared
+
+- Wait for Windows test-server closure before treating taskkill worker races as
+  cleanup failures. Continue reporting shutdown failures when the server is alive.
+
 - Publish one documentation edition per major. Patch and minor releases advance
   its number and content from live docs; new majors preserve previous editions.
   Keep Canary/Current independent, retain historical files, and redirect replaced
@@ -20,7 +25,7 @@
   key syntax, literal plus keys, search text and tab clipboard content.
   Give explicitly named KbdGroup compositions a group role that supports naming.
 
-## 3.1.0 — Prepared
+## 3.1.0
 
 - Keep production timeout checks valid when a slow process has not printed its
   startup log before the deadline, while checking cleanup for initialized processes.

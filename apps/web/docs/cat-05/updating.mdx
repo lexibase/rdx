@@ -32,6 +32,42 @@ configuration and custom components are not replaced by this operation.
 Check the release notes for migrations and any required Next.js, React or Node.js
 updates. Those requirements are separate from updating RDX itself.
 
+## Update from RDX 3.1 to 3.2
+
+Update the main framework with the commands above. Existing configuration,
+Markdown and custom React imports remain usable. RDX 3.2 includes shared
+skip-to-content navigation, sidebar labels that wrap at narrow widths, and
+accessible text alternatives for combinations written as `:kbd[Ctrl + K]`.
+Write complete combinations with spaces around `+` to display the keys together
+with a localized text alternative.
+
+### Published documentation editions
+
+If you use versioning, also [update the optional plugin](#optional-plugins) to
+version 1.2 or newer. Update the framework and plugin together before running
+the publishing commands or deploying their manifest.
+
+Versioning keeps one published edition per major. Running `rdx version 3.2.0`
+copies the ready content from `docs/` and replaces the previous major-3 entry
+with `3.2.0`. A patch such as `3.2.1` advances that same edition. A new major
+adds an edition and preserves the final documentation of previous majors.
+The live Current/Canary documentation stays independent.
+
+Existing manifests with multiple editions of the same major use the highest
+version of that major. The next versioning command records the consolidated
+manifest and its `redirects` map. Snapshot files stay on disk; historical URLs
+redirect to the updated edition, preserving the requested page path. Removed
+pages return a 404. Keep the redirect map with your documentation in Git.
+
+Archiving and restoring use the published label currently listed for that major.
+Publishing a newer version of an archived major keeps it archived. See
+[Versioning](../cat-04/versioning.mdx) for commands and examples.
+
+For direct package integrations, update the runtime and UI to 3.2 together.
+Native Next.js integrations should apply the complete object returned by
+`getRdxTracingConfig` to their Next configuration, including its redirects.
+The generated runtime already applies this configuration.
+
 ## Update from RDX 3.0 to 3.1
 
 Update the main framework with the commands above. RDX 3.1 includes natural

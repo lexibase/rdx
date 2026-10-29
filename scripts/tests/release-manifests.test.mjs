@@ -71,7 +71,7 @@ test('the runtime consumes a compatible project-owned UI while workspace develop
   const runtime = await manifest('packages/rdx-next/package.json')
   assert.equal(runtime.dependencies['@lexibase/rdx-ui'], undefined)
   assert.equal(runtime.optionalDependencies?.['@lexibase/rdx-ui'], undefined)
-  assert.equal(runtime.peerDependencies['@lexibase/rdx-ui'], '^3.1.0')
+  assert.equal(runtime.peerDependencies['@lexibase/rdx-ui'], '^3.2.0')
   assert.equal(runtime.devDependencies['@lexibase/rdx-ui'], 'workspace:*')
   assert.notEqual(
     runtime.peerDependenciesMeta?.['@lexibase/rdx-ui']?.optional,

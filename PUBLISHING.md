@@ -34,10 +34,73 @@ release PR.
 This workflow supersedes the former packages-first, separate-documentation-PR
 process and takes precedence over the historical checklists below.
 
-## Prepared grouped release: RDX 3.1.0
+## Prepared grouped release: RDX 3.2.0
 
-This release is prepared, not yet published. Keep its package versions, updated
-guides and `apps/web/versioned_docs/version-3.1.0` snapshot in the same PR.
+This release is prepared, not yet published. Keep the package versions, upgrade
+guide, changelog and `apps/web/versioned_docs/version-3.2.0` in the same PR.
+It adds compatible APIs and preserves existing imports and configuration.
+
+| Package                  | Version | Changes                                                                           |
+| ------------------------ | ------- | --------------------------------------------------------------------------------- |
+| @lexibase/rdx-types      | 1.2.0   | Canonical redirect prefixes for historical content sources                        |
+| @lexibase/rdx-core       | 1.4.0   | Complete Markdown keyboard combinations and canonical source validation           |
+| @lexibase/rdx-ui         | 3.2.0   | Accessible shortcut notation, shared skip link and sidebar reflow                 |
+| @lexibase/rdx-versioning | 1.2.0   | One published edition per major, historical redirects and preserved archive state |
+| @lexibase/rdx-next       | 3.2.0   | Native Next redirects, canonical search sources and UI ^3.2.0                     |
+| @lexibase/rdx            | 3.2.0   | Compatible runtime and UI, including the new public UI exports                    |
+| @lexibase/create-rdx     | 3.2.0   | Pin framework 3.2.0 in generated projects                                         |
+
+All seven packages changed and must be published. Workspace dependencies remain
+local during development and become exact versions when packed. Existing
+projects update the main framework; projects with versioning also update that
+optional plugin. See the 3.1-to-3.2 section of the upgrade guide. The commands do
+not replace the user's content, configuration or components.
+
+Documentation publication now advances the existing major-3 edition from 3.1.0
+to 3.2.0. Canary stays independent. The manifest retains 2.0.0 and 1.0.1 and
+redirects both 3.0.0 and 3.1.0 to 3.2.0; historical snapshot files stay in Git.
+New patch and minor documentation releases use the same workflow.
+
+Before merging, run `pnpm check` and `pnpm test:release --install`. The archive
+check covers fresh installations, framework-only updates, plain and versioned
+sites, optional plugin activation, archive/restore, same-major publication,
+new-major preservation, historical redirects, localized keyboard labels, assets,
+search, generated CSS and a pnpm workspace with parent-installed dependencies.
+
+After merging, use the merged `main`, install the frozen lockfile and build the
+packages. Publish sequentially in dependency order; confirm each exact version
+is available before publishing its consumers:
+
+```powershell
+npm whoami
+pnpm --filter @lexibase/rdx-types publish --tag latest --access public
+npm view @lexibase/rdx-types@1.2.0 version
+pnpm --filter @lexibase/rdx-core publish --tag latest --access public
+npm view @lexibase/rdx-core@1.4.0 version
+pnpm --filter @lexibase/rdx-ui publish --tag latest --access public
+npm view @lexibase/rdx-ui@3.2.0 version
+pnpm --filter @lexibase/rdx-versioning publish --tag latest --access public
+npm view @lexibase/rdx-versioning@1.2.0 version
+pnpm --filter @lexibase/rdx-next publish --tag latest --access public
+npm view @lexibase/rdx-next@3.2.0 version
+pnpm --filter @lexibase/rdx publish --tag latest --access public
+npm view @lexibase/rdx@3.2.0 version
+pnpm --filter @lexibase/create-rdx publish --tag latest --access public
+npm view @lexibase/create-rdx@3.2.0 version
+```
+
+Verify each package's `latest` tag against the table. Then check a fresh registry
+installation with `pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@latest docs-validacao-3-2`.
+The cache refresh does not bypass pnpm release-age policies. Approve trusted RDX
+releases in the governing workspace policy when required, then validate dev,
+production build/start, search and version publication. Existing users update
+with `pnpm add @lexibase/rdx@latest` and, if installed,
+`pnpm add @lexibase/rdx-versioning@latest`.
+
+## Previous grouped release: RDX 3.1.0
+
+This previous grouped release is published. Its table and commands below are
+historical; use the 3.2.0 instructions above for the current release.
 No required migration is introduced for existing 3.0 projects.
 
 | Package                  | Version | Changes                                                                    |

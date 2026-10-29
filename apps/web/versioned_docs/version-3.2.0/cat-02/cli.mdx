@@ -1,0 +1,152 @@
+---
+title: CLI reference
+description: Create, develop, build, and extend a documentation project.
+link_position: 3
+---
+
+## Creator and runtime
+
+The creator, `@lexibase/create-rdx`, generates a new directory. The runtime command,
+`rdx`, belongs to the installed `@lexibase/rdx` package and works inside an
+existing documentation project. You do not need a global RDX installation.
+
+## Create a project
+
+:::tabs
+
+### pnpm
+
+pnpm create @lexibase/rdx@latest my-docs
+
+### npm
+
+npm create @lexibase/rdx@latest -- my-docs
+
+### yarn
+
+yarn dlx @lexibase/create-rdx@latest my-docs
+
+:::
+
+The Yarn creator example uses `yarn dlx` (Yarn 2+).
+
+Omit the name to get an interactive prompt. The directory name is preserved;
+the generated package name is normalized to lowercase. Existing directories
+are not overwritten.
+
+| Creator option   | Effect                                     |
+| :--------------- | :----------------------------------------- |
+| `--help`         | Show usage without creating a project      |
+| `--version`      | Print the creator's version                |
+| `--skip-install` | Create files and leave installation to you |
+
+## Development and production
+
+Run these from the generated project root:
+
+:::tabs
+
+### pnpm
+
+pnpm dev\
+pnpm build\
+pnpm start
+
+### npm
+
+npm run dev\
+npm run build\
+npm run start
+
+### yarn
+
+yarn dev\
+yarn build\
+yarn start
+
+:::
+
+`dev` starts the development server, `build` prepares a production build, and
+`start` serves that build. Stop the development server before building for production.
+
+The underlying commands are `rdx dev`, `rdx build`, and `rdx start`. They prepare
+the internal app automatically. Forward Next.js arguments when needed:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx dev --port 3001\
+pnpm rdx start --hostname 127.0.0.1 --port 3001
+
+### npm
+
+npm exec -- rdx dev --port 3001\
+npm exec -- rdx start --hostname 127.0.0.1 --port 3001
+
+### yarn
+
+yarn rdx dev --port 3001\
+yarn rdx start --hostname 127.0.0.1 --port 3001
+
+:::
+
+## Prepare without starting a server
+
+:::tabs
+
+### pnpm
+
+pnpm rdx prepare
+
+### npm
+
+npm exec -- rdx prepare
+
+### yarn
+
+yarn rdx prepare
+
+:::
+
+This validates configuration and prepares `.rdx/`, including public assets and
+configured plugin preparation. It does not create a documentation snapshot.
+
+## Plugins and snapshots
+
+:::tabs
+
+### pnpm
+
+pnpm rdx add versioning\
+pnpm rdx version 1.0.0\
+pnpm rdx archive 1.0.0\
+pnpm rdx unarchive 1.0.0
+
+### npm
+
+npm exec -- rdx add versioning\
+npm exec -- rdx version 1.0.0\
+npm exec -- rdx archive 1.0.0\
+npm exec -- rdx unarchive 1.0.0
+
+### yarn
+
+yarn rdx add versioning\
+yarn rdx version 1.0.0\
+yarn rdx archive 1.0.0\
+yarn rdx unarchive 1.0.0
+
+:::
+
+`version`, `archive`, and `unarchive` are registered only after the versioning
+plugin is configured. `version` publishes the ready `docs/` content, replacing
+the published edition of the same major or adding a new major. Superseded URLs
+redirect to the updated edition. Archiving and restoring update the manifest without
+modifying snapshot contents.
+See [Plugins](../cat-04/plugins.mdx) and [Versioning](../cat-04/versioning.mdx)
+before creating snapshots. `rdx --help` lists the built-in command usage.
+
+The installer can be selected explicitly with
+`rdx add versioning --package-manager npm` (or `pnpm` / `yarn`). Normally RDX
+detects the package manager from how the command was invoked.
