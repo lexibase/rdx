@@ -53,6 +53,21 @@ function groupExists(pid) {
   }
 }
 
+async function finishSetup(record, timeoutMs) {
+  // A completed build may leave its output handles inherited by a background
+  // helper. Its exit code is final; waiting for those handles is not shutdown.
+  // Drain normal output first, then release only our readers if they stay open.
+  const closed = await Promise.race([
+    record.closed.then(() => true),
+    delay(timeoutMs, false, { ref: false }),
+  ])
+  if (!closed) {
+    record.child.stdout.destroy()
+    record.child.stderr.destroy()
+    await record.closed
+  }
+}
+
 async function stop(record, timeoutMs) {
   const { child } = record
   if (!child.pid) return
@@ -143,12 +158,12 @@ export async function runDevProcesses(
       const record = launch(task)
       const result = await Promise.race([record.exit, cancellation])
       if (result === cancelled) return 0
+      await finishSetup(record, timeoutMs)
+      records.delete(record)
       if (result.code !== 0) {
         failure(task, result)
         return code
       }
-      await stop(record, timeoutMs)
-      records.delete(record)
     }
     if (signal?.aborted) return 0
     if (!services.length) throw new Error('No development services configured.')

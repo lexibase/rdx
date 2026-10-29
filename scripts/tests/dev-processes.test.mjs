@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict'
+import childProcess from 'node:child_process'
 import { EventEmitter } from 'node:events'
 import { createServer } from 'node:http'
+import { syncBuiltinESMExports } from 'node:module'
 import path from 'node:path'
-import { Writable } from 'node:stream'
+import { PassThrough, Writable } from 'node:stream'
 import test from 'node:test'
 import { setTimeout as delay } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
@@ -206,6 +208,75 @@ test('successful setup completes before watchers start; unexpected clean service
   )
   assert.equal(code, 1)
 })
+
+for (const [mode, expectedCode, expectedTasks] of [
+  ['setup-held-output', 1, ['build', 'prepare', 'unexpected exit']],
+  ['setup-failure-held-output', 17, ['build']],
+]) {
+  test(`completed ${mode} releases inherited output handles without changing its exit result`, async (t) => {
+    const logs = output()
+    const started = []
+    let build
+    const spawn = childProcess.spawn
+    const mocked = t.mock.method(
+      childProcess,
+      'spawn',
+      (command, args, options) => {
+        if (args[1] !== mode) return spawn(command, args, options)
+        // Model exit with inherited pipes still open. Windows does not reliably
+        // reproduce inherited pipe lifetimes with a real short-lived helper.
+        const child = new EventEmitter()
+        child.pid = 2_147_483_647
+        child.stdout = new PassThrough()
+        child.stderr = new PassThrough()
+        child.signalCode = null
+        let closed = 0
+        for (const stream of [child.stdout, child.stderr]) {
+          stream.once('close', () => {
+            if (++closed === 2) child.emit('close', child.exitCode)
+          })
+        }
+        queueMicrotask(() => {
+          child.stdout.write('setup output before exit\n')
+          child.stderr.write('setup diagnostics before exit\n')
+          child.exitCode = mode === 'setup-held-output' ? 0 : 17
+          child.emit('exit', child.exitCode, null)
+        })
+        return child
+      }
+    )
+    syncBuiltinESMExports()
+    t.after(() => {
+      mocked.mock.restore()
+      syncBuiltinESMExports()
+      build?.stdout.destroy()
+      build?.stderr.destroy()
+    })
+    const code = await runDevProcesses(
+      {
+        setup: [task('build', mode), task('prepare', 'setup')],
+        services: [task('unexpected exit', 'setup')],
+      },
+      {
+        stdout: logs.stream,
+        stderr: logs.stream,
+        timeoutMs: 100,
+        onFailure: () => {},
+        onStart: (child, task) => {
+          started.push(task.name)
+          if (task.name === 'build') build = child
+          else assert.equal(build.stdout.destroyed, true)
+        },
+      }
+    )
+    assert.equal(code, expectedCode)
+    assert.deepEqual(started, expectedTasks)
+    assert.match(logs.text(), /setup output before exit/)
+    assert.match(logs.text(), /setup diagnostics before exit/)
+    assert.equal(build.stdout.destroyed, true)
+    assert.equal(build.stderr.destroyed, true)
+  })
+}
 
 test('development plan keeps the initial Turbo builds but launches long-running tools without package-manager batch files', () => {
   const plan = developmentPlan()
