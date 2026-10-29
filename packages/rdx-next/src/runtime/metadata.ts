@@ -12,6 +12,8 @@ export function getDocumentMetadata({
   slug?: string[]
 }): Metadata {
   const route = resolveDocsRoute(project, slug)
+  // The page owns the redirect. Throwing it here too can duplicate Location headers.
+  if (route.source.redirectTo !== undefined) return {}
   // An empty documentation tree renders the setup page with site metadata.
   if (!route.slug) return {}
   if (!route.document) notFound()

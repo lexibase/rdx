@@ -71,6 +71,19 @@ test(
             await result.arrayBuffer()
           }
         }
+        for (const [from, to] of Object.entries(versions.redirects ?? {})) {
+          for (const suffix of ['', '/intro', '/intro?from=old']) {
+            const response = await fetch(`${base}/docs/${from}${suffix}`, {
+              redirect: 'manual',
+            })
+            assert.equal(response.status, 308)
+            assert.equal(
+              response.headers.get('location'),
+              `/docs/${to}${suffix}`
+            )
+          }
+          assert.equal((await fetch(`${base}/rdx-search/${from}`)).status, 404)
+        }
         const example = await fetch(`${base}/docs/canary/mdx-components`)
         const html = await example.text()
         assert.match(html, /Markdown \| RDX/)

@@ -5,12 +5,18 @@ import { randomUUID } from 'node:crypto'
 import { resolveProjectPath } from '@lexibase/rdx-core/config'
 import type { RdxPlugin, RdxPluginContext } from '@lexibase/rdx-types'
 
+import {
+  consolidateVersions,
+  compareVersions,
+  major,
+  type Versions,
+} from './editions'
+
 export type VersioningOptions = {
   versionsFile?: string
   versionsDir?: string
 }
 
-type Versions = { active: string[]; archived: string[] }
 const versionPattern = /^\d+\.\d+\.\d+(?:-[a-zA-Z0-9][a-zA-Z0-9.-]*)?$/
 
 function hasLiveRoute(docsDir: string, version: string) {
@@ -41,11 +47,15 @@ function parseVersions(filename: string): Versions {
     throw new Error(`${filename} must be an object.`)
   const value = input as Record<string, unknown>
   if (
-    Object.keys(value).some((key) => !['active', 'archived'].includes(key)) ||
+    Object.keys(value).some(
+      (key) => !['active', 'archived', 'redirects'].includes(key)
+    ) ||
     !Array.isArray(value.active) ||
     !Array.isArray(value.archived)
   ) {
-    throw new Error(`${filename} must contain only active and archived arrays.`)
+    throw new Error(
+      `${filename} must contain active and archived arrays and an optional redirects object.`
+    )
   }
   const seen = new Set<string>()
   for (const version of [...value.active, ...value.archived]) {
@@ -54,7 +64,23 @@ function parseVersions(filename: string): Versions {
       throw new Error(`Duplicate version "${version}" in ${filename}.`)
     seen.add(version)
   }
-  return value as Versions
+  if (value.redirects !== undefined) {
+    if (
+      typeof value.redirects !== 'object' ||
+      value.redirects === null ||
+      Array.isArray(value.redirects)
+    )
+      throw new Error(`${filename}.redirects must be an object.`)
+    for (const [from, to] of Object.entries(value.redirects)) {
+      validateVersion(from)
+      validateVersion(to)
+      if (seen.has(from))
+        throw new Error(
+          `Version redirect "${from}" is also a published edition.`
+        )
+    }
+  }
+  return consolidateVersions(value as Versions)
 }
 
 function writeVersions(filename: string, versions: Versions) {
@@ -139,10 +165,15 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
       const versions = parseVersions(versionsFile)
       return {
         runtimeFiles: [path.relative(context.rootDir, versionsFile)],
-        sources: [...versions.active, ...versions.archived].map((version) => {
+        sources: [
+          ...versions.active,
+          ...versions.archived,
+          ...Object.keys(versions.redirects ?? {}),
+        ].map((version) => {
+          const canonical = versions.redirects?.[version] ?? version
           const snapshotDir = path.join(
             /* turbopackIgnore: true */ versionsDir,
-            `version-${version}`
+            `version-${canonical}`
           )
           if (
             // Snapshot trees are explicitly traced from the contributed sources.
@@ -163,7 +194,8 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
             label: version,
             routePrefix: version,
             docsDir: path.relative(context.rootDir, snapshotDir),
-            ...(versions.archived.includes(version)
+            ...(canonical !== version ? { redirectTo: canonical } : {}),
+            ...(versions.archived.includes(canonical)
               ? { badge: 'Archived' }
               : {}),
           }
@@ -173,7 +205,8 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
     commands: [
       {
         name: 'version',
-        description: 'Snapshot the current docs: rdx version <version>',
+        description:
+          'Publish the current docs to their major edition: rdx version <version>',
         run(context) {
           if (context.args.length !== 1)
             throw new Error('Usage: rdx version <version>')
@@ -191,6 +224,7 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
           if (
             versions.active.includes(version) ||
             versions.archived.includes(version) ||
+            versions.redirects?.[version] !== undefined ||
             fs.existsSync(/* turbopackIgnore: true */ snapshotDir)
           ) {
             throw new Error(
@@ -205,28 +239,63 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
             throw new Error(
               `Version "${version}" conflicts with live documentation.`
             )
+          const previous = [...versions.active, ...versions.archived].find(
+            (entry) => major(entry) === major(version)
+          )
+          if (previous && compareVersions(version, previous) <= 0)
+            throw new Error(
+              `Version "${version}" must be newer than the published edition "${previous}".`
+            )
+          const redirects = { ...versions.redirects }
+          if (previous) {
+            redirects[previous] = version
+            for (const from of Object.keys(redirects)) {
+              if (redirects[from] === previous) redirects[from] = version
+            }
+          }
+          const archived =
+            previous && versions.archived.includes(previous)
+              ? versions.archived.map((entry) =>
+                  entry === previous ? version : entry
+                )
+              : versions.archived
+          const active =
+            previous && versions.archived.includes(previous)
+              ? versions.active
+              : [
+                  version,
+                  ...versions.active.filter((entry) => entry !== previous),
+                ].sort((a, b) => compareVersions(b, a))
           fs.mkdirSync(versionsDir, { recursive: true })
           // Reserve the snapshot exclusively, then copy into absent children.
           // Newer Node releases reject cpSync onto an existing directory when
           // errorOnExist is enabled, including the root we just reserved.
           fs.mkdirSync(snapshotDir)
-          for (const entry of fs.readdirSync(docsDir)) {
-            fs.cpSync(
-              path.join(docsDir, entry),
-              path.join(snapshotDir, entry),
-              {
-                recursive: true,
-                force: false,
-                errorOnExist: true,
-              }
-            )
+          try {
+            for (const entry of fs.readdirSync(docsDir)) {
+              fs.cpSync(
+                path.join(docsDir, entry),
+                path.join(snapshotDir, entry),
+                {
+                  recursive: true,
+                  force: false,
+                  errorOnExist: true,
+                }
+              )
+            }
+            writeVersions(versionsFile, {
+              active,
+              archived,
+              ...(Object.keys(redirects).length ? { redirects } : {}),
+            })
+          } catch (error) {
+            // This exclusively reserved directory belongs to this failed publication.
+            if (inside(versionsDir, snapshotDir))
+              fs.rmSync(snapshotDir, { recursive: true, force: true })
+            throw error
           }
-          writeVersions(versionsFile, {
-            active: [version, ...versions.active],
-            archived: versions.archived,
-          })
           console.log(
-            `RDX version ${version} created in ${path.relative(context.rootDir, snapshotDir)}`
+            `RDX version ${version} ${previous ? `published, replacing ${previous}` : 'created'} in ${path.relative(context.rootDir, snapshotDir)}`
           )
         },
       },
@@ -240,6 +309,10 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
           validateVersion(version)
           const { versionsFile, versionsDir } = locations(context, options)
           const versions = parseVersions(versionsFile)
+          if (versions.redirects?.[version])
+            throw new Error(
+              `Version "${version}" was replaced by "${versions.redirects[version]}". Run "rdx ${name} ${versions.redirects[version]}" instead.`
+            )
           const from = name === 'archive' ? 'active' : 'archived'
           const to = name === 'archive' ? 'archived' : 'active'
           if (

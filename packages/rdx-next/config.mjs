@@ -62,7 +62,7 @@ function literalPattern(filename) {
     .replace(/([*?[\]{}()!+@])/g, '\\$1')
 }
 
-/** Next.js tracing for configured RDX content, independent of plugin names. */
+/** Next.js tracing and historical route redirects, independent of plugin names. */
 export async function getRdxTracingConfig({ rootDir, appDir = rootDir }) {
   rootDir = path.resolve(rootDir)
   appDir = path.resolve(appDir)
@@ -77,11 +77,17 @@ export async function getRdxTracingConfig({ rootDir, appDir = rootDir }) {
   const project = await createRdxProject(input, { rootDir })
   const files = (
     await Promise.all(
-      project.sources.map((source) =>
-        contentFiles(
-          resolveProjectPath(rootDir, source.docsDir, 'content source docsDir')
+      project.sources
+        .filter((source) => source.redirectTo === undefined)
+        .map((source) =>
+          contentFiles(
+            resolveProjectPath(
+              rootDir,
+              source.docsDir,
+              'content source docsDir'
+            )
+          )
         )
-      )
     )
   ).flat()
   for (const filename of project.runtimeFiles) {
@@ -94,7 +100,15 @@ export async function getRdxTracingConfig({ rootDir, appDir = rootDir }) {
       throw new Error(`Plugin runtimeFiles must name a file: ${filename}`)
     files.push(resolved)
   }
+  const redirects = project.sources
+    .filter((source) => source.redirectTo !== undefined)
+    .map((source) => ({
+      source: `/docs/${source.routePrefix}/:path*`,
+      destination: `/docs/${source.redirectTo}/:path*`,
+      permanent: true,
+    }))
   return {
+    ...(redirects.length ? { redirects: async () => redirects } : {}),
     outputFileTracingIncludes: {
       '/*': [
         ...new Set(

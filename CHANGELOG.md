@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Publish one documentation edition per major. Patch and minor releases advance
+  its number and content from live docs; new majors preserve previous editions.
+  Keep Canary/Current independent, retain historical files, and redirect replaced
+  URLs to the current edition of their major without duplicate menus or indexes.
+  Preserve archive state and reject reused labels or downgrades within a major.
+
 - Wrap long sidebar labels and category names within the available width,
   preserving complete text and keyboard navigation at narrow viewport sizes.
 

@@ -4,14 +4,17 @@ import type { RdxProject } from '@lexibase/rdx-types'
 
 export function getSearchSources(project: RdxProject) {
   return project.config.search
-    ? project.sources.map((source) => ({ source: source.routePrefix || '_' }))
+    ? project.sources
+        .filter((source) => source.redirectTo === undefined)
+        .map((source) => ({ source: source.routePrefix || '_' }))
     : []
 }
 
 export function getSearchResponse(project: RdxProject, key: string) {
   if (!project.config.search) return new Response(null, { status: 404 })
   const source = project.sources.find(
-    (entry) => (entry.routePrefix || '_') === key
+    (entry) =>
+      entry.redirectTo === undefined && (entry.routePrefix || '_') === key
   )
   if (!source) return new Response(null, { status: 404 })
   const options = getSourceOptions(project, source)

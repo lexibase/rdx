@@ -27,7 +27,7 @@ yarn rdx add versioning
 This activates the plugin in your configuration. For manual setup, see
 [Plugins](./plugins.mdx).
 
-## Create a release snapshot
+## Publish an edition
 
 When the current documentation is ready for a release:
 
@@ -57,16 +57,64 @@ RDX copies `docs/` into `versioned_docs/version-1.0.0/` and adds the version to
 }
 ```
 
-Snapshots are not overwritten. Continue editing `docs/` for your next release;
-the snapshot retains its previous content. This command versions documentation,
-not npm packages, Git tags, or your application's source.
+Continue editing `docs/` for your next release. The published edition stays
+unchanged until you run the command with a newer version. This command publishes
+documentation, not npm packages, Git tags, or your application's source.
+
+## Update the same major
+
+RDX keeps one published edition per major. When the next release is ready:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx version 1.1.0
+
+### npm
+
+npm exec -- rdx version 1.1.0
+
+### yarn
+
+yarn rdx version 1.1.0
+
+:::
+
+The command copies the ready content from `docs/` into
+`versioned_docs/version-1.1.0/`. The dropdown now shows `1.1.0` in place of
+`1.0.0`. A patch such as `1.1.1` updates that same edition again.
+
+```json
+{
+  "active": ["1.1.0"],
+  "archived": [],
+  "redirects": { "1.0.0": "1.1.0" }
+}
+```
+
+RDX maintains `redirects` automatically. Older documentation URLs redirect to
+the latest edition of their major, preserving the requested page path. If that
+page was removed, the destination returns a 404. Historical snapshot files stay
+on disk, but are not separate menu entries or search indexes. Keep the redirect
+entries when editing the manifest.
+
+Publishing `2.0.0` adds a new edition and preserves the final published content
+of major 1. Publishing a newer version of an archived major keeps it archived;
+use `unarchive` to restore that edition to the active list.
+
+Versions must advance within their major. An already published label cannot be
+reused. Pre-release labels such as `2.0.0-beta.1` also belong to their major;
+publishing one updates that major's edition. Use the live documentation for work
+that should not replace a published edition.
 
 ## Read and switch editions
 
 In a generated project, the live page stays at `/docs/init/intro`; its snapshot
 is at `/docs/1.0.0/init/intro`.
 
-The navbar dropdown lets readers switch editions. RDX keeps the same document
+The navbar dropdown shows one edition per major and the independent live
+documentation. RDX keeps the same document
 when it exists in the destination; otherwise it opens that edition's first page.
 Pre-release and outdated edition notices provide context. Search returns results
 only from the selected edition, including when reading an archived edition.
@@ -83,15 +131,15 @@ Archive a published snapshot:
 
 ### pnpm
 
-pnpm rdx archive 1.0.0
+pnpm rdx archive 1.1.0
 
 ### npm
 
-npm exec -- rdx archive 1.0.0
+npm exec -- rdx archive 1.1.0
 
 ### yarn
 
-yarn rdx archive 1.0.0
+yarn rdx archive 1.1.0
 
 :::
 
@@ -100,12 +148,13 @@ keeping the snapshot directory intact:
 
 ```json
 {
-  "active": ["1.1.0"],
-  "archived": ["1.0.0"]
+  "active": ["2.0.0"],
+  "archived": ["1.1.0"],
+  "redirects": { "1.0.0": "1.1.0" }
 }
 ```
 
-This example requires both snapshots to exist. The first active entry is the
+This example requires both editions to exist. The first active entry is the
 current published edition. Archived content remains accessible and searchable
 within its edition; archiving is not deletion or access control.
 
@@ -115,15 +164,15 @@ within its edition; archiving is not deletion or access control.
 
 ### pnpm
 
-pnpm rdx unarchive 1.0.0
+pnpm rdx unarchive 1.1.0
 
 ### npm
 
-npm exec -- rdx unarchive 1.0.0
+npm exec -- rdx unarchive 1.1.0
 
 ### yarn
 
-yarn rdx unarchive 1.0.0
+yarn rdx unarchive 1.1.0
 
 :::
 

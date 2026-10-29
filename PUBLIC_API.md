@@ -79,7 +79,10 @@ estão em [MDX.md](./MDX.md).
 - `rdx add versioning [--package-manager npm|pnpm|yarn]`: instala/restaura,
   ativa explicitamente o plugin e prepara o projeto.
 - `rdx version <versão>`: só existe se o plugin de versionamento estiver ativado;
-  cria uma cópia da documentação e nunca sobrescreve uma versão existente.
+  publica `docs/` na edição da mesma major, atualizando seu número e conteúdo.
+  Uma nova major acrescenta uma edição. Rótulos publicados não são reutilizados;
+  os arquivos anteriores são preservados e URLs antigas redirecionam por meio
+  de `redirects` no manifesto. Canary/Current permanece independente.
 - `rdx archive <versão>` e `rdx unarchive <versão>`: comandos do plugin de
   versionamento que movem versões existentes entre `active` e `archived`, sem
   alterar snapshots ou URLs. Restaurar adiciona ao fim de `active`, preservando
@@ -108,6 +111,8 @@ exato das mensagens, logs do Next.js ou localização dos caches como API estáv
 - `@lexibase/rdx-next/config`: `getRdxTracingConfig({ rootDir, appDir? })`, para
   aplicações Next nativas usando o core. Carrega `rdx.config.ts` e retorna
   `outputFileTracingIncludes` com os arquivos de conteúdo e runtime necessários.
+  Fontes com `redirectTo` também geram regras nativas `redirects` do Next.js;
+  aplique o objeto retornado inteiro no `next.config` para preservar URLs antigas.
   `appDir` é a pasta do `next.config`, por padrão igual a `rootDir`. O runtime
   gerado já aplica esta configuração; ela não é uma opção de `rdx.config.ts`.
 - `@lexibase/rdx-core`: indexação (`getDocument`, `getDocsIndex`, `getDocsPaths`),

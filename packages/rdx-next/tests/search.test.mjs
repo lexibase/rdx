@@ -100,4 +100,12 @@ test('disabled search and unknown sources return 404 without indexing or touchin
   assert.deepEqual(getSearchSources(project), [{ source: '_' }])
   for (const source of ['../docs', 'missing', 'current'])
     assert.equal(getSearchResponse(project, source).status, 404)
+  project.sources.push({
+    id: 'old',
+    routePrefix: '1.0.0',
+    docsDir: 'docs',
+    redirectTo: '1.1.0',
+  })
+  assert.deepEqual(getSearchSources(project), [{ source: '_' }])
+  assert.equal(getSearchResponse(project, '1.0.0').status, 404)
 })

@@ -26,7 +26,7 @@ import {
   type VersionOption,
 } from '@lexibase/rdx-ui/components/version-dropdown'
 import { ThemeProvider } from '@lexibase/rdx-ui/providers/theme-provider'
-import { notFound, redirect } from 'next/navigation'
+import { notFound, redirect, permanentRedirect } from 'next/navigation'
 
 import { compileDocumentation } from './mdx'
 
@@ -76,29 +76,31 @@ function RdxHeader({
   const { config } = project
   const messages = getMessages(config.lang)
   const { source, slug: currentSlug } = resolveDocsRoute(project, slug)
-  const options: VersionOption[] = project.sources.map((edition) => {
-    const docs = getSourceOptions(project, edition)
-    const destination =
-      currentSlug && getDocument(currentSlug, docs)
-        ? currentSlug
-        : getDocsPaths(docs)[0]
-    return {
-      id: edition.id,
-      label:
-        edition.id === 'current'
-          ? messages.current
-          : formatMessage(messages.version, { version: edition.label }),
-      kind:
-        edition.id === 'current'
-          ? 'live'
-          : edition.badge === 'Archived'
-            ? 'archived'
-            : 'version',
-      href: ['/docs', edition.routePrefix, destination]
-        .filter(Boolean)
-        .join('/'),
-    }
-  })
+  const options: VersionOption[] = project.sources
+    .filter((edition) => edition.redirectTo === undefined)
+    .map((edition) => {
+      const docs = getSourceOptions(project, edition)
+      const destination =
+        currentSlug && getDocument(currentSlug, docs)
+          ? currentSlug
+          : getDocsPaths(docs)[0]
+      return {
+        id: edition.id,
+        label:
+          edition.id === 'current'
+            ? messages.current
+            : formatMessage(messages.version, { version: edition.label }),
+        kind:
+          edition.id === 'current'
+            ? 'live'
+            : edition.badge === 'Archived'
+              ? 'archived'
+              : 'version',
+        href: ['/docs', edition.routePrefix, destination]
+          .filter(Boolean)
+          .join('/'),
+      }
+    })
   const BrandLogo = config.navbar?.logo ?? Logo
   return (
     <Navbar
@@ -185,6 +187,14 @@ export async function DocsPage({
     document,
     categories,
   } = resolveDocsRoute(project, slug)
+  if (source.redirectTo !== undefined)
+    permanentRedirect(
+      [
+        '/docs',
+        source.redirectTo,
+        ...(slug?.slice(1).map(encodeURIComponent) ?? []),
+      ].join('/')
+    )
   if (!currentSlug)
     return (
       <>

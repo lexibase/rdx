@@ -6,6 +6,15 @@ Prepare each release in a single PR containing the implementation, package
 versions, migration guidance, changelog, updated guides and documentation
 snapshot. Validate the workspace and installed archives together before merging.
 
+Publish ready live guides with `pnpm --filter web docs:version <release>`.
+Patch and minor releases replace the published edition of their major in the
+manifest and dropdown; a new major adds an edition and preserves earlier majors.
+Canary remains the independent development documentation. Commit the updated
+`versions.json`, its generated `redirects` map and the new snapshot directory in
+the release PR. Historical directories are retained; their URLs redirect to the
+latest edition of the same major. Existing labels cannot be reused, and releases
+must advance within their major. Do not edit or delete redirect history.
+
 1. Merge the tested release PR into `main`. The documentation deployment can run
    automatically from that merge.
 2. Publish the packages from the merged release in dependency order. The user

@@ -7,20 +7,28 @@ import type { RdxProject } from '@lexibase/rdx-types'
 /** Only the official site's historical URL aliases differ from installed sites. */
 export function createDocumentation(project: RdxProject) {
   const messages = getMessages(project.config.lang)
-  const editions = project.sources.map((source) => ({
-    id: source.id === 'current' ? 'canary' : source.routePrefix,
-    label:
-      source.id === 'current'
-        ? 'Canary'
-        : formatMessage(messages.version, { version: source.label }),
-    kind:
-      source.id === 'current'
-        ? ('live' as const)
-        : source.badge === 'Archived'
-          ? ('archived' as const)
-          : ('version' as const),
-    href: `/docs/${source.id === 'current' ? 'canary' : source.routePrefix}`,
-  }))
+  const editions = project.sources
+    .filter((source) => source.redirectTo === undefined)
+    .map((source) => ({
+      id: source.id === 'current' ? 'canary' : source.routePrefix,
+      label:
+        source.id === 'current'
+          ? 'Canary'
+          : formatMessage(messages.version, { version: source.label }),
+      kind:
+        source.id === 'current'
+          ? ('live' as const)
+          : source.badge === 'Archived'
+            ? ('archived' as const)
+            : ('version' as const),
+      href: `/docs/${source.id === 'current' ? 'canary' : source.routePrefix}`,
+    }))
+  function canonicalVersion(version: string) {
+    return (
+      project.sources.find((entry) => entry.routePrefix === version)
+        ?.redirectTo ?? version
+    )
+  }
   function source(version: string) {
     const entry = project.sources.find((entry) =>
       version === 'canary'
@@ -74,10 +82,18 @@ export function createDocumentation(project: RdxProject) {
       links: category.pages.map((page) => ({
         label: page.title,
         description: page.description,
-        href: `/docs/${version}/${routes.get(page.sourcePath)}`,
+        href: `/docs/${canonicalVersion(version)}/${routes.get(page.sourcePath)}`,
       })),
     }))
   }
 
-  return { source, index, pages: routePages, document, categories, editions }
+  return {
+    source,
+    index,
+    pages: routePages,
+    document,
+    categories,
+    editions,
+    canonicalVersion,
+  }
 }

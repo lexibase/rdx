@@ -230,7 +230,7 @@ test(
                 name: new RegExp('^' + messages.version.split('{version}')[0]),
               })
               .count(),
-            4
+            3
           )
           await page.keyboard.press('Escape')
           await page.goto(`${running.base}/docs/canary/intro`)
