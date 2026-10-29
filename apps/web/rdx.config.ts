@@ -8,7 +8,7 @@ import { Home } from './components/home'
 const config = {
   // Site identity, SEO and link previews. '/' paths refer to files in public/.
   metadata: {
-    // Public site URL used to resolve relative metadata URLs, such as share images.
+    // Public site URL for the sitemap and relative metadata URLs, such as share images.
     metadataBase:
       process.env.NEXT_PUBLIC_SITE_URL || 'https://rdx-tool.vercel.app',
     // The single site name: browser titles, social previews and default branding.
@@ -35,8 +35,6 @@ const config = {
     },
     // Web app manifest (name, icons, etc.). This file must exist in public/.
     manifest: '/site.webmanifest',
-    // Instructions for search engines, not access control or a privacy setting.
-    robots: { index: true, follow: true },
     // Shared preview images; documentation pages use their own title and description.
     openGraph: {
       type: 'website',

@@ -3,6 +3,8 @@ import type { RdxDocPage, RdxProject, RDXConfig } from '@lexibase/rdx-types'
 import { resolveDocsRoute } from '@lexibase/rdx-core'
 import { notFound } from 'next/navigation'
 
+import { getSourceRobots } from './indexing'
+
 /** Read metadata from the same content source and index used by the page. */
 export function getDocumentMetadata({
   project,
@@ -13,14 +15,18 @@ export function getDocumentMetadata({
 }): Metadata {
   const route = resolveDocsRoute(project, slug)
   // The page owns the redirect. Throwing it here too can duplicate Location headers.
-  if (route.source.redirectTo !== undefined) return {}
+  if (route.source.redirectTo !== undefined)
+    return { robots: getSourceRobots(project, route.source) }
   // An empty documentation tree renders the setup page with site metadata.
-  if (!route.slug) return {}
+  if (!route.slug) return { robots: { index: false, follow: true } }
   if (!route.document) notFound()
   const page = route.categories
     .flatMap((category) => category.pages)
     .find((page) => page.slug === route.slug)!
-  return getPageMetadata(project.config, page)
+  return {
+    ...getPageMetadata(project.config, page),
+    robots: getSourceRobots(project, route.source),
+  }
 }
 
 /** Keep page previews in sync while retaining the site's social images and options. */
@@ -47,6 +53,7 @@ export function getRdxMetadata(config: RDXConfig): Metadata {
     title: { default: name, template: `%s | ${name}` },
     description: config.description,
     ...metadata,
+    robots: { index: true, follow: true },
     ...(metadataBase ? { metadataBase: new URL(metadataBase) } : {}),
     ...(metadata.openGraph
       ? {

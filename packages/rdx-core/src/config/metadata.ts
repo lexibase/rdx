@@ -51,7 +51,6 @@ export function validateMetadata(input: unknown) {
     'keywords',
     'icons',
     'manifest',
-    'robots',
     'openGraph',
     'twitter',
   ])
@@ -96,15 +95,6 @@ export function validateMetadata(input: unknown) {
         })
       else url(value, field, true)
     }
-  }
-  if (metadata.robots !== undefined) {
-    const robots = object(metadata.robots, 'metadata.robots', [
-      'index',
-      'follow',
-    ])
-    for (const [key, value] of Object.entries(robots))
-      if (value !== undefined && typeof value !== 'boolean')
-        throw new RdxConfigError(`metadata.robots.${key} must be a boolean.`)
   }
   for (const key of ['openGraph', 'twitter']) {
     if (metadata[key] === undefined) continue

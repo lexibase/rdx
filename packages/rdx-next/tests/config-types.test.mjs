@@ -85,7 +85,6 @@ test('published configuration exports share RDXConfig and retain nested editor d
       'metadata.icons.shortcut',
       'metadata.icons.apple',
       'metadata.manifest',
-      'metadata.robots.index',
       'metadata.openGraph.images',
       'metadata.twitter.card',
       'navbar.title',

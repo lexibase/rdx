@@ -17,6 +17,55 @@ import { runProjectCommand } from '../lib/project-command.ts'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 
+test('official sitemap uses the same edition policy and short URLs as its document routes', async () => {
+  const temporary = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'rdx-showcase-indexing-')
+  )
+  try {
+    fs.mkdirSync(path.join(temporary, 'docs/guides'), { recursive: true })
+    fs.writeFileSync(
+      path.join(temporary, 'docs/guides/intro.mdx'),
+      'Introduction'
+    )
+    const input = {
+      metadata: {
+        applicationName: 'Test',
+        metadataBase: 'https://rdx.example.com',
+      },
+      homepage: { enabled: true },
+      plugins: [versioning()],
+    }
+    await runProjectCommand(temporary, input, 'prepare')
+    let docs = createDocumentation(
+      await createRdxProject(input, { rootDir: temporary })
+    )
+    assert.deepEqual(
+      docs.sitemap().map(({ url }) => url),
+      ['https://rdx.example.com/', 'https://rdx.example.com/docs/canary/intro']
+    )
+    assert.equal(docs.robots('canary').index, true)
+    await runProjectCommand(temporary, input, 'version', ['1.0.0'])
+    docs = createDocumentation(
+      await createRdxProject(input, { rootDir: temporary })
+    )
+    assert.deepEqual(
+      docs.sitemap().map(({ url }) => url),
+      ['https://rdx.example.com/', 'https://rdx.example.com/docs/1.0.0/intro']
+    )
+    assert.equal(docs.robots('canary').index, false)
+    assert.equal(docs.robots('1.0.0').index, true)
+    await runProjectCommand(temporary, input, 'archive', ['1.0.0'])
+    docs = createDocumentation(
+      await createRdxProject(input, { rootDir: temporary })
+    )
+    assert.equal(docs.robots('canary').index, true)
+    assert.equal(docs.robots('1.0.0').index, false)
+    assert.ok(docs.sitemap().every(({ url }) => !url.includes('/1.0.0/')))
+  } finally {
+    fs.rmSync(temporary, { recursive: true, force: true })
+  }
+})
+
 test('showcase commands use configured versioning, preserve snapshots and refuse invalid state', async () => {
   const temporary = fs.mkdtempSync(
     path.join(os.tmpdir(), 'rdx-showcase-commands-')

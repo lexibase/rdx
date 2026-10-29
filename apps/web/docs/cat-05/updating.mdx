@@ -281,6 +281,16 @@ Check documents, relative links, components, assets, search and snapshots before
 redeploying. Keep customizations in project-owned files; RDX refreshes generated
 runtime files.
 
+## Adopt automatic search indexing
+
+For configurations that define `metadata.robots`, remove that field. RDX manages
+the page directives and generated crawler files automatically. Keep
+`metadata.metadataBase` set to the public URL of your documentation, rebuild and
+redeploy. Check `/sitemap.xml` and `/robots.txt` on the deployed site.
+
+See [Search engine indexing](../cat-02/config.mdx#search-engine-indexing) for the
+policy applied to live, published and archived documentation.
+
 ## Adopt the main package in an existing package-level setup
 
 Install `@lexibase/rdx`, then change the configuration import to:

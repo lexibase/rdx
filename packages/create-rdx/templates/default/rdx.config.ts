@@ -10,7 +10,8 @@ export default defineConfig({
     applicationName: 'My documentation',
     // Footer starting year. Change it to an earlier founding year if needed.
     since: new Date().getFullYear(),
-    // Set metadataBase to your public site URL to resolve relative share images.
+    // Set metadataBase to your public site URL for the sitemap and share images.
+    // metadataBase: 'https://docs.example.com',
     // Optional examples below: uncomment only after adding the referenced files.
     // icons: {
     //   icon: [

@@ -32,6 +32,7 @@ import { compileDocumentation } from './mdx'
 
 export { createRdxProject, getProjectDocsPaths } from '@lexibase/rdx-core'
 export { getSearchResponse, getSearchSources } from './search'
+export { getSourceRobots, getRdxRobots, getRdxSitemap } from './indexing'
 export {
   getDocumentMetadata,
   getPageMetadata,

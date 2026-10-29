@@ -119,7 +119,6 @@ metadata: {
     apple: '/apple-touch-icon.png',
   },
   manifest: '/site.webmanifest',
-  robots: { index: true, follow: true },
   openGraph: {
     type: 'website',
     images: [{
@@ -138,16 +137,50 @@ metadata: {
 
 This is the `metadata` portion of a `defineConfig` call, not a complete file.
 Place the referenced images, icons, and web app manifest in `public/`.
-`metadataBase` must be an absolute HTTP(S) URL and resolves relative social image URLs.
+`metadataBase` must be your absolute public HTTP(S) URL. RDX uses it for sitemap
+entries and relative social image URLs.
 
 Documentation pages use their frontmatter `title` and `description` for browser
 metadata and Open Graph/Twitter link previews. When a page has no description,
 the site's `description` is used. Social images, locale, and card settings come
 from `metadata.openGraph` and `metadata.twitter`.
 
-Supported fields include authors, keywords, icons, manifest, robots, OpenGraph,
+Supported fields include authors, keywords, icons, manifest, OpenGraph,
 and Twitter metadata. This is a validated subset, not the entire Next.js Metadata
 API. Invalid or unknown configuration fields fail with an actionable error.
+
+## Search engine indexing
+
+Set `metadata.metadataBase` to the public URL of your documentation:
+
+```ts
+metadata: {
+  applicationName: 'My documentation',
+  metadataBase: 'https://docs.example.com',
+}
+```
+
+RDX generates `/sitemap.xml` with the homepage when enabled and each indexable
+document. `/robots.txt` points search engines to this sitemap. Without a public
+URL, the sitemap contains no entries and robots.txt omits the sitemap address.
+
+| Content                                                 | Included in the sitemap and eligible for search results |
+| ------------------------------------------------------- | ------------------------------------------------------- |
+| Current documentation without versioning                | Yes                                                     |
+| Enabled homepage                                        | Yes                                                     |
+| Published editions, including previous majors           | Yes                                                     |
+| Live Current/Canary with a published edition            | No                                                      |
+| Live Current/Canary without a published edition         | Yes                                                     |
+| Archived editions                                       | No                                                      |
+| Historical redirect URLs, internal search and 404 pages | No                                                      |
+
+The HTML directives follow the same edition policy automatically. Archiving,
+restoring or publishing an edition updates that policy on the next build and
+deployment. All documents within an edition follow its indexing policy.
+
+Excluded documentation remains accessible. RDX allows crawlers to read its
+`noindex` directive and follow its links. These directives are not access control;
+search engines decide whether and when to include a page in their results.
 
 ## Navbar and homepage
 

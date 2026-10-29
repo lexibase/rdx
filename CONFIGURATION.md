@@ -21,6 +21,14 @@ browser titles and their suffix, social preview defaults, accessible logo labels
 the footer, and the built-in homepage fallback. `navbar.title` is independent
 and optional.
 
+`metadata.metadataBase` supplies the public HTTP(S) URL for relative metadata,
+`/sitemap.xml` entries and the sitemap reference in `/robots.txt`. No deployment
+host is inferred. Without this URL the sitemap is empty. RDX owns indexing:
+published non-archived sources are indexable; live content is indexable only when
+no published source exists. Archived and redirect sources receive noindex. The
+homepage is included when enabled, and internal search responses carry an
+X-Robots-Tag noindex header. Crawling remains allowed so noindex can be read.
+
 `metadata.since` is the optional footer starting year. The CLI writes the creation
 year as a fixed number; it can be edited to an earlier founding year. Equal years
 appear once, earlier years form a range, and omission shows the current year.

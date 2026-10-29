@@ -127,7 +127,7 @@ export type RdxHomepage = {
  */
 export type RdxMetadata = {
   /**
-   * Absolute HTTP(S) deployment URL used to resolve relative metadata URLs.
+   * Absolute HTTP(S) deployment URL used for sitemap entries and relative metadata URLs.
    * Set this to the real public site URL when deploying; no domain is assumed.
    * @example 'https://docs.example.com'
    */
@@ -187,13 +187,6 @@ export type RdxMetadata = {
    * @example '/site.webmanifest'
    */
   manifest?: string
-  /** Optional crawler directives; these do not protect content from access. */
-  robots?: {
-    /** Whether search engines are instructed to index the page. */
-    index?: boolean
-    /** Whether search engines are instructed to follow links on the page. */
-    follow?: boolean
-  }
   /** Optional Open Graph link previews. No fixed URL is applied to every page. */
   openGraph?: {
     /** Site preview title; defaults to applicationName. Docs pages use their page title. */

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Generate sitemap.xml and robots.txt from the configured public URL and apply
+  automatic indexing directives to published, live and archived documentation.
+  Exclude redirect aliases and internal search from search engine indexes while
+  preserving access and edition-specific documentation search.
+- Breaking: remove metadata.robots from the public configuration. Remove this
+  field from existing configurations; indexing is now managed by RDX.
 - Let completed development setup tasks release inherited output handles without
   treating them as running services or blocking watcher and website startup.
 
