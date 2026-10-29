@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Let completed development setup tasks release inherited output handles without
+  treating them as running services or blocking watcher and website startup.
+
 ## 3.2.0 — Prepared
 
 - Wait for Windows test-server closure before treating taskkill worker races as
