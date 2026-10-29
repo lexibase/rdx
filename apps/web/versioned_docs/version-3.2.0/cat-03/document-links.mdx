@@ -1,0 +1,45 @@
+---
+title: Document links
+description: Write file paths and let RDX resolve documentation URLs.
+link_position: 8
+---
+
+## Relative links
+
+Read the [Tabs example](./tabs.mdx) or the [Accordion example](./accordion.mdx).
+Jump directly to the [Markdown example](./mdx-components.mdx#native-markdown).
+
+```md
+[Tabs](./tabs.mdx)
+[Accordion](./accordion.mdx)
+```
+
+RDX resolves the file path inside the same documentation version. Use relative
+paths from the source document to keep links aligned with your content files.
+
+## Section links
+
+Return to [relative links](#relative-links). Markdown headings receive automatic
+IDs for direct section links.
+
+## Paths, assets, and versions
+
+Relative `.mdx` links keep readers in the same edition. A snapshot cannot fall
+back to a newer page that did not exist when it was created. Query strings and
+fragments are preserved:
+
+```md
+[A section](./tabs.mdx#write-your-own-tabs)
+[A guide](../cat-02/config.mdx)
+```
+
+Use exact filename capitalization and forward slashes, including on Windows.
+Root-relative URLs, external links, downloads, images, and code samples are not
+rewritten. For images, use paths from [public/](../cat-05/assets.mdx).
+
+## Link errors
+
+> [!NOTE] Portable documentation
+> Use `.mdx` file paths with forward slashes. A missing document or a path outside
+> this version's documentation directory produces an error identifying the link
+> and source file. Links inside code samples and image paths are not rewritten.

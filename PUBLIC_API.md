@@ -1,6 +1,6 @@
-# RDX public API — 3.0
+# RDX public API — 3.2
 
-This document describes the public API of RDX 3.0. See the release instructions
+This document describes the public API of RDX 3.2. See the release instructions
 in [PUBLISHING.md](./PUBLISHING.md).
 
 RDX 3.0 installs the complete shadcn Code Block and Dialog compositions. Markdown
@@ -29,7 +29,7 @@ The official CodeBlock root uses div props; pass wrapping and line-number option
 to `CodeBlockContent` and explicit clipboard values to `CodeBlockCopyButton`.
 `DialogContent` defaults to the official centered layout; set `className` for
 custom positioning/sizing and `showCloseButton` for the native close control.
-Runtime 3.1 requires UI ^3.1.0. The main package selects matching versions.
+Runtime 3.2 requires UI ^3.2.0. The main package selects matching versions.
 
 RDX 2.0 removes the published `ButtonLink` module. Use `Button` with `href`
 from `@lexibase/rdx/ui/components/button`. See the
