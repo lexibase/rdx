@@ -6,10 +6,21 @@ import { defineConfig, resolveConfig } from '../dist/index.js'
 test('footer starting years are optional positive integers no later than the current year', () => {
   const currentYear = new Date().getFullYear()
   for (const since of [undefined, 2004, currentYear]) {
-    const config = resolveConfig({ metadata: { applicationName: 'Docs', since } })
+    const config = resolveConfig({
+      metadata: { applicationName: 'Docs', since },
+    })
     assert.equal(config.metadata.since, since)
   }
-  for (const since of ['2004', null, 0, -1, 2020.5, NaN, Infinity, currentYear + 1])
+  for (const since of [
+    '2004',
+    null,
+    0,
+    -1,
+    2020.5,
+    NaN,
+    Infinity,
+    currentYear + 1,
+  ])
     assert.throws(
       () => resolveConfig({ metadata: { applicationName: 'Docs', since } }),
       /metadata\.since must be a positive integer no later than the current year/
@@ -59,7 +70,6 @@ test('applicationName is the required single site name without inventing deploym
       apple: '/apple.png',
     },
     manifest: '/site.webmanifest',
-    robots: { index: false, follow: true },
     openGraph: {
       type: 'website',
       siteName: 'Docs',
@@ -95,7 +105,7 @@ test('invalid metadata reports the exact field before runtime', () => {
     [{ keywords: [1] }, 'metadata.keywords[0]'],
     [{ icons: { icon: 'data:image/svg+xml,bad' } }, 'metadata.icons.icon'],
     [{ manifest: '//example.com/manifest' }, 'metadata.manifest'],
-    [{ robots: { index: 'no' } }, 'metadata.robots.index'],
+    [{ robots: { index: true, follow: true } }, 'metadata.robots'],
     [{ openGraph: { url: 'https://example.com' } }, 'metadata.openGraph.url'],
     [{ openGraph: { type: 'article' } }, 'metadata.openGraph.type'],
     [

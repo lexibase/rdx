@@ -89,7 +89,6 @@ export default defineConfig({
     authors: [{ name: 'My team', url: 'https://example.com' }],
     keywords: ['documentation', 'my-project'],
     icons: { icon: '/favicon.ico' },
-    robots: { index: true, follow: true },
     openGraph: {
       type: 'website',
       images: [{ url: '/og.png', width: 1200, height: 630, alt: 'My project' }],
@@ -111,7 +110,7 @@ production domain or force localhost. Image, favicon and manifest paths refer
 to files you create in `public/`. Nothing creates those assets automatically.
 
 Supported fields are `metadataBase` (an absolute http(s) string),
-`applicationName`, `authors`, `keywords`, `icons`, `manifest`, `robots`,
+`applicationName`, `authors`, `keywords`, `icons`, `manifest`,
 `openGraph` and `twitter`. TypeScript describes the supported nested options,
 and invalid fields fail during configuration validation. This is a portable
 subset, not an unrestricted pass-through of all Next.js metadata options.

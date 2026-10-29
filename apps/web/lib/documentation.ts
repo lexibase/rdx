@@ -3,6 +3,7 @@ import path from 'node:path'
 import { getMessages, formatMessage } from '@lexibase/rdx-ui/lib/i18n'
 import { getDocument, getDocsIndex, getSourceOptions } from '@lexibase/rdx-core'
 import type { RdxProject } from '@lexibase/rdx-types'
+import { getSourceRobots, getRdxSitemap } from '@lexibase/rdx-next/runtime'
 
 /** Only the official site's historical URL aliases differ from installed sites. */
 export function createDocumentation(project: RdxProject) {
@@ -29,12 +30,16 @@ export function createDocumentation(project: RdxProject) {
         ?.redirectTo ?? version
     )
   }
-  function source(version: string) {
-    const entry = project.sources.find((entry) =>
+  function contentSource(version: string) {
+    return project.sources.find((entry) =>
       version === 'canary'
         ? entry.id === 'current'
         : entry.id !== 'current' && entry.routePrefix === version
     )
+  }
+
+  function source(version: string) {
+    const entry = contentSource(version)
     return entry ? getSourceOptions(project, entry) : null
   }
 
@@ -88,6 +93,30 @@ export function createDocumentation(project: RdxProject) {
   }
 
   return {
+    robots(version: string) {
+      const entry = contentSource(version)
+      return entry
+        ? getSourceRobots(project, entry)
+        : { index: false, follow: true }
+    },
+    sitemap() {
+      const routes = new Map<string, Map<string, string>>()
+      return getRdxSitemap(project, {
+        documentPath(entry, page) {
+          const version = entry.id === 'current' ? 'canary' : entry.routePrefix
+          if (!routes.has(version)) {
+            routes.set(
+              version,
+              new Map(
+                routePages(version).map((page) => [page.sourcePath, page.slug])
+              )
+            )
+          }
+          const slug = routes.get(version)!.get(page.sourcePath)!
+          return `/docs/${version}/${slug.split('/').map(encodeURIComponent).join('/')}`
+        },
+      })
+    },
     source,
     index,
     pages: routePages,

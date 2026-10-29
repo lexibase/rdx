@@ -11,12 +11,14 @@ export function getSearchSources(project: RdxProject) {
 }
 
 export function getSearchResponse(project: RdxProject, key: string) {
-  if (!project.config.search) return new Response(null, { status: 404 })
+  const headers = { 'X-Robots-Tag': 'noindex, follow' }
+  if (!project.config.search)
+    return new Response(null, { status: 404, headers })
   const source = project.sources.find(
     (entry) =>
       entry.redirectTo === undefined && (entry.routePrefix || '_') === key
   )
-  if (!source) return new Response(null, { status: 404 })
+  if (!source) return new Response(null, { status: 404, headers })
   const options = getSourceOptions(project, source)
   const documents = getDocsIndex(options).flatMap((category) =>
     category.pages.map((page) => ({
@@ -33,5 +35,5 @@ export function getSearchResponse(project: RdxProject, key: string) {
       content: getDocument(page.slug, options)?.content ?? '',
     }))
   )
-  return Response.json(buildSearchIndex(documents))
+  return Response.json(buildSearchIndex(documents), { headers })
 }

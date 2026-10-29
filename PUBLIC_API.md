@@ -65,6 +65,12 @@ Detalhes e exemplos de propriedades aninhadas ficam em
 [CONFIGURATION.md](./CONFIGURATION.md). The canonical public type is `RDXConfig`.
 `RdxRuntimeConfig` is an alias for `RDXConfig`.
 
+Search indexing is automatic. `metadata.metadataBase` provides absolute public
+URLs for the sitemap and robots.txt. Published non-archived sources are indexed;
+Current/Canary is indexed only without a published source. Archived editions,
+redirect aliases and internal search are excluded. The runtime exports
+`getRdxSitemap`, `getRdxRobots` and `getSourceRobots` for host integration.
+
 Pastas do primeiro nível formam categorias. Slugs preservam o caminho completo
 do arquivo MDX, sem a extensão. Os detalhes de frontmatter, componentes e links
 estão em [MDX.md](./MDX.md).

@@ -6,6 +6,12 @@ link_position: 2
 
 ## Build locally
 
+Set `metadata.metadataBase` in `rdx.config.ts` to your public site URL so RDX can
+generate absolute sitemap URLs. After deployment, visit `/sitemap.xml` and
+`/robots.txt` to inspect the generated files. See
+[Search engine indexing](../cat-02/config.mdx#search-engine-indexing) for the
+automatic rules for current, published and archived documentation.
+
 From the directory containing `package.json` and `rdx.config.ts`:
 
 :::tabs

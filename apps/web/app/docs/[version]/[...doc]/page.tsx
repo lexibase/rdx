@@ -26,7 +26,10 @@ export async function generateMetadata({
   const page = documentation
     .pages(version)
     .find((entry) => entry.sourcePath === document.sourcePath)!
-  return getPageMetadata(config, page)
+  return {
+    ...getPageMetadata(config, page),
+    robots: documentation.robots(version),
+  }
 }
 
 export default async function DocPage({

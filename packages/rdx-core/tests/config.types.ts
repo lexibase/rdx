@@ -60,7 +60,6 @@ defineConfig({
     applicationName: 'Typed docs',
     metadataBase: 'https://docs.example.com',
     authors: [{ name: 'Team' }],
-    robots: { index: false },
     openGraph: { type: 'website', images: [{ url: '/og.png', width: 1200 }] },
     twitter: { card: 'summary_large_image' },
   },
@@ -73,8 +72,8 @@ defineConfig({
 defineConfig({ metadata: { applicationName: 'Typed docs' }, TOC: 'false' })
 
 defineConfig({
-  // @ts-expect-error Robots configuration uses booleans.
-  metadata: { applicationName: 'Typed docs', robots: { index: 'no' } },
+  // @ts-expect-error Search indexing is managed by RDX, not public configuration.
+  metadata: { applicationName: 'Typed docs', robots: { index: true } },
 })
 
 defineConfig({

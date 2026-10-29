@@ -125,7 +125,7 @@ test('generated projects expose homepage and navbar defaults without activating 
   assert.match(config, /metadata:\s*\{/)
   assert.match(config, /applicationName:\s*'My documentation'/)
   assert.doesNotMatch(config, /^  title:/m)
-  assert.doesNotMatch(config, /metadataBase:\s*['"]/)
+  assert.doesNotMatch(config, /^\s*metadataBase:\s*['"]/m)
   assert.doesNotMatch(config, /plugins\s*:/)
   assert.doesNotMatch(config, /docsDir/)
   await access(path.join(projectDir, 'docs/init/intro.mdx'))

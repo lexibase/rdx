@@ -19,6 +19,16 @@ test(
       require.resolve('next/dist/bin/next'),
       root,
       async (base) => {
+        const sitemapResponse = await fetch(`${base}/sitemap.xml`)
+        assert.equal(sitemapResponse.status, 200)
+        const sitemap = await sitemapResponse.text()
+        for (const { url } of docs.sitemap()) {
+          assert.ok(sitemap.includes(`<loc>${url}</loc>`), url)
+        }
+        assert.doesNotMatch(sitemap, /\/canary\/|\/rdx-search\//)
+        const robots = await (await fetch(`${base}/robots.txt`)).text()
+        assert.match(robots, /Sitemap: https:\/\/[^\s]+\/sitemap\.xml/)
+        assert.doesNotMatch(robots, /Disallow:/)
         for (const version of [
           'canary',
           ...versions.active,
@@ -27,6 +37,11 @@ test(
           const response = await fetch(`${base}/docs/${version}/intro`)
           assert.equal(response.status, 200, version)
           const introHtml = await response.text()
+          assert.ok(
+            introHtml.includes(
+              `<meta name="robots" content="${docs.robots(version).index ? 'index' : 'noindex'}, follow"`
+            )
+          )
           assert.match(introHtml, /data-rdx-sidebar/)
           assert.match(introHtml, /Introduction \| RDX/)
           assert.match(

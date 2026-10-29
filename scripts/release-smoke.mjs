@@ -73,6 +73,8 @@ const required = {
     'dist/styles.css',
     'dist/styles.d.css.ts',
     'dist/templates/app/docs/[[...slug]]/page.tsx',
+    'dist/templates/app/sitemap.ts',
+    'dist/templates/app/robots.ts',
   ],
   'rdx-types': ['dist/index.d.ts', 'dist/config.d.ts', 'dist/search.d.ts'],
   'rdx-core': [
@@ -126,6 +128,8 @@ const required = {
     'templates/runtime/app/rdx-search/[source]/route.ts',
     'templates/runtime/app/docs/[[...slug]]/page.tsx',
     'templates/runtime/app/not-found.tsx',
+    'templates/runtime/app/sitemap.ts',
+    'templates/runtime/app/robots.ts',
     'templates/runtime/rdx-project.ts',
     'src/runtime/styles.css',
     'src/runtime/styles.d.css.ts',
@@ -542,7 +546,28 @@ async function verifySite(
       }
       assert.match(html, /href="https:\/\/github\.com\/lexibase\/rdx"/)
       assert.match(html, /<meta name="author" content="RDX Metadata Fixture"/)
-      assert.match(html, /<meta name="robots" content="noindex, nofollow"/)
+      assert.ok(
+        html.includes(
+          `<meta name="robots" content="${versioned ? 'noindex' : 'index'}, follow"`
+        )
+      )
+      const robots = await (await request(base, '/robots.txt')).text()
+      assert.match(
+        robots,
+        /Sitemap: https:\/\/docs\.example\.test\/sitemap.xml/
+      )
+      assert.doesNotMatch(robots, /Disallow:/)
+      const sitemap = await (await request(base, '/sitemap.xml')).text()
+      assert.ok(
+        sitemap.includes(
+          `https://docs.example.test/docs/${versioned ? '1.0.0/' : ''}init/intro`
+        )
+      )
+      assert.doesNotMatch(sitemap, /rdx-search|_not-found/)
+      if (versioned)
+        assert.ok(
+          !sitemap.includes('https://docs.example.test/docs/init/intro')
+        )
       assert.match(
         html,
         /<meta property="og:image" content="https:\/\/docs\.example\.test\/images\/rdx\.svg"/
@@ -566,6 +591,7 @@ async function verifySite(
         await request(base, '/docs/rdx-missing-page', 404)
       ).text()
       assert.match(missing, /data-rdx-not-found/)
+      assert.match(missing, /<meta name="robots" content="noindex"/)
       assert.match(missing, /data-rdx-navbar/)
       assert.match(missing, /text-9xl/)
       assert.ok(
@@ -617,6 +643,7 @@ async function verifySite(
       if (search) {
         const response = await request(base, '/rdx-search/_')
         assert.match(response.headers.get('content-type'), /application\/json/)
+        assert.equal(response.headers.get('x-robots-tag'), 'noindex, follow')
         const index = await response.json()
         assert.equal(index.schemaVersion, 1)
         assert.ok(index.entries.some((entry) => entry.text.includes(current)))
@@ -887,7 +914,6 @@ if (process.argv.includes('--install')) {
         authors: [{ name: 'RDX Metadata Fixture' }],
         keywords: ['rdx-metadata-fixture'],
         icons: { icon: '/images/rdx.svg' },
-        robots: { index: false, follow: false },
         openGraph: { type: 'website', images: [{ url: '/images/rdx.svg' }] },
         twitter: { card: 'summary_large_image' },`
       )

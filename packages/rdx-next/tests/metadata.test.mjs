@@ -27,7 +27,7 @@ test('historical editions defer redirects to the page without looking up metadat
   }
   assert.deepEqual(
     getDocumentMetadata({ project, slug: ['1.0.0', 'guides', 'intro'] }),
-    {}
+    { robots: { index: false, follow: true } }
   )
 })
 
@@ -41,6 +41,7 @@ test('applicationName supplies browser titles without inventing canonical or loc
       title: { default: 'Docs', template: '%s | Docs' },
       applicationName: 'Docs',
       description: 'Learn',
+      robots: { index: true, follow: true },
     }
   )
   assert.equal(
@@ -60,7 +61,6 @@ test('configured metadata reaches Next with social defaults, explicit overrides,
       keywords: ['docs'],
       icons: { icon: '/favicon.ico' },
       manifest: '/site.webmanifest',
-      robots: { index: false, follow: false },
       openGraph: { title: 'Shared Docs', images: [{ url: '/og.png' }] },
       twitter: { card: 'summary_large_image', images: ['/twitter.png'] },
     },
@@ -72,7 +72,7 @@ test('configured metadata reaches Next with social defaults, explicit overrides,
   assert.equal(metadata.openGraph.title, 'Shared Docs')
   assert.equal(metadata.openGraph.description, 'Learn')
   assert.equal(metadata.twitter.title, 'Docs')
-  assert.deepEqual(metadata.robots, { index: false, follow: false })
+  assert.deepEqual(metadata.robots, { index: true, follow: true })
   assert.deepEqual(metadata.icons, config.metadata.icons)
   assert.deepEqual(metadata.authors, config.metadata.authors)
   assert.equal(metadata.alternates, undefined)
@@ -212,12 +212,18 @@ test('document metadata follows live and plugin sources, frontmatter and filenam
   const live = { title: 'Live introduction', description: 'Live description' }
   assert.deepEqual(
     getDocumentMetadata({ project, slug: ['guides', 'intro'] }),
-    { ...live, openGraph: live, twitter: live }
+    {
+      ...live,
+      openGraph: live,
+      twitter: live,
+      robots: { index: true, follow: true },
+    }
   )
   assert.deepEqual(getDocumentMetadata({ project }), {
     ...live,
     openGraph: live,
     twitter: live,
+    robots: { index: true, follow: true },
   })
   const snapshot = {
     title: 'Snapshot introduction',
@@ -225,12 +231,18 @@ test('document metadata follows live and plugin sources, frontmatter and filenam
   }
   assert.deepEqual(
     getDocumentMetadata({ project, slug: ['1.0.1', 'guides', 'intro'] }),
-    { ...snapshot, openGraph: snapshot, twitter: snapshot }
+    {
+      ...snapshot,
+      openGraph: snapshot,
+      twitter: snapshot,
+      robots: { index: false, follow: true },
+    }
   )
   assert.deepEqual(getDocumentMetadata({ project, slug: ['1.0.1'] }), {
     ...snapshot,
     openGraph: snapshot,
     twitter: snapshot,
+    robots: { index: false, follow: true },
   })
   assert.deepEqual(
     getDocumentMetadata({ project, slug: ['guides', 'getting-started'] }),
@@ -239,6 +251,7 @@ test('document metadata follows live and plugin sources, frontmatter and filenam
       description: 'Site description',
       openGraph: { title: 'Getting Started', description: 'Site description' },
       twitter: { title: 'Getting Started', description: 'Site description' },
+      robots: { index: true, follow: true },
     }
   )
   assert.deepEqual(
@@ -248,6 +261,7 @@ test('document metadata follows live and plugin sources, frontmatter and filenam
       description: 'Site description',
       openGraph: { title: 'Blank', description: 'Site description' },
       twitter: { title: 'Blank', description: 'Site description' },
+      robots: { index: true, follow: true },
     }
   )
   for (const slug of [['missing'], ['1.0.1', 'missing'], ['..', 'private']]) {
@@ -265,7 +279,9 @@ test('empty documentation inherits site metadata and generated routes export gen
     { metadata: { applicationName: 'Empty' } },
     { rootDir }
   )
-  assert.deepEqual(getDocumentMetadata({ project }), {})
+  assert.deepEqual(getDocumentMetadata({ project }), {
+    robots: { index: false, follow: true },
+  })
   const source = await readFile(
     new URL(
       '../templates/runtime/app/docs/[[...slug]]/page.tsx',
