@@ -8,6 +8,7 @@ import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 
 import { verifySkipLink } from '../../../packages/rdx-next/tests/helpers/skip-link-browser.mjs'
+import { verifySidebarReflow } from '../../../packages/rdx-next/tests/helpers/sidebar-reflow-browser.mjs'
 
 import { verifyHomePreview } from './helpers/home-browser.mjs'
 
@@ -111,6 +112,8 @@ test(
           const page = await context.newPage()
           const errors = []
           page.on('pageerror', (error) => errors.push(error.message))
+          await page.setViewportSize({ width: 1872, height: 955 })
+          await verifySidebarReflow(page, running.base, '/docs/canary/docs')
           await page.setViewportSize({ width: 1872, height: 955 })
           await verifySkipLink(page, running.base, '/docs/canary/docs')
           await verifySkipLink(page, running.base, '/')

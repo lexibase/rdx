@@ -62,9 +62,9 @@ export function DocsSidebar({
       {categories.map((category, index) => (
         <div
           key={`${index}:${category.title}`}
-          className="flex flex-col gap-0.5 mb-3 first:mt-4"
+          className="flex min-w-0 flex-col gap-0.5 mb-3 first:mt-4"
         >
-          <p className="text-xs text-ring font-semibold uppercase mb-1">
+          <p className="text-xs text-ring font-semibold uppercase mb-1 [overflow-wrap:anywhere]">
             {category.title}
           </p>
           {category.links.map((link) => (
@@ -86,7 +86,7 @@ export function DocsSidebar({
               }
               onClick={() => actions.current?.close()}
               aria-current={pathname === link.href ? 'page' : undefined}
-              className={`justify-start text-sm ${pathname === link.href ? 'text-accent-foreground' : 'text-primary'}`}
+              className={`h-auto min-h-8 w-full min-w-0 justify-start whitespace-normal py-1.5 text-left text-sm [overflow-wrap:anywhere] ${pathname === link.href ? 'text-accent-foreground' : 'text-primary'}`}
             >
               {link.label}
             </Button>

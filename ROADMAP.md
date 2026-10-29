@@ -46,6 +46,12 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
 
 ## Depois da consolidação da base
 
+- [ ] Separar edições da documentação da frequência de releases dos pacotes.
+      Evitar criar snapshots por patch quando o guia continua válido; avaliar
+      agrupar o seletor por linha de compatibilidade (major ou minor), mostrando
+      a edição mais recente de cada linha. Preservar URLs de snapshots existentes
+      e permitir acesso às edições anteriores, sem apagar conteúdo ao agrupá-las.
+
 - [x] Alinhar configuração, leitura de conteúdo e versionamento do site oficial ao
       motor dos projetos instalados. `apps/web` usa `RDXConfig`, `createRdxProject`
       e o plugin atual via `workspace:*`, com `docs/` e `versioned_docs/`. Preservar
