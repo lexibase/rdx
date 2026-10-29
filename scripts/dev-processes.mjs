@@ -57,10 +57,13 @@ async function finishSetup(record, timeoutMs) {
   // A completed build may leave its output handles inherited by a background
   // helper. Its exit code is final; waiting for those handles is not shutdown.
   // Drain normal output first, then release only our readers if they stay open.
+  const timeout = new AbortController()
+  // Keep the cleanup deadline alive even when the exited child's output is the
+  // last remaining work. Cancel it on early closure so it cannot delay exit.
   const closed = await Promise.race([
     record.closed.then(() => true),
-    delay(timeoutMs, false, { ref: false }),
-  ])
+    delay(timeoutMs, false, { signal: timeout.signal }),
+  ]).finally(() => timeout.abort())
   if (!closed) {
     record.child.stdout.destroy()
     record.child.stderr.destroy()
