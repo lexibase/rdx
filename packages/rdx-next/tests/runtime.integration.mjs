@@ -427,7 +427,8 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
     )
     await command(rootDir, cli, ['prepare'])
     await command(rootDir, cli, ['version', '1.0.0'])
-    await command(rootDir, cli, ['version', '1.1.0'])
+    await command(rootDir, cli, ['version', '2.0.0'])
+    await command(rootDir, cli, ['version', '2.1.0'])
     await writeFile(
       path.join(rootDir, 'docs/init/intro.mdx'),
       '---\ntitle: Introduction\nlink_position: 1\n---\nChanged live body\n\n## Details\n\nLive details.'
@@ -438,7 +439,11 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
     )
     await writeFile(
       path.join(rootDir, 'versions.json'),
-      JSON.stringify({ active: ['1.1.0'], archived: ['1.0.0'] })
+      JSON.stringify({
+        active: ['2.1.0'],
+        archived: ['1.0.0'],
+        redirects: { '2.0.0': '2.1.0' },
+      })
     )
     await command(rootDir, nextCli, ['build', path.join(rootDir, '.rdx')])
     running = await server(rootDir, 'start')
@@ -505,7 +510,13 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
     assert.doesNotMatch(archived, /Changed live body/)
     assert.match(archived, /Documentation version: Version 1.0.0/)
     assert.match(archived, />Archived</)
-    for (const prefix of ['', '/1.1.0', '/1.0.0']) {
+    const historical = await fetch(`${running.base}/docs/2.0.0/init/intro`, {
+      redirect: 'manual',
+    })
+    assert.equal(historical.status, 308)
+    assert.equal(historical.headers.get('location'), '/docs/2.1.0/init/intro')
+    assert.equal((await fetch(`${running.base}/rdx-search/2.0.0`)).status, 404)
+    for (const prefix of ['', '/2.1.0', '/1.0.0']) {
       const linked = await (
         await fetch(`${running.base}/docs${prefix}/init/links`)
       ).text()

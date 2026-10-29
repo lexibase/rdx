@@ -84,6 +84,33 @@ test('tracing supports empty projects without enabling versioning or creating fi
   })
 })
 
+test('historical prefixes become native permanent redirects and do not duplicate tracing files', async (t) => {
+  const rootDir = await fixture(t)
+  await file(
+    rootDir,
+    'rdx.config.ts',
+    `export default {
+    metadata: { applicationName: 'Edition redirects' },
+    plugins: [{ name: 'editions', apiVersion: 1, setup() { return { sources: [
+      { id: 'published', label: '1.1.0', routePrefix: '1.1.0', docsDir: 'snapshots/latest' },
+      { id: 'old', label: '1.0.0', routePrefix: '1.0.0', docsDir: 'snapshots/latest', redirectTo: '1.1.0' }
+    ] } } }]
+  }`
+  )
+  await file(rootDir, 'snapshots/latest/intro.mdx', 'Published content')
+  const config = await getRdxTracingConfig({ rootDir })
+  assert.deepEqual(await config.redirects(), [
+    {
+      source: '/docs/1.0.0/:path*',
+      destination: '/docs/1.1.0/:path*',
+      permanent: true,
+    },
+  ])
+  assert.deepEqual(config.outputFileTracingIncludes['/*'], [
+    'snapshots/latest/intro.mdx',
+  ])
+})
+
 test('configured versioning traces custom manifests and both active and archived snapshots', async (t) => {
   const rootDir = await fixture(t)
   const plugin = new URL(

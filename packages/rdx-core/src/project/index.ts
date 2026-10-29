@@ -32,6 +32,8 @@ export function resolveDocsRoute(project: RdxProject, segments: string[] = []) {
 export function getProjectDocsPaths(project: RdxProject) {
   const paths = new Set<string>()
   for (const source of project.sources) {
+    // Historical prefixes are handled on request, not duplicated as static pages.
+    if (source.redirectTo !== undefined) continue
     for (const slug of getDocsPaths(getSourceOptions(project, source))) {
       const route = [source.routePrefix, slug].filter(Boolean).join('/')
       if (paths.has(route))

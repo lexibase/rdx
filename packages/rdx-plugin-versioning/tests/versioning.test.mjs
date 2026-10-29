@@ -35,6 +35,217 @@ const config = () => ({
   plugins: [versioning()],
 })
 
+test('patch and minor releases advance one edition per major and retain historical route aliases', async (t) => {
+  const rootDir = await fixture(t)
+  const project = await createRdxProject(config(), {
+    rootDir,
+    command: 'prepare',
+  })
+  const publish = (version) =>
+    project.commands[0].run({
+      rootDir,
+      config: project.config,
+      command: 'version',
+      args: [version],
+    })
+  await publish('2.0.0')
+  await publish('3.1.0')
+  await writeFile(
+    path.join(rootDir, 'docs/guides/intro.mdx'),
+    'Ready for 3.2.0'
+  )
+  await publish('3.2.0')
+  await writeFile(
+    path.join(rootDir, 'docs/guides/intro.mdx'),
+    'Ready for 3.2.1'
+  )
+  await publish('3.2.1')
+  await writeFile(
+    path.join(rootDir, 'docs/guides/intro.mdx'),
+    'Canary keeps moving'
+  )
+  const manifest = JSON.parse(
+    await readFile(path.join(rootDir, 'versions.json'))
+  )
+  assert.deepEqual(manifest, {
+    active: ['3.2.1', '2.0.0'],
+    archived: [],
+    redirects: { '3.1.0': '3.2.1', '3.2.0': '3.2.1' },
+  })
+  const next = await createRdxProject(config(), { rootDir })
+  assert.deepEqual(
+    next.sources
+      .filter((source) => source.redirectTo === undefined)
+      .map((source) => source.label),
+    ['Current', '3.2.1', '2.0.0']
+  )
+  assert.equal(
+    resolveDocsRoute(next, ['3.1.0', 'guides', 'intro']).source.redirectTo,
+    '3.2.1'
+  )
+  assert.equal(
+    resolveDocsRoute(next, ['3.1.0', 'guides', 'intro']).document.content,
+    'Ready for 3.2.1'
+  )
+  assert.equal(
+    resolveDocsRoute(next, ['guides', 'intro']).document.content,
+    'Canary keeps moving'
+  )
+  assert.equal(
+    resolveDocsRoute(next, ['2.0.0', 'guides', 'intro']).document.content,
+    'Original documentation'
+  )
+  assert.deepEqual(getProjectDocsPaths(next), [
+    'guides/intro',
+    '3.2.1/guides/intro',
+    '2.0.0/guides/intro',
+  ])
+  assert.equal(
+    await readFile(
+      path.join(rootDir, 'versioned_docs/version-3.1.0/guides/intro.mdx'),
+      'utf8'
+    ),
+    'Original documentation'
+  )
+  assert.throws(() => publish('3.2.0'), /never overwritten/)
+  assert.throws(() => publish('3.1.9'), /must be newer/)
+  await publish('4.0.0')
+  const upgraded = JSON.parse(
+    await readFile(path.join(rootDir, 'versions.json'))
+  )
+  assert.deepEqual(upgraded.active, ['4.0.0', '3.2.1', '2.0.0'])
+  assert.equal(
+    await readFile(
+      path.join(rootDir, 'versioned_docs/version-3.2.1/guides/intro.mdx'),
+      'utf8'
+    ),
+    'Ready for 3.2.1'
+  )
+})
+
+test('old manifests consolidate numerically without writes, and archived majors stay archived when updated', async (t) => {
+  const rootDir = await fixture(t)
+  for (const version of ['3.2.0', '3.10.0', '2.0.0']) {
+    await mkdir(
+      path.join(rootDir, `versioned_docs/version-${version}/guides`),
+      { recursive: true }
+    )
+    await writeFile(
+      path.join(rootDir, `versioned_docs/version-${version}/guides/intro.mdx`),
+      version
+    )
+  }
+  const filename = path.join(rootDir, 'versions.json')
+  const original = JSON.stringify({
+    active: ['3.2.0', '3.10.0'],
+    archived: ['2.0.0'],
+  })
+  await writeFile(filename, original)
+  const project = await createRdxProject(config(), { rootDir })
+  assert.equal(await readFile(filename, 'utf8'), original)
+  assert.deepEqual(
+    project.sources
+      .filter((source) => source.redirectTo === undefined)
+      .map((source) => source.label),
+    ['Current', '3.10.0', '2.0.0']
+  )
+  assert.equal(
+    project.sources.find((source) => source.routePrefix === '3.2.0').redirectTo,
+    '3.10.0'
+  )
+  await project.commands[0].run({
+    rootDir,
+    config: project.config,
+    command: 'version',
+    args: ['2.0.1'],
+  })
+  const saved = JSON.parse(await readFile(filename))
+  assert.deepEqual(saved.active, ['3.10.0'])
+  assert.deepEqual(saved.archived, ['2.0.1'])
+  assert.equal(saved.redirects['3.2.0'], '3.10.0')
+  assert.throws(
+    () =>
+      project.commands
+        .find((entry) => entry.name === 'archive')
+        .run({
+          rootDir,
+          config: project.config,
+          command: 'archive',
+          args: ['2.0.0'],
+        }),
+    /replaced by/
+  )
+})
+
+test('failed edition publication leaves the previous manifest and content usable and permits retry', async (t) => {
+  const rootDir = await fixture(t)
+  const project = await createRdxProject(config(), {
+    rootDir,
+    command: 'prepare',
+  })
+  const publish = (version) =>
+    project.commands[0].run({
+      rootDir,
+      config: project.config,
+      command: 'version',
+      args: [version],
+    })
+  await publish('1.0.0')
+  const filename = path.join(rootDir, 'versions.json')
+  const before = await readFile(filename, 'utf8')
+  const mocked = t.mock.method(fs, 'renameSync', () => {
+    throw new Error('Write failed')
+  })
+  assert.throws(() => publish('1.0.1'), /Write failed/)
+  mocked.mock.restore()
+  assert.equal(await readFile(filename, 'utf8'), before)
+  assert.equal(
+    fs.existsSync(path.join(rootDir, 'versioned_docs/version-1.0.1')),
+    false
+  )
+  await publish('1.0.1')
+  assert.deepEqual(JSON.parse(await readFile(filename)).active, ['1.0.1'])
+})
+
+test('redirect manifests reject cycles, cross-major targets and missing editions', async (t) => {
+  const rootDir = await fixture(t)
+  for (const redirects of [
+    { '1.0.0': '1.0.1', '1.0.1': '1.0.0' },
+    { '1.0.0': '2.0.0' },
+    { '1.0.0': '1.0.9' },
+  ]) {
+    await writeFile(
+      path.join(rootDir, 'versions.json'),
+      JSON.stringify({ active: ['2.0.0'], archived: [], redirects })
+    )
+    await assert.rejects(createRdxProject(config(), { rootDir }), /redirect/)
+  }
+})
+
+test('pre-release identifiers compare numerically and stable releases advance the same major', async (t) => {
+  const rootDir = await fixture(t)
+  const project = await createRdxProject(config(), {
+    rootDir,
+    command: 'prepare',
+  })
+  const publish = (version) =>
+    project.commands[0].run({
+      rootDir,
+      config: project.config,
+      command: 'version',
+      args: [version],
+    })
+  await publish('1.0.0-beta.9')
+  await publish('1.0.0-beta.10')
+  assert.throws(() => publish('1.0.0-beta.8'), /must be newer/)
+  await publish('1.0.0')
+  assert.throws(() => publish('1.0.0-rc.1'), /must be newer/)
+  assert.deepEqual(
+    JSON.parse(await readFile(path.join(rootDir, 'versions.json'))).active,
+    ['1.0.0']
+  )
+})
+
 test('archive and unarchive preserve snapshots, routes and the current published edition', async (t) => {
   const rootDir = await fixture(t)
   const input = {

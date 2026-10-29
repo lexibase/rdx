@@ -37,6 +37,50 @@ test('configuration defaults and legacy runtime config objects remain usable', (
   })
 })
 
+test('historical prefixes resolve content but do not multiply static pages, and reject unsafe redirect targets', async (t) => {
+  const rootDir = await fixture(t)
+  const source = {
+    id: 'release',
+    label: '1.1.0',
+    routePrefix: '1.1.0',
+    docsDir: 'docs',
+  }
+  const alias = {
+    id: 'old',
+    label: '1.0.0',
+    routePrefix: '1.0.0',
+    docsDir: 'docs',
+    redirectTo: '1.1.0',
+  }
+  const input = (entries) => ({
+    metadata: { applicationName: 'Test' },
+    plugins: [
+      { name: 'releases', apiVersion: 1, setup: () => ({ sources: entries }) },
+    ],
+  })
+  const project = await createRdxProject(input([source, alias]), { rootDir })
+  assert.deepEqual(getProjectDocsPaths(project), [
+    'guides/intro',
+    '1.1.0/guides/intro',
+  ])
+  assert.equal(
+    resolveDocsRoute(project, ['1.0.0', 'guides', 'intro']).source.redirectTo,
+    '1.1.0'
+  )
+  for (const redirectTo of ['missing', '1.0.0', '../outside', 3]) {
+    await assert.rejects(
+      createRdxProject(input([source, { ...alias, redirectTo }]), { rootDir }),
+      /redirectTo/
+    )
+  }
+  await assert.rejects(
+    createRdxProject(input([source, { ...alias, docsDir: 'other' }]), {
+      rootDir,
+    }),
+    /redirectTo/
+  )
+})
+
 test('docsDir is rejected even when it repeats the fixed docs/ convention', () => {
   for (const docsDir of ['docs', 'content', '..', undefined])
     assert.throws(

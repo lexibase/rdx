@@ -7,6 +7,8 @@ export type RdxContentSource = {
   docsDir: string
   routePrefix: string
   badge?: string
+  /** Canonical route prefix to redirect this historical source to. */
+  redirectTo?: string
 }
 
 export type RdxPluginContext = {

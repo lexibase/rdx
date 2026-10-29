@@ -131,7 +131,7 @@ test('showcase compilation preserves relative links, missing-document handling a
   }
 })
 
-test('the website exposes Canary and the 3.1.0, 3.0.0, 2.0.0 and 1.0.1 snapshots', async () => {
+test('the website exposes Canary and one edition per major, with historical routes', async () => {
   const docs = createDocumentation(
     await createRdxProject(config, { rootDir: root })
   )
@@ -140,7 +140,6 @@ test('the website exposes Canary and the 3.1.0, 3.0.0, 2.0.0 and 1.0.1 snapshots
     [
       { id: 'canary', kind: 'live' },
       { id: '3.1.0', kind: 'version' },
-      { id: '3.0.0', kind: 'version' },
       { id: '2.0.0', kind: 'version' },
       { id: '1.0.1', kind: 'version' },
     ]
@@ -156,12 +155,17 @@ test('the website exposes Canary and the 3.1.0, 3.0.0, 2.0.0 and 1.0.1 snapshots
       docs
         .categories(version)
         .some((category) =>
-          category.links.some((link) => link.href === `/docs/${version}/intro`)
+          category.links.some(
+            (link) =>
+              link.href === `/docs/${docs.canonicalVersion(version)}/intro`
+          )
         )
     )
     for (const page of pages) assert.ok(docs.document(version, page.slug))
   }
   assert.deepEqual(docs.index('../canary'), [])
+  assert.equal(docs.canonicalVersion('3.0.0'), '3.1.0')
+  assert.equal(docs.canonicalVersion('canary'), 'canary')
   for (const retired of ['2.1.1', '2.1.0']) {
     assert.equal(docs.document(retired, 'intro'), null)
   }

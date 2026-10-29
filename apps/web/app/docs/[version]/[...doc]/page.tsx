@@ -3,7 +3,7 @@ import { getPageMetadata } from '@lexibase/rdx-next/runtime'
 import { getMdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
 import { DocsPageTransition } from '@lexibase/rdx-ui/components/docs-page-transition'
-import { notFound, redirect } from 'next/navigation'
+import { notFound, redirect, permanentRedirect } from 'next/navigation'
 
 import config from '@/rdx.config'
 import { VersionBanner } from '@/components/Page/version-banner'
@@ -19,6 +19,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { version, doc } = await params
   const documentation = await getDocumentation()
+  const canonical = documentation.canonicalVersion(version)
+  if (canonical !== version) return {}
   const document = documentation.document(version, doc.join('/'))
   if (!document) notFound()
   const page = documentation
@@ -34,6 +36,11 @@ export default async function DocPage({
 }) {
   const { version, doc } = await params
   const documentation = await getDocumentation()
+  const canonical = documentation.canonicalVersion(version)
+  if (canonical !== version)
+    permanentRedirect(
+      `/docs/${canonical}/${doc.map(encodeURIComponent).join('/')}`
+    )
   const slug = doc.join('/')
   const document = documentation.document(version, slug)
   if (!document) return notFound()

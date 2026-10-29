@@ -11,6 +11,26 @@ const { getDocumentMetadata, getPageMetadata, getRdxMetadata } =
   await jiti.import('../src/runtime/metadata.ts')
 const { createRdxProject } = await jiti.import('@lexibase/rdx-core')
 
+test('historical editions defer redirects to the page without looking up metadata', () => {
+  const project = {
+    rootDir: '/missing',
+    config: {},
+    sources: [
+      {
+        id: 'old',
+        label: '1.0.0',
+        routePrefix: '1.0.0',
+        redirectTo: '1.1.0',
+        docsDir: 'missing',
+      },
+    ],
+  }
+  assert.deepEqual(
+    getDocumentMetadata({ project, slug: ['1.0.0', 'guides', 'intro'] }),
+    {}
+  )
+})
+
 test('applicationName supplies browser titles without inventing canonical or localhost URLs', () => {
   assert.deepEqual(
     getRdxMetadata({

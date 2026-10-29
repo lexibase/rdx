@@ -140,7 +140,9 @@ yarn rdx unarchive 1.0.0
 :::
 
 `version`, `archive`, and `unarchive` are registered only after the versioning
-plugin is configured. Archiving and restoring update the manifest without
+plugin is configured. `version` publishes the ready `docs/` content, replacing
+the published edition of the same major or adding a new major. Superseded URLs
+redirect to the updated edition. Archiving and restoring update the manifest without
 modifying snapshot contents.
 See [Plugins](../cat-04/plugins.mdx) and [Versioning](../cat-04/versioning.mdx)
 before creating snapshots. `rdx --help` lists the built-in command usage.

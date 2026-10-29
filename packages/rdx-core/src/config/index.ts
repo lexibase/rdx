@@ -372,8 +372,25 @@ export async function createRdxProject(
       }
       if (source.badge !== undefined)
         text(source.badge, `content source ${id}.badge`)
+      if (source.redirectTo !== undefined)
+        text(source.redirectTo, `content source ${id}.redirectTo`)
       sources.push(source as RdxContentSource)
     }
+  }
+  for (const source of sources) {
+    if (source.redirectTo === undefined) continue
+    const target = sources.find(
+      (entry) => entry.routePrefix === source.redirectTo
+    )
+    if (
+      !target ||
+      target === source ||
+      target.redirectTo !== undefined ||
+      target.docsDir !== source.docsDir
+    )
+      throw new RdxConfigError(
+        `content source ${source.id}.redirectTo must reference a canonical source with the same docsDir.`
+      )
   }
   return { rootDir, config, sources, commands, runtimeFiles: [...runtimeFiles] }
 }

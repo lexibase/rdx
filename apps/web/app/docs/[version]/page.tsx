@@ -1,6 +1,6 @@
-import { notFound, redirect } from 'next/navigation'
+import { notFound, redirect, permanentRedirect } from 'next/navigation'
 
-import { docsIndexer } from '@/lib/docs'
+import { getDocumentation } from '@/lib/docs'
 
 export default async function VersionRoot({
   params,
@@ -8,7 +8,10 @@ export default async function VersionRoot({
   params: Promise<{ version: string }>
 }) {
   const { version } = await params
-  const categories = await docsIndexer(version)
+  const documentation = await getDocumentation()
+  const canonical = documentation.canonicalVersion(version)
+  if (canonical !== version) permanentRedirect(`/docs/${canonical}`)
+  const categories = documentation.categories(version)
   const firstHref = categories.flatMap((c) => c.links)[0]?.href
 
   if (firstHref) {
