@@ -32,6 +32,39 @@ configuration and custom components are not replaced by this operation.
 Check the release notes for migrations and any required Next.js, React or Node.js
 updates. Those requirements are separate from updating RDX itself.
 
+## Update from RDX 3.x to 4.0
+
+RDX 4 manages search-engine indexing automatically. Remove `metadata.robots`
+from `rdx.config.ts`, keeping the rest of your configuration:
+
+```ts
+metadata: {
+  applicationName: 'My documentation',
+  metadataBase: 'https://docs.example.com',
+}
+```
+
+This shows only the relevant fields; retain your icons, social images, authors
+and other settings. Set `metadataBase` to the public URL of your site so RDX can
+generate absolute sitemap URLs. Without it, the sitemap contains no entries.
+
+Update the main framework using the commands above. If versioning is installed,
+also [update the optional plugin](#optional-plugins) to 1.2.1 or newer. Its commands
+and manifest format remain compatible. Your Markdown, React component imports,
+assets and custom styles remain usable, and Node.js, Next.js and React requirements
+are unchanged.
+
+Use [`rdx check`](../cat-03/checking.mdx) to review document links, section anchors
+and local assets, then build and preview your site. After deployment, inspect
+`/sitemap.xml` and `/robots.txt`. The [indexing policy](../cat-02/config.mdx#search-engine-indexing)
+is shared by page metadata and the generated sitemap.
+
+The main framework supplies runtime 4.0 and UI 3.2.1. Direct package integrations
+should update runtime to 4.0 and types/core to 2.0. Runtime retains UI ^3.2.0
+compatibility. Native Next.js hosts use `getSourceRobots`, `getRdxSitemap` and
+`getRdxRobots` to apply the same policy to their own routes; generated projects
+already include that integration.
+
 ## Update from RDX 3.1 to 3.2
 
 Update the main framework with the commands above. Existing configuration,
@@ -280,16 +313,6 @@ yarn start
 Check documents, relative links, components, assets, search and snapshots before
 redeploying. Keep customizations in project-owned files; RDX refreshes generated
 runtime files.
-
-## Adopt automatic search indexing
-
-For configurations that define `metadata.robots`, remove that field. RDX manages
-the page directives and generated crawler files automatically. Keep
-`metadata.metadataBase` set to the public URL of your documentation, rebuild and
-redeploy. Check `/sitemap.xml` and `/robots.txt` on the deployed site.
-
-See [Search engine indexing](../cat-02/config.mdx#search-engine-indexing) for the
-policy applied to live, published and archived documentation.
 
 ## Adopt the main package in an existing package-level setup
 

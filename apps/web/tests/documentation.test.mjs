@@ -222,6 +222,7 @@ test('the website exposes Canary and one edition per major, with historical rout
     docs.editions.map(({ id, kind }) => ({ id, kind })),
     [
       { id: 'canary', kind: 'live' },
+      { id: '4.0.0', kind: 'version' },
       { id: '3.2.0', kind: 'version' },
       { id: '2.0.0', kind: 'version' },
       { id: '1.0.1', kind: 'version' },
@@ -229,6 +230,7 @@ test('the website exposes Canary and one edition per major, with historical rout
   )
   for (const version of [
     'canary',
+    '4.0.0',
     '3.2.0',
     '3.1.0',
     '3.0.0',

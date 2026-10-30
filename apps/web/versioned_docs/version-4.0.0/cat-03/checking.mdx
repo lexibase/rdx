@@ -1,0 +1,70 @@
+---
+title: Checking documentation
+description: Find broken pages, section links and local assets before deployment.
+link_position: 12
+---
+
+## Run the check
+
+Run this from the project directory containing `rdx.config.ts`:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx check
+
+### npm
+
+npm exec -- rdx check
+
+### yarn
+
+yarn rdx check
+
+:::
+
+RDX reads the documentation and reports all detected problems with the source
+file, line and column. It checks content without building the site or preparing
+`.rdx/`.
+
+```text
+docs/guides/setup.mdx:12:1 [anchor] "./install.mdx#requirements": Section "#requirements" does not exist in docs/guides/install.mdx.
+RDX check failed: 8 pages checked, 1 problem.
+```
+
+Fix the reported references and rerun the command. A successful check exits with
+code `0`; detected problems or invalid configuration exit with code `1`. You can
+run the same command in your CI before building or deploying.
+
+## What is checked?
+
+- Relative `.mdx` links and local documentation URLs.
+- Section fragments such as `#installation`, using the same heading IDs as the
+  Markdown renderer, including repeated headings.
+- Literal IDs in MDX, such as `<span id="details" />`.
+- Markdown images and download links that point to files in `public/`.
+- Reference-style links and images, and literal HTML `href` and image `src` values.
+- Frontmatter and MDX parsing errors.
+
+Line numbers refer to the original file, including its frontmatter. Examples
+inside code blocks are treated as code, not as links to validate.
+
+## Versions
+
+With the versioning plugin enabled, RDX checks live documentation and every
+published or archived edition. Relative links and section fragments are resolved
+within the edition containing the link. Historical URLs that redirect to another
+edition use the destination edition; retained copies behind those redirects are
+not checked again.
+
+## Static content
+
+Frontmatter is read as YAML or JSON data. RDX does not request external URLs or execute document imports, expressions or
+React components. Absolute links to the configured `metadata.metadataBase`
+origin are checked as local URLs.
+
+Homepage components and dynamically generated IDs require checking in the running
+site. When a document declares a dynamic ID, the checker cannot prove that an
+anchor is missing from that document. Literal links and local files are still
+checked. A content check complements the production build and browser review.

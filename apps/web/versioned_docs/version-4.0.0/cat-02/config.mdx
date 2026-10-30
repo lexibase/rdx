@@ -1,0 +1,202 @@
+---
+title: Configuration
+description: One typed configuration for branding, metadata, and optional features.
+link_position: 2
+---
+
+## Minimal configuration
+
+Edit `rdx.config.ts` at your project root:
+
+```ts
+import { defineConfig } from '@lexibase/rdx'
+
+export default defineConfig({
+  metadata: {
+    applicationName: 'My documentation',
+  },
+})
+```
+
+Only `metadata.applicationName` is required. It provides the default browser
+title, the page-title suffix, social preview defaults, footer branding, and the
+built-in homepage name. For example, a page named Installation appears in the
+browser as **Installation | My documentation**.
+
+Use `navbar.title` for optional text beside the navbar logo.
+
+## Footer
+
+The footer shows the site name and a **Powered by RDX** link to the framework's
+GitHub repository. Set `metadata.since` to the project's or organization's starting
+year. The CLI fills this with the year the project is created; you can edit it:
+
+```ts
+metadata: {
+  applicationName: 'My documentation',
+  since: 2004,
+},
+```
+
+An earlier starting year produces a range, such as **2004–2026**. Equal years are
+shown once. Omitting `since` shows only the current year. Use a positive whole
+year no later than the current year.
+
+## Common options
+
+```ts
+import { defineConfig } from '@lexibase/rdx'
+
+export default defineConfig({
+  description: 'Guides and reference for my project.',
+  metadata: {
+    applicationName: 'My documentation',
+    metadataBase: 'https://docs.example.com',
+  },
+  lang: 'en',
+  search: true,
+  TOC: true,
+  homepage: { enabled: false },
+  theme: { defaultTheme: 'system' },
+  navbar: {
+    title: '',
+    actions: {
+      github: {
+        visible: true,
+        url: 'https://github.com/example/project',
+      },
+      showToggleMode: true,
+    },
+  },
+})
+```
+
+| Option               | Default     | Purpose                                 |
+| :------------------- | :---------- | :-------------------------------------- |
+| `description`        | Empty       | Default site description                |
+| `lang`               | `en`        | HTML and interface language             |
+| `search`             | `false`     | Navbar search dialog                    |
+| `TOC`                | `false`     | Floating heading navigation             |
+| `homepage.enabled`   | `false`     | Homepage instead of redirecting to docs |
+| `theme.defaultTheme` | `system`    | `system`, `light`, or `dark`            |
+| `plugins`            | Empty array | Explicitly activated plugins            |
+
+The creator includes the GitHub action with a `#` placeholder and the theme
+toggle enabled. Replace the placeholder with your own repository URL.
+
+Use an optional [rdx.css stylesheet](../cat-04/appearance.mdx) to customize the
+highlight color for light and dark themes.
+
+`lang` sets the HTML language and translates built-in interface labels:
+
+```ts
+lang: 'pt-BR',
+```
+
+Use `en` for English or `pt-BR` for Brazilian Portuguese. Portuguese locale
+variants, including `pt`, use Brazilian Portuguese labels. Other languages keep
+their configured HTML language and use English interface labels.
+
+This includes search, the table of contents, copy buttons, navigation, version
+notices, and footer credits. Your MDX content, page titles, category names, and
+custom component text remain as written. Rebuild and redeploy after changing
+`lang` in production.
+
+## SEO and social previews
+
+```ts
+metadata: {
+  applicationName: 'My documentation',
+  metadataBase: 'https://docs.example.com',
+  authors: [{ name: 'Your team', url: 'https://example.com' }],
+  keywords: ['documentation', 'my-project'],
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon.png', sizes: '96x96', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/site.webmanifest',
+  openGraph: {
+    type: 'website',
+    images: [{
+      url: '/social-preview.png',
+      width: 1200,
+      height: 630,
+      alt: 'My documentation',
+    }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: ['/social-preview.png'],
+  },
+}
+```
+
+This is the `metadata` portion of a `defineConfig` call, not a complete file.
+Place the referenced images, icons, and web app manifest in `public/`.
+`metadataBase` must be your absolute public HTTP(S) URL. RDX uses it for sitemap
+entries and relative social image URLs.
+
+Documentation pages use their frontmatter `title` and `description` for browser
+metadata and Open Graph/Twitter link previews. When a page has no description,
+the site's `description` is used. Social images, locale, and card settings come
+from `metadata.openGraph` and `metadata.twitter`.
+
+Supported fields include authors, keywords, icons, manifest, OpenGraph,
+and Twitter metadata. This is a validated subset, not the entire Next.js Metadata
+API. Invalid or unknown configuration fields fail with an actionable error.
+
+## Search engine indexing
+
+Set `metadata.metadataBase` to the public URL of your documentation:
+
+```ts
+metadata: {
+  applicationName: 'My documentation',
+  metadataBase: 'https://docs.example.com',
+}
+```
+
+RDX generates `/sitemap.xml` with the homepage when enabled and each indexable
+document. `/robots.txt` points search engines to this sitemap. Without a public
+URL, the sitemap contains no entries and robots.txt omits the sitemap address.
+
+| Content                                                 | Included in the sitemap and eligible for search results |
+| ------------------------------------------------------- | ------------------------------------------------------- |
+| Current documentation without versioning                | Yes                                                     |
+| Enabled homepage                                        | Yes                                                     |
+| Published editions, including previous majors           | Yes                                                     |
+| Live Current/Canary with a published edition            | No                                                      |
+| Live Current/Canary without a published edition         | Yes                                                     |
+| Archived editions                                       | No                                                      |
+| Historical redirect URLs, internal search and 404 pages | No                                                      |
+
+The HTML directives follow the same edition policy automatically. Archiving,
+restoring or publishing an edition updates that policy on the next build and
+deployment. All documents within an edition follow its indexing policy.
+
+Excluded documentation remains accessible. RDX allows crawlers to read its
+`noindex` directive and follow its links. These directives are not access control;
+search engines decide whether and when to include a page in their results.
+
+## Navbar and homepage
+
+Set `navbar.title: ''` for logo-only branding. `navbar.logo` accepts an imported
+React component that accepts `className`, not an image path. The shared navbar
+keeps its Docs link, enabled search, optional GitHub action, and theme toggle.
+
+See [Homepage](../cat-04/homepage.mdx) for a project-owned `components/home.tsx`.
+See [Custom logo](../cat-04/custom-logo.mdx) for a complete SVG component,
+configuration example, and favicon setup.
+
+## Plugins and configuration changes
+
+Installing a package does not activate it. Use [Plugins](../cat-04/plugins.mdx)
+to install and configure the optional versioning feature.
+
+Write your documentation in `docs/`.
+Do not edit files inside `.rdx/`. Restart development after changing configuration,
+and rebuild/redeploy for production.
