@@ -53,6 +53,11 @@ The first command runs lint, type checks, documentation checks, builds, and test
 local packages, installs their archives into a disposable generated project,
 and checks production behavior without publishing to npm.
 
+Use `pnpm test:release --i18n` for the multilingual archive matrix: a standalone
+project and a pnpm monorepo, with language setup, fallback, search, contribution
+links, versioned translations and production deployment. Combine `--install --i18n`
+to run both installation matrices from the same archives.
+
 Use `pnpm docs:check` from the repository root to check the official site's live,
 published and archived content on its own. This uses the same checker as
 `rdx check`, with the official site's URL aliases.

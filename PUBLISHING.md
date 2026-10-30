@@ -666,6 +666,26 @@ protections, delete lockfiles reflexively or mix package managers.
 
 Recheck a generated site's public deployment after the final package release.
 
+## Multilingual archive validation
+
+Run the focused optional-plugin matrix after building the packages:
+
+```sh
+pnpm test:release --i18n
+```
+
+This packs the local releases and installs those archives in a standalone `docs`
+project and a plain pnpm workspace at `apps/docs`. It validates package presence
+without activation, assisted language setup, contribution links, untranslated-page
+fallback, isolated search, multilingual snapshots, archive/restore, same-major
+redirects, production HTTP and deployment traces. The monorepo server also starts
+directly from `.rdx/`, exercising the serverless working directory.
+
+Artifacts remain under the timestamped `.rdx-package-smoke/release-*` path printed
+by the command. This does not publish packages or edit another repository. Use
+`--install --i18n` together to include the existing installation matrix; CI runs
+both against one set of packed archives on Windows and Ubuntu.
+
 ## Finish the launch
 
 After registry and deployment checks succeed:

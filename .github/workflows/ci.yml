@@ -55,5 +55,5 @@ jobs:
       - name: Lint, typecheck, build and unit tests
         run: pnpm check
 
-      - name: Pack and validate standalone installations
-        run: pnpm test:release --install
+      - name: Pack and validate standalone, monorepo and multilingual installations
+        run: pnpm test:release --install --i18n
