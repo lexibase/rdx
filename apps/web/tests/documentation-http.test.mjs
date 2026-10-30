@@ -12,7 +12,13 @@ const versions = require('../versions.json')
 
 test(
   'website serves live and released documentation, shared MDX and isolated search',
-  { timeout: 120_000 },
+  // Every added major is another complete tree of HTTP assertions on Windows.
+  {
+    timeout: Math.max(
+      120_000,
+      30_000 * (1 + versions.active.length + versions.archived.length)
+    ),
+  },
   async () => {
     const docs = await getDocumentation()
     await withProductionServer(

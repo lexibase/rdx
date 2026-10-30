@@ -1,8 +1,27 @@
 # RDX release readiness
 
-Status: **framework/runtime 1.2.2 and CLI 1.2.3 in preparation**. Individual internal packages
+Status: **RDX 4.0.0 in preparation**. Individual internal packages
 have their own versions; the grouped publication order is in PUBLISHING.md.
 The maintainer handles commits, PRs, merges and publication.
+
+## RDX 4.0.0 grouped release
+
+- [x] Confirm the seven proposed exact versions are not already published.
+- [x] Prepare framework/runtime/creator 4.0.0, types/core 2.0.0, UI 3.2.1 and
+      versioning 1.2.1. Keep runtime UI compatibility at ^3.2.0.
+- [x] Document removal of metadata.robots and the automatic indexing policy.
+- [x] Publish the 4.0.0 documentation snapshot while preserving Canary and older majors.
+- [x] Validate workspace checks and installed archives, including migrations and rdx check.
+- [ ] Merge the release PR after Linux and Windows CI pass.
+- [ ] Publish packages manually and confirm each exact version and latest tag.
+- [ ] Verify public-registry creation and an existing-project upgrade.
+
+Local validation completed the full installed-archive matrix. A Windows pnpm
+process exited unexpectedly during the UI upgrade installation; retrying that
+installation and resuming all remaining assertions passed. CI must still pass
+on both supported operating systems before merging.
+
+The checklists below record previous releases, not the active publication plan.
 
 ## CSS and TypeScript patch follow-up
 

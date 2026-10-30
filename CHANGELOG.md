@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 4.0.0 — Prepared
+
+- Keep the existing UI visuals at 3.2.1 and versioning commands at 1.2.1;
+  these patches align dependencies with types/core 2.0.0. The framework,
+  Next adapter and creator ship at 4.0.0, with generated projects pinned to 4.0.0.
 - Add `rdx check` for static documentation links, heading fragments and local
   assets, with aggregated file/line/column diagnostics and nonzero error status.
   Check live, published and archived sources without generating the runtime or
@@ -17,7 +22,7 @@
 - Let completed development setup tasks release inherited output handles without
   treating them as running services or blocking watcher and website startup.
 
-## 3.2.0 — Prepared
+## 3.2.0
 
 - Wait for Windows test-server closure before treating taskkill worker races as
   cleanup failures. Continue reporting shutdown failures when the server is alive.

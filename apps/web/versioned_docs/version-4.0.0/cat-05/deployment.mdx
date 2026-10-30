@@ -1,0 +1,152 @@
+---
+title: Build and deployment
+description: Validate production locally, then deploy the complete documentation project.
+link_position: 2
+---
+
+## Build locally
+
+Run [`rdx check`](../cat-03/checking.mdx) before building to find broken document
+links, missing sections and local files.
+
+Set `metadata.metadataBase` in `rdx.config.ts` to your public site URL so RDX can
+generate absolute sitemap URLs. After deployment, visit `/sitemap.xml` and
+`/robots.txt` to inspect the generated files. See
+[Search engine indexing](../cat-02/config.mdx#search-engine-indexing) for the
+automatic rules for current, published and archived documentation.
+
+From the directory containing `package.json` and `rdx.config.ts`:
+
+:::tabs
+
+### pnpm
+
+pnpm build
+
+    pnpm start
+
+### npm
+
+npm run build
+
+    npm run start
+
+### yarn
+
+yarn build
+
+    yarn start
+
+:::
+
+The generated scripts call
+`rdx build` and `rdx start`; they run Next.js against the internal `.rdx/` app.
+
+Do not deploy the development server. Test your pages, assets, navigation,
+search, and a nonexistent URL before making a deployment public.
+
+## Keep the source
+
+Your build environment needs `docs/`, `public/`, `rdx.config.ts`, the package
+manifest and lockfile, and any imported React components. With versioning,
+include `versions.json` and `versioned_docs/` too.
+
+Do not upload only `.rdx/.next`. Do not commit generated `.rdx/` files or copy
+Windows dependencies into a Linux build environment. Install and build on the host.
+
+## Vercel
+
+Create `vercel.json` beside your documentation project's `package.json` and
+`rdx.config.ts`. For a pnpm project:
+
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm build",
+  "outputDirectory": ".rdx/.next"
+}
+```
+
+Commit the package manifest, lockfile, configuration, and documentation sources
+before deploying. `--frozen-lockfile` uses the committed dependency versions and
+fails if the lockfile needs updating. With npm and a committed `package-lock.json`,
+use `npm ci` for `installCommand` and `npm run build` for `buildCommand`.
+
+Import your Git repository through the Vercel dashboard. Set **Root Directory**
+to the folder containing `rdx.config.ts`. For a standalone documentation
+repository, this is the repository root. The configuration selects the Next.js
+preset, runs the RDX build script, and points Vercel to the generated Next.js
+output in `.rdx/.next`.
+
+### Inside a monorepo
+
+For documentation installed in `apps/web`, keep the configuration inside that
+application:
+
+```folder
+my-repository/
+  package.json
+  pnpm-lock.yaml
+  pnpm-workspace.yaml
+  apps/
+    web/
+      package.json
+      rdx.config.ts
+      vercel.json
+      docs/
+      public/
+```
+
+Include the application in your workspace, for example through `apps/*` in
+`pnpm-workspace.yaml`, and commit the updated repository-root lockfile. Set the
+Vercel project's **Root Directory** to `apps/web`. Keep `outputDirectory` as
+`.rdx/.next`: the path is relative to that application directory.
+
+If the build needs workspace files outside `apps/web`, enable **Include source
+files outside of the Root Directory in the Build Step** in the Vercel project's
+Root Directory settings. If your app depends on local packages that require
+compilation, include those build steps before the documentation build.
+
+See Vercel's [monorepo setup](https://vercel.com/docs/monorepos) and
+[`vercel.json` reference](https://vercel.com/docs/project-configuration/vercel-json)
+for the corresponding platform settings.
+
+The framework traces configured documentation and plugin runtime files into the
+server build. Keep your source content available during the build; do not create
+snapshots inside a serverless request.
+
+> [!NOTE] Check your deployed site
+> After deploying, open a document URL directly, test search and assets, refresh a
+> nested page, and check that a missing page returns 404.
+
+## Node.js hosting
+
+On a Node.js server, install dependencies, run the build, and start the generated
+project:
+
+:::tabs
+
+### pnpm
+
+pnpm start
+
+### npm
+
+npm run start
+
+### yarn
+
+yarn start
+
+:::
+
+Configure HTTPS, a process supervisor, and the host's network settings. Keep the
+complete project available to the runtime.
+
+## Updates
+
+Content, configuration, component, and version changes require a new build and
+deployment. Search indexes are built from the documentation at build time.
+Set `metadata.metadataBase` to your final public URL for social previews.

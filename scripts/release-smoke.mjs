@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { createRequire } from 'node:module'
 import {
@@ -460,6 +460,31 @@ async function verifyFrameworkUpgrade(project) {
   return archive
 }
 
+async function verifyMetadataMigration(project, configPath, config) {
+  const previousConfig = config.replace(
+    'metadata: {',
+    'metadata: { robots: { index: true, follow: true },'
+  )
+  assert.notEqual(previousConfig, config)
+  try {
+    await writeFile(configPath, previousConfig)
+    const result = spawnSync(
+      process.execPath,
+      [path.join(project, 'node_modules/@lexibase/rdx/bin/rdx.mjs'), 'check'],
+      { cwd: project, encoding: 'utf8' }
+    )
+    assert.equal(result.status, 1, result.stdout + result.stderr)
+    assert.match(result.stderr, /metadata\.robots/)
+    assert.equal(await readFile(configPath, 'utf8'), previousConfig)
+  } finally {
+    await writeFile(configPath, config)
+  }
+  pnpm(project, ['exec', 'rdx', 'check'])
+  console.log(
+    'OK 3.x configuration migration: removed metadata.robots is rejected, removing the field restores the packed CLI'
+  )
+}
+
 async function verifySite(
   project,
   {
@@ -906,6 +931,7 @@ if (process.argv.includes('--install')) {
   )
   const configPath = path.join(project, 'rdx.config.ts')
   const config = await readFile(configPath, 'utf8')
+  await verifyMetadataMigration(project, configPath, config)
   await writeFile(
     configPath,
     config

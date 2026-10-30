@@ -1,0 +1,160 @@
+---
+title: Installation
+description: Create a documentation project and preview your first page.
+link_position: 1
+---
+
+## Requirements
+
+Use Node.js **22.18+ (22.x)** or **24.11+ (24.x)**, with the latest patch of
+either line. Choose pnpm, npm, or Yarn and use the same package manager throughout
+your project.
+
+You do not need to create a Next.js project first.
+
+## Create a project
+
+Run the creator and follow the prompt:
+
+:::tabs
+
+### pnpm
+
+pnpm create @lexibase/rdx@latest
+
+### npm
+
+npm create @lexibase/rdx@latest
+
+### yarn
+
+yarn dlx @lexibase/create-rdx@latest
+
+:::
+
+The Yarn creator examples use `yarn dlx` (Yarn 2+).
+
+The prompt asks **What is your project named?** Enter a name such as `my-docs`.
+RDX creates that directory and installs its dependencies.
+
+## Run locally
+
+:::tabs
+
+### pnpm
+
+pnpm dev
+
+### npm
+
+npm run dev
+
+### yarn
+
+yarn run dev
+
+:::
+
+Open `http://localhost:3000/docs`, edit `docs/init/intro.mdx` and save. Keep the development server running to preview content changes. Restart it after editing framework configuration.
+
+## Optional CLI arguments
+
+Provide the directory name directly to skip the name prompt:
+
+:::tabs
+
+### pnpm
+
+pnpm create @lexibase/rdx@latest my-docs
+
+### npm
+
+npm create @lexibase/rdx@latest -- my-docs
+
+### yarn
+
+yarn dlx @lexibase/create-rdx@latest my-docs
+
+:::
+
+Inspect the creator without generating a project:
+
+:::tabs
+
+### pnpm
+
+pnpm dlx @lexibase/create-rdx@latest --help
+
+    pnpm dlx @lexibase/create-rdx@latest --version
+
+### npm
+
+npx @lexibase/create-rdx@latest --help
+
+    npx @lexibase/create-rdx@latest --version
+
+### yarn
+
+yarn dlx @lexibase/create-rdx@latest --help
+
+    yarn dlx @lexibase/create-rdx@latest --version
+
+:::
+
+Use `--skip-install` to generate files without installing dependencies, then
+install them yourself inside the new directory. An existing directory is not overwritten.
+
+## pnpm workspaces
+
+Create the project inside a directory included by your workspace's `packages`
+patterns, such as `apps/docs`. Turborepo is optional. The generated application
+uses the workspace dependency installation and shared lockfile.
+
+The creator consolidates existing exact-version RDX approvals in
+`minimumReleaseAgeExclude` before installation and runtime preparation,
+preserving the workspace's release-age threshold and strict mode.
+
+To allow new Lexibase releases immediately, add this pattern to
+`minimumReleaseAgeExclude` in the workspace-root `pnpm-workspace.yaml`:
+
+```yaml
+minimumReleaseAgeExclude:
+  - '@lexibase/*'
+```
+
+The `*` matches every package in the `@lexibase` scope, across all versions,
+including RDX's internal dependencies and creator. This lets subsequent RDX
+updates install without adding an exception for each new version. Other packages
+keep the workspace's configured release-age policy, such as the default 24-hour
+delay in pnpm 11.
+
+Use this pattern when you trust releases from the Lexibase organization. Keep
+unrelated exclusions already in the list; existing exact-version Lexibase entries
+can be replaced by this pattern. Wildcard exclusions require pnpm 10.17 or later.
+
+If installation fails, keep the generated project and follow the reported error;
+you do not need to recreate your documents. The generator version can be checked
+with `pnpm create @lexibase/rdx@latest --version`. To refresh a cached creator:
+
+:::tabs
+
+### pnpm
+
+pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@latest my-docs
+
+### npm {disabled}
+
+### yarn {disabled}
+
+:::
+
+Cache refresh and release approval are separate settings. pnpm's release-age
+policy can select an older creator for `@latest` or block newly published
+dependencies. See [Release-age policies](../cat-05/troubleshooting.mdx#a-release-age-policy-blocks-installation)
+to check the selected version and configure exclusions when needed.
+
+## Next steps
+
+Explore the [project structure](../cat-03/docs.mdx), write your
+[first page](../cat-03/create-docs.mdx), and set your
+[application name and metadata](./config.mdx).

@@ -34,11 +34,71 @@ release PR.
 This workflow supersedes the former packages-first, separate-documentation-PR
 process and takes precedence over the historical checklists below.
 
-## Prepared grouped release: RDX 3.2.0
+## Prepared grouped release: RDX 4.0.0
 
-This release is prepared, not yet published. Keep the package versions, upgrade
-guide, changelog and `apps/web/versioned_docs/version-3.2.0` in the same PR.
-It adds compatible APIs and preserves existing imports and configuration.
+This is the current preparation plan. Publish all seven packages after the
+release PR is merged and tested. The major change is removal of metadata.robots;
+existing configurations must remove that field. Indexing is managed by RDX.
+Sitemap/robots generation and rdx check are included in the same release.
+
+| Package                  | Version | Reason                                                         |
+| ------------------------ | ------- | -------------------------------------------------------------- |
+| @lexibase/rdx-types      | 2.0.0   | Remove metadata.robots from the configuration contract         |
+| @lexibase/rdx-core       | 2.0.0   | Enforce the new contract and expose the static checker         |
+| @lexibase/rdx-ui         | 3.2.1   | Align the types dependency; existing visuals and component API |
+| @lexibase/rdx-versioning | 1.2.1   | Align core/types dependencies; existing commands and manifests |
+| @lexibase/rdx-next       | 4.0.0   | Automatic indexing, metadata routes and rdx check              |
+| @lexibase/rdx            | 4.0.0   | Select runtime 4.0.0 and UI 3.2.1                              |
+| @lexibase/create-rdx     | 4.0.0   | Pin framework 4.0.0 in new projects                            |
+
+Keep workspace dependencies local. Packing resolves them to the exact versions
+above. The runtime retains its compatible UI peer range ^3.2.0; UI and versioning
+do not need a major release for their dependency alignment.
+
+Prepare the snapshot with `pnpm --filter web docs:version 4.0.0`. The new major
+adds 4.0.0 above 3.2.0, 2.0.0 and 1.0.1. Preserve Canary, previous snapshots and
+the redirects from 3.0.0/3.1.0 to 3.2.0. Do not redirect earlier majors to 4.0.0.
+
+Before merging, run `pnpm check` and `pnpm test:release --install`. Verify the
+packed creator, new and upgraded projects, removal of metadata.robots, static
+checks, sitemap/robots, plain/versioned HTTP responses, assets and workspace
+installations. Keep the changelog, migration guide, package versions and snapshot
+in this one PR.
+
+After merging, update main, install its frozen lockfile and build. Publish one
+package at a time, confirming its exact version before its consumers:
+
+```powershell
+npm whoami
+pnpm --filter @lexibase/rdx-types publish --tag latest --access public
+npm view @lexibase/rdx-types@2.0.0 version
+pnpm --filter @lexibase/rdx-core publish --tag latest --access public
+npm view @lexibase/rdx-core@2.0.0 version
+pnpm --filter @lexibase/rdx-ui publish --tag latest --access public
+npm view @lexibase/rdx-ui@3.2.1 version
+pnpm --filter @lexibase/rdx-versioning publish --tag latest --access public
+npm view @lexibase/rdx-versioning@1.2.1 version
+pnpm --filter @lexibase/rdx-next publish --tag latest --access public
+npm view @lexibase/rdx-next@4.0.0 version
+pnpm --filter @lexibase/rdx publish --tag latest --access public
+npm view @lexibase/rdx@4.0.0 version
+pnpm --filter @lexibase/create-rdx publish --tag latest --access public
+npm view @lexibase/create-rdx@4.0.0 version
+```
+
+Verify latest tags against the table, then create a project from the public
+registry with `pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@latest docs-validacao-4`.
+Approve trusted RDX releases in the governing pnpm workspace policy if its
+release-age check requires it. Validate `pnpm rdx check`, dev, build/start,
+search and generated metadata files. Existing users update `@lexibase/rdx@latest`,
+remove metadata.robots when present and update the optional versioning plugin
+to 1.2.1 or newer when installed. See the 3.x-to-4.0 migration guide.
+
+## Previous grouped release: RDX 3.2.0
+
+This release is published. The instructions in this section are historical;
+use the 4.0.0 plan above for the current release. It added compatible APIs and
+preserved the configuration available in 3.x.
 
 | Package                  | Version | Changes                                                                           |
 | ------------------------ | ------- | --------------------------------------------------------------------------------- |
@@ -100,7 +160,7 @@ with `pnpm add @lexibase/rdx@latest` and, if installed,
 ## Previous grouped release: RDX 3.1.0
 
 This previous grouped release is published. Its table and commands below are
-historical; use the 3.2.0 instructions above for the current release.
+historical; use the 4.0.0 instructions above for the current release.
 No required migration is introduced for existing 3.0 projects.
 
 | Package                  | Version | Changes                                                                    |
