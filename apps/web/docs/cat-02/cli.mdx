@@ -142,6 +142,30 @@ configured plugin preparation. It does not create a documentation snapshot.
 
 ## Plugins and snapshots
 
+Activate content languages with the optional i18n installer:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx add i18n
+
+### npm
+
+npm exec -- rdx add i18n
+
+### yarn
+
+yarn rdx add i18n
+
+:::
+
+It uses `lang` as the primary language, asks for additional languages and
+prepares their folders. Use `--locales en,es-ES` to supply additional languages
+without a prompt, and `--package-manager npm|pnpm|yarn` to choose the installer.
+Later language additions are made in `locales` and their translation directories.
+See [Languages](../cat-04/languages.mdx).
+
 :::tabs
 
 ### pnpm

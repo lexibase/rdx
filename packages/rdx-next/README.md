@@ -31,6 +31,13 @@ Use `--package-manager npm|pnpm|yarn` to resolve ambiguous lockfiles. Dynamic
 configurations receive manual instructions and are not automatically edited.
 Installing a package with npm/pnpm/yarn alone never edits `rdx.config.ts`.
 
+Run `pnpm rdx add i18n` to activate multilingual documentation. It reuses the
+primary `lang`, asks for additional language tags and creates translation
+directories with `.gitkeep` files for empty trees. `--locales en,es-ES` supplies
+additional languages noninteractively. Existing configurations and authored
+translations are preserved; add later languages directly to `locales` and
+`locale/<folder>/docs/`. The main project creator asks only for a project name.
+
 First plugin installation follows the installed runtime: stable releases use
 `latest`, betas use `beta`, and release candidates use `rc`. Unknown prerelease
 channels require manual installation; missing tags do not fall back to another

@@ -8,6 +8,54 @@ The optional `@lexibase/rdx-i18n` plugin adds content languages and a language
 selector to the navbar. Authors supply the translations as Markdown files.
 It works on its own or with the optional versioning plugin.
 
+## Activate languages
+
+From the documentation project root:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx add i18n
+
+### npm
+
+npm exec -- rdx add i18n
+
+### yarn
+
+yarn rdx add i18n
+
+:::
+
+The command uses `lang` from `rdx.config.ts` as the primary language and asks
+for additional language tags, separated by commas, such as `en, es-ES`. It
+installs the plugin, adds its configuration and prepares the translation folders
+and runtime. Display labels use each language's native name when available; edit `label`
+to customize them. Empty folders include `.gitkeep` so they can be committed.
+
+For scripts or a terminal without interactive input, provide the additional
+languages explicitly:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx add i18n --locales en,es-ES
+
+### npm
+
+npm exec -- rdx add i18n --locales en,es-ES
+
+### yarn
+
+yarn rdx add i18n --locales en,es-ES
+
+:::
+
+Include at least one language different from your primary language. Repeating the command
+preserves existing plugin options, languages, translations and dependency versions.
+
 ## Configure languages
 
 Import the plugin in `rdx.config.ts` and add it to `plugins`. Keep the other
@@ -35,6 +83,10 @@ export default defineConfig({
 `lang` identifies the primary language. Its entry belongs in the language list
 without a folder setting. Other entries can specify a folder alias; by default,
 the folder is the lower-case language tag. Labels are displayed as written.
+
+To add another language later, add its entry to `locales`, create its
+`locale/<folder>/docs/` directory and write the translated pages. Restart the
+development server. The plugin is installed once for all configured languages.
 
 ## Organize translations
 

@@ -16,7 +16,10 @@ const { pluginRoot, fail, expectedArgs } = JSON.parse(
 assert.deepEqual(process.argv.slice(2), expectedArgs)
 await appendFile('installer-calls.txt', 'install\n')
 if (fail) process.exit(42)
-const location = path.resolve('node_modules/@lexibase/rdx-versioning')
+const plugin = JSON.parse(
+  await readFile(path.join(pluginRoot, 'package.json'), 'utf8')
+)
+const location = path.resolve('node_modules', plugin.name)
 await mkdir(path.dirname(location), { recursive: true })
 await symlink(
   pluginRoot,
@@ -25,12 +28,9 @@ await symlink(
 )
 const pkg = JSON.parse(await readFile('package.json', 'utf8'))
 if (expectedArgs.length > 1) {
-  const plugin = JSON.parse(
-    await readFile(path.join(pluginRoot, 'package.json'), 'utf8')
-  )
   pkg.dependencies = {
     ...pkg.dependencies,
-    '@lexibase/rdx-versioning': plugin.version,
+    [plugin.name]: plugin.version,
   }
   await writeFile('package.json', JSON.stringify(pkg, null, 2))
 }

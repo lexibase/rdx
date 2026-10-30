@@ -2,8 +2,8 @@
 
 Status: multilingual content and versioned snapshots are implemented in a private
 workspace plugin. Language-prefixed routes, selectors, fallback, isolated search
-and metadata share frozen per-edition inventories. Assisted installation and the
-CLI language prompt remain planned below. This is an internal design record,
+and metadata share frozen per-edition inventories. Assisted installation uses
+`rdx add i18n`; the project creator asks only for the project name. This is an internal design record,
 not registry installation instructions.
 
 ## Goals
@@ -263,9 +263,12 @@ the website adapter.
    search, metadata and `rdx check` integration.
 4. Integrate one-command multilingual snapshots, archive/restore, old editions
    and same-major redirects, independent of plugin declaration order.
-5. Add assisted installation through the existing `rdx add` catalog. In the CLI
-   language prompt, offer known interface languages plus `Other`; record the
-   chosen language without automatically installing multilingual content support.
+5. Assisted installation uses the existing `rdx add` catalog. Reuse `lang` as
+   the primary language and ask for additional language tags during first
+   activation, accepting arbitrary valid tags. `--locales` supports scripts.
+   Repeated activation preserves existing options and dependency ranges.
+   Later additions are authored in config and matching translation directories.
+   The main creator does not ask about languages or activate optional plugins.
 6. Validate packed projects outside/inside monorepos and serverless deployment,
    then write public guides and prepare a grouped release when requested.
 
@@ -285,5 +288,5 @@ selectors; public assets; custom homepage/logo imports; and production tracing.
 
 Do not alter published snapshots, user projects or the current release as part
 of this work. Snapshot contributions now support both plugins together;
-assisted installation and the creator prompt remain separate implementation
-stages under the contracts above.
+assisted installation is available locally under the contracts above. The
+plugin remains private until grouped release preparation and archive validation.

@@ -1,7 +1,29 @@
 import ts from 'typescript'
 
 export const versioningPackage = '@lexibase/rdx-versioning'
-const manual = `Cannot safely edit rdx.config.ts. Add "import { versioning } from '${versioningPackage}'" and versioning() to plugins manually, then run rdx prepare.`
+export const i18nPackage = '@lexibase/rdx-i18n'
+const versioning = {
+  packageName: versioningPackage,
+  name: 'versioning',
+  label: 'Versioning',
+}
+const localization = { packageName: i18nPackage, name: 'i18n', label: 'i18n' }
+
+export function activateVersioning(source) {
+  return editPluginConfig(source, versioning)
+}
+
+export function inspectI18n(source) {
+  return editPluginConfig(source, localization, '', true)
+}
+
+export function activateI18n(source, locales) {
+  return editPluginConfig(
+    source,
+    localization,
+    JSON.stringify({ locales }, null, 2)
+  )
+}
 
 function unwrap(node) {
   while (
@@ -14,7 +36,9 @@ function unwrap(node) {
 }
 
 // Edit only known literal shapes; never print/reconstruct the user's entire file.
-export function activateVersioning(source) {
+function editPluginConfig(source, plugin, argument = '', inspect = false) {
+  const { packageName, name: pluginName, label } = plugin
+  const manual = `Cannot safely edit rdx.config.ts. Add "import { ${pluginName} } from '${packageName}'" and ${pluginName}(${pluginName === 'i18n' ? '{ locales: [...] }' : ''}) to plugins manually, then run rdx prepare.`
   const file = ts.createSourceFile(
     'rdx.config.ts',
     source,
@@ -44,7 +68,7 @@ export function activateVersioning(source) {
           imported === 'defineConfig'
         )
           definitions.add(specifier.name.text)
-        if (name === versioningPackage && imported === 'versioning') {
+        if (name === packageName && imported === pluginName) {
           if (factory) throw new Error(manual)
           factory = specifier.name.text
         }
@@ -52,10 +76,10 @@ export function activateVersioning(source) {
     } else if (
       bindings &&
       ts.isNamespaceImport(bindings) &&
-      name === versioningPackage
+      name === packageName
     ) {
       if (factory) throw new Error(manual)
-      factory = `${bindings.name.text}.versioning`
+      factory = `${bindings.name.text}.${pluginName}`
     }
   }
   const exports = file.statements.filter(ts.isExportAssignment)
@@ -100,9 +124,18 @@ export function activateVersioning(source) {
     )
     if (matches.length > 1)
       throw new Error(
-        'Versioning is configured more than once. Remove the duplicate plugin before retrying.'
+        `${label} is configured more than once. Remove the duplicate plugin before retrying.`
       )
-    if (matches.length === 1) return source
+    if (matches.length === 1) return inspect ? { configured: true } : source
+  }
+  if (inspect) {
+    const languages = properties.filter((entry) => entry.name.text === 'lang')
+    if (languages.length > 1) throw new Error(manual)
+    const language = languages.length
+      ? unwrap(languages[0].initializer)
+      : undefined
+    if (language && !ts.isStringLiteral(language)) throw new Error(manual)
+    return { configured: false, lang: language?.text ?? 'en' }
   }
   const newline = source.includes('\r\n') ? '\r\n' : '\n'
   const edits = []
@@ -113,11 +146,12 @@ export function activateVersioning(source) {
       ts.forEachChild(node, visit)
     }
     visit(file)
-    factory = 'versioning'
+    factory = pluginName
     let suffix = 1
-    while (identifiers.has(factory)) factory = `rdxVersioning${suffix++}`
+    const alias = `rdx${pluginName[0].toUpperCase()}${pluginName.slice(1)}`
+    while (identifiers.has(factory)) factory = `${alias}${suffix++}`
     const specifier =
-      factory === 'versioning' ? 'versioning' : `versioning as ${factory}`
+      factory === pluginName ? pluginName : `${pluginName} as ${factory}`
     let position = imports.length
       ? imports.at(-1).end
       : file.statements[0].getStart(file)
@@ -133,7 +167,7 @@ export function activateVersioning(source) {
     }
     edits.push({
       position,
-      text: `${newline}import { ${specifier} } from '${versioningPackage}'${newline}`,
+      text: `${newline}import { ${specifier} } from '${packageName}'${newline}`,
     })
   }
   if (plugins) {
@@ -142,14 +176,14 @@ export function activateVersioning(source) {
       : plugins.getStart(file) + 1
     edits.push({
       position,
-      text: `${plugins.elements.length ? ',' : ''} ${factory}()`,
+      text: `${plugins.elements.length ? ',' : ''} ${factory}(${argument.replaceAll('\n', newline)})`,
     })
   } else {
     if (properties.length && !properties.hasTrailingComma)
       edits.push({ position: properties.at(-1).end, text: ',' })
     edits.push({
       position: config.end - 1,
-      text: `${newline}  plugins: [${factory}()],${newline}`,
+      text: `${newline}  plugins: [${factory}(${argument.replaceAll('\n', newline)})],${newline}`,
     })
   }
   for (const edit of edits.sort((a, b) => b.position - a.position))
