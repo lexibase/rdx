@@ -48,3 +48,12 @@ The plugin declares its manifest through `runtimeFiles` so the Next adapter
 includes custom manifest paths in production deployments together with active
 and archived documentation snapshots. Updating an archived major preserves its
 archived state until explicitly restored.
+
+Plugins can declare extra snapshot trees and metadata through the synchronous
+`snapshot` contribution hook. Versioning validates every destination, reserves
+new paths exclusively, copies all contributions, then commits the version
+manifest. A failure rolls back only the new snapshot directories. Existing
+snapshots and pre-existing destinations are never overwritten.
+
+The optional language plugin uses this lifecycle for multilingual editions.
+Versioning does not import or depend on that plugin; each also works alone.

@@ -1,9 +1,9 @@
 # Optional multilingual documentation
 
-Status: first implementation stage in a private workspace plugin. Unversioned
-projects have language-prefixed routes, a selector, missing-translation fallback,
-isolated search and metadata. Multilingual snapshots, assisted installation and
-the CLI language prompt remain planned below. This is an internal design record,
+Status: multilingual content and versioned snapshots are implemented in a private
+workspace plugin. Language-prefixed routes, selectors, fallback, isolated search
+and metadata share frozen per-edition inventories. Assisted installation and the
+CLI language prompt remain planned below. This is an internal design record,
 not registry installation instructions.
 
 ## Goals
@@ -284,6 +284,6 @@ fallback canonical/noindex and real-language alternates; mobile/keyboard
 selectors; public assets; custom homepage/logo imports; and production tracing.
 
 Do not alter published snapshots, user projects or the current release as part
-of this work. The first-stage feature PR implements unversioned content; snapshot
-contributions, assisted installation and the creator prompt remain separate
-implementation stages under the contracts above.
+of this work. Snapshot contributions now support both plugins together;
+assisted installation and the creator prompt remain separate implementation
+stages under the contracts above.

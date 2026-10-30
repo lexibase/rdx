@@ -14,18 +14,25 @@ export function getLocalizedProject(
     ...project,
     locale: selected,
     config: { ...project.config, lang: selected.code },
-    sources: project.sources.map((source) => ({
-      ...source,
-      docsDir: source.fallbackDocsDir ?? source.docsDir,
-      fallbackDocsDir: undefined,
-      basePath: `/${selected.path}/docs`,
-      ...(selected.code === project.localization!.defaultLocale
-        ? {}
-        : {
-            docsDir: `locale/${selected.folder}/docs`,
-            fallbackDocsDir: source.fallbackDocsDir ?? source.docsDir,
-          }),
-    })),
+    sources: project.sources.map((source) => {
+      const primary =
+        source.localization?.docs[project.localization!.defaultLocale] ??
+        source.fallbackDocsDir ??
+        source.docsDir
+      const translated =
+        source.localization?.docs[selected.code] ??
+        (!source.localization && !source.version && selected.folder
+          ? `locale/${selected.folder}/docs`
+          : undefined)
+      const isPrimary = selected.code === project.localization!.defaultLocale
+      return {
+        ...source,
+        docsDir: isPrimary ? primary : (translated ?? primary),
+        fallbackDocsDir: isPrimary ? undefined : primary,
+        fallbackOnly: !isPrimary && !translated,
+        basePath: `/${selected.path}/docs`,
+      }
+    }),
   }
 }
 
@@ -54,6 +61,40 @@ export function getDocsHref(
   ]
     .filter(Boolean)
     .join('/')
+}
+
+/** Navbar language links retain both the page and the selected edition. */
+export function getLanguageLinks(
+  project: RdxProject,
+  source: RdxContentSource,
+  slug = ''
+) {
+  if (!project.localization) return []
+  const visible = new Set(
+    (
+      project.sources[0]?.localization?.locales ?? project.localization.locales
+    ).map((locale) => locale.code)
+  )
+  for (const locale of source.localization?.locales ?? [])
+    visible.add(locale.code)
+  if (project.locale) visible.add(project.locale.code)
+  return project.localization.locales
+    .filter((locale) => visible.has(locale.code))
+    .map((locale) => {
+      const view = getLocalizedProject(project, locale.path)
+      return {
+        code: locale.code,
+        label:
+          source.localization?.locales.find(
+            (entry) => entry.code === locale.code
+          )?.label ?? locale.label,
+        href: getDocsHref(
+          view,
+          view.sources.find((entry) => entry.id === source.id),
+          slug
+        ),
+      }
+    })
 }
 
 export function isFallbackPage(

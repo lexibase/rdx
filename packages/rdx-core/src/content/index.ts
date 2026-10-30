@@ -96,9 +96,11 @@ function isSafeSlug(slug: string) {
  * route metadata. Default callers keep the existing fail-fast behavior.
  */
 export function getDocsIndex(
-  { docsDir, fallbackDocsDir }: RdxDocsOptions = {},
+  { docsDir, fallbackDocsDir, fallbackOnly }: RdxDocsOptions = {},
   onError?: (error: unknown, sourcePath: string) => void
 ): RdxDocCategory[] {
+  if (fallbackOnly)
+    return getDocsIndex({ docsDir: fallbackDocsDir ?? docsDir }, onError)
   if (fallbackDocsDir) {
     const primary = getDocsIndex({ docsDir: fallbackDocsDir }, onError)
     const translated = getDocsIndex({ docsDir }, onError)
@@ -199,9 +201,11 @@ export function getDocsPaths(options?: RdxDocsOptions) {
 
 export function getDocument(
   slug: string,
-  { docsDir, fallbackDocsDir }: RdxDocsOptions = {}
+  { docsDir, fallbackDocsDir, fallbackOnly }: RdxDocsOptions = {}
 ): RdxDocument | null {
   if (!isSafeSlug(slug)) return null
+  if (fallbackOnly)
+    return getDocument(slug, { docsDir: fallbackDocsDir ?? docsDir })
 
   const docsRoot = getDocsRoot(docsDir)
   const sourcePath = path.resolve(docsRoot, `${slug}${MDX_EXTENSION}`)

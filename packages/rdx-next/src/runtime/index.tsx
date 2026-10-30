@@ -7,6 +7,7 @@ import {
   resolveDocsRoute,
   getLocalizedProject,
   getDocsHref,
+  getLanguageLinks,
   isFallbackPage,
 } from '@lexibase/rdx-core'
 import type { RdxProject, RDXConfig } from '@lexibase/rdx-types'
@@ -136,14 +137,7 @@ function RdxHeader({
           <LanguageDropdown
             lang={config.lang}
             current={project.locale?.code ?? project.localization.defaultLocale}
-            options={project.localization.locales.map((locale) => {
-              const localized = getLocalizedProject(project, locale.path)
-              return {
-                code: locale.code,
-                label: locale.label,
-                href: getDocsHref(localized, localized.sources[0], currentSlug),
-              }
-            })}
+            options={getLanguageLinks(project, source, currentSlug)}
           />
         ) : undefined
       }
@@ -234,11 +228,13 @@ export async function DocsPage({
   } = resolveDocsRoute(project, slug)
   if (source.redirectTo !== undefined)
     permanentRedirect(
-      [
-        '/docs',
-        source.redirectTo,
-        ...(slug?.slice(1).map(encodeURIComponent) ?? []),
-      ].join('/')
+      getDocsHref(
+        project,
+        project.sources.find(
+          (entry) => entry.routePrefix === source.redirectTo
+        ),
+        slug?.slice(1).join('/')
+      )
     )
   if (!currentSlug)
     return (
@@ -252,7 +248,9 @@ export async function DocsPage({
     )
   if (!document) notFound()
   const fallback = isFallbackPage(project, source, document.sourcePath)
-  const primaryLocale = project.localization?.locales.find(
+  const primaryLocale = (
+    source.localization ?? project.localization
+  )?.locales.find(
     (locale) => locale.code === project.localization!.defaultLocale
   )
   const originalProject =

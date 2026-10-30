@@ -161,7 +161,7 @@ test('unsafe, missing, duplicate and incomplete locale declarations fail without
   assert.equal(fs.existsSync(path.join(rootDir, '.rdx')), false)
 })
 
-test('the first phase rejects version commands regardless of plugin order', async (t) => {
+test('localization no longer reserves or blocks another plugin version command', async (t) => {
   const { rootDir, config } = fixture(t)
   const editions = {
     name: 'editions-fixture',
@@ -180,8 +180,9 @@ test('the first phase rejects version commands regardless of plugin order', asyn
     [...config.plugins, editions],
     [editions, ...config.plugins],
   ])
-    await assert.rejects(
-      createRdxProject({ ...config, plugins }, { rootDir }),
-      /unversioned projects only/
+    assert.ok(
+      (
+        await createRdxProject({ ...config, plugins }, { rootDir })
+      ).commands.some((entry) => entry.name === 'version')
     )
 })

@@ -2,7 +2,10 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { randomUUID } from 'node:crypto'
 
-import { resolveProjectPath } from '@lexibase/rdx-core/config'
+import {
+  resolveProjectPath,
+  collectSnapshotContributions,
+} from '@lexibase/rdx-core/config'
 import type { RdxPlugin, RdxPluginContext } from '@lexibase/rdx-types'
 
 import {
@@ -194,7 +197,19 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
             label: version,
             routePrefix: version,
             docsDir: path.relative(context.rootDir, snapshotDir),
-            ...(canonical !== version ? { redirectTo: canonical } : {}),
+            version: canonical,
+            ...(canonical !== version
+              ? {
+                  redirectTo: canonical,
+                  previousSnapshot: {
+                    version,
+                    docsDir: path.relative(
+                      context.rootDir,
+                      path.join(versionsDir, `version-${version}`)
+                    ),
+                  },
+                }
+              : {}),
             ...(versions.archived.includes(canonical)
               ? { badge: 'Archived' }
               : {}),
@@ -266,22 +281,39 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
                   version,
                   ...versions.active.filter((entry) => entry !== previous),
                 ].sort((a, b) => compareVersions(b, a))
-          fs.mkdirSync(versionsDir, { recursive: true })
-          // Reserve the snapshot exclusively, then copy into absent children.
-          // Newer Node releases reject cpSync onto an existing directory when
-          // errorOnExist is enabled, including the root we just reserved.
-          fs.mkdirSync(snapshotDir)
+          // CLI-only copy paths must not expand the server's content trace.
+          const snapshotRoot = path.resolve(
+            /* turbopackIgnore: true */ context.rootDir
+          )
+          const plan = collectSnapshotContributions(
+            { ...context, rootDir: snapshotRoot },
+            {
+              version,
+              sourceDir: path.relative(snapshotRoot, docsDir),
+              snapshotDir: path.relative(snapshotRoot, snapshotDir),
+            }
+          )
+          const reserved: string[] = []
           try {
-            for (const entry of fs.readdirSync(docsDir)) {
-              fs.cpSync(
-                path.join(docsDir, entry),
-                path.join(snapshotDir, entry),
-                {
-                  recursive: true,
-                  force: false,
-                  errorOnExist: true,
-                }
-              )
+            for (const directory of plan.directories) {
+              fs.mkdirSync(path.dirname(directory.to), { recursive: true })
+              fs.mkdirSync(directory.to)
+              reserved.push(directory.to)
+            }
+            for (const directory of plan.directories) {
+              for (const entry of fs.readdirSync(
+                /* turbopackIgnore: true */ directory.from
+              )) {
+                fs.cpSync(
+                  path.join(/* turbopackIgnore: true */ directory.from, entry),
+                  path.join(/* turbopackIgnore: true */ directory.to, entry),
+                  { recursive: true, force: false, errorOnExist: true }
+                )
+              }
+            }
+            for (const file of plan.files) {
+              fs.mkdirSync(path.dirname(file.filename), { recursive: true })
+              fs.writeFileSync(file.filename, file.content, { flag: 'wx' })
             }
             writeVersions(versionsFile, {
               active,
@@ -289,9 +321,10 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
               ...(Object.keys(redirects).length ? { redirects } : {}),
             })
           } catch (error) {
-            // This exclusively reserved directory belongs to this failed publication.
-            if (inside(versionsDir, snapshotDir))
-              fs.rmSync(snapshotDir, { recursive: true, force: true })
+            // Remove only directories exclusively reserved by this operation.
+            for (const directory of reserved.reverse())
+              if (inside(plan.rootDir, directory))
+                fs.rmSync(directory, { recursive: true, force: true })
             throw error
           }
           console.log(

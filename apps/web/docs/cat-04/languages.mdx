@@ -6,7 +6,7 @@ link_position: 8
 
 The optional `@lexibase/rdx-i18n` plugin adds content languages and a language
 selector to the navbar. Authors supply the translations as Markdown files.
-This plugin supports documentation without versioning.
+It works on its own or with the optional versioning plugin.
 
 ## Configure languages
 
@@ -105,3 +105,85 @@ counterpart is reported as an error. Missing translations are allowed.
 The `lang` setting also selects built-in interface messages. English and Brazilian
 Portuguese have interface catalogs; other content languages use English interface
 messages. Your translated documents and language labels remain as written.
+
+## With versioning
+
+Configure both plugins in `rdx.config.ts`, in either order:
+
+```ts title="rdx.config.ts"
+import { defineConfig } from '@lexibase/rdx'
+import { i18n } from '@lexibase/rdx-i18n'
+import { versioning } from '@lexibase/rdx-versioning'
+
+export default defineConfig({
+  metadata: { applicationName: 'My documentation' },
+  lang: 'en',
+  plugins: [
+    versioning(),
+    i18n({
+      locales: [
+        { code: 'en', label: 'English' },
+        { code: 'pt-BR', label: 'Português (Brasil)', folder: 'ptbr' },
+      ],
+    }),
+  ],
+})
+```
+
+Publish all configured languages with one command:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx version 1.0.0
+
+### npm
+
+npm exec -- rdx version 1.0.0
+
+### yarn
+
+yarn rdx version 1.0.0
+
+:::
+
+The primary snapshot stays in `versioned_docs/`. Translated snapshots stay beside
+their live language trees:
+
+```folder
+versioned_docs/
+  version-1.0.0/
+    guides/
+      installation.mdx
+locale/
+  ptbr/
+    docs/
+      guides/
+        installation.mdx
+    versioned_docs/
+      version-1.0.0/
+        guides/
+          installation.mdx
+versions.json
+```
+
+RDX records the language inventory of each release in its snapshot metadata.
+Commit the complete snapshot directories, including their internal JSON files.
+Keep `versions.json` at the project root; one edition applies to every language.
+If copying a language fails, the new snapshots are removed and the version
+manifest stays unchanged.
+
+Read a Portuguese snapshot at `/pt-br/docs/1.0.0/guides/installation`. Switching
+languages preserves the edition; switching editions preserves the language.
+Search stays within both selections. Missing translations display the primary
+page from that same edition, never a later translation from the live tree.
+
+Snapshots created before language support contain primary-language content.
+Adding the plugin does not copy current translations into those snapshots.
+Changing a live translation's folder alias does not move existing snapshots.
+Keep the primary `lang` stable after publishing multilingual snapshots.
+
+The [versioning commands](./versioning.mdx) also archive, restore and advance the
+whole edition. Same-major redirects preserve the language and page. Retain the
+historical snapshot metadata so replaced-language URLs remain recognizable.

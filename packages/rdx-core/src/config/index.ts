@@ -4,6 +4,8 @@ import { existsSync } from 'node:fs'
 import { validateMetadata } from './metadata.js'
 import { RdxConfigError } from './error.js'
 import { resolveLocalization } from './localization'
+import { resolveProjectPath } from './paths'
+import { hydrateSourceLocalizations } from './source-localization'
 
 import type {
   RDXConfig,
@@ -15,6 +17,10 @@ import type {
 } from '@lexibase/rdx-types'
 
 export { RdxConfigError } from './error.js'
+export { resolveProjectPath } from './paths'
+export { normalizeLocalization } from './localization'
+export { collectSnapshotContributions } from './snapshots'
+export { getContentSources } from '../project/localization'
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -60,29 +66,6 @@ function keys(
     if (!allowed.includes(key))
       throw new RdxConfigError(`unknown option ${field}${key}.`)
   }
-}
-
-/** Resolve project-owned paths without allowing traversal or filesystem roots. */
-export function resolveProjectPath(
-  rootDir: string,
-  value: string,
-  field: string
-) {
-  text(value, field)
-  const resolved = path.resolve(/* turbopackIgnore: true */ rootDir, value)
-  const relative = path.relative(rootDir, resolved)
-  if (
-    path.isAbsolute(value) ||
-    !relative ||
-    relative === '..' ||
-    relative.startsWith(`..${path.sep}`) ||
-    path.isAbsolute(relative)
-  ) {
-    throw new RdxConfigError(
-      `${field} must be a relative path inside the project.`
-    )
-  }
-  return resolved
 }
 
 export function resolveConfig(input: unknown): ResolvedRdxConfig {
@@ -230,6 +213,8 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
       throw new RdxConfigError(`plugin "${name}" setup must be a function.`)
     if (plugin.commands !== undefined && !Array.isArray(plugin.commands))
       throw new RdxConfigError(`plugin "${name}" commands must be an array.`)
+    if (plugin.snapshot !== undefined && typeof plugin.snapshot !== 'function')
+      throw new RdxConfigError(`plugin "${name}" snapshot must be a function.`)
   }
 
   const typed = config as RDXConfig
@@ -341,7 +326,11 @@ export async function createRdxProject(
       )
     for (const value of contribution.sources) {
       const source = object(value, `plugin "${plugin.name}" content source`)
-      if ('basePath' in source || 'fallbackDocsDir' in source)
+      if (
+        ['basePath', 'fallbackDocsDir', 'fallbackOnly', 'localization'].some(
+          (key) => key in source
+        )
+      )
         throw new RdxConfigError(
           'Content source basePath and fallbackDocsDir are reserved for internal locale views.'
         )
@@ -391,6 +380,37 @@ export async function createRdxProject(
         text(source.badge, `content source ${id}.badge`)
       if (source.redirectTo !== undefined)
         text(source.redirectTo, `content source ${id}.redirectTo`)
+      if (
+        source.version !== undefined &&
+        (typeof source.version !== 'string' ||
+          !/^\d+\.\d+\.\d+(?:-[a-zA-Z0-9][a-zA-Z0-9.-]*)?$/.test(
+            source.version
+          ))
+      )
+        throw new RdxConfigError(
+          `content source ${id}.version must be a safe snapshot label.`
+        )
+      if (source.previousSnapshot !== undefined) {
+        const previous = object(
+          source.previousSnapshot,
+          `content source ${id}.previousSnapshot`
+        )
+        keys(previous, ['version', 'docsDir'], 'previousSnapshot.')
+        if (
+          typeof previous.version !== 'string' ||
+          !/^\d+\.\d+\.\d+(?:-[a-zA-Z0-9][a-zA-Z0-9.-]*)?$/.test(
+            previous.version
+          )
+        )
+          throw new RdxConfigError(
+            'previousSnapshot.version must be a safe snapshot label.'
+          )
+        resolveProjectPath(
+          rootDir,
+          text(previous.docsDir, 'previousSnapshot.docsDir'),
+          'previousSnapshot.docsDir'
+        )
+      }
       sources.push(source as RdxContentSource)
     }
   }
@@ -409,12 +429,12 @@ export async function createRdxProject(
         `content source ${source.id}.redirectTo must reference a canonical source with the same docsDir.`
       )
   }
-  if (
-    localization &&
-    (sources.length > 1 || commands.some((entry) => entry.name === 'version'))
-  )
-    throw new RdxConfigError(
-      'Multilingual documentation currently supports unversioned projects only. Do not configure localization and versioning together.'
+  if (localization)
+    localization = hydrateSourceLocalizations(
+      rootDir,
+      sources,
+      localization,
+      runtimeFiles
     )
   return {
     rootDir,

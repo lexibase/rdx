@@ -2,7 +2,11 @@ import { readdir, realpath, stat } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 
-import { createRdxProject, resolveProjectPath } from '@lexibase/rdx-core/config'
+import {
+  createRdxProject,
+  resolveProjectPath,
+  getContentSources,
+} from '@lexibase/rdx-core/config'
 import { createJiti } from 'jiti'
 
 /** Include the project and the real Next.js installation in Turbopack's root. */
@@ -77,13 +81,7 @@ export async function getRdxTracingConfig({ rootDir, appDir = rootDir }) {
   const project = await createRdxProject(input, { rootDir })
   const files = (
     await Promise.all(
-      [
-        ...project.sources,
-        ...(project.localization?.locales
-          .filter((locale) => locale.folder)
-          .map((locale) => ({ docsDir: `locale/${locale.folder}/docs` })) ??
-          []),
-      ]
+      getContentSources(project)
         .filter((source) => source.redirectTo === undefined)
         .map((source) =>
           contentFiles(
@@ -108,11 +106,18 @@ export async function getRdxTracingConfig({ rootDir, appDir = rootDir }) {
   }
   const redirects = project.sources
     .filter((source) => source.redirectTo !== undefined)
-    .map((source) => ({
-      source: `/docs/${source.routePrefix}/:path*`,
-      destination: `/docs/${source.redirectTo}/:path*`,
-      permanent: true,
-    }))
+    .flatMap((source) =>
+      [
+        '/docs',
+        ...(project.localization?.locales.map(
+          (locale) => `/${locale.path}/docs`
+        ) ?? []),
+      ].map((base) => ({
+        source: `${base}/${source.routePrefix}/:path*`,
+        destination: `${base}/${source.redirectTo}/:path*`,
+        permanent: true,
+      }))
+    )
   if (project.localization) {
     const primary = project.localization.locales.find(
       (locale) => locale.code === project.localization.defaultLocale

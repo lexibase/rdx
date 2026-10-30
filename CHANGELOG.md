@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Integrate multilingual content with optional versioning through generic snapshot
+  contributions. Freeze language identities and translated trees per release;
+  publish all languages atomically, preserve old primary-only snapshots and
+  same-major language redirects, and keep search and fallback within the selected
+  edition. Archive and restore retain every language together.
+
 - Add the optional multilingual content plugin for unversioned projects:
   language-prefixed routes, a shared Base UI selector, primary-page fallback
   notices, translated navigation, isolated search and localized metadata.
