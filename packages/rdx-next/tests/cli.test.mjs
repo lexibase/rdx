@@ -29,6 +29,119 @@ function run(cwd, ...args) {
   return spawnSync(process.execPath, [cli, ...args], { cwd, encoding: 'utf8' })
 }
 
+async function nextProbe(rootDir) {
+  const directory = path.join(rootDir, 'node_modules/next/dist/bin')
+  await mkdir(directory, { recursive: true })
+  await writeFile(
+    path.join(rootDir, 'node_modules/next/package.json'),
+    '{"name":"next","type":"commonjs"}'
+  )
+  await writeFile(
+    path.join(directory, 'next'),
+    `require('node:fs').writeFileSync('next-invocation.json', JSON.stringify(process.argv.slice(2))); console.log('NEXT_PROBE_STARTED')`
+  )
+}
+
+test('build rejects broken content before changing the runtime or starting Next', async (t) => {
+  const rootDir = await fixture(
+    t,
+    "export default { metadata: { applicationName: 'Docs' } }"
+  )
+  await nextProbe(rootDir)
+  await mkdir(path.join(rootDir, 'docs'))
+  await writeFile(
+    path.join(rootDir, 'docs/intro.mdx'),
+    '[Missing](missing.mdx)\n\n![Image](/missing.png)'
+  )
+  await mkdir(path.join(rootDir, '.rdx/app'), { recursive: true })
+  const layout = path.join(rootDir, '.rdx/app/layout.tsx')
+  await writeFile(layout, 'Existing runtime')
+  const result = run(rootDir, 'build')
+  assert.equal(result.status, 1, result.stdout)
+  assert.match(result.stderr, /docs\/intro.mdx:1:1 \[page\]/)
+  assert.match(result.stderr, /docs\/intro.mdx:3:1 \[asset\]/)
+  assert.match(result.stderr, /2 problems/)
+  assert.equal(await readFile(layout, 'utf8'), 'Existing runtime')
+  await assert.rejects(access(path.join(rootDir, 'next-invocation.json')))
+  await assert.rejects(access(path.join(rootDir, 'public')))
+})
+
+test('valid build checks content then prepares runtime and forwards Next arguments', async (t) => {
+  const rootDir = await fixture(
+    t,
+    "export default { metadata: { applicationName: 'Docs' } }"
+  )
+  await nextProbe(rootDir)
+  await mkdir(path.join(rootDir, 'docs'))
+  await writeFile(
+    path.join(rootDir, 'docs/intro.mdx'),
+    '## Hello\n\n[Hello](#hello)'
+  )
+  const result = run(rootDir, 'build', '--debug')
+  assert.equal(result.status, 0, result.stderr)
+  assert.match(
+    result.stdout,
+    /1 page checked, 0 problems[\s\S]*NEXT_PROBE_STARTED/
+  )
+  await access(path.join(rootDir, '.rdx/app/layout.tsx'))
+  assert.deepEqual(
+    JSON.parse(
+      await readFile(path.join(rootDir, 'next-invocation.json'), 'utf8')
+    ),
+    ['build', path.join(rootDir, '.rdx'), '--debug']
+  )
+})
+
+test('build checks archived documentation as well as live content', async (t) => {
+  const plugin = new URL(
+    '../../rdx-plugin-versioning/dist/index.js',
+    import.meta.url
+  ).href
+  const rootDir = await fixture(
+    t,
+    `import { versioning } from '${plugin}'; export default { metadata: { applicationName: 'Docs' }, plugins: [versioning()] }`
+  )
+  await mkdir(path.join(rootDir, 'docs'))
+  await writeFile(path.join(rootDir, 'docs/intro.mdx'), '## Live')
+  await mkdir(path.join(rootDir, 'versioned_docs/version-1.0.0'), {
+    recursive: true,
+  })
+  await writeFile(
+    path.join(rootDir, 'versions.json'),
+    JSON.stringify({ active: [], archived: ['1.0.0'] })
+  )
+  await writeFile(
+    path.join(rootDir, 'versioned_docs/version-1.0.0/intro.mdx'),
+    '[Missing](#missing)'
+  )
+  const result = run(rootDir, 'build')
+  assert.equal(result.status, 1, result.stdout)
+  assert.match(
+    result.stderr,
+    /versioned_docs\/version-1.0.0\/intro.mdx:1:1 \[anchor\]/
+  )
+  await assert.rejects(access(path.join(rootDir, '.rdx')))
+})
+
+test('dev and start do not block on documentation checks', async (t) => {
+  const rootDir = await fixture(
+    t,
+    "export default { metadata: { applicationName: 'Docs' } }"
+  )
+  await nextProbe(rootDir)
+  await mkdir(path.join(rootDir, 'docs'))
+  await writeFile(
+    path.join(rootDir, 'docs/intro.mdx'),
+    '[Missing](missing.mdx)'
+  )
+  for (const command of ['dev', 'start']) {
+    const result = run(rootDir, command)
+    assert.equal(result.status, 0, result.stderr)
+    assert.match(result.stdout, /NEXT_PROBE_STARTED/)
+    assert.doesNotMatch(result.stdout + result.stderr, /RDX check/)
+  }
+})
+
 test('check aggregates content errors and never prepares runtime, assets or a Next server', async (t) => {
   const rootDir = await fixture(
     t,

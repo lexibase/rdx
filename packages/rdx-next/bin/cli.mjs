@@ -114,7 +114,7 @@ export async function runRdxCli({ templateDir } = {}) {
       rootDir: projectRoot,
       command,
     })
-    if (command === 'check') {
+    if (command === 'check' || command === 'build') {
       const { checkDocumentation, formatDocumentationCheck } =
         await import('@lexibase/rdx-core/check')
       const report = checkDocumentation(project)
@@ -122,8 +122,9 @@ export async function runRdxCli({ templateDir } = {}) {
       if (report.diagnostics.length) {
         console.error(output)
         process.exitCode = 1
+        return
       } else console.log(output)
-      return
+      if (command === 'check') return
     }
     if (command === 'prepare') {
       await prepareRuntime()

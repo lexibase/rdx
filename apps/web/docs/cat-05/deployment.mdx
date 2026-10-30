@@ -6,8 +6,9 @@ link_position: 2
 
 ## Build locally
 
-Run [`rdx check`](../cat-03/checking.mdx) before building to find broken document
-links, missing sections and local files.
+`rdx build` automatically [checks your documentation](../cat-03/checking.mdx)
+before compiling. Broken document links, missing sections, missing local files
+and parsing errors stop the build with their source locations.
 
 Set `metadata.metadataBase` in `rdx.config.ts` to your public site URL so RDX can
 generate absolute sitemap URLs. After deployment, visit `/sitemap.xml` and

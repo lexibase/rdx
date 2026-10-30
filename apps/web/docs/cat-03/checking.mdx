@@ -28,6 +28,10 @@ RDX reads the documentation and reports all detected problems with the source
 file, line and column. It checks content without building the site or preparing
 `.rdx/`.
 
+`rdx build` runs this check automatically before preparing the runtime or starting
+Next.js. Detected problems stop the build. Use `rdx check` on its own for an
+earlier review, in a Git hook or in CI.
+
 ```text
 docs/guides/setup.mdx:12:1 [anchor] "./install.mdx#requirements": Section "#requirements" does not exist in docs/guides/install.mdx.
 RDX check failed: 8 pages checked, 1 problem.

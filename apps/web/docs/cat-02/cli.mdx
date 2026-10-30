@@ -69,6 +69,10 @@ yarn start
 `dev` starts the development server, `build` prepares a production build, and
 `start` serves that build. Stop the development server before building for production.
 
+`build` checks documentation before preparing or compiling the site. Problems
+stop the build and include their source file, line and column. See
+[Checking documentation](../cat-03/checking.mdx) for the checks performed.
+
 The underlying commands are `rdx dev`, `rdx build`, and `rdx start`. They prepare
 the internal app automatically. Forward Next.js arguments when needed:
 
