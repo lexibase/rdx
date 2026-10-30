@@ -100,14 +100,20 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       usam a mesma localidade no servidor e no navegador. Localidades portuguesas
       usam pt-BR; idiomas sem catálogo usam inglês. Conteúdo MDX e nomes
       personalizados permanecem como escritos pelo autor.
-- [ ] Avaliar perguntar o idioma durante a criação pela CLI, preenchendo
-      `lang` automaticamente.
+- [ ] Perguntar o idioma durante a criação pela CLI, preenchendo `lang`
+      automaticamente. Adiado para a etapa de evolução do suporte a idiomas.
+      Oferecer os idiomas disponíveis e `Other`, permitindo informar outro
+      código de idioma válido. Distinguir o idioma declarado do conteúdo dos
+      catálogos de tradução da interface; escolher um idioma sem catálogo não
+      deve prometer tradução automática.
 - [ ] Documentação multilíngue e seletor opcional na navbar: planejar uma
-      estrutura simples por idioma (por exemplo `lang/en/` e `lang/pt-BR/`, nomes
-      ainda não definidos), preservação da página ao trocar de idioma e a
-      interação entre idiomas e versões. Conteúdo traduzido é fornecido pelo
-      autor. Recurso futuro separado da i18n dos rótulos; não definir rotas ou
-      migrar pastas existentes durante a implementação da busca.
+      arquitetura como plugin opcional. Conteúdo principal em `docs/`; traduções
+      em `locale/<pasta>/docs/`, com códigos de idioma separados de aliases como
+      `ptbr`. Proposta de URLs: `/<idioma>/docs/<versão opcional>/<página>`.
+      Preservar idioma, página e edição na navegação; na ausência de tradução,
+      mostrar o original da mesma edição com Callout explícito. Busca isolada
+      por idioma/edição e snapshots conjuntos, sem depender da ordem dos plugins.
+      Contratos, limitações atuais e etapas em `MULTILINGUAL_DESIGN.md`.
 
 ## Final da lista
 
