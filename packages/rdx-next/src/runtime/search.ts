@@ -24,6 +24,8 @@ export function getSearchResponse(project: RdxProject, key: string) {
       entry.redirectTo === undefined && (entry.routePrefix || '_') === key
   )
   if (!source) return new Response(null, { status: 404, headers })
+  if (source.fallbackOnly)
+    return Response.json(buildSearchIndex([]), { headers })
   // Index only authored translations, never fallback bodies from another language.
   const { docsDir } = getSourceOptions(project, source)
   const options = { docsDir }

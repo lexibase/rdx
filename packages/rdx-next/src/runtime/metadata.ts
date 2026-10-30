@@ -48,9 +48,10 @@ export function getDocumentMetadata({
             const source = view.sources.find(
               (entry) => entry.id === route.source.id
             )!
-            return getDocument(page.slug, {
-              docsDir: getSourceOptions(view, source).docsDir,
-            })
+            return !source.fallbackOnly &&
+              getDocument(page.slug, {
+                docsDir: getSourceOptions(view, source).docsDir,
+              })
               ? [
                   [
                     locale.code,

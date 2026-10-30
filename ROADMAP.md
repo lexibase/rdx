@@ -114,9 +114,10 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       mostrar o original da mesma edição com Callout explícito. Busca isolada
       por idioma/edição e snapshots conjuntos, sem depender da ordem dos plugins.
       Contratos, limitações atuais e etapas em `MULTILINGUAL_DESIGN.md`.
-      Primeira etapa implementada em pacote privado: projetos sem versionamento,
-      rotas por idioma, fallback com Callout, seletor, busca e metadados. Validar
-      os projetos gerados antes de avançar para snapshots multilíngues.
+      Implementado em pacote privado: rotas por idioma, fallback com Callout,
+      seletor, busca, metadados e snapshots multilíngues com publicação conjunta.
+      Concluir validação de versões, redirecionamentos e instalação assistida
+      antes da publicação agrupada.
 
 ## Final da lista
 

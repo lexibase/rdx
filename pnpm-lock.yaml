@@ -293,13 +293,19 @@ importers:
 
   packages/rdx-plugin-i18n:
     dependencies:
+      '@lexibase/rdx-core':
+        specifier: workspace:*
+        version: link:../rdx-core
       '@lexibase/rdx-types':
         specifier: workspace:*
         version: link:../rdx-types
     devDependencies:
-      '@lexibase/rdx-core':
+      '@lexibase/rdx-versioning':
         specifier: workspace:*
-        version: link:../rdx-core
+        version: link:../rdx-plugin-versioning
+      '@types/node':
+        specifier: ^22.15.3
+        version: 22.15.3
 
   packages/rdx-plugin-versioning:
     dependencies:

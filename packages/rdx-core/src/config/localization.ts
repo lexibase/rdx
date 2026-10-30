@@ -3,11 +3,10 @@ import path from 'node:path'
 import type { RdxLocalization } from '@lexibase/rdx-types'
 import { RdxConfigError } from './error'
 
-export function resolveLocalization(
+/** Validate language identities without depending on live filesystem trees. */
+export function normalizeLocalization(
   input: unknown,
-  language: string,
-  rootDir: string,
-  command: string
+  language: string
 ): RdxLocalization {
   const fail = (message: string): never => {
     throw new RdxConfigError(`localization: ${message}`)
@@ -63,21 +62,38 @@ export function resolveLocalization(
       return fail(`unsafe folder for ${tag}.`)
     if (folders.has(folder.toLowerCase())) fail(`duplicate folder "${folder}".`)
     folders.add(folder.toLowerCase())
+    return { code: tag, path: url, label: entry.label, folder }
+  })
+  if (!seen.has(primary.toLowerCase()))
+    fail(`locales must include the primary language ${primary}.`)
+  return { defaultLocale: primary, locales }
+}
+
+export function resolveLocalization(
+  input: unknown,
+  language: string,
+  rootDir: string,
+  command: string
+) {
+  const localization = normalizeLocalization(input, language)
+  for (const locale of localization.locales) {
+    if (!locale.folder) continue
     const directory = path.resolve(
       /* turbopackIgnore: true */ rootDir,
       'locale',
-      folder,
+      locale.folder,
       'docs'
     )
     if (!fs.existsSync(/* turbopackIgnore: true */ directory)) {
-      // Deployment traces retain files, not empty directories. A wholly
-      // untranslated language must still work in a deployed server.
-      if (command === 'runtime' || command === 'start')
-        return { code: tag, path: url, label: entry.label, folder }
-      fail(`missing locale/${folder}/docs/. Create it before enabling ${tag}.`)
+      if (command === 'runtime' || command === 'start') continue
+      throw new RdxConfigError(
+        `localization: missing locale/${locale.folder}/docs/. Create it before enabling ${locale.code}.`
+      )
     }
     if (!fs.statSync(/* turbopackIgnore: true */ directory).isDirectory())
-      fail(`locale/${folder}/docs/ must be a directory.`)
+      throw new RdxConfigError(
+        `localization: locale/${locale.folder}/docs/ must be a directory.`
+      )
     const relative = path.relative(
       fs.realpathSync(/* turbopackIgnore: true */ rootDir),
       fs.realpathSync(/* turbopackIgnore: true */ directory)
@@ -87,10 +103,9 @@ export function resolveLocalization(
       relative.startsWith(`..${path.sep}`) ||
       path.isAbsolute(relative)
     )
-      fail(`locale ${tag} must remain inside the project.`)
-    return { code: tag, path: url, label: entry.label, folder }
-  })
-  if (!seen.has(primary.toLowerCase()))
-    fail(`locales must include the primary language ${primary}.`)
-  return { defaultLocale: primary, locales }
+      throw new RdxConfigError(
+        `localization: locale ${locale.code} must remain inside the project.`
+      )
+  }
+  return localization
 }

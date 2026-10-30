@@ -16,7 +16,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean --external @lexibase/rdx-types",
+    "build": "tsup src/index.ts --format esm --dts --clean --external @lexibase/rdx-types --external @lexibase/rdx-core",
     "check-types": "tsc --noEmit",
     "test": "node --test tests/*.test.mjs"
   },
@@ -24,9 +24,11 @@
     "node": "^22.18.0 || ^24.11.0"
   },
   "dependencies": {
+    "@lexibase/rdx-core": "workspace:*",
     "@lexibase/rdx-types": "workspace:*"
   },
   "devDependencies": {
-    "@lexibase/rdx-core": "workspace:*"
+    "@lexibase/rdx-versioning": "workspace:*",
+    "@types/node": "^22.15.3"
   }
 }

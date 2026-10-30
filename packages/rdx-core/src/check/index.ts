@@ -185,7 +185,9 @@ export function checkDocumentation(
       message: value.message ?? String(error),
     })
   }
-  const sources = getContentSources(project)
+  const sources = getContentSources(
+    project.locale ? { ...project, locale: undefined } : project
+  )
   if (project.localization) {
     const primary = project.localization.locales.find(
       (locale) => locale.code === project.localization!.defaultLocale
@@ -195,7 +197,9 @@ export function checkDocumentation(
   for (const source of sources) {
     if (source.redirectTo !== undefined) {
       const destination = sources.find(
-        (entry) => entry.routePrefix === source.redirectTo
+        (entry) =>
+          entry.routePrefix === source.redirectTo &&
+          entry.basePath === source.basePath
       )!
       prefixes.push([key(rootFor(source)), key(rootFor(destination))])
       continue
@@ -297,6 +301,7 @@ export function checkDocumentation(
     )
       ? sources.find(
           (source) =>
+            source.id === document.source.id &&
             source.docsDir === document.source.fallbackDocsDir &&
             !source.fallbackDocsDir
         )!

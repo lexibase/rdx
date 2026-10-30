@@ -43,6 +43,7 @@ const directories = [
   'rdx-next',
   'rdx',
   'rdx-plugin-versioning',
+  'rdx-plugin-i18n',
   'create-rdx',
 ]
 const required = {
@@ -142,6 +143,7 @@ const required = {
     'src/runtime/styles.d.css.ts',
   ],
   'rdx-plugin-versioning': ['dist/index.js', 'dist/index.d.ts'],
+  'rdx-plugin-i18n': ['dist/index.js', 'dist/index.d.ts'],
   'create-rdx': [
     'bin/index.js',
     'bin/options.mjs',

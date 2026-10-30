@@ -108,6 +108,11 @@ reused. Pre-release labels such as `2.0.0-beta.1` also belong to their major;
 publishing one updates that major's edition. Use the live documentation for work
 that should not replace a published edition.
 
+With the [language plugin](./languages.mdx#with-versioning) configured, the same
+command captures all language trees together. Missing translations use the
+primary snapshot of that edition. Archiving, restoring and same-major redirects
+apply to the complete multilingual edition.
+
 ## Read and switch editions
 
 In a generated project, the live page stays at `/docs/init/intro`; its snapshot

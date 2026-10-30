@@ -8,6 +8,8 @@ const nextConfig = {
     rootDir: fileURLToPath(new URL('.', import.meta.url)),
   })),
   agentRules: false,
+  // Browser integration scripts are development tools, never server assets.
+  outputFileTracingExcludes: { '/*': ['./tests/**/*'] },
   transpilePackages: ['@lexibase/rdx-ui', 'next-mdx-remote'],
 }
 

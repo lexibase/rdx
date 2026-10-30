@@ -3,6 +3,7 @@ export {
   getLocalizedProject,
   getContentSources,
   getDocsHref,
+  getLanguageLinks,
   isFallbackPage,
 } from './project/localization'
 export {

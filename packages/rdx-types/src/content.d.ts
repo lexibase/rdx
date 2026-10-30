@@ -31,4 +31,5 @@ export type RdxDocsOptions = {
   docsDir?: string
   /** Internal overlay: missing translated pages use this primary tree. */
   fallbackDocsDir?: string
+  fallbackOnly?: boolean
 }

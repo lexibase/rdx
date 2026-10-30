@@ -57,6 +57,7 @@ test(
       ['rdx-types', 'rdx-types'],
       ['rdx-ui', 'rdx-ui'],
       ['rdx-i18n', 'rdx-plugin-i18n'],
+      ['rdx-versioning', 'rdx-plugin-versioning'],
     ])
       await link(
         `@lexibase/${name}`,
@@ -202,5 +203,172 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       )
     )
     await access(path.join(root, 'locale/ptbr/docs/guides/intro.mdx'))
+
+    // Enable the independent versioning plugin on the same generated project.
+    await mkdir(path.join(root, 'locale/es-es/docs'), { recursive: true })
+    const configFile = path.join(root, 'rdx.config.ts')
+    const config = await readFile(configFile, 'utf8')
+    await writeFile(
+      configFile,
+      "import { versioning } from '@lexibase/rdx-versioning'\n" +
+        config.replace('plugins: [', 'plugins: [versioning(), ')
+    )
+    const command = (...args) => {
+      const result = spawnSync(process.execPath, [cli, ...args], {
+        cwd: root,
+        encoding: 'utf8',
+        timeout: 480_000,
+        maxBuffer: 5 * 1024 * 1024,
+      })
+      assert.equal(result.status, 0, result.stdout + result.stderr)
+      assert.doesNotMatch(
+        result.stdout + result.stderr,
+        /Dynamic filesystem access causes tracing of the whole project/
+      )
+      return result.stdout
+    }
+    command('version', '1.0.0')
+    const frozenMetadata = await readFile(
+      path.join(root, 'versioned_docs/version-1.0.0/.rdx-locales.json'),
+      'utf8'
+    )
+    const portuguese = await readFile(
+      path.join(root, 'locale/ptbr/docs/guides/intro.mdx'),
+      'utf8'
+    )
+    await write(
+      'locale/ptbr/docs/guides/intro.mdx',
+      portuguese.replace('TranslatedIntroMarker', 'UpdatedPortugueseMarker')
+    )
+    const english = await readFile(
+      path.join(root, 'docs/guides/intro.mdx'),
+      'utf8'
+    )
+    await write(
+      'docs/guides/intro.mdx',
+      english.replace('OriginalIntroMarker', 'UpdatedOriginalMarker')
+    )
+    command('version', '1.1.0')
+    command('version', '2.0.0')
+    command('archive', '1.1.0')
+    await write(
+      'locale/ptbr/docs/guides/intro.mdx',
+      portuguese.replace('TranslatedIntroMarker', 'UnreleasedPortugueseMarker')
+    )
+    await write(
+      'locale/ptbr/docs/guides/install.mdx',
+      '---\ntitle: Instalação\n---\n\n## Requirements\n\nPortugueseInstallLiveMarker'
+    )
+    for (const version of ['1.0.0', '1.1.0', '2.0.0'])
+      await rmdir(
+        path.join(root, `locale/es-es/versioned_docs/version-${version}`)
+      )
+    assert.match(command('build'), /10 pages checked, 0 problems/)
+    await rmdir(path.join(root, 'locale/es-es/docs'))
+    assert.equal(
+      await readFile(
+        path.join(root, 'versioned_docs/version-1.0.0/.rdx-locales.json'),
+        'utf8'
+      ),
+      frozenMetadata
+    )
+    assert.match(
+      await readFile(
+        path.join(
+          root,
+          'locale/ptbr/versioned_docs/version-1.0.0/guides/intro.mdx'
+        ),
+        'utf8'
+      ),
+      /TranslatedIntroMarker/
+    )
+
+    const verifyVersions = async (base) => {
+      const html = async (url) => {
+        const response = await fetch(base + url)
+        assert.equal(response.status, 200, url)
+        return response.text()
+      }
+      const archived = await html('/pt-br/docs/1.1.0/guides/intro')
+      assert.match(archived, /<html[^>]*lang="pt-BR"/)
+      assert.match(archived, /UpdatedPortugueseMarker/)
+      assert.doesNotMatch(archived, /UnreleasedPortugueseMarker/)
+      assert.match(archived, /data-rdx-version-trigger/)
+      assert.match(archived, /data-rdx-language-trigger/)
+      const missing = await html('/pt-br/docs/1.1.0/guides/install')
+      assert.match(missing, /OriginalInstallMarker/)
+      assert.match(missing, /data-rdx-translation-fallback/)
+      assert.doesNotMatch(missing, /PortugueseInstallLiveMarker/)
+      assert.match(
+        missing,
+        /https:\/\/docs.example.test\/en\/docs\/1.1.0\/guides\/install/
+      )
+      const live = await html('/pt-br/docs/guides/install')
+      assert.match(live, /PortugueseInstallLiveMarker/)
+      assert.doesNotMatch(live, /data-rdx-translation-fallback/)
+      const previous = await fetch(
+        base + '/pt-br/docs/1.0.0/guides/intro?ref=old',
+        { redirect: 'manual' }
+      )
+      assert.equal(previous.status, 308)
+      assert.match(
+        previous.headers.get('location'),
+        /\/pt-br\/docs\/1.1.0\/guides\/intro\?ref=old$/
+      )
+      const search = await html('/pt-br/rdx-search/1.1.0')
+      assert.match(search, /UpdatedPortugueseMarker/)
+      assert.doesNotMatch(
+        search,
+        /UnreleasedPortugueseMarker|PortugueseInstallLiveMarker|UpdatedOriginalMarker/
+      )
+      assert.match(
+        await html('/es-es/docs/2.0.0/guides/intro'),
+        /data-rdx-translation-fallback/
+      )
+      const sitemap = await html('/sitemap.xml')
+      assert.match(sitemap, /\/pt-br\/docs\/2.0.0\/guides\/intro/)
+      assert.doesNotMatch(
+        sitemap,
+        /\/docs\/1.1.0\/|\/docs\/1.0.0\/|\/es-es\/docs/
+      )
+    }
+    await withProductionServer(cli, root, verifyVersions, {
+      readyPath: '/pt-br/docs/2.0.0/guides/intro',
+    })
+    await withProductionServer(
+      require.resolve('next/dist/bin/next'),
+      path.join(root, '.rdx'),
+      verifyVersions,
+      { readyPath: '/pt-br/docs/2.0.0/guides/intro' }
+    )
+    const frozenTrace = JSON.parse(
+      await readFile(
+        path.join(
+          root,
+          '.rdx/.next/server/app/(rdx-locales)/[locale]/docs/[[...slug]]/page.js.nft.json'
+        ),
+        'utf8'
+      )
+    ).files.map((file) => file.replaceAll('\\', '/'))
+    assert.ok(
+      frozenTrace.some((file) =>
+        file.endsWith(
+          'locale/ptbr/versioned_docs/version-1.1.0/guides/intro.mdx'
+        )
+      )
+    )
+    assert.ok(
+      frozenTrace.some((file) =>
+        file.endsWith('versioned_docs/version-1.0.0/.rdx-locales.json')
+      )
+    )
+    assert.equal(
+      frozenTrace.some((file) =>
+        file.endsWith(
+          'locale/ptbr/versioned_docs/version-1.0.0/guides/intro.mdx'
+        )
+      ),
+      false
+    )
   }
 )

@@ -10,6 +10,7 @@ export function getSourceOptions(
 ) {
   return {
     docsDir: path.resolve(project.rootDir, source.docsDir),
+    ...(source.fallbackOnly ? { fallbackOnly: true } : {}),
     ...(source.fallbackDocsDir
       ? {
           fallbackDocsDir: path.resolve(

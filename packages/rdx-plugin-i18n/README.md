@@ -37,10 +37,16 @@ language. Search indexes contain authored content for the selected language.
 Fallback pages are noindex and canonical to the original when metadataBase is
 configured. The sitemap excludes untranslated fallback copies.
 
-The first stage supports unversioned projects. Combining localization with a
-snapshot/versioning plugin is rejected before a snapshot command can run.
-Multilingual snapshot contributions require the next implementation stage;
-the contracts and acceptance cases are in `MULTILINGUAL_DESIGN.md`.
+With the optional versioning plugin, one `rdx version <release>` captures every
+language. Translated snapshots live in `locale/<folder>/versioned_docs/`; their
+identity metadata is stored with the primary snapshot. Missing translations use
+that edition's primary content, never the live tree. Archive, restore and
+same-major redirects apply to the whole edition. Plugin declaration order does
+not change this behavior. Keep the primary language stable after publishing.
+
+Older snapshots without language metadata remain primary-language-only. Adding
+or editing live translations does not change them. Commit all snapshot files,
+including metadata, and retain historical identities for replaced URLs.
 
 Installing the package alone does not activate it. Existing one-language
 projects and their URLs remain unchanged without the configured plugin.
