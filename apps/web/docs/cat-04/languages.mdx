@@ -134,6 +134,40 @@ languages so RDX can regenerate the route structure.
 Custom homepages stay at `/`. Their Docs action opens the primary language.
 Search runs in the selected language and indexes the pages authored in it.
 
+The menu lists the primary language and every configured additional language,
+including languages whose translations are still being written. A missing page
+uses the fallback described below.
+
+## Community translations
+
+Set `contributionUrl` on the i18n plugin to invite readers to help translate:
+
+```ts title="rdx.config.ts"
+i18n({
+  locales: [
+    { code: 'en', label: 'English' },
+    { code: 'pt-BR', label: 'Português', folder: 'ptbr' },
+  ],
+  contributionUrl: 'https://github.com/organization/project/tree/main/locale',
+})
+```
+
+This adds **Help translate** below the language list and **Translate this page**
+in the missing-translation Callout. Both open the configured destination in a new
+tab. Their labels follow the interface language.
+
+Use the full URL for your repository, contribution branch and documentation
+directory. For a monorepo, that might be
+`https://github.com/organization/project/tree/main/apps/web/locale`. You can also
+point to a translation contribution guide.
+Commit the translation directory to that branch before sharing its contribution link.
+
+The `locale/` directory contains the additional languages. The original pages
+remain in `docs/`; contributors use those paths to identify the corresponding
+translated files. For example, `docs/guides/installation.mdx` corresponds to
+`locale/ptbr/docs/guides/installation.mdx` in the configuration above.
+All documentation editions use the current contribution URL.
+
 ## Missing translations
 
 When a translation is absent, RDX displays the original page at the selected

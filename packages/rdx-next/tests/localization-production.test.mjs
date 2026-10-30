@@ -106,7 +106,7 @@ test(
 import { i18n } from '@lexibase/rdx-i18n'
 import Home from './components/home'
 import Logo from './components/logo'
-export default defineConfig({ metadata: { applicationName: 'Locale Docs', metadataBase: 'https://docs.example.test' }, lang: 'en', search: true, homepage: { enabled: true, component: Home }, navbar: { logo: Logo }, plugins: [i18n({ locales: [{ code: 'en', label: 'English' }, { code: 'pt-BR', label: 'Português', folder: 'ptbr' }, { code: 'es-ES', label: 'Español' }] })] })`
+export default defineConfig({ metadata: { applicationName: 'Locale Docs', metadataBase: 'https://docs.example.test' }, lang: 'en', search: true, homepage: { enabled: true, component: Home }, navbar: { logo: Logo }, plugins: [i18n({ contributionUrl: 'https://github.com/example/project/tree/main/locale', locales: [{ code: 'en', label: 'English' }, { code: 'pt-BR', label: 'Português', folder: 'ptbr' }, { code: 'es-ES', label: 'Español' }] })] })`
     )
     const cli = path.resolve(packageRoot, '../rdx/bin/rdx.mjs')
     const built = spawnSync(process.execPath, [cli, 'build'], {
@@ -138,12 +138,19 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         /href="\/pt-br\/docs\/guides\/install#requirements"/
       )
       assert.doesNotMatch(translated, /data-rdx-translation-fallback/)
+      assert.doesNotMatch(translated, /data-rdx-translate-page/)
       assert.doesNotMatch(translated, /data-rdx-version-trigger/)
       const fallback = await html('/pt-br/docs/guides/install')
       assert.match(fallback, /<html[^>]*lang="pt-BR"/)
       assert.match(fallback, /<main[^>]*lang="en"/)
       assert.match(fallback, /OriginalInstallMarker/)
       assert.match(fallback, /data-rdx-translation-fallback/)
+      assert.match(fallback, /data-rdx-translate-page/)
+      assert.match(fallback, /Traduza esta página/)
+      assert.match(
+        fallback,
+        /href="https:\/\/github.com\/example\/project\/tree\/main\/locale"/
+      )
       assert.match(fallback, /href="\/en\/docs\/guides\/intro#hello"/)
       assert.match(fallback, /name="robots" content="noindex, follow"/)
       assert.match(
@@ -298,6 +305,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       const missing = await html('/pt-br/docs/1.1.0/guides/install')
       assert.match(missing, /OriginalInstallMarker/)
       assert.match(missing, /data-rdx-translation-fallback/)
+      assert.match(missing, /data-rdx-translate-page/)
       assert.doesNotMatch(missing, /PortugueseInstallLiveMarker/)
       assert.match(
         missing,

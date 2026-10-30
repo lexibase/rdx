@@ -15,7 +15,9 @@ export function normalizeLocalization(
     fail('expected an object.')
   const value = input as Record<string, unknown>
   if (
-    Object.keys(value).some((key) => key !== 'locales') ||
+    Object.keys(value).some(
+      (key) => !['locales', 'contributionUrl'].includes(key)
+    ) ||
     !Array.isArray(value.locales) ||
     value.locales.length < 2
   )
@@ -66,7 +68,35 @@ export function normalizeLocalization(
   })
   if (!seen.has(primary.toLowerCase()))
     fail(`locales must include the primary language ${primary}.`)
-  return { defaultLocale: primary, locales }
+  if (value.contributionUrl !== undefined) {
+    if (
+      typeof value.contributionUrl !== 'string' ||
+      !value.contributionUrl.trim()
+    )
+      fail('contributionUrl must be an absolute HTTP(S) URL.')
+    try {
+      const url = new URL(value.contributionUrl as string)
+      if (
+        !['https:', 'http:'].includes(url.protocol) ||
+        url.username ||
+        url.password
+      )
+        fail(
+          'contributionUrl must be an absolute HTTP(S) URL without credentials.'
+        )
+    } catch {
+      fail(
+        'contributionUrl must be an absolute HTTP(S) URL without credentials.'
+      )
+    }
+  }
+  return {
+    defaultLocale: primary,
+    locales,
+    ...(value.contributionUrl !== undefined
+      ? { contributionUrl: value.contributionUrl as string }
+      : {}),
+  }
 }
 
 export function resolveLocalization(

@@ -59,6 +59,35 @@ function fixture(t) {
   return { rootDir, write, config, project, run, read, exists, locales }
 }
 
+test('historical editions use the current contribution URL without rewriting frozen metadata', async (t) => {
+  const f = fixture(t)
+  const config = (contributionUrl) => ({
+    ...f.config(),
+    plugins: [versioning(), i18n({ locales: f.locales, contributionUrl })],
+  })
+  const first = await f.project(
+    config('https://github.com/old/project/tree/main/locale')
+  )
+  f.run(first, 'version', '1.0.0')
+  const metadata = f.read('versioned_docs/version-1.0.0/.rdx-locales.json')
+  const url = 'https://github.com/new/project/tree/docs/locale'
+  const updated = getLocalizedProject(await f.project(config(url)), 'pt-br')
+  assert.equal(updated.localization.contributionUrl, url)
+  assert.equal(
+    resolveDocsRoute(updated, [
+      '1.0.0',
+      'guides',
+      'intro',
+    ]).document.content.includes('PortugueseSnapshotMarker'),
+    true
+  )
+  assert.equal(
+    f.read('versioned_docs/version-1.0.0/.rdx-locales.json'),
+    metadata
+  )
+  assert.equal(JSON.parse(metadata).contributionUrl, undefined)
+})
+
 for (const reversed of [false, true])
   test(`one command freezes all languages independently of plugin order (${reversed})`, async (t) => {
     const f = fixture(t)

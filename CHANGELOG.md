@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add optional i18n contribution links through `contributionUrl`: a shared
+  language-menu action and a missing-translation Callout action, with localized
+  labels and accessible external-link behavior. Keep the current contribution
+  destination across editions without modifying snapshot metadata.
+
 - Add assisted `rdx add i18n` setup using the existing primary language and a
   prompt for additional language tags, or `--locales` for scripts. Reuse the
   official plugin installer across npm, pnpm and Yarn; preserve configured

@@ -1,6 +1,6 @@
 'use client'
 
-import { Languages } from 'lucide-react'
+import { ExternalLink, Languages } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from './button'
 import {
@@ -8,6 +8,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuLinkItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './dropdown-menu'
 import { getMessages } from '../lib/i18n'
@@ -17,13 +18,16 @@ export function LanguageDropdown({
   options,
   current,
   lang,
+  contributionUrl,
 }: {
   options: { code: string; label: string; href: string }[]
   current: string
   lang?: string
+  contributionUrl?: string
 }) {
   const selected = options.find((option) => option.code === current)
   if (!selected) return null
+  const messages = getMessages(lang)
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -54,6 +58,26 @@ export function LanguageDropdown({
             </DropdownMenuLinkItem>
           ))}
         </DropdownMenuGroup>
+        {contributionUrl && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLinkItem
+              closeOnClick
+              render={
+                <a
+                  href={contributionUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />
+              }
+              data-rdx-help-translate
+            >
+              {messages.helpTranslate}
+              <ExternalLink className="ml-auto size-3.5" aria-hidden="true" />
+              <span className="sr-only"> ({messages.opensInNewTab})</span>
+            </DropdownMenuLinkItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
