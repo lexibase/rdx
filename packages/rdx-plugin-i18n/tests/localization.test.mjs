@@ -70,6 +70,56 @@ test('installing without configuring the plugin leaves the project unchanged', a
   assert.equal(fs.existsSync(path.join(rootDir, '.rdx')), false)
 })
 
+test('optional contribution URLs use explicit HTTP(S) destinations and preserve configured languages without translations', async (t) => {
+  const f = fixture(t)
+  for (const contributionUrl of [
+    '',
+    '/locale',
+    'javascript:alert(1)',
+    'data:text/html,test',
+    'https://user:secret@example.test/locale',
+    42,
+  ]) {
+    await assert.rejects(
+      createRdxProject(
+        { ...f.config, plugins: [i18n({ ...f.options, contributionUrl })] },
+        { rootDir: f.rootDir }
+      ),
+      /contributionUrl/
+    )
+  }
+  const contributionUrl =
+    'https://github.com/example/project/tree/main/apps/web/locale'
+  fs.mkdirSync(path.join(f.rootDir, 'locale/es/docs'), { recursive: true })
+  const project = await createRdxProject(
+    {
+      ...f.config,
+      plugins: [
+        i18n({
+          ...f.options,
+          contributionUrl,
+          locales: [...f.options.locales, { code: 'es', label: 'Español' }],
+        }),
+      ],
+    },
+    { rootDir: f.rootDir }
+  )
+  assert.equal(project.localization.contributionUrl, contributionUrl)
+  assert.equal(
+    getLocalizedProject(project, 'pt-br').localization.contributionUrl,
+    contributionUrl
+  )
+  assert.deepEqual(
+    project.localization.locales.map((locale) => locale.code),
+    ['en', 'pt-BR', 'es']
+  )
+  assert.equal(
+    (await createRdxProject(f.config, { rootDir: f.rootDir })).localization
+      .contributionUrl,
+    undefined
+  )
+})
+
 test('locale views preserve primary order, translated labels and whole-page fallback without mutation', async (t) => {
   const { rootDir, config } = fixture(t)
   const project = await createRdxProject(config, { rootDir })

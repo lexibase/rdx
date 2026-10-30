@@ -172,6 +172,7 @@ export function hydrateSourceLocalizations(
     }
   }
   return {
+    ...current,
     defaultLocale: current.defaultLocale,
     locales: [...languages.values()],
   }

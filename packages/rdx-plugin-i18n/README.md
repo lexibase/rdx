@@ -10,6 +10,24 @@ Optional multilingual content for RDX. This private workspace package is in its
 first implementation stage; do not publish it independently of compatible
 framework packages.
 
+Set the optional `contributionUrl` next to `locales` to expose a community
+translation link in the language menu and the missing-translation Callout:
+
+```ts
+i18n({
+  locales: [
+    { code: 'en', label: 'English' },
+    { code: 'pt-BR', label: 'Português' },
+  ],
+  contributionUrl: 'https://github.com/organization/project/tree/main/locale',
+})
+```
+
+Use an absolute HTTP(S) URL, including a monorepo path when needed. Links open
+in a new tab and follow the interface language. Existing snapshots use the
+current configured destination. Primary-language files stay in `docs/`;
+`locale/` holds the additional languages.
+
 ```ts
 import { i18n } from '@lexibase/rdx-i18n'
 

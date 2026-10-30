@@ -262,6 +262,12 @@ authored translations and dependency specs. It does not prompt again. Supplying
 `locales` array and create the matching folders instead of overwriting it.
 The main project creator asks only for the project name.
 
+The optional i18n `contributionUrl` accepts an absolute HTTP(S) destination for
+community translations, such as the repository's `locale/` directory or a
+contribution guide. It adds localized actions to the language menu and the
+missing-translation Callout. Both actions open the same configured URL in a new
+tab. This destination is current configuration, not frozen snapshot data.
+
 Manual installation/configuration remains supported:
 
 ```ts

@@ -138,6 +138,7 @@ function RdxHeader({
             lang={config.lang}
             current={project.locale?.code ?? project.localization.defaultLocale}
             options={getLanguageLinks(project, source, currentSlug)}
+            contributionUrl={project.localization.contributionUrl}
           />
         ) : undefined
       }
@@ -339,16 +340,33 @@ export async function DocsPage({
                         original: primaryLocale!.label,
                       })}
                     </p>
-                    <Button
-                      variant="link"
-                      href={getDocsHref(
-                        originalProject,
-                        contentSource,
-                        currentSlug
+                    <div className="flex flex-wrap items-center gap-x-2">
+                      <Button
+                        variant="link"
+                        href={getDocsHref(
+                          originalProject,
+                          contentSource,
+                          currentSlug
+                        )}
+                      >
+                        {messages.viewOriginal}
+                      </Button>
+                      {project.localization?.contributionUrl && (
+                        <Button
+                          variant="link"
+                          href={project.localization.contributionUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          data-rdx-translate-page
+                        >
+                          {messages.translateThisPage}
+                          <span className="sr-only">
+                            {' '}
+                            ({messages.opensInNewTab})
+                          </span>
+                        </Button>
                       )}
-                    >
-                      {messages.viewOriginal}
-                    </Button>
+                    </div>
                   </Callout>
                 )}
                 <header className="mb-6">

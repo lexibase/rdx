@@ -6,9 +6,18 @@ export type RdxLocaleDefinition = {
   label: string
   folder?: string
 }
-export type RdxLocalizationOptions = { locales: RdxLocaleDefinition[] }
+export type RdxLocalizationOptions = {
+  locales: RdxLocaleDefinition[]
+  /** Absolute HTTP(S) URL for community translations, e.g. the repository's locale/ directory. */
+  contributionUrl?: string
+}
 export type RdxLocale = RdxLocaleDefinition & { path: string }
-export type RdxLocalization = { defaultLocale: string; locales: RdxLocale[] }
+export type RdxLocalization = {
+  defaultLocale: string
+  locales: RdxLocale[]
+  /** Current contribution destination, shared across languages and editions. */
+  contributionUrl?: string
+}
 /** Language inventory frozen for one content source/edition. */
 export type RdxSourceLocalization = RdxLocalization & {
   docs: Record<string, string>

@@ -5,6 +5,9 @@ const en = {
   translationFallback:
     'This page is not available in {requested}. You are reading the {original} version.',
   viewOriginal: 'View the original page',
+  helpTranslate: 'Help translate',
+  translateThisPage: 'Translate this page',
+  opensInNewTab: 'opens in a new tab',
   keyboardJoiner: ' plus ',
   keyboardControl: 'Control',
   keyboardShift: 'Shift',
@@ -103,6 +106,9 @@ const ptBR = {
   translationFallback:
     'Esta página não está disponível em {requested}. Você está lendo a versão em {original}.',
   viewOriginal: 'Ver a página original',
+  helpTranslate: 'Ajude a traduzir',
+  translateThisPage: 'Traduza esta página',
+  opensInNewTab: 'abre em uma nova aba',
   keyboardJoiner: ' mais ',
   keyboardControl: 'Control',
   keyboardShift: 'Shift',
