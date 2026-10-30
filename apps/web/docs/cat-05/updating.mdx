@@ -32,6 +32,25 @@ configuration and custom components are not replaced by this operation.
 Check the release notes for migrations and any required Next.js, React or Node.js
 updates. Those requirements are separate from updating RDX itself.
 
+## Update from RDX 4.0 to 4.1
+
+Update the main framework using the commands above. Single-language documentation
+keeps its current files and configuration. Builds automatically run `rdx check`
+before compiling; fix reported broken links, assets or Markdown before deploying.
+
+To offer translated content, follow [Languages](../cat-04/languages.mdx) and run
+`rdx add i18n`. The installer reuses `lang` and asks for additional languages.
+Primary content stays in `docs/`; translations use `locale/<folder>/docs/`.
+
+For multilingual snapshots, update the optional versioning plugin to 1.3.0 or
+newer using the [plugin update commands](#optional-plugins). One `rdx version`
+captures all configured languages. Existing snapshots keep their original
+content; translated files are authored by the project owner and contributors.
+
+Direct consumers of `@lexibase/rdx-next` must provide `@lexibase/rdx-ui` 3.3.0
+or newer within major 3. The main `@lexibase/rdx` package supplies this compatible
+UI automatically.
+
 ## Update from RDX 3.x to 4.0
 
 RDX 4 manages search-engine indexing automatically. Remove `metadata.robots`

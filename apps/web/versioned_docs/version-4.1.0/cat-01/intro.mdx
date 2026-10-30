@@ -1,0 +1,47 @@
+---
+title: Introduction
+description: Simple documentation, built on Next.js, Tailwind CSS, and shadcn/ui.
+link_position: 1
+---
+
+RDX turns folders and `.mdx` files into a documentation website. Write your content,
+choose the features you need, and keep the framework's internal application out of your way.
+
+## The idea
+
+- A folder inside `docs/` becomes a sidebar category.
+- An `.mdx` file becomes a page.
+- `rdx.config.ts` controls branding, metadata, navigation, and optional features.
+- `.rdx/` contains the generated Next.js application. You do not maintain it.
+
+The foundation is **Next.js + Tailwind CSS + shadcn/ui**, using the **Base UI**
+variant. RDX adds the documentation layer: content indexing, Markdown integration,
+search, heading navigation, and optional version snapshots.
+
+## What is included?
+
+| Feature                                     | How to use it                                 |
+| :------------------------------------------ | :-------------------------------------------- |
+| File-based pages and categories             | Add folders and MDX files                     |
+| Markdown, tables, and highlighted code      | Write standard Markdown                       |
+| Code diffs and directory trees              | Use `diff` and `folder` fences                |
+| Image previews                              | Click an image written with standard Markdown |
+| Callouts, Tabs, and Accordion               | Use the built-in MDX components               |
+| Navbar, sidebar, theme, and page navigation | Included in the shared layout                 |
+| Local search                                | Enable `search: true`                         |
+| Floating table of contents                  | Enable `TOC: true`                            |
+| Optional homepage                           | Enable `homepage.enabled`                     |
+| Versioned documentation                     | Install and activate the versioning plugin    |
+
+## Start here
+
+Follow [Installation](../cat-02/installation.mdx), then
+[create your first page](../cat-03/create-docs.mdx).
+The [configuration reference](../cat-02/config.mdx) explains the options without
+requiring you to edit generated Next.js files.
+
+## Keep it simple
+
+Use ordinary Markdown for ordinary content. Add a component when it helps the
+reader, not to fill the page. Keep each page focused on a task, explain the
+steps, and include a working example.

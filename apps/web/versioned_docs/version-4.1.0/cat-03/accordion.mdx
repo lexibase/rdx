@@ -1,0 +1,94 @@
+---
+title: Accordion
+description: Optional explanations, without crowding your documentation.
+link_position: 7
+---
+
+## Frequently asked questions
+
+Wrap questions in `:::accordion` and start each item with `### Question`.
+The answer continues until the next direct `###` or the closing `:::`.
+
+::::accordion
+
+### Where do I write my documentation?
+
+Create folders and `.mdx` files inside **docs/**. Each folder becomes a category
+and each file becomes a page.
+
+### How do I preview my changes?
+
+Start the development server from your documentation project root:
+
+:::tabs
+
+### pnpm
+
+pnpm dev
+
+### npm
+
+npm run dev
+
+### yarn
+
+yarn dev
+
+:::
+
+> [!TIP] Live updates
+> Keep the server running while editing your documentation.
+
+::::
+
+## Write an Accordion
+
+```md
+:::accordion
+
+### Where do I write my docs?
+
+Create folders and Markdown files inside **docs/**.
+
+### How do I preview my changes?
+
+Start the development server from your documentation project root.
+
+:::
+```
+
+No import or plugin is required. Items start closed, and opening one closes the
+previous item in the same group. Use Enter or Space to toggle and Tab to move
+between questions and links. Keep essential steps visible rather than hiding
+the whole guide in panels.
+
+## Nest components
+
+Answers support Markdown and RDX components. When Tabs are inside an Accordion,
+open the outer Accordion with **four colons** (`::::accordion`) and close it with
+`::::`. The inner Tabs use **three colons** (`:::tabs`) and close with `:::`.
+The extra colon keeps the inner closing fence from closing the outer component.
+For each additional nesting level, use one more colon on the outer container:
+
+```md
+::::accordion
+
+### Which environment should I use?
+
+:::tabs
+
+### Development
+
+Preview changes locally.
+
+### Production
+
+Build and deploy the site.
+
+:::
+
+::::
+```
+
+Use `####` or deeper headings for subsections inside an answer. Direct `###`
+headings define item titles in the current container.

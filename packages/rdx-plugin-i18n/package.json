@@ -1,7 +1,6 @@
 {
   "name": "@lexibase/rdx-i18n",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
   "description": "Optional multilingual documentation for RDX.",
   "license": "MIT",
   "type": "module",
@@ -30,5 +29,17 @@
   "devDependencies": {
     "@lexibase/rdx-versioning": "workspace:*",
     "@types/node": "^22.15.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lexibase/rdx.git",
+    "directory": "packages/rdx-plugin-i18n"
+  },
+  "homepage": "https://github.com/lexibase/rdx/tree/main/packages/rdx-plugin-i18n#readme",
+  "bugs": {
+    "url": "https://github.com/lexibase/rdx/issues"
   }
 }

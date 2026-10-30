@@ -1,0 +1,275 @@
+---
+title: Languages
+description: Offer translated documentation with an optional content-language plugin.
+link_position: 8
+---
+
+The optional `@lexibase/rdx-i18n` plugin adds content languages and a language
+selector to the navbar. Authors supply the translations as Markdown files.
+It works on its own or with the optional versioning plugin.
+
+## Activate languages
+
+From the documentation project root:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx add i18n
+
+### npm
+
+npm exec -- rdx add i18n
+
+### yarn
+
+yarn rdx add i18n
+
+:::
+
+The command uses `lang` from `rdx.config.ts` as the primary language and asks
+for additional language tags, separated by commas, such as `en, es-ES`. It
+installs the plugin, adds its configuration and prepares the translation folders
+and runtime. Display labels use each language's native name when available; edit `label`
+to customize them. Empty folders include `.gitkeep` so they can be committed.
+
+For scripts or a terminal without interactive input, provide the additional
+languages explicitly:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx add i18n --locales en,es-ES
+
+### npm
+
+npm exec -- rdx add i18n --locales en,es-ES
+
+### yarn
+
+yarn rdx add i18n --locales en,es-ES
+
+:::
+
+Include at least one language different from your primary language. Repeating the command
+preserves existing plugin options, languages, translations and dependency versions.
+
+## Configure languages
+
+Import the plugin in `rdx.config.ts` and add it to `plugins`. Keep the other
+settings in your configuration:
+
+```ts title="rdx.config.ts"
+import { defineConfig } from '@lexibase/rdx'
+import { i18n } from '@lexibase/rdx-i18n'
+
+export default defineConfig({
+  metadata: { applicationName: 'My documentation' },
+  lang: 'en',
+  plugins: [
+    i18n({
+      locales: [
+        { code: 'en', label: 'English' },
+        { code: 'pt-BR', label: 'Português (Brasil)', folder: 'ptbr' },
+        { code: 'es-ES', label: 'Español' },
+      ],
+    }),
+  ],
+})
+```
+
+`lang` identifies the primary language. Its entry belongs in the language list
+without a folder setting. Other entries can specify a folder alias; by default,
+the folder is the lower-case language tag. Labels are displayed as written.
+
+To add another language later, add its entry to `locales`, create its
+`locale/<folder>/docs/` directory and write the translated pages. Restart the
+development server. The plugin is installed once for all configured languages.
+
+## Organize translations
+
+Keep primary content in `docs/`. Create `locale/<folder>/docs/` for every secondary
+language, matching the relative paths of the original pages:
+
+```folder
+docs/
+  guides/
+    installation.mdx
+locale/
+  ptbr/
+    docs/
+      guides/
+        installation.mdx
+  es-es/
+    docs/
+      guides/
+        installation.mdx
+```
+
+Translate the title, description, headings and body. Use the same relative filename
+as the primary page. Translate category labels with `_category.json`; categories
+and pages keep the primary tree's ordering. Store shared images and downloads in
+root `public/`.
+
+The examples above have English as the primary language. When English is a
+secondary language, its content belongs in `locale/en/docs/` instead.
+
+## Navigate between languages
+
+The selector preserves the page when changing languages. Language tags prefix
+the documentation URL:
+
+- `/en/docs/guides/installation`
+- `/pt-br/docs/guides/installation`
+- `/es-es/docs/guides/installation`
+
+The `ptbr` folder alias still produces the `pt-br` language prefix. Existing
+unprefixed documentation links redirect to the primary language.
+
+Restart the development server after enabling, disabling or changing configured
+languages so RDX can regenerate the route structure.
+
+Custom homepages stay at `/`. Their Docs action opens the primary language.
+Search runs in the selected language and indexes the pages authored in it.
+
+The menu lists the primary language and every configured additional language,
+including languages whose translations are still being written. A missing page
+uses the fallback described below.
+
+## Community translations
+
+Set `contributionUrl` on the i18n plugin to invite readers to help translate:
+
+```ts title="rdx.config.ts"
+i18n({
+  locales: [
+    { code: 'en', label: 'English' },
+    { code: 'pt-BR', label: 'Português', folder: 'ptbr' },
+  ],
+  contributionUrl: 'https://github.com/organization/project/tree/main/locale',
+})
+```
+
+This adds **Help translate** below the language list and **Translate this page**
+in the missing-translation Callout. Both open the configured destination in a new
+tab. Their labels follow the interface language.
+
+Use the full URL for your repository, contribution branch and documentation
+directory. For a monorepo, that might be
+`https://github.com/organization/project/tree/main/apps/web/locale`. You can also
+point to a translation contribution guide.
+Commit the translation directory to that branch before sharing its contribution link.
+
+The `locale/` directory contains the additional languages. The original pages
+remain in `docs/`; contributors use those paths to identify the corresponding
+translated files. For example, `docs/guides/installation.mdx` corresponds to
+`locale/ptbr/docs/guides/installation.mdx` in the configuration above.
+All documentation editions use the current contribution URL.
+
+## Missing translations
+
+When a translation is absent, RDX displays the original page at the selected
+language URL, with a Callout explaining which language you are reading and a
+link to the original. It does not copy or translate files automatically.
+
+Links inside that original content retain their original language so section
+anchors keep working. Sidebar and previous/next navigation stay in the selected
+language. A page absent from both trees returns 404.
+
+Fallback copies are excluded from the sitemap and marked `noindex, follow`.
+With `metadata.metadataBase` configured, their canonical URL points to the
+original page. Actual translations have their own metadata and language alternates.
+
+## Validate content
+
+[`rdx check`](../cat-03/checking.mdx) checks the authored pages in every language,
+including links, sections and local assets. A translated page without a primary
+counterpart is reported as an error. Missing translations are allowed.
+
+The `lang` setting also selects built-in interface messages. English and Brazilian
+Portuguese have interface catalogs; other content languages use English interface
+messages. Your translated documents and language labels remain as written.
+
+## With versioning
+
+Configure both plugins in `rdx.config.ts`, in either order:
+
+```ts title="rdx.config.ts"
+import { defineConfig } from '@lexibase/rdx'
+import { i18n } from '@lexibase/rdx-i18n'
+import { versioning } from '@lexibase/rdx-versioning'
+
+export default defineConfig({
+  metadata: { applicationName: 'My documentation' },
+  lang: 'en',
+  plugins: [
+    versioning(),
+    i18n({
+      locales: [
+        { code: 'en', label: 'English' },
+        { code: 'pt-BR', label: 'Português (Brasil)', folder: 'ptbr' },
+      ],
+    }),
+  ],
+})
+```
+
+Publish all configured languages with one command:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx version 1.0.0
+
+### npm
+
+npm exec -- rdx version 1.0.0
+
+### yarn
+
+yarn rdx version 1.0.0
+
+:::
+
+The primary snapshot stays in `versioned_docs/`. Translated snapshots stay beside
+their live language trees:
+
+```folder
+versioned_docs/
+  version-1.0.0/
+    guides/
+      installation.mdx
+locale/
+  ptbr/
+    docs/
+      guides/
+        installation.mdx
+    versioned_docs/
+      version-1.0.0/
+        guides/
+          installation.mdx
+versions.json
+```
+
+RDX records the language inventory of each release in its snapshot metadata.
+Commit the complete snapshot directories, including their internal JSON files.
+Keep `versions.json` at the project root; one edition applies to every language.
+If copying a language fails, the new snapshots are removed and the version
+manifest stays unchanged.
+
+Read a Portuguese snapshot at `/pt-br/docs/1.0.0/guides/installation`. Switching
+languages preserves the edition; switching editions preserves the language.
+Search stays within both selections. Missing translations display the primary
+page from that same edition, never a later translation from the live tree.
+
+Snapshots created before language support contain primary-language content.
+Adding the plugin does not copy current translations into those snapshots.
+Changing a live translation's folder alias does not move existing snapshots.
+Keep the primary `lang` stable after publishing multilingual snapshots.
+
+The [versioning commands](./versioning.mdx) also archive, restore and advance the
+whole edition. Same-major redirects preserve the language and page. Retain the
+historical snapshot metadata so replaced-language URLs remain recognizable.

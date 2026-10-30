@@ -22,7 +22,7 @@ test(
     assert.match(await home.text(), /<title>RDX<\/title>/)
     const root = await request('/docs')
     assert.equal(root.status, 200)
-    assert.equal(new URL(root.url).pathname, '/docs/4.0.0/intro')
+    assert.equal(new URL(root.url).pathname, '/docs/4.1.0/intro')
     const html = await root.text()
     assert.equal(html.match(/<html[^>]*lang="([^"]+)"/)?.[1], config.lang)
     assert.match(html, /data-rdx-sidebar/)

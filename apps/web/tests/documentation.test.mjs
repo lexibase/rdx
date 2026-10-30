@@ -222,7 +222,7 @@ test('the website exposes Canary and one edition per major, with historical rout
     docs.editions.map(({ id, kind }) => ({ id, kind })),
     [
       { id: 'canary', kind: 'live' },
-      { id: '4.0.0', kind: 'version' },
+      { id: '4.1.0', kind: 'version' },
       { id: '3.2.0', kind: 'version' },
       { id: '2.0.0', kind: 'version' },
       { id: '1.0.1', kind: 'version' },
@@ -230,6 +230,7 @@ test('the website exposes Canary and one edition per major, with historical rout
   )
   for (const version of [
     'canary',
+    '4.1.0',
     '4.0.0',
     '3.2.0',
     '3.1.0',
@@ -257,6 +258,7 @@ test('the website exposes Canary and one edition per major, with historical rout
   }
   assert.deepEqual(docs.index('../canary'), [])
   assert.equal(docs.canonicalVersion('3.0.0'), '3.2.0')
+  assert.equal(docs.canonicalVersion('4.0.0'), '4.1.0')
   assert.equal(docs.canonicalVersion('3.1.0'), '3.2.0')
   assert.equal(docs.canonicalVersion('canary'), 'canary')
   for (const retired of ['2.1.1', '2.1.0']) {

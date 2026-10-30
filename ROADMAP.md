@@ -105,7 +105,7 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       aceitando tags válidas e `--locales` para scripts. A CLI principal continua
       perguntando apenas o nome do projeto. Novos idiomas são adicionados depois
       em `locales` e nas pastas de tradução; não exigem reinstalar o plugin.
-- [ ] Documentação multilíngue e seletor opcional na navbar: planejar uma
+- [x] Documentação multilíngue e seletor opcional na navbar: implementar uma
       arquitetura como plugin opcional. Conteúdo principal em `docs/`; traduções
       em `locale/<pasta>/docs/`, com códigos de idioma separados de aliases como
       `ptbr`. Proposta de URLs: `/<idioma>/docs/<versão opcional>/<página>`.
@@ -113,11 +113,10 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       mostrar o original da mesma edição com Callout explícito. Busca isolada
       por idioma/edição e snapshots conjuntos, sem depender da ordem dos plugins.
       Contratos, limitações atuais e etapas em `MULTILINGUAL_DESIGN.md`.
-      Implementado em pacote privado: rotas por idioma, fallback com Callout,
+      Implementado como plugin opcional: rotas por idioma, fallback com Callout,
       seletor, busca, metadados e snapshots multilíngues com publicação conjunta.
       Instalação assistida, versões e redirecionamentos validados localmente;
-      preparar a matriz de pacotes e validação dos instaláveis para a publicação
-      agrupada.
+      matriz de pacotes e instaláveis preparada para a publicação agrupada 4.1.0.
 
 ## Final da lista
 
