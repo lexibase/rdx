@@ -289,4 +289,6 @@ selectors; public assets; custom homepage/logo imports; and production tracing.
 Do not alter published snapshots, user projects or the current release as part
 of this work. Snapshot contributions now support both plugins together;
 assisted installation is available locally under the contracts above. The
-plugin remains private until grouped release preparation and archive validation.
+plugin remains private until grouped release preparation. Packed installations
+are validated with `pnpm test:release --i18n` in standalone and pnpm monorepo
+projects, including activation, contributions, snapshots and production tracing.

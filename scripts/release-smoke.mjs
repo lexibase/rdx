@@ -21,7 +21,7 @@ const root = fileURLToPath(new URL('../', import.meta.url))
 const pnpmEntry = process.env.npm_execpath
 assert.ok(
   pnpmEntry && /\.[cm]?js$/i.test(pnpmEntry),
-  'Run this check with pnpm test:release [--install].'
+  'Run this check with pnpm test:release [--install|--i18n].'
 )
 const base = path.join(root, '.rdx-package-smoke')
 await mkdir(base, { recursive: true })
@@ -886,6 +886,12 @@ const template = JSON.parse(
 )
 for (const name of ['@lexibase/rdx'])
   assert.equal(template.dependencies[name], releases.get(name).manifest.version)
+
+if (process.argv.includes('--i18n')) {
+  const { verifyMultilingualArchives } =
+    await import('./multilingual-release-smoke.mjs')
+  await verifyMultilingualArchives({ temporary, releases, pnpm })
+}
 
 if (process.argv.includes('--install')) {
   const generatorRoot = path.join(temporary, 'generator')
