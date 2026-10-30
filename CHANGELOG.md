@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Add assisted `rdx add i18n` setup using the existing primary language and a
+  prompt for additional language tags, or `--locales` for scripts. Reuse the
+  official plugin installer across npm, pnpm and Yarn; preserve configured
+  languages, dependency ranges and authored translations on repeated runs.
+  Prepare translation directories and localized runtime routes without changing
+  the main creator's project-name prompt.
+
 - Integrate multilingual content with optional versioning through generic snapshot
   contributions. Freeze language identities and translated trees per release;
   publish all languages atomically, preserve old primary-only snapshots and

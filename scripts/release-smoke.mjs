@@ -128,6 +128,8 @@ const required = {
     'config.d.mts',
     'bin/rdx.mjs',
     'bin/add-plugin.mjs',
+    'bin/plugin-config.mjs',
+    'bin/i18n-setup.mjs',
     'bin/public-assets.mjs',
     'bin/project-styles.mjs',
     'bin/locale-routes.mjs',

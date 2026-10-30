@@ -235,7 +235,7 @@ Automatic editing supports a literal default-exported object, optionally inside
 the imported `defineConfig(...)`, including `as`/`satisfies` wrappers. Imports,
 aliases, existing array entries, comments and unrelated options are retained.
 Dynamic config exports, spreads or computed options are refused before installing:
-follow the manual instructions instead. Only `versioning` is currently supported;
+follow the manual instructions instead. The catalog supports `versioning` and `i18n`;
 arbitrary package names and additional install flags are not accepted.
 
 The command validates the new config before replacing the original file.
@@ -244,7 +244,23 @@ the original config is left unchanged; package-manager changes to dependencies
 and lockfiles are retained for inspection, not rolled back. If preparation fails
 after activation, the valid edited config remains: fix the reported
 problem and run `rdx prepare` again. Custom plugin factories are trusted code and
-are evaluated during validation, but setup hooks run only during preparation.
+are evaluated during validation. The i18n installer reads the official language
+declaration during validation; other setup hooks run during preparation.
+
+### Activating content languages
+
+`rdx add i18n` reuses the current `lang` (default `en`) and asks for additional
+comma-separated language tags. `rdx add i18n --locales en,es-ES` supplies them
+without interactive input; at least one must differ from the primary language.
+The command adds `i18n({ locales: [...] })` with native language labels and creates
+`locale/<lowercase-tag>/docs/` for translations. Newly created empty docs trees
+contain `.gitkeep` for source control. Primary content stays in `docs/`.
+
+Repeated activation preserves all configured language options, folder aliases,
+authored translations and dependency specs. It does not prompt again. Supplying
+`--locales` to an already configured plugin gives instructions to edit its
+`locales` array and create the matching folders instead of overwriting it.
+The main project creator asks only for the project name.
 
 Manual installation/configuration remains supported:
 

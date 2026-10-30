@@ -8,7 +8,18 @@ import { createRdxProject, resolveConfig } from '@lexibase/rdx-core/config'
 import spawn from 'cross-spawn'
 import { createJiti } from 'jiti'
 
-import { activateVersioning, versioningPackage } from './plugin-config.mjs'
+import {
+  activateVersioning,
+  versioningPackage,
+  activateI18n,
+  inspectI18n,
+  i18nPackage,
+} from './plugin-config.mjs'
+import {
+  askI18nLanguages,
+  initialLocales,
+  prepareLanguageFolders,
+} from './i18n-setup.mjs'
 
 const managers = new Set(['npm', 'pnpm', 'yarn'])
 const runtimeVersion = createRequire(import.meta.url)('../package.json').version
@@ -16,10 +27,18 @@ const runtimeVersion = createRequire(import.meta.url)('../package.json').version
 // Internal installer policy; channels belong to the installed runtime release,
 // not the user's docs version, invoking command or dependency range.
 export function versioningInstallRequest(version, declared) {
+  return pluginInstallRequest(version, declared, versioningPackage)
+}
+
+export function i18nInstallRequest(version, declared) {
+  return pluginInstallRequest(version, declared, i18nPackage)
+}
+
+function pluginInstallRequest(version, declared, packageName) {
   if (declared !== undefined) {
     if (typeof declared !== 'string' || !declared.trim())
       throw new Error(
-        'The declared @lexibase/rdx-versioning dependency must be a non-empty string.'
+        `The declared ${packageName} dependency must be a non-empty string.`
       )
     return { kind: 'restore' }
   }
@@ -46,26 +65,36 @@ export function versioningInstallRequest(version, declared) {
     )
   return {
     kind: 'add',
-    specifier: `${versioningPackage}@${prerelease ?? 'latest'}`,
+    specifier: `${packageName}@${prerelease ?? 'latest'}`,
   }
 }
 
 export function parseAddArguments(args) {
   const [plugin, ...rest] = args
-  if (plugin !== 'versioning')
-    throw new Error(
-      'Usage: rdx add versioning [--package-manager npm|pnpm|yarn]. Only the official versioning plugin is currently supported.'
+  const usage =
+    'Usage: rdx add versioning|i18n [--package-manager npm|pnpm|yarn]. i18n also accepts --locales en,es-ES.'
+  if (!['versioning', 'i18n'].includes(plugin)) throw new Error(usage)
+  const options = {}
+  for (let index = 0; index < rest.length; index += 2) {
+    const flag = rest[index]
+    const value = rest[index + 1]
+    if (
+      flag === '--package-manager' &&
+      managers.has(value) &&
+      !options.packageManager
     )
-  if (!rest.length) return {}
-  if (
-    rest.length === 2 &&
-    rest[0] === '--package-manager' &&
-    managers.has(rest[1])
-  )
-    return { packageManager: rest[1] }
-  throw new Error(
-    'Usage: rdx add versioning [--package-manager npm|pnpm|yarn].'
-  )
+      options.packageManager = value
+    else if (
+      plugin === 'i18n' &&
+      flag === '--locales' &&
+      value?.trim() &&
+      !value.startsWith('-') &&
+      options.locales === undefined
+    )
+      options.locales = value
+    else throw new Error(usage)
+  }
+  return options
 }
 
 async function exists(filename) {
@@ -160,7 +189,7 @@ export function installPackage(
   })
 }
 
-async function validateCandidate(filename) {
+async function validateCandidate(filename, packageName) {
   const jiti = createJiti(import.meta.url, {
     moduleCache: false,
     fsCache: false,
@@ -168,27 +197,62 @@ async function validateCandidate(filename) {
   })
   const input = await jiti.import(filename, { default: true })
   const config = resolveConfig(input)
-  // Validate paths and command registrations without running plugin setup hooks.
-  await createRdxProject(
+  // Read the official language declaration; other setup hooks run during prepare.
+  const project = await createRdxProject(
     {
       ...config,
       plugins: config.plugins.map((plugin) => ({
         ...plugin,
-        setup: undefined,
+        setup:
+          packageName === i18nPackage && plugin.name === i18nPackage
+            ? plugin.setup
+            : undefined,
       })),
     },
-    { rootDir: path.dirname(filename), command: 'prepare' }
+    { rootDir: path.dirname(filename), command: 'runtime' }
   )
   if (
-    config.plugins.filter((plugin) => plugin.name === versioningPackage)
-      .length !== 1
+    config.plugins.filter((plugin) => plugin.name === packageName).length !== 1
   )
     throw new Error(
-      'Expected exactly one official versioning plugin in the resulting configuration.'
+      `Expected exactly one ${packageName} plugin in the resulting configuration.`
     )
+  return project
 }
 
 export async function addVersioning(rootDir, options = {}) {
+  return addPlugin(rootDir, options, {
+    packageName: versioningPackage,
+    label: 'Versioning',
+    activate: activateVersioning,
+  })
+}
+
+export async function addI18n(rootDir, options = {}) {
+  return addPlugin(rootDir, options, {
+    packageName: i18nPackage,
+    label: 'i18n',
+    async activate(source) {
+      const state = inspectI18n(source)
+      if (state.configured) {
+        if (options.locales !== undefined)
+          throw new Error(
+            'i18n is already configured. Add further languages to locales in rdx.config.ts and create their locale/<folder>/docs/ directories.'
+          )
+        return source
+      }
+      const primary = Intl.getCanonicalLocales(state.lang)[0]
+      if (!primary) throw new Error('lang must be a valid language tag.')
+      const additional =
+        options.locales ?? (await (options.ask ?? askI18nLanguages)(primary))
+      if (additional === undefined) return
+      return activateI18n(source, initialLocales(primary, additional))
+    },
+  })
+}
+
+async function addPlugin(rootDir, options, definition) {
+  const { packageName, label } = definition
   const {
     install = installPackage,
     log = console.log,
@@ -209,7 +273,11 @@ export async function addVersioning(rootDir, options = {}) {
     throw new Error('rdx.config.ts must be a regular project file, not a link.')
   const original = await readFile(filename, 'utf8')
   // Refuse unsupported configurations before running the package manager.
-  const updated = activateVersioning(original)
+  const updated = await definition.activate(original)
+  if (updated === undefined) {
+    log(`${label} setup cancelled.`)
+    return { changed: false, cancelled: true }
+  }
   const pkg = JSON.parse(
     await readFile(path.join(rootDir, 'package.json'), 'utf8')
   )
@@ -220,11 +288,10 @@ export async function addVersioning(rootDir, options = {}) {
     options.packageManager
   )
   const declared =
-    pkg.dependencies?.[versioningPackage] ??
-    pkg.devDependencies?.[versioningPackage]
+    pkg.dependencies?.[packageName] ?? pkg.devDependencies?.[packageName]
   let installed = false
   try {
-    createRequire(path.join(rootDir, 'package.json')).resolve(versioningPackage)
+    createRequire(path.join(rootDir, 'package.json')).resolve(packageName)
     installed = true
   } catch (error) {
     // The official package exposes ESM imports only. require.resolve can find
@@ -234,21 +301,27 @@ export async function addVersioning(rootDir, options = {}) {
       throw error
   }
   if (!declared || !installed) {
-    const request = versioningInstallRequest(runtimeVersion, declared)
+    const request = pluginInstallRequest(runtimeVersion, declared, packageName)
     log(
       request.kind === 'restore'
-        ? `Restoring the declared ${versioningPackage} dependency with ${manager}...`
+        ? `Restoring the declared ${packageName} dependency with ${manager}...`
         : `Installing ${request.specifier} with ${manager}...`
     )
     await install(manager, rootDir, env, request)
-  } else
-    log(`${versioningPackage} is already installed; preserving its version.`)
+  } else log(`${packageName} is already installed; preserving its version.`)
 
   const temporary = path.join(rootDir, `rdx.config.add-${randomUUID()}.ts`)
+  let rollbackFolders
+  let committed = false
   try {
     await writeFile(temporary, updated, { flag: 'wx', mode: info.mode })
     try {
-      await validateCandidate(temporary)
+      const project = await validateCandidate(temporary, packageName)
+      if (project.localization)
+        rollbackFolders = await prepareLanguageFolders(
+          rootDir,
+          project.localization
+        )
     } catch (error) {
       throw new Error(
         `Plugin configuration validation failed: ${error.message}. rdx.config.ts was not changed. Installed dependencies were kept; fix the error and retry.`
@@ -265,10 +338,13 @@ export async function addVersioning(rootDir, options = {}) {
       )
     if (updated !== original) {
       await rename(temporary, filename)
-      log('Versioning activated in rdx.config.ts.')
+      committed = true
+      log(`${label} activated in rdx.config.ts.`)
     } else
-      log('Versioning is already configured; no configuration changes needed.')
+      log(`${label} is already configured; no configuration changes needed.`)
+    committed = true
   } finally {
+    if (!committed) await rollbackFolders?.()
     await unlink(temporary).catch((error) => {
       if (error.code !== 'ENOENT') throw error
     })

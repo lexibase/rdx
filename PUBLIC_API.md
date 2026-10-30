@@ -91,6 +91,11 @@ estão em [MDX.md](./MDX.md).
   `formatDocumentationCheck` and host-route adapter options.
 - `rdx add versioning [--package-manager npm|pnpm|yarn]`: instala/restaura,
   ativa explicitamente o plugin e prepara o projeto.
+- `rdx add i18n [--locales en,es-ES] [--package-manager npm|pnpm|yarn]`:
+  instala/restaura o plugin, reutiliza `lang` e pergunta pelos idiomas adicionais
+  na primeira ativação. `--locales` evita a pergunta. Prepara pastas e rotas;
+  repetições preservam opções, traduções e dependências existentes. Novos idiomas
+  são adicionados depois em `locales` e nas pastas de tradução.
 - `rdx version <versão>`: só existe se o plugin de versionamento estiver ativado;
   publica `docs/` na edição da mesma major, atualizando seu número e conteúdo.
   Uma nova major acrescenta uma edição. Rótulos publicados não são reutilizados;

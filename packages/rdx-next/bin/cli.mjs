@@ -60,6 +60,9 @@ export async function runRdxCli({ templateDir } = {}) {
       )
       console.log('  rdx add versioning [--package-manager npm|pnpm|yarn]')
       console.log(
+        '  rdx add i18n [--locales en,es-ES] [--package-manager npm|pnpm|yarn]'
+      )
+      console.log(
         'Plugin commands are registered through plugins in rdx.config.ts.'
       )
       return
@@ -79,10 +82,31 @@ export async function runRdxCli({ templateDir } = {}) {
     }
 
     if (command === 'add') {
-      const { addVersioning, parseAddArguments } =
+      if (
+        (commandArgs.length === 1 &&
+          ['--help', '-h'].includes(commandArgs[0])) ||
+        (commandArgs.length === 2 &&
+          ['versioning', 'i18n'].includes(commandArgs[0]) &&
+          ['--help', '-h'].includes(commandArgs[1]))
+      ) {
+        console.log(
+          'Usage: rdx add versioning|i18n [--package-manager npm|pnpm|yarn]'
+        )
+        console.log(
+          '  i18n: reuse lang and ask for additional languages, or pass --locales en,es-ES.'
+        )
+        console.log(
+          '  Existing i18n languages are edited in rdx.config.ts and locale/<folder>/docs/.'
+        )
+        return
+      }
+      const { addVersioning, addI18n, parseAddArguments } =
         await import('./add-plugin.mjs')
       const options = parseAddArguments(commandArgs)
-      await addVersioning(projectRoot, options)
+      const result = await (
+        commandArgs[0] === 'i18n' ? addI18n : addVersioning
+      )(projectRoot, options)
+      if (result.cancelled) return
       command = 'prepare'
     }
 

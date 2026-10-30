@@ -100,12 +100,11 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       usam a mesma localidade no servidor e no navegador. Localidades portuguesas
       usam pt-BR; idiomas sem catálogo usam inglês. Conteúdo MDX e nomes
       personalizados permanecem como escritos pelo autor.
-- [ ] Perguntar o idioma durante a criação pela CLI, preenchendo `lang`
-      automaticamente. Adiado para a etapa de evolução do suporte a idiomas.
-      Oferecer os idiomas disponíveis e `Other`, permitindo informar outro
-      código de idioma válido. Distinguir o idioma declarado do conteúdo dos
-      catálogos de tradução da interface; escolher um idioma sem catálogo não
-      deve prometer tradução automática.
+- [x] Configuração inicial de idiomas somente na ativação opcional com
+      `rdx add i18n`: reutilizar `lang` e perguntar os idiomas adicionais,
+      aceitando tags válidas e `--locales` para scripts. A CLI principal continua
+      perguntando apenas o nome do projeto. Novos idiomas são adicionados depois
+      em `locales` e nas pastas de tradução; não exigem reinstalar o plugin.
 - [ ] Documentação multilíngue e seletor opcional na navbar: planejar uma
       arquitetura como plugin opcional. Conteúdo principal em `docs/`; traduções
       em `locale/<pasta>/docs/`, com códigos de idioma separados de aliases como
@@ -116,8 +115,9 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       Contratos, limitações atuais e etapas em `MULTILINGUAL_DESIGN.md`.
       Implementado em pacote privado: rotas por idioma, fallback com Callout,
       seletor, busca, metadados e snapshots multilíngues com publicação conjunta.
-      Concluir validação de versões, redirecionamentos e instalação assistida
-      antes da publicação agrupada.
+      Instalação assistida, versões e redirecionamentos validados localmente;
+      preparar a matriz de pacotes e validação dos instaláveis para a publicação
+      agrupada.
 
 ## Final da lista
 

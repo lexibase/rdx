@@ -1,5 +1,11 @@
 # `@lexibase/rdx-i18n`
 
+Assisted activation: `pnpm rdx add i18n` reuses `lang` and asks for additional
+language tags. Use `--locales en,es-ES` noninteractively. The command prepares
+`locale/<tag>/docs/`, preserves authored translations and existing plugin options,
+and prepares the runtime. Later languages are added to `locales` and their
+translation directories without reinstalling the plugin.
+
 Optional multilingual content for RDX. This private workspace package is in its
 first implementation stage; do not publish it independently of compatible
 framework packages.

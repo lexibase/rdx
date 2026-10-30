@@ -58,6 +58,7 @@
     "@lexibase/rdx-types": "workspace:*",
     "cross-spawn": "^7.0.6",
     "jiti": "^2.6.1",
+    "prompts": "^2.4.2",
     "next-mdx-remote": "^6.0.0",
     "remark-gfm": "^4",
     "typescript": "6.0.3"
