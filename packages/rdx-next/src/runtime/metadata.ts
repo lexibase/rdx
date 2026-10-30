@@ -1,6 +1,13 @@
 import type { Metadata } from 'next'
 import type { RdxDocPage, RdxProject, RDXConfig } from '@lexibase/rdx-types'
-import { resolveDocsRoute } from '@lexibase/rdx-core'
+import {
+  resolveDocsRoute,
+  getLocalizedProject,
+  getDocsHref,
+  isFallbackPage,
+  getDocument,
+  getSourceOptions,
+} from '@lexibase/rdx-core'
 import { notFound } from 'next/navigation'
 
 import { getSourceRobots } from './indexing'
@@ -13,6 +20,8 @@ export function getDocumentMetadata({
   project: RdxProject
   slug?: string[]
 }): Metadata {
+  if (project.localization && !project.locale)
+    return { robots: { index: false, follow: true } }
   const route = resolveDocsRoute(project, slug)
   // The page owns the redirect. Throwing it here too can duplicate Location headers.
   if (route.source.redirectTo !== undefined)
@@ -23,9 +32,57 @@ export function getDocumentMetadata({
   const page = route.categories
     .flatMap((category) => category.pages)
     .find((page) => page.slug === route.slug)!
+  const fallback = isFallbackPage(project, route.source, page.sourcePath)
+  const primary = project.localization?.locales.find(
+    (locale) => locale.code === project.localization!.defaultLocale
+  )
+  const canonicalProject = fallback
+    ? getLocalizedProject(project, primary!.path)
+    : project
+  const base = project.config.metadata.metadataBase
+  const languages =
+    project.localization && base
+      ? Object.fromEntries(
+          project.localization.locales.flatMap((locale) => {
+            const view = getLocalizedProject(project, locale.path)
+            const source = view.sources.find(
+              (entry) => entry.id === route.source.id
+            )!
+            return getDocument(page.slug, {
+              docsDir: getSourceOptions(view, source).docsDir,
+            })
+              ? [
+                  [
+                    locale.code,
+                    new URL(getDocsHref(view, source, page.slug), base).href,
+                  ],
+                ]
+              : []
+          })
+        )
+      : undefined
   return {
     ...getPageMetadata(project.config, page),
-    robots: getSourceRobots(project, route.source),
+    robots: fallback
+      ? { index: false, follow: true }
+      : getSourceRobots(project, route.source),
+    ...(project.localization && base
+      ? {
+          alternates: {
+            canonical: new URL(
+              getDocsHref(
+                canonicalProject,
+                canonicalProject.sources.find(
+                  (entry) => entry.id === route.source.id
+                ),
+                page.slug
+              ),
+              base
+            ).href,
+            ...(fallback ? {} : { languages }),
+          },
+        }
+      : {}),
   }
 }
 

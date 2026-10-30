@@ -1,8 +1,10 @@
 # Optional multilingual documentation
 
-Status: proposed architecture, not an available feature. This document records
-the agreed direction for a future optional plugin. Configuration and package
-names below are proposed contracts, not installation instructions.
+Status: first implementation stage in a private workspace plugin. Unversioned
+projects have language-prefixed routes, a selector, missing-translation fallback,
+isolated search and metadata. Multilingual snapshots, assisted installation and
+the CLI language prompt remain planned below. This is an internal design record,
+not registry installation instructions.
 
 ## Goals
 
@@ -267,6 +269,12 @@ the website adapter.
 6. Validate packed projects outside/inside monorepos and serverless deployment,
    then write public guides and prepare a grouped release when requested.
 
+At release preparation, raise the runtime's minimum compatible UI version to
+the release containing the language selector and localized 404 modules. The
+runtime imports these shared modules; its former UI peer floor cannot describe
+the new module requirements. Keep the new plugin private until its compatible
+package matrix and supported scope are ready for publication.
+
 Required regression cases include: no-plugin projects; each plugin alone; both
 plugin orders; translated/missing/orphan pages; translated heading anchors;
 primary-page deletion; undeclared languages; locale-code/folder collisions;
@@ -276,5 +284,6 @@ fallback canonical/noindex and real-language alternates; mobile/keyboard
 selectors; public assets; custom homepage/logo imports; and production tracing.
 
 Do not alter published snapshots, user projects or the current release as part
-of this design. Implementation begins in a separate feature PR after agreement
-on these contracts.
+of this work. The first-stage feature PR implements unversioned content; snapshot
+contributions, assisted installation and the creator prompt remain separate
+implementation stages under the contracts above.

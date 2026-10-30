@@ -96,9 +96,32 @@ function isSafeSlug(slug: string) {
  * route metadata. Default callers keep the existing fail-fast behavior.
  */
 export function getDocsIndex(
-  { docsDir }: RdxDocsOptions = {},
+  { docsDir, fallbackDocsDir }: RdxDocsOptions = {},
   onError?: (error: unknown, sourcePath: string) => void
 ): RdxDocCategory[] {
+  if (fallbackDocsDir) {
+    const primary = getDocsIndex({ docsDir: fallbackDocsDir }, onError)
+    const translated = getDocsIndex({ docsDir }, onError)
+    const pages = new Map(
+      translated.flatMap((category) =>
+        category.pages.map((page) => [page.slug, page] as const)
+      )
+    )
+    return primary.map((category) => ({
+      ...category,
+      title: readCategoryMeta(
+        path.join(
+          getDocsRoot(docsDir),
+          category.id === '_root' ? '' : category.id
+        ),
+        category.title
+      ).title,
+      pages: category.pages.map((page) => ({
+        ...(pages.get(page.slug) ?? page),
+        position: page.position,
+      })),
+    }))
+  }
   const docsRoot = getDocsRoot(docsDir)
   if (!fs.existsSync(docsRoot)) return []
 
@@ -176,7 +199,7 @@ export function getDocsPaths(options?: RdxDocsOptions) {
 
 export function getDocument(
   slug: string,
-  { docsDir }: RdxDocsOptions = {}
+  { docsDir, fallbackDocsDir }: RdxDocsOptions = {}
 ): RdxDocument | null {
   if (!isSafeSlug(slug)) return null
 
@@ -186,7 +209,12 @@ export function getDocument(
 
   if (relativePath.startsWith('..') || path.isAbsolute(relativePath))
     return null
-  if (!fs.existsSync(sourcePath)) return null
+  if (fallbackDocsDir && !getDocument(slug, { docsDir: fallbackDocsDir }))
+    return null
+  if (!fs.existsSync(sourcePath))
+    return fallbackDocsDir
+      ? getDocument(slug, { docsDir: fallbackDocsDir })
+      : null
 
   const parsed = matter(fs.readFileSync(sourcePath, 'utf8'))
 

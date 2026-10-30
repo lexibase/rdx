@@ -8,6 +8,10 @@ export {
   ResolvedRdxConfig,
 } from './config'
 export {
+  RdxLocaleDefinition,
+  RdxLocale,
+  RdxLocalizationOptions,
+  RdxLocalization,
   RdxContentSource,
   RdxPlugin,
   RdxPluginCommand,

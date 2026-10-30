@@ -17,6 +17,7 @@ export function Navbar({
   docsHref = '/docs',
   docsLink,
   versionMenu,
+  languageMenu,
   search,
   github,
   showToggleMode = false,
@@ -29,6 +30,7 @@ export function Navbar({
   docsHref?: string
   docsLink?: ReactNode
   versionMenu?: ReactNode
+  languageMenu?: ReactNode
   search?: ReactNode
   github?: { visible: boolean; url: string }
   showToggleMode?: boolean
@@ -55,6 +57,7 @@ export function Navbar({
       <div className="flex items-center gap-x-1 md:gap-x-2 h-4">
         {search}
         {versionMenu}
+        {languageMenu}
         {docsLink ?? (
           <Button variant="link" size="sm" href={docsHref}>
             {messages.docs}

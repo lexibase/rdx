@@ -77,7 +77,13 @@ export async function getRdxTracingConfig({ rootDir, appDir = rootDir }) {
   const project = await createRdxProject(input, { rootDir })
   const files = (
     await Promise.all(
-      project.sources
+      [
+        ...project.sources,
+        ...(project.localization?.locales
+          .filter((locale) => locale.folder)
+          .map((locale) => ({ docsDir: `locale/${locale.folder}/docs` })) ??
+          []),
+      ]
         .filter((source) => source.redirectTo === undefined)
         .map((source) =>
           contentFiles(
@@ -107,6 +113,16 @@ export async function getRdxTracingConfig({ rootDir, appDir = rootDir }) {
       destination: `/docs/${source.redirectTo}/:path*`,
       permanent: true,
     }))
+  if (project.localization) {
+    const primary = project.localization.locales.find(
+      (locale) => locale.code === project.localization.defaultLocale
+    )
+    redirects.push({
+      source: '/docs/:path*',
+      destination: `/${primary.path}/docs/:path*`,
+      permanent: true,
+    })
+  }
   return {
     ...(redirects.length ? { redirects: async () => redirects } : {}),
     outputFileTracingIncludes: {

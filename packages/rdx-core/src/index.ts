@@ -1,5 +1,11 @@
 export { getDocument, getDocsIndex, getDocsPaths } from './content/index'
 export {
+  getLocalizedProject,
+  getContentSources,
+  getDocsHref,
+  isFallbackPage,
+} from './project/localization'
+export {
   createDocumentLinkResolver,
   RdxDocumentLinkError,
   type DocumentLinkOptions,

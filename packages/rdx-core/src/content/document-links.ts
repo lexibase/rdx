@@ -4,6 +4,9 @@ export interface DocumentLinkOptions {
   sourceRoot: string
   sourcePath: string
   routePrefix?: string
+  basePath?: string
+  /** Resolve missing translated files against the effective primary inventory. */
+  virtualPaths?: boolean
   documents: readonly { sourcePath: string; slug: string }[]
 }
 
@@ -23,7 +26,12 @@ export function createDocumentLinkResolver(options: DocumentLinkOptions) {
   const root = path.resolve(options.sourceRoot)
   const current = path.resolve(options.sourcePath)
   const documents = new Map(
-    options.documents.map((page) => [path.resolve(page.sourcePath), page.slug])
+    options.documents.flatMap((page) => [
+      [path.resolve(page.sourcePath), page.slug] as const,
+      ...(options.virtualPaths
+        ? [[path.resolve(root, `${page.slug}.mdx`), page.slug] as const]
+        : []),
+    ])
   )
   const routeCounts = new Map<string, number>()
   for (const page of options.documents)
@@ -72,7 +80,7 @@ export function createDocumentLinkResolver(options: DocumentLinkOptions) {
     if ((routeCounts.get(slug) ?? 0) > 1)
       fail('the destination has an ambiguous documentation route.')
     const route = [
-      '/docs',
+      options.basePath ?? '/docs',
       options.routePrefix && encodeURIComponent(options.routePrefix),
       ...slug.split('/').map(encodeURIComponent),
     ]

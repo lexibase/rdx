@@ -17,6 +17,7 @@ import {
   RdxDocumentLinkError,
 } from '../content/document-links'
 import { getSourceOptions } from '../project/index'
+import { getContentSources, isFallbackPage } from '../project/localization'
 import { headingText } from '../mdx/heading-text'
 import { remarkDocumentationComponents } from '../mdx/markdown-components'
 
@@ -74,7 +75,7 @@ const parser = unified()
   .use(remarkMdx)
   .use(remarkDocumentationComponents)
 const sourceRoute = (source: RdxContentSource) =>
-  ['/docs', source.routePrefix].filter(Boolean).join('/')
+  [source.basePath ?? '/docs', source.routePrefix].filter(Boolean).join('/')
 const documentRoute = (source: RdxContentSource, page: RdxDocPage) =>
   `${sourceRoute(source)}/${page.slug.split('/').map(encodeURIComponent).join('/')}`
 const identifier = (value: string) =>
@@ -184,9 +185,16 @@ export function checkDocumentation(
       message: value.message ?? String(error),
     })
   }
-  for (const source of project.sources) {
+  const sources = getContentSources(project)
+  if (project.localization) {
+    const primary = project.localization.locales.find(
+      (locale) => locale.code === project.localization!.defaultLocale
+    )!
+    prefixes.push(['/docs', `/${primary.path}/docs`])
+  }
+  for (const source of sources) {
     if (source.redirectTo !== undefined) {
-      const destination = project.sources.find(
+      const destination = sources.find(
         (entry) => entry.routePrefix === source.redirectTo
       )!
       prefixes.push([key(rootFor(source)), key(rootFor(destination))])
@@ -194,6 +202,28 @@ export function checkDocumentation(
     }
     let pages: RdxDocPage[]
     try {
+      if (source.fallbackDocsDir) {
+        const primaryPages = new Set(
+          getDocsIndex(
+            { docsDir: path.resolve(project.rootDir, source.fallbackDocsDir) },
+            (error, file) => syntax(error, file)
+          ).flatMap((category) => category.pages.map((page) => page.slug))
+        )
+        for (const category of getDocsIndex(
+          { docsDir: path.resolve(project.rootDir, source.docsDir) },
+          (error, file) => syntax(error, file)
+        ))
+          for (const page of category.pages)
+            if (!primaryPages.has(page.slug))
+              diagnostics.push({
+                file: relativeFile(page.sourcePath),
+                line: 1,
+                column: 1,
+                code: 'page',
+                message:
+                  'Translation has no primary-language counterpart with the same relative MDX path.',
+              })
+      }
       pages = getDocsIndex(getSourceOptions(project, source), (error, file) => {
         syntax(error, file)
         failed.add(file)
@@ -260,12 +290,25 @@ export function checkDocumentation(
   for (const document of documents) {
     const parsed = document.parsed
     if (!parsed) continue
+    const contentSource = isFallbackPage(
+      project,
+      document.source,
+      document.page.sourcePath
+    )
+      ? sources.find(
+          (source) =>
+            source.docsDir === document.source.fallbackDocsDir &&
+            !source.fallbackDocsDir
+        )!
+      : document.source
     const resolve = createDocumentLinkResolver({
-      sourceRoot: getSourceOptions(project, document.source).docsDir,
+      sourceRoot: getSourceOptions(project, contentSource).docsDir,
       sourcePath: document.page.sourcePath,
-      routePrefix: document.source.routePrefix,
+      routePrefix: contentSource.routePrefix,
+      basePath: contentSource.basePath,
+      virtualPaths: !!contentSource.fallbackDocsDir,
       documents: documents
-        .filter((entry) => entry.source === document.source)
+        .filter((entry) => entry.source === contentSource)
         .map((entry) => entry.page),
     })
     for (const reference of parsed.references) {
@@ -273,7 +316,10 @@ export function checkDocumentation(
         ? 'asset'
         : 'page'
       try {
-        const url = new URL(reference.href, `${origin}${document.href}`)
+        const url = new URL(
+          reference.href,
+          `${origin}${contentSource === document.source ? document.href : documentRoute(contentSource, document.page)}`
+        )
         if (!['http:', 'https:'].includes(url.protocol)) continue
         if (url.origin !== origin) continue
         // Absolute links are local only when a real public domain was configured.
@@ -313,7 +359,7 @@ export function checkDocumentation(
         }
         if (!reference.image && roots.has(pathname)) continue
         code =
-          reference.image || !/^\/docs(?:\/|$)/.test(pathname)
+          reference.image || !/^\/(?:[^/]+\/)?docs(?:\/|$)/.test(pathname)
             ? 'asset'
             : 'page'
         if (pathname.includes('\\') || pathname.includes('\0'))
@@ -360,7 +406,16 @@ export function checkDocumentation(
     (a, b) =>
       a.file.localeCompare(b.file) || a.line - b.line || a.column - b.column
   )
-  return { checkedPages: documents.length, diagnostics }
+  const unique = [
+    ...new Map(
+      diagnostics.map((diagnostic) => [JSON.stringify(diagnostic), diagnostic])
+    ).values(),
+  ]
+  return {
+    checkedPages: new Set(documents.map((document) => document.page.sourcePath))
+      .size,
+    diagnostics: unique,
+  }
 }
 
 export function formatDocumentationCheck(report: DocumentationCheck): string {

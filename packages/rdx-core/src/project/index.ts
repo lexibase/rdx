@@ -8,7 +8,17 @@ export function getSourceOptions(
   project: RdxProject,
   source: RdxContentSource
 ) {
-  return { docsDir: path.resolve(project.rootDir, source.docsDir) }
+  return {
+    docsDir: path.resolve(project.rootDir, source.docsDir),
+    ...(source.fallbackDocsDir
+      ? {
+          fallbackDocsDir: path.resolve(
+            project.rootDir,
+            source.fallbackDocsDir
+          ),
+        }
+      : {}),
+  }
 }
 
 /** Match plugin routes before looking up pages in the live documentation. */
