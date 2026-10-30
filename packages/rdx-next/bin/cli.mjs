@@ -11,6 +11,7 @@ import { createJiti } from 'jiti'
 import postcssConfig from '../postcss.config.mjs'
 import { preparePublicAssets } from './public-assets.mjs'
 import { prepareProjectStyles } from './project-styles.mjs'
+import { prepareLocaleRoutes } from './locale-routes.mjs'
 
 export async function runRdxCli({ templateDir } = {}) {
   const supportedCommands = new Set(['dev', 'build', 'start'])
@@ -25,7 +26,7 @@ export async function runRdxCli({ templateDir } = {}) {
     templateDir ?? path.join(packageRoot, 'templates', 'runtime')
   const runtimeDirectory = path.join(projectRoot, '.rdx')
 
-  async function prepareRuntime() {
+  async function prepareRuntime(project) {
     await mkdir(runtimeDirectory, { recursive: true })
     await preparePublicAssets(projectRoot, runtimeDirectory)
     await cp(runtimeTemplate, runtimeDirectory, {
@@ -33,6 +34,7 @@ export async function runRdxCli({ templateDir } = {}) {
       recursive: true,
     })
     await prepareProjectStyles(projectRoot, runtimeDirectory)
+    await prepareLocaleRoutes(project, runtimeDirectory, runtimeTemplate)
     // Resolve in Node before Next processes this file: UI may be transitive,
     // and native Tailwind plugins must stay outside the Turbopack module graph.
     const resolvePlugin = createRequire(import.meta.url)
@@ -127,7 +129,7 @@ export async function runRdxCli({ templateDir } = {}) {
       if (command === 'check') return
     }
     if (command === 'prepare') {
-      await prepareRuntime()
+      await prepareRuntime(project)
       console.log('RDX runtime prepared in .rdx/')
       return
     }
@@ -148,7 +150,7 @@ export async function runRdxCli({ templateDir } = {}) {
       return
     }
 
-    await prepareRuntime()
+    await prepareRuntime(project)
     const projectRequire = createRequire(path.join(projectRoot, 'package.json'))
     const nextCli = projectRequire.resolve('next/dist/bin/next')
     const child = spawn(

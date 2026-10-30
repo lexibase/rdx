@@ -5,9 +5,14 @@ import {
   getDocsPaths,
   getSourceOptions,
   resolveDocsRoute,
+  getLocalizedProject,
+  getDocsHref,
+  isFallbackPage,
 } from '@lexibase/rdx-core'
 import type { RdxProject, RDXConfig } from '@lexibase/rdx-types'
 import { Button } from '@lexibase/rdx-ui/components/button'
+import { Callout } from '@lexibase/rdx-ui/components/callout'
+import { LanguageDropdown } from '@lexibase/rdx-ui/components/language-dropdown'
 import { DocsSidebar } from '@lexibase/rdx-ui/components/docs-sidebar'
 import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
 import { DocsPageTransition } from '@lexibase/rdx-ui/components/docs-page-transition'
@@ -21,6 +26,7 @@ import { getMessages, formatMessage } from '@lexibase/rdx-ui/lib/i18n'
 import { LocaleProvider } from '@lexibase/rdx-ui/providers/locale-provider'
 import { Navbar } from '@lexibase/rdx-ui/components/navbar'
 import { NotFound } from '@lexibase/rdx-ui/components/not-found'
+import { LocalizedNotFound } from '@lexibase/rdx-ui/components/localized-not-found'
 import {
   VersionDropdown,
   type VersionOption,
@@ -30,7 +36,11 @@ import { notFound, redirect, permanentRedirect } from 'next/navigation'
 
 import { compileDocumentation } from './mdx'
 
-export { createRdxProject, getProjectDocsPaths } from '@lexibase/rdx-core'
+export {
+  createRdxProject,
+  getProjectDocsPaths,
+  getLocalizedProject,
+} from '@lexibase/rdx-core'
 export { getSearchResponse, getSearchSources } from './search'
 export { getSourceRobots, getRdxRobots, getRdxSitemap } from './indexing'
 export {
@@ -97,9 +107,7 @@ function RdxHeader({
             : edition.badge === 'Archived'
               ? 'archived'
               : 'version',
-        href: ['/docs', edition.routePrefix, destination]
-          .filter(Boolean)
-          .join('/'),
+        href: getDocsHref(project, edition, destination),
       }
     })
   const BrandLogo = config.navbar?.logo ?? Logo
@@ -110,7 +118,7 @@ function RdxHeader({
       search={
         config.search ? (
           <DocsSearch
-            indexUrl={`/rdx-search/${encodeURIComponent(source.routePrefix || '_')}`}
+            indexUrl={`${project.locale ? `/${project.locale.path}` : ''}/rdx-search/${encodeURIComponent(source.routePrefix || '_')}`}
             version={
               source.id === 'current'
                 ? messages.current
@@ -121,8 +129,24 @@ function RdxHeader({
       }
       siteTitle={config.metadata.applicationName}
       logo={<BrandLogo className="size-5" />}
-      homeHref={config.homepage?.enabled ? '/' : '/docs'}
-      docsHref={['/docs', source.routePrefix].filter(Boolean).join('/')}
+      homeHref={config.homepage?.enabled ? '/' : getDocsHref(project)}
+      docsHref={getDocsHref(project, source)}
+      languageMenu={
+        project.localization ? (
+          <LanguageDropdown
+            lang={config.lang}
+            current={project.locale?.code ?? project.localization.defaultLocale}
+            options={project.localization.locales.map((locale) => {
+              const localized = getLocalizedProject(project, locale.path)
+              return {
+                code: locale.code,
+                label: locale.label,
+                href: getDocsHref(localized, localized.sources[0], currentSlug),
+              }
+            })}
+          />
+        ) : undefined
+      }
       versionMenu={
         project.sources.length > 1 ? (
           <VersionDropdown options={options} currentId={source.id} />
@@ -136,7 +160,7 @@ function RdxHeader({
 
 export function HomePage({ project }: { project: RdxProject }) {
   const { config } = project
-  if (!config.homepage?.enabled) redirect('/docs')
+  if (!config.homepage?.enabled) redirect(getDocsHref(project))
   const homepage = config.homepage
   const CustomHome = homepage.component
   const BrandLogo = config.navbar?.logo ?? Logo
@@ -166,6 +190,24 @@ export function HomePage({ project }: { project: RdxProject }) {
 }
 
 export function NotFoundPage({ project }: { project: RdxProject }) {
+  if (project.localization) {
+    const { config, localization } = project
+    const BrandLogo = config.navbar?.logo ?? Logo
+    return (
+      <LocalizedNotFound
+        locales={localization.locales}
+        defaultLocale={localization.defaultLocale}
+        homepage={!!config.homepage?.enabled}
+        brand={{
+          title: config.navbar?.title,
+          siteTitle: config.metadata.applicationName,
+          github: config.navbar?.actions?.github,
+          showToggleMode: config.navbar?.actions?.showToggleMode,
+          logo: <BrandLogo className="size-5" />,
+        }}
+      />
+    )
+  }
   return (
     <>
       <RdxHeader project={project} />
@@ -181,6 +223,8 @@ export async function DocsPage({
   slug?: string[]
   project: RdxProject
 }) {
+  if (project.localization && !project.locale)
+    permanentRedirect(getDocsHref(project, project.sources[0], slug?.join('/')))
   const messages = getMessages(project.config.lang)
   const {
     source,
@@ -207,14 +251,32 @@ export async function DocsPage({
       </>
     )
   if (!document) notFound()
+  const fallback = isFallbackPage(project, source, document.sourcePath)
+  const primaryLocale = project.localization?.locales.find(
+    (locale) => locale.code === project.localization!.defaultLocale
+  )
+  const originalProject =
+    fallback && primaryLocale
+      ? getLocalizedProject(project, primaryLocale.path)
+      : project
+  const contentSource = originalProject.sources.find(
+    (entry) => entry.id === source.id
+  )!
+  const contentOptions = getSourceOptions(originalProject, contentSource)
+  const contentCategories = fallback
+    ? resolveDocsRoute(originalProject, slug).categories
+    : categories
+  const contentLanguage = fallback ? primaryLocale!.code : project.config.lang
   const { content } = await compileDocumentation(
     document.content,
     getMdxComponents(project.config.lang),
     {
-      sourceRoot: getSourceOptions(project, source).docsDir,
+      sourceRoot: contentOptions.docsDir,
       sourcePath: document.sourcePath,
       routePrefix: source.routePrefix,
-      documents: categories.flatMap((category) => category.pages),
+      basePath: contentSource.basePath,
+      virtualPaths: !!contentOptions.fallbackDocsDir,
+      documents: contentCategories.flatMap((category) => category.pages),
     }
   )
   const title =
@@ -225,8 +287,7 @@ export async function DocsPage({
     typeof document.frontmatter.description === 'string'
       ? document.frontmatter.description
       : null
-  const hrefFor = (pageSlug: string) =>
-    ['/docs', source.routePrefix, pageSlug].filter(Boolean).join('/')
+  const hrefFor = (pageSlug: string) => getDocsHref(project, source, pageSlug)
   const sidebarCategories = categories.map((category) => ({
     title: category.title,
     links: category.pages.map((page) => ({
@@ -263,9 +324,35 @@ export async function DocsPage({
             >
               <main
                 id="rdx-main"
+                lang={contentLanguage}
                 tabIndex={-1}
                 className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1 outline-none"
               >
+                {fallback && (
+                  <Callout
+                    lang={project.config.lang}
+                    variant="note"
+                    title={messages.translationUnavailable}
+                    data-rdx-translation-fallback
+                  >
+                    <p>
+                      {formatMessage(messages.translationFallback, {
+                        requested: project.locale!.label,
+                        original: primaryLocale!.label,
+                      })}
+                    </p>
+                    <Button
+                      variant="link"
+                      href={getDocsHref(
+                        originalProject,
+                        contentSource,
+                        currentSlug
+                      )}
+                    >
+                      {messages.viewOriginal}
+                    </Button>
+                  </Callout>
+                )}
                 <header className="mb-6">
                   {source.badge && (
                     <p className="text-sm text-muted-foreground mb-4">

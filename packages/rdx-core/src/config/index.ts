@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs'
 
 import { validateMetadata } from './metadata.js'
 import { RdxConfigError } from './error.js'
+import { resolveLocalization } from './localization'
 
 import type {
   RDXConfig,
@@ -272,6 +273,7 @@ export async function createRdxProject(
   ]
   const commands: RdxPluginCommand[] = []
   const runtimeFiles = new Set<string>()
+  let localization: RdxProject['localization']
   const commandNames = new Set([
     'dev',
     'build',
@@ -310,6 +312,16 @@ export async function createRdxProject(
     }
     if (result === undefined) continue
     const contribution = object(result, `plugin "${plugin.name}" setup result`)
+    if (contribution.localization !== undefined) {
+      if (localization)
+        throw new RdxConfigError('Only one plugin may declare localization.')
+      localization = resolveLocalization(
+        contribution.localization,
+        config.lang,
+        rootDir,
+        command
+      )
+    }
     if (contribution.runtimeFiles !== undefined) {
       if (!Array.isArray(contribution.runtimeFiles))
         throw new RdxConfigError(
@@ -329,6 +341,10 @@ export async function createRdxProject(
       )
     for (const value of contribution.sources) {
       const source = object(value, `plugin "${plugin.name}" content source`)
+      if ('basePath' in source || 'fallbackDocsDir' in source)
+        throw new RdxConfigError(
+          'Content source basePath and fallbackDocsDir are reserved for internal locale views.'
+        )
       const id = text(source.id, 'content source id')
       const prefix = text(
         source.routePrefix,
@@ -393,5 +409,19 @@ export async function createRdxProject(
         `content source ${source.id}.redirectTo must reference a canonical source with the same docsDir.`
       )
   }
-  return { rootDir, config, sources, commands, runtimeFiles: [...runtimeFiles] }
+  if (
+    localization &&
+    (sources.length > 1 || commands.some((entry) => entry.name === 'version'))
+  )
+    throw new RdxConfigError(
+      'Multilingual documentation currently supports unversioned projects only. Do not configure localization and versioning together.'
+    )
+  return {
+    rootDir,
+    config,
+    sources,
+    commands,
+    runtimeFiles: [...runtimeFiles],
+    ...(localization ? { localization } : {}),
+  }
 }

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add the optional multilingual content plugin for unversioned projects:
+  language-prefixed routes, a shared Base UI selector, primary-page fallback
+  notices, translated navigation, isolated search and localized metadata.
+  Keep existing projects unchanged without plugin activation. Validate locale
+  declarations, translated counterparts and localized production builds.
+
 - Run documentation checks automatically before `rdx build` prepares the runtime
   or starts Next.js. Stop builds on broken pages, anchors, local assets or syntax
   errors. Apply the same validation to the development website's build.

@@ -5,7 +5,12 @@ import type {
   RdxProject,
   RDXConfig,
 } from '@lexibase/rdx-types'
-import { getDocsIndex, getSourceOptions } from '@lexibase/rdx-core'
+import {
+  getDocsIndex,
+  getSourceOptions,
+  getContentSources,
+  isFallbackPage,
+} from '@lexibase/rdx-core'
 
 /** Published editions replace live development content in search results. */
 export function getSourceRobots(project: RdxProject, source: RdxContentSource) {
@@ -41,7 +46,7 @@ export function getRdxSitemap(
   {
     documentPath = (source, page) =>
       [
-        '/docs',
+        source.basePath ?? '/docs',
         source.routePrefix,
         page.slug.split('/').map(encodeURIComponent).join('/'),
       ]
@@ -55,10 +60,11 @@ export function getRdxSitemap(
   if (!base) return []
   const urls = new Set<string>()
   if (project.config.homepage?.enabled) urls.add(new URL('/', base).href)
-  for (const source of project.sources) {
+  for (const source of getContentSources(project)) {
     if (!getSourceRobots(project, source).index) continue
     for (const category of getDocsIndex(getSourceOptions(project, source))) {
       for (const page of category.pages) {
+        if (isFallbackPage(project, source, page.sourcePath)) continue
         urls.add(new URL(documentPath(source, page), base).href)
       }
     }

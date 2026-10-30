@@ -1,4 +1,9 @@
-import { getDocsIndex, getDocument, getSourceOptions } from '@lexibase/rdx-core'
+import {
+  getDocsIndex,
+  getDocument,
+  getSourceOptions,
+  getDocsHref,
+} from '@lexibase/rdx-core'
 import { buildSearchIndex } from '@lexibase/rdx-core/search'
 import type { RdxProject } from '@lexibase/rdx-types'
 
@@ -19,19 +24,15 @@ export function getSearchResponse(project: RdxProject, key: string) {
       entry.redirectTo === undefined && (entry.routePrefix || '_') === key
   )
   if (!source) return new Response(null, { status: 404, headers })
-  const options = getSourceOptions(project, source)
+  // Index only authored translations, never fallback bodies from another language.
+  const { docsDir } = getSourceOptions(project, source)
+  const options = { docsDir }
   const documents = getDocsIndex(options).flatMap((category) =>
     category.pages.map((page) => ({
       title: page.title,
       description: page.description,
       category: category.title,
-      href: [
-        '/docs',
-        source.routePrefix,
-        page.slug.split('/').map(encodeURIComponent).join('/'),
-      ]
-        .filter(Boolean)
-        .join('/'),
+      href: getDocsHref(project, source, page.slug),
       content: getDocument(page.slug, options)?.content ?? '',
     }))
   )

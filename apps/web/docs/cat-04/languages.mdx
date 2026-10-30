@@ -1,0 +1,107 @@
+---
+title: Languages
+description: Offer translated documentation with an optional content-language plugin.
+link_position: 8
+---
+
+The optional `@lexibase/rdx-i18n` plugin adds content languages and a language
+selector to the navbar. Authors supply the translations as Markdown files.
+This plugin supports documentation without versioning.
+
+## Configure languages
+
+Import the plugin in `rdx.config.ts` and add it to `plugins`. Keep the other
+settings in your configuration:
+
+```ts title="rdx.config.ts"
+import { defineConfig } from '@lexibase/rdx'
+import { i18n } from '@lexibase/rdx-i18n'
+
+export default defineConfig({
+  metadata: { applicationName: 'My documentation' },
+  lang: 'en',
+  plugins: [
+    i18n({
+      locales: [
+        { code: 'en', label: 'English' },
+        { code: 'pt-BR', label: 'Português (Brasil)', folder: 'ptbr' },
+        { code: 'es-ES', label: 'Español' },
+      ],
+    }),
+  ],
+})
+```
+
+`lang` identifies the primary language. Its entry belongs in the language list
+without a folder setting. Other entries can specify a folder alias; by default,
+the folder is the lower-case language tag. Labels are displayed as written.
+
+## Organize translations
+
+Keep primary content in `docs/`. Create `locale/<folder>/docs/` for every secondary
+language, matching the relative paths of the original pages:
+
+```folder
+docs/
+  guides/
+    installation.mdx
+locale/
+  ptbr/
+    docs/
+      guides/
+        installation.mdx
+  es-es/
+    docs/
+      guides/
+        installation.mdx
+```
+
+Translate the title, description, headings and body. Use the same relative filename
+as the primary page. Translate category labels with `_category.json`; categories
+and pages keep the primary tree's ordering. Store shared images and downloads in
+root `public/`.
+
+The examples above have English as the primary language. When English is a
+secondary language, its content belongs in `locale/en/docs/` instead.
+
+## Navigate between languages
+
+The selector preserves the page when changing languages. Language tags prefix
+the documentation URL:
+
+- `/en/docs/guides/installation`
+- `/pt-br/docs/guides/installation`
+- `/es-es/docs/guides/installation`
+
+The `ptbr` folder alias still produces the `pt-br` language prefix. Existing
+unprefixed documentation links redirect to the primary language.
+
+Restart the development server after enabling, disabling or changing configured
+languages so RDX can regenerate the route structure.
+
+Custom homepages stay at `/`. Their Docs action opens the primary language.
+Search runs in the selected language and indexes the pages authored in it.
+
+## Missing translations
+
+When a translation is absent, RDX displays the original page at the selected
+language URL, with a Callout explaining which language you are reading and a
+link to the original. It does not copy or translate files automatically.
+
+Links inside that original content retain their original language so section
+anchors keep working. Sidebar and previous/next navigation stay in the selected
+language. A page absent from both trees returns 404.
+
+Fallback copies are excluded from the sitemap and marked `noindex, follow`.
+With `metadata.metadataBase` configured, their canonical URL points to the
+original page. Actual translations have their own metadata and language alternates.
+
+## Validate content
+
+[`rdx check`](../cat-03/checking.mdx) checks the authored pages in every language,
+including links, sections and local assets. A translated page without a primary
+counterpart is reported as an error. Missing translations are allowed.
+
+The `lang` setting also selects built-in interface messages. English and Brazilian
+Portuguese have interface catalogs; other content languages use English interface
+messages. Your translated documents and language labels remain as written.

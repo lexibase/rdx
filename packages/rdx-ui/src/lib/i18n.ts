@@ -1,5 +1,10 @@
 /** Shared labels only: document content and author-provided names stay untouched. */
 const en = {
+  documentationLanguage: 'Documentation language',
+  translationUnavailable: 'Translation unavailable',
+  translationFallback:
+    'This page is not available in {requested}. You are reading the {original} version.',
+  viewOriginal: 'View the original page',
   keyboardJoiner: ' plus ',
   keyboardControl: 'Control',
   keyboardShift: 'Shift',
@@ -93,6 +98,11 @@ export type InterfaceMessages = { [Key in keyof typeof en]: string }
 export type InterfaceLocale = 'en' | 'pt-BR'
 
 const ptBR = {
+  documentationLanguage: 'Idioma da documentação',
+  translationUnavailable: 'Tradução indisponível',
+  translationFallback:
+    'Esta página não está disponível em {requested}. Você está lendo a versão em {original}.',
+  viewOriginal: 'Ver a página original',
   keyboardJoiner: ' mais ',
   keyboardControl: 'Control',
   keyboardShift: 'Shift',
