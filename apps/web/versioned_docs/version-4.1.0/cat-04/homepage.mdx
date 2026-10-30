@@ -1,0 +1,79 @@
+---
+title: Homepage
+description: Enable the built-in landing page or bring your own React component.
+link_position: 1
+---
+
+## Enable the homepage
+
+By default, `/` redirects to `/docs`. Enable the minimal logo-and-name homepage:
+
+```ts
+homepage: {
+  enabled: true,
+}
+```
+
+This is a configuration fragment inside `defineConfig`. The built-in homepage
+uses `metadata.applicationName` unless you give it a specific title.
+Its logo follows `navbar.logo`. See [Custom logo](./custom-logo.mdx) to supply
+your own SVG component.
+
+## Add a description and links
+
+```ts
+homepage: {
+  enabled: true,
+  title: 'Build with our tools',
+  description: 'Guides, examples, and reference in one place.',
+  buttons: [
+    { label: 'Get started', href: '/docs/init/intro' },
+    { label: 'GitHub', href: 'https://github.com/example/project' },
+  ],
+}
+```
+
+Descriptions and buttons appear only when configured. The first button is primary.
+URLs must be root-relative or HTTP(S). Adjust the documentation link to match
+your own page paths.
+
+## Create components/home.tsx
+
+Create `components/home.tsx` inside your project-root `components/` folder:
+
+```tsx
+// components/home.tsx
+import { Home } from '@lexibase/rdx/ui/components/home'
+
+export default function MyHome() {
+  return (
+    <Home
+      title="My project"
+      description="Everything you need to get started."
+      buttons={[{ label: 'Read the docs', href: '/docs/init/intro' }]}
+    />
+  )
+}
+```
+
+Then import the component into your configuration:
+
+```ts
+import { defineConfig } from '@lexibase/rdx'
+import MyHome from './components/home'
+
+export default defineConfig({
+  metadata: { applicationName: 'My project' },
+  homepage: {
+    enabled: true,
+    component: MyHome,
+  },
+})
+```
+
+Pass the component itself, not JSX or a string path. The navbar stays shared;
+your component owns the page body. Built-in homepage title, description, and
+buttons are not injected into a custom component.
+
+React source files can use React expressions normally. The restrictions on
+JavaScript expressions apply to documentation MDX, not your `components/home.tsx`.

@@ -32,9 +32,16 @@ Optional plugins remain separate; updating the framework does not install them.
 Remove `metadata.robots` from `rdx.config.ts`. RDX 4 owns indexing directives and
 generates sitemap.xml and robots.txt using `metadata.metadataBase`, the public
 site URL. Markdown and custom React imports remain compatible. The framework
-selects runtime 4.0 and UI 3.2.1; existing Next.js, React and Node.js requirements
+selects runtime 4.1 and UI 3.3.0; existing Next.js, React and Node.js requirements
 remain unchanged. If versioning is installed, update the optional plugin to
-1.2.1 or newer. Run `pnpm rdx check`, build and preview before deploying.
+1.3.0 or newer. Run `pnpm rdx check`, build and preview before deploying.
+
+## Optional content languages
+
+RDX 4.1 supports `pnpm rdx add i18n` to install and configure multilingual
+documentation. The command uses the primary `lang`, asks for additional languages
+and prepares `locale/<folder>/docs/`. Versioning remains a separate plugin;
+version 1.3.0 captures all configured language trees in one snapshot operation.
 
 ## Upgrading from 2.x
 

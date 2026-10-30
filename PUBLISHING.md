@@ -34,9 +34,47 @@ release PR.
 This workflow supersedes the former packages-first, separate-documentation-PR
 process and takes precedence over the historical checklists below.
 
-## Prepared grouped release: RDX 4.0.0
+## Prepared grouped release: RDX 4.1.0
 
-This is the current preparation plan. Publish all seven packages after the
+This minor framework release adds optional multilingual documentation and automatic
+build validation without changing the single-language project structure.
+Publish the following packages after merging the tested release PR:
+
+| Package                  | Version |
+| ------------------------ | ------- |
+| @lexibase/rdx-types      | 2.1.0   |
+| @lexibase/rdx-core       | 2.1.0   |
+| @lexibase/rdx-ui         | 3.3.0   |
+| @lexibase/rdx-versioning | 1.3.0   |
+| @lexibase/rdx-i18n       | 1.0.0   |
+| @lexibase/rdx-next       | 4.1.0   |
+| @lexibase/rdx            | 4.1.0   |
+| @lexibase/create-rdx     | 4.1.0   |
+
+The adapter's UI peer floor is ^3.3.0: earlier UI releases do not expose all
+language-selector and localized-404 modules used by this runtime. Workspace
+dependencies stay local; `pnpm pack` resolves their published versions.
+
+```sh
+pnpm --filter @lexibase/rdx-types publish --tag latest --access public
+pnpm --filter @lexibase/rdx-core publish --tag latest --access public
+pnpm --filter @lexibase/rdx-ui publish --tag latest --access public
+pnpm --filter @lexibase/rdx-versioning publish --tag latest --access public
+pnpm --filter @lexibase/rdx-i18n publish --tag latest --access public
+pnpm --filter @lexibase/rdx-next publish --tag latest --access public
+pnpm --filter @lexibase/rdx publish --tag latest --access public
+pnpm --filter @lexibase/create-rdx publish --tag latest --access public
+```
+
+Verify the exact versions and `latest` tags in the registry, then create a fresh
+project and run `rdx add i18n`. Existing projects update `@lexibase/rdx@latest`;
+existing versioning users also update `@lexibase/rdx-versioning@latest` to capture
+all configured languages together. The new 4.1.0 documentation snapshot ships
+in this same PR; 4.0.0 routes redirect to 4.1.0 and Canary stays independent.
+
+## Historical preparation: RDX 4.0.0
+
+This records the previous preparation plan. Publish all seven packages after the
 release PR is merged and tested. The major change is removal of metadata.robots;
 existing configurations must remove that field. Indexing is managed by RDX.
 Sitemap/robots generation and rdx check are included in the same release.

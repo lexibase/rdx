@@ -1,6 +1,6 @@
 {
   "name": "@lexibase/rdx-types",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "license": "MIT",
   "description": "Shared TypeScript types for RDX documentation projects.",
   "types": "./dist/index.d.ts",

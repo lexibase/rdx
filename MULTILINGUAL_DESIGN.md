@@ -1,7 +1,7 @@
 # Optional multilingual documentation
 
-Status: multilingual content and versioned snapshots are implemented in a private
-workspace plugin. Language-prefixed routes, selectors, fallback, isolated search
+Status: multilingual content and versioned snapshots are prepared for RDX 4.1.0,
+with @lexibase/rdx-i18n 1.0.0. Language-prefixed routes, selectors, fallback, isolated search
 and metadata share frozen per-edition inventories. Assisted installation uses
 `rdx add i18n`; the project creator asks only for the project name. This is an internal design record,
 not registry installation instructions.
@@ -272,11 +272,9 @@ the website adapter.
 6. Validate packed projects outside/inside monorepos and serverless deployment,
    then write public guides and prepare a grouped release when requested.
 
-At release preparation, raise the runtime's minimum compatible UI version to
-the release containing the language selector and localized 404 modules. The
-runtime imports these shared modules; its former UI peer floor cannot describe
-the new module requirements. Keep the new plugin private until its compatible
-package matrix and supported scope are ready for publication.
+Runtime 4.1 uses the minimum compatible UI version ^3.3.0, containing the language
+selector and localized 404 modules. The release matrix and public plugin manifest
+are prepared together; registry publication and tag verification follow the merge.
 
 Required regression cases include: no-plugin projects; each plugin alone; both
 plugin orders; translated/missing/orphan pages; translated heading anchors;
@@ -289,6 +287,6 @@ selectors; public assets; custom homepage/logo imports; and production tracing.
 Do not alter published snapshots, user projects or the current release as part
 of this work. Snapshot contributions now support both plugins together;
 assisted installation is available locally under the contracts above. The
-plugin remains private until grouped release preparation. Packed installations
+plugin is prepared for the grouped release. Packed installations
 are validated with `pnpm test:release --i18n` in standalone and pnpm monorepo
 projects, including activation, contributions, snapshots and production tracing.

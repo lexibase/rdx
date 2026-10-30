@@ -6,9 +6,8 @@ language tags. Use `--locales en,es-ES` noninteractively. The command prepares
 and prepares the runtime. Later languages are added to `locales` and their
 translation directories without reinstalling the plugin.
 
-Optional multilingual content for RDX. This private workspace package is in its
-first implementation stage; do not publish it independently of compatible
-framework packages.
+Optional multilingual content for RDX 4.1 and later. Activate it with the
+assisted installer or configure it alongside compatible framework packages.
 
 Set the optional `contributionUrl` next to `locales` to expose a community
 translation link in the language menu and the missing-translation Callout:

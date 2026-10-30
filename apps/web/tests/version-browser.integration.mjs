@@ -215,7 +215,7 @@ test(
           await page.reload()
           await page
             .getByRole('button', {
-              name: triggerLabel(versionLabel('4.0.0')),
+              name: triggerLabel(versionLabel('4.1.0')),
             })
             .click()
           await page.getByRole('menu').waitFor()

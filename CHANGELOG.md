@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.1.0 — Prepared
+
 - Add optional i18n contribution links through `contributionUrl`: a shared
   language-menu action and a missing-translation Callout action, with localized
   labels and accessible external-link behavior. Keep the current contribution
@@ -20,7 +22,7 @@
   same-major language redirects, and keep search and fallback within the selected
   edition. Archive and restore retain every language together.
 
-- Add the optional multilingual content plugin for unversioned projects:
+- Add the optional multilingual content plugin:
   language-prefixed routes, a shared Base UI selector, primary-page fallback
   notices, translated navigation, isolated search and localized metadata.
   Keep existing projects unchanged without plugin activation. Validate locale
