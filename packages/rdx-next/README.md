@@ -19,6 +19,8 @@ internal `.rdx` application and run Next.js.
 Run `pnpm rdx check` to validate static documentation links, heading fragments
 and local files in public/ before deployment. It reports source locations and
 exits nonzero for problems, without preparing the runtime or rendering documents.
+`rdx build` runs the same check automatically before runtime preparation and
+Next.js compilation, and stops if problems are found.
 
 Run `pnpm rdx add versioning` (or `npm exec -- rdx add versioning`) from a
 documentation project to install and activate the official optional plugin.

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Run documentation checks automatically before `rdx build` prepares the runtime
+  or starts Next.js. Stop builds on broken pages, anchors, local assets or syntax
+  errors. Apply the same validation to the development website's build.
+
 ## 4.0.0 — Prepared
 
 - Keep the existing UI visuals at 3.2.1 and versioning commands at 1.2.1;

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "pnpm run docs:prepare && next dev",
-    "build": "pnpm run docs:prepare && next build",
+    "build": "pnpm run docs:check && pnpm run docs:prepare && next build",
     "start": "next start",
     "lint": "eslint . --max-warnings 0",
     "check-types": "next typegen && tsc --noEmit",
