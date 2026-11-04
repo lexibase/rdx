@@ -9,6 +9,8 @@ import prompts from 'prompts'
 
 import { parseArguments, validateProjectName } from './options.mjs'
 import { normalizePnpmRdxApprovals } from './pnpm-policy.mjs'
+import { installedRuntime } from './installed-runtime.mjs'
+import { runStep } from './progress.mjs'
 
 function getPackageManager() {
   const userAgent = process.env.npm_config_user_agent || ''
@@ -19,7 +21,7 @@ function getPackageManager() {
   return 'npm'
 }
 
-function run(command, args, cwd) {
+function run(command, args, cwd, label = `${command} ${args.join(' ')}`) {
   return new Promise((resolve, reject) => {
     // Reuse the Node entry point when available. Otherwise cross-spawn
     // resolves Windows command shims and escapes their arguments.
@@ -33,12 +35,13 @@ function run(command, args, cwd) {
     const child = spawn(executable, commandArgs, {
       cwd,
       stdio: 'inherit',
+      windowsHide: true,
     })
 
     child.on('error', reject)
     child.on('exit', (code) => {
       if (code === 0) resolve()
-      else reject(new Error(`${command} ${args.join(' ')} exited with ${code}`))
+      else reject(new Error(`${label} exited with ${code}`))
     })
   })
 }
@@ -93,73 +96,92 @@ async function main() {
   if (relativeTarget.startsWith('..') || path.isAbsolute(relativeTarget)) {
     throw new Error('Project must be created inside the current directory.')
   }
-  try {
-    await fs.mkdir(targetDir)
-  } catch (error) {
-    if (error.code === 'EEXIST')
-      throw new Error(
-        `The path "${projectName}" already exists. Choose another name; existing files are never overwritten.`
+  await runStep(
+    `[1/${skipInstall ? 1 : 3}] Creating project files...`,
+    async () => {
+      try {
+        await fs.mkdir(targetDir)
+      } catch (error) {
+        if (error.code === 'EEXIST')
+          throw new Error(
+            `The path "${projectName}" already exists. Choose another name; existing files are never overwritten.`
+          )
+        throw error
+      }
+
+      const currentFile = fileURLToPath(import.meta.url)
+      const templateDir = path.resolve(
+        path.dirname(currentFile),
+        '../templates/default'
       )
-    throw error
-  }
+      await fs.copy(templateDir, targetDir, {
+        errorOnExist: true,
+        overwrite: false,
+      })
+      await fs.ensureDir(path.join(targetDir, 'public'))
 
-  const currentFile = fileURLToPath(import.meta.url)
-  const templateDir = path.resolve(
-    path.dirname(currentFile),
-    '../templates/default'
-  )
-  await fs.copy(templateDir, targetDir, {
-    errorOnExist: true,
-    overwrite: false,
-  })
-  await fs.ensureDir(path.join(targetDir, 'public'))
+      const configPath = path.join(targetDir, 'rdx.config.ts')
+      const config = await fs.readFile(configPath, 'utf8')
+      await fs.writeFile(
+        configPath,
+        config.replace(
+          'since: new Date().getFullYear(),',
+          `since: ${new Date().getFullYear()},`
+        )
+      )
 
-  const configPath = path.join(targetDir, 'rdx.config.ts')
-  const config = await fs.readFile(configPath, 'utf8')
-  await fs.writeFile(
-    configPath,
-    config.replace(
-      'since: new Date().getFullYear(),',
-      `since: ${new Date().getFullYear()},`
-    )
-  )
+      const gitignoreTemplatePath = path.join(targetDir, 'gitignore.template')
+      await fs.move(gitignoreTemplatePath, path.join(targetDir, '.gitignore'), {
+        overwrite: true,
+      })
+      await fs.remove(path.join(targetDir, 'gitignore'))
+      await fs.remove(path.join(targetDir, '.npmignore'))
 
-  const gitignoreTemplatePath = path.join(targetDir, 'gitignore.template')
-  await fs.move(gitignoreTemplatePath, path.join(targetDir, '.gitignore'), {
-    overwrite: true,
-  })
-  await fs.remove(path.join(targetDir, 'gitignore'))
-  await fs.remove(path.join(targetDir, '.npmignore'))
+      const pkgPath = path.join(targetDir, 'package.json')
+      const pkg = await fs.readJson(pkgPath)
+      pkg.name = projectName.toLowerCase()
+      await fs.writeJson(pkgPath, pkg, { spaces: 2 })
 
-  const pkgPath = path.join(targetDir, 'package.json')
-  const pkg = await fs.readJson(pkgPath)
-  pkg.name = projectName.toLowerCase()
-  await fs.writeJson(pkgPath, pkg, { spaces: 2 })
-
-  const readmePath = path.join(targetDir, 'README.md')
-  const readme = await fs.readFile(readmePath, 'utf8')
-  await fs.writeFile(
-    readmePath,
-    readme
-      .replaceAll('{{RDX_PROJECT_NAME}}', projectName)
-      .replaceAll('__RDX_PROJECT_NAME__', projectName)
+      const readmePath = path.join(targetDir, 'README.md')
+      const readme = await fs.readFile(readmePath, 'utf8')
+      await fs.writeFile(
+        readmePath,
+        readme
+          .replaceAll('{{RDX_PROJECT_NAME}}', projectName)
+          .replaceAll('__RDX_PROJECT_NAME__', projectName)
+      )
+    }
   )
 
   const packageManager = getPackageManager()
 
   if (!skipInstall) {
     try {
-      console.log(`\nInstalling dependencies with ${packageManager}...\n`)
-      if (packageManager === 'pnpm')
-        await normalizePnpmRdxApprovals(targetDir)
-      await run(packageManager, ['install'], targetDir)
-      if (packageManager === 'pnpm')
-        await normalizePnpmRdxApprovals(targetDir)
-      const prepareArgs =
-        packageManager === 'npm'
-          ? ['exec', '--', 'rdx', 'prepare']
-          : ['exec', 'rdx', 'prepare']
-      await run(packageManager, prepareArgs, targetDir)
+      await runStep(
+        `[2/3] Installing dependencies with ${packageManager}...`,
+        async () => {
+          if (packageManager === 'pnpm')
+            await normalizePnpmRdxApprovals(targetDir)
+          await run(packageManager, ['install'], targetDir)
+          if (packageManager === 'pnpm')
+            await normalizePnpmRdxApprovals(targetDir)
+        }
+      )
+      await runStep('[3/3] Preparing RDX...', async () => {
+        if (packageManager === 'yarn') {
+          // Yarn provides the project's Plug'n'Play loader when needed.
+          await run(packageManager, ['exec', 'rdx', 'prepare'], targetDir)
+        } else {
+          // Avoid another package-manager startup and automatic install check.
+          const executable = await installedRuntime(targetDir)
+          await run(
+            process.execPath,
+            [executable, 'prepare'],
+            targetDir,
+            'rdx prepare'
+          )
+        }
+      })
     } catch (error) {
       const runner = packageManager === 'npm' ? 'npm run' : packageManager
       throw new Error(

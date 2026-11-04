@@ -112,12 +112,13 @@ test('skip-install does not edit workspace approvals and invalid YAML is not ove
   assert.equal(await readFile(filename, 'utf8'), invalid)
 })
 
-test('CLI handles existing duplicates and newly appended approvals before pnpm prepare rechecks the policy', async (t) => {
+test('CLI consolidates existing approvals before install and newly appended approvals before direct preparation', async (t) => {
   const { root, filename } = await fixture(
     t,
     "packages: ['apps/*']\nminimumReleaseAgeExclude:\n  - '@lexibase/rdx-core@1.0.0'\n  - '@lexibase/rdx-core@1.0.1'\n"
   )
   const installer = path.join(root, 'pnpm-fixture.mjs')
+  const preparation = `import fs from 'node:fs';const text=fs.readFileSync(${JSON.stringify(filename)},'utf8');if(!text.includes('@lexibase/rdx-core@1.0.0 || 1.0.1 || 1.1.0'))process.exit(32)`
   await writeFile(
     installer,
     `
@@ -132,7 +133,11 @@ function allows(version) {
 if (process.argv.includes('install')) {
   if (!allows('1.0.1')) process.exit(31)
   fs.appendFileSync(file, "  - '@lexibase/rdx-core@1.1.0'\\n")
-} else if (!allows('1.1.0')) process.exit(32)
+  const directory = path.join(process.cwd(), 'node_modules/@lexibase/rdx')
+  fs.mkdirSync(directory, {recursive:true})
+  fs.writeFileSync(path.join(directory,'package.json'),JSON.stringify({name:'@lexibase/rdx',bin:{rdx:'rdx.mjs'},exports:{'./package.json':'./package.json'}}))
+  fs.writeFileSync(path.join(directory,'rdx.mjs'), ${JSON.stringify(preparation)})
+}
 `
   )
   const cli = fileURLToPath(new URL('../bin/index.js', import.meta.url))

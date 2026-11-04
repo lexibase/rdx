@@ -154,7 +154,15 @@ test('install and prepare failures preserve generated files and explain how to r
     const installer = path.join(root, `fail-${failAt}.mjs`)
     await writeFile(
       installer,
-      `if (process.argv.includes(${JSON.stringify(failAt)})) process.exit(17)`
+      `import fs from 'node:fs'
+import path from 'node:path'
+if (process.argv.includes('install')) {
+  if (${JSON.stringify(failAt)} === 'install') process.exit(17)
+  const directory = path.join(process.cwd(), 'node_modules/@lexibase/rdx')
+  fs.mkdirSync(directory, {recursive:true})
+  fs.writeFileSync(path.join(directory,'package.json'),JSON.stringify({name:'@lexibase/rdx',bin:{rdx:'rdx.mjs'},exports:{'./package.json':'./package.json'}}))
+  fs.writeFileSync(path.join(directory,'rdx.mjs'), 'process.exit(17)')
+}`
     )
     const name = `retry-${failAt}`
     const result = run(root, [name], {

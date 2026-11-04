@@ -37,6 +37,16 @@ The Yarn creator examples use `yarn dlx` (Yarn 2+).
 The prompt asks **What is your project named?** Enter a name such as `my-docs`.
 RDX creates that directory and installs its dependencies.
 
+The terminal reports three stages: creating project files, installing dependencies,
+and preparing the runtime. Each completed stage shows its elapsed time. Longer
+stages print an activity message every 15 seconds, alongside the package manager's
+own output and prompts. The first installation may need to download dependencies;
+subsequent installations can reuse the package manager's cache.
+
+In a monorepo, the package manager can also process workspace dependencies during
+installation. The printed stage timings help distinguish that work from RDX's
+runtime preparation.
+
 ## Run locally
 
 :::tabs
