@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 4.2.0 — Prepared
+
+- Ship Mermaid's complete official browser distribution inside the UI package,
+  preserving lazy diagram loading and license notices while reducing production
+  installation dependencies. Keep the shared shadcn/ui components and APIs.
+
 - Prepare new npm and pnpm projects directly through their installed RDX
   executable, avoiding a second package-manager startup and dependency preflight.
   Preserve Yarn's execution environment and existing pnpm approvals. Show timed
@@ -15,7 +21,7 @@
   document links, static checks, search, localized content, and version snapshots.
   Reject duplicate page routes across the two extensions.
 
-## 4.1.0 — Prepared
+## 4.1.0
 
 - Add optional i18n contribution links through `contributionUrl`: a shared
   language-menu action and a missing-translation Callout action, with localized

@@ -32,6 +32,30 @@ configuration and custom components are not replaced by this operation.
 Check the release notes for migrations and any required Next.js, React or Node.js
 updates. Those requirements are separate from updating RDX itself.
 
+## Update from RDX 4.1 to 4.2
+
+Update the main framework using the commands above. Existing documents,
+configuration and custom React components remain compatible.
+
+Pages can use `.md` or `.mdx`. Both formats support the built-in Markdown
+components; use `.mdx` when a page needs JSX or component imports. Keep one file
+per page route: `intro.md` and `intro.mdx` in the same folder share a route.
+
+Use a public image path such as `navbar.logo: '/images/logo.png'` or keep a
+React logo component. Store image files in `public/`; `rdx check` validates the
+configured logo alongside other local assets. See [Custom logo](../cat-04/custom-logo.mdx).
+
+If installed, also update the versioning plugin to 1.3.1 or newer and the i18n
+plugin to 1.0.1 or newer using the [plugin update commands](#optional-plugins).
+These releases recognize `.md` content in translated trees and version-route
+validation. Existing snapshots and language configuration remain usable.
+
+The next dev run or build refreshes the generated runtime. Mermaid diagrams
+keep their existing fence syntax and load locally from the UI package.
+
+Direct package integrations should use runtime 4.2 with UI 3.4 or newer within
+major 3, plus types/core 2.2. The main framework selects compatible packages.
+
 ## Update from RDX 4.0 to 4.1
 
 Update the main framework using the commands above. Single-language documentation
@@ -288,6 +312,8 @@ monorepo, this is usually the workspace-root file, shared by its applications.
 Plugins remain separate dependencies. Update an installed plugin when its release
 notes recommend a compatible update:
 
+### Versioning
+
 :::tabs
 
 ### pnpm
@@ -304,7 +330,25 @@ yarn add @lexibase/rdx-versioning@latest
 
 :::
 
-Updating RDX does not install or activate optional plugins.
+### Languages
+
+For projects with the i18n plugin installed:
+
+:::tabs
+
+### pnpm
+
+pnpm add @lexibase/rdx-i18n@latest
+
+### npm
+
+npm install @lexibase/rdx-i18n@latest
+
+### yarn
+
+yarn add @lexibase/rdx-i18n@latest
+
+:::
 
 ## Validate and deploy
 

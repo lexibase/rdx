@@ -34,7 +34,57 @@ release PR.
 This workflow supersedes the former packages-first, separate-documentation-PR
 process and takes precedence over the historical checklists below.
 
-## Prepared grouped release: RDX 4.1.0
+## Prepared grouped release: RDX 4.2.0
+
+This compatible minor release adds `.md` documentation and public image logos,
+improves creator progress and avoids repeated package-manager startup. The UI
+ships Mermaid's complete browser distribution with fewer production dependencies.
+
+| Package                  | Version |
+| ------------------------ | ------- |
+| @lexibase/rdx-types      | 2.2.0   |
+| @lexibase/rdx-core       | 2.2.0   |
+| @lexibase/rdx-ui         | 3.4.0   |
+| @lexibase/rdx-versioning | 1.3.1   |
+| @lexibase/rdx-i18n       | 1.0.1   |
+| @lexibase/rdx-next       | 4.2.0   |
+| @lexibase/rdx            | 4.2.0   |
+| @lexibase/create-rdx     | 4.2.0   |
+
+All eight packages changed or select the updated internal dependencies. Keep
+workspace dependencies local. The adapter requires UI ^3.4.0 for the new branding
+module; the main framework supplies it automatically. Optional plugins stay
+optional and receive compatible patches for Markdown content recognition.
+
+Before merging, run `pnpm check` and `pnpm test:release --install --i18n`.
+Validate the new creator, installed archive exports, framework updates, Markdown
+and MDX pages, image logos, diagrams, plain/versioned/multilingual builds and HTTP
+responses. Include the 4.2.0 snapshot and 4.1.0 redirect in this same release PR.
+
+After merging, publish sequentially in dependency order:
+
+```sh
+pnpm --filter @lexibase/rdx-types publish --tag latest --access public
+pnpm --filter @lexibase/rdx-core publish --tag latest --access public
+pnpm --filter @lexibase/rdx-ui publish --tag latest --access public
+pnpm --filter @lexibase/rdx-versioning publish --tag latest --access public
+pnpm --filter @lexibase/rdx-i18n publish --tag latest --access public
+pnpm --filter @lexibase/rdx-next publish --tag latest --access public
+pnpm --filter @lexibase/rdx publish --tag latest --access public
+pnpm --filter @lexibase/create-rdx publish --tag latest --access public
+```
+
+Confirm each exact version and its `latest` tag in the public registry before
+publishing its consumers. Use `npm view <package>@<version> version` and
+`npm view <package> dist-tags`. Then verify a fresh registry installation with
+`pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@latest docs-validation`.
+
+Existing projects update `@lexibase/rdx@latest`. Update versioning and i18n to the
+listed patches when installed. No file migration is required: authored content,
+configuration, components and public assets are retained. The next dev run or
+build refreshes `.rdx/`. See the 4.1-to-4.2 update guide for direct integrations.
+
+## Previous grouped release: RDX 4.1.0
 
 This minor framework release adds optional multilingual documentation and automatic
 build validation without changing the single-language project structure.

@@ -148,10 +148,7 @@ export async function verifyMultilingualArchives({
     await mkdir(path.join(project, 'locale/pt-br/docs/init'), {
       recursive: true,
     })
-    const translatedPath = path.join(
-      project,
-      'locale/pt-br/docs/init/intro.mdx'
-    )
+    const translatedPath = path.join(project, 'locale/pt-br/docs/init/intro.md')
     await writeFile(
       translatedPath,
       '---\ntitle: Introdução\n---\n\n## Olá\n\nPortuguesePublishedMarker\n'
@@ -161,7 +158,7 @@ export async function verifyMultilingualArchives({
     cli('version', '3.1.0')
     const snapshotPath = path.join(
       project,
-      'locale/pt-br/versioned_docs/version-3.1.0/init/intro.mdx'
+      'locale/pt-br/versioned_docs/version-3.1.0/init/intro.md'
     )
     const frozen = await readFile(snapshotPath, 'utf8')
     cli('archive', '3.1.0')
