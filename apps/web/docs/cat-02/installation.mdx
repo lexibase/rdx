@@ -38,9 +38,12 @@ The prompt asks **What is your project named?** Enter a name such as `my-docs`.
 RDX creates that directory and installs its dependencies.
 
 The terminal reports three stages: creating project files, installing dependencies,
-and preparing the runtime. Each completed stage shows its elapsed time. Longer
-stages print an activity message every 15 seconds, alongside the package manager's
-own output and prompts. The first installation may need to download dependencies;
+and preparing the runtime. Each completed stage shows its elapsed time. With pnpm,
+an activity indicator stays moving while a progress bar tracks package linking.
+The terminal shows cache and download counts; the bar starts filling once pnpm
+reports the package total. Warnings and errors remain visible. Non-interactive
+logs use periodic status lines, and npm/Yarn retain their package-manager output.
+The first installation may need to download dependencies;
 subsequent installations can reuse the package manager's cache.
 
 In a monorepo, the package manager can also process workspace dependencies during

@@ -11,6 +11,7 @@ import { parseArguments, validateProjectName } from './options.mjs'
 import { normalizePnpmRdxApprovals } from './pnpm-policy.mjs'
 import { installedRuntime } from './installed-runtime.mjs'
 import { runStep } from './progress.mjs'
+import { createPnpmProgress } from './pnpm-progress.mjs'
 
 function getPackageManager() {
   const userAgent = process.env.npm_config_user_agent || ''
@@ -32,14 +33,27 @@ function run(command, args, cwd, label = `${command} ${args.join(' ')}`) {
       /\.[cm]?js$/i.test(packageManagerEntry)
     const executable = useNodeEntry ? process.execPath : command
     const commandArgs = useNodeEntry ? [packageManagerEntry, ...args] : args
+    const progress =
+      command === 'pnpm' && args[0] === 'install'
+        ? createPnpmProgress()
+        : undefined
+    if (progress) commandArgs.push('--reporter=ndjson')
     const child = spawn(executable, commandArgs, {
       cwd,
-      stdio: 'inherit',
+      stdio: progress ? ['inherit', 'pipe', 'pipe'] : 'inherit',
       windowsHide: true,
     })
 
-    child.on('error', reject)
-    child.on('exit', (code) => {
+    if (progress) {
+      child.stdout.setEncoding('utf8').on('data', progress.stdout)
+      child.stderr.setEncoding('utf8').on('data', progress.stderr)
+    }
+    child.on('error', (error) => {
+      progress?.finish(false)
+      reject(error)
+    })
+    child.on('close', (code) => {
+      progress?.finish(code === 0)
       if (code === 0) resolve()
       else reject(new Error(`${label} exited with ${code}`))
     })
@@ -165,7 +179,8 @@ async function main() {
           await run(packageManager, ['install'], targetDir)
           if (packageManager === 'pnpm')
             await normalizePnpmRdxApprovals(targetDir)
-        }
+        },
+        { intervalMs: packageManager === 'pnpm' ? 0 : 15_000 }
       )
       await runStep('[3/3] Preparing RDX...', async () => {
         if (packageManager === 'yarn') {

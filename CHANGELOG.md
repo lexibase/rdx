@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Show pnpm installation progress through RDX's own terminal renderer: an activity
+  spinner, real package-linking progress, elapsed time, cache/download counts,
+  visible diagnostics and plain status lines in non-interactive logs.
+
 ## 4.2.0 — Prepared
 
 - Ship Mermaid's complete official browser distribution inside the UI package,
