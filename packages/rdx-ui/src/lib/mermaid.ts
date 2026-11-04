@@ -1,11 +1,12 @@
-type Mermaid = (typeof import('mermaid'))['default']
+type Mermaid =
+  (typeof import('../../dist/mermaid/mermaid.esm.min.mjs'))['default']
 
 let engine: Promise<Mermaid> | undefined
 let queue: Promise<unknown> = Promise.resolve()
 let serial = 0
 
 function loadMermaid() {
-  engine ??= import('mermaid')
+  engine ??= import('../../dist/mermaid/mermaid.esm.min.mjs')
     .then((module) => module.default)
     .catch((error: unknown) => {
       engine = undefined

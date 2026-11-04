@@ -59,6 +59,9 @@
     "check-types": {
       "dependsOn": ["^check-types"]
     },
+    "@lexibase/rdx-ui#check-types": {
+      "dependsOn": ["build", "^check-types"]
+    },
     "web#check-types": {
       "dependsOn": ["^check-types", "^build"]
     },
