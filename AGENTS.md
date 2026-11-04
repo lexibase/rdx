@@ -27,6 +27,8 @@
 
 ## Entrega
 
+- Prepare releases com `pnpm release:note`, `pnpm release:plan` e `pnpm release:prepare`. Revise a severidade semântica e as notas; deixe a atualização mecânica de versões, template, changelog e snapshot para o script. Execute localmente os testes focados nas mudanças. A CI executa `pnpm check` e os testes completos de instalação; não repita essa bateria localmente durante a preparação rotineira de releases, salvo para investigar uma falha específica ou por pedido explícito do usuário.
+
 - Valide as mudanças e forneça ao final a mensagem de conventional commit e os comandos para atualizar ou criar a PR.
 - O usuário faz commits, merges e publicações pelo terminal. Não os execute automaticamente sem autorização explícita para essas ações.
 - Não publique pacotes nem incremente versões a cada ajuste; as publicações são agrupadas quando solicitadas.

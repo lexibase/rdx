@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Automate release planning and preparation with Changesets, independent package
+  versions, template alignment, changelog promotion, publication checklists and
+  formatted documentation snapshots. Keep full release validation in CI and
+  preserve manual control of commits, tags and publication.
+
 ## 4.2.0 — Prepared
 
 - Ship Mermaid's complete official browser distribution inside the UI package,

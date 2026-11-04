@@ -15,6 +15,7 @@ import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 import { withProductionServer } from './production-server.mjs'
+import { assertCompatibleUi } from './prepare-release.mjs'
 
 // Test the publishable archives, not workspace source links. Nothing publishes.
 const root = fileURLToPath(new URL('../', import.meta.url))
@@ -866,7 +867,10 @@ for (const [name, release] of releases) {
   }
   if (name === '@lexibase/rdx-next') {
     assert.equal(packed.dependencies?.['@lexibase/rdx-ui'], undefined)
-    assert.equal(packed.peerDependencies['@lexibase/rdx-ui'], '^3.4.0')
+    assertCompatibleUi(
+      packed.peerDependencies['@lexibase/rdx-ui'],
+      releases.get('@lexibase/rdx-ui').manifest.version
+    )
   }
   if (name === '@lexibase/rdx-ui') {
     assert.equal(packed.dependencies?.mermaid, undefined)

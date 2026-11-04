@@ -29,10 +29,25 @@ The official CodeBlock root uses div props; pass wrapping and line-number option
 to `CodeBlockContent` and explicit clipboard values to `CodeBlockCopyButton`.
 `DialogContent` defaults to the official centered layout; set `className` for
 custom positioning/sizing and `showCloseButton` for the native close control.
-Runtime 4.2 requires UI ^3.4.0, including image/component branding across the
-navbar, homepage and localized 404 pages; the main package selects UI 3.4.0.
-Types/core 2.2 support `.md` and `.mdx` pages. Optional multilingual content uses
-@lexibase/rdx-i18n 1.0.1, and versioning uses 1.3.1. Types/core 2.0 remove
+The runtime declares its compatible UI range in `peerDependencies`; the main
+framework selects the tested runtime and UI packages. Current package versions:
+
+<!-- rdx:packages:start -->
+
+| Package                  | Version |
+| ------------------------ | ------- |
+| @lexibase/rdx-types      | 2.2.0   |
+| @lexibase/rdx-core       | 2.2.0   |
+| @lexibase/rdx-ui         | 3.4.0   |
+| @lexibase/rdx-versioning | 1.3.1   |
+| @lexibase/rdx-i18n       | 1.0.1   |
+| @lexibase/rdx-next       | 4.2.0   |
+| @lexibase/rdx            | 4.2.0   |
+| @lexibase/create-rdx     | 4.2.0   |
+
+<!-- rdx:packages:end -->
+
+Types/core 2.0 remove
 metadata.robots, now managed automatically. See the
 [4.0 migration guide](apps/web/docs/cat-05/updating.mdx#update-from-rdx-3x-to-40).
 
