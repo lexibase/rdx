@@ -35,6 +35,11 @@ if (process.argv[2] === 'install') {
   fs.mkdirSync(path.dirname(entry),{recursive:true})
   fs.writeFileSync(path.join(directory,'package.json'),JSON.stringify({name:'@lexibase/rdx',bin:{rdx:'bin/runtime entry.mjs'},exports:{'./package.json':'./package.json'}}))
   fs.writeFileSync(entry,${JSON.stringify(runtime)})
+  if (${JSON.stringify(manager)} === 'pnpm') {
+    console.log(JSON.stringify({name:'pnpm:stats',prefix:process.cwd(),added:1}))
+    console.log(JSON.stringify({name:'pnpm:progress',status:'imported',to:entry}))
+    console.log(JSON.stringify({name:'pnpm',level:'warn',message:'Visible installer warning'}))
+  }
 } else if (process.argv[2] === 'exec') {
   const child=spawnSync(process.execPath,[entry,'prepare'],{stdio:'inherit'})
   process.exit(child.status??1)
@@ -65,7 +70,9 @@ if (process.argv[2] === 'install') {
         .map((event) => event.args),
       manager === 'yarn'
         ? [['install'], ['exec', 'rdx', 'prepare']]
-        : [['install']]
+        : manager === 'pnpm'
+          ? [['install', '--reporter=ndjson']]
+          : [['install']]
     )
     assert.deepEqual(
       events.find((event) => event.kind === 'runtime'),
@@ -79,7 +86,42 @@ if (process.argv[2] === 'install') {
       assert.ok(result.stdout.includes(label))
     assert.equal((result.stdout.match(/Completed in/g) ?? []).length, 3)
     assert.match(result.stdout, /created successfully/)
+    if (manager === 'pnpm') {
+      assert.match(result.stdout, /Dependencies installed: 1 linked/)
+      assert.doesNotMatch(result.stdout, /"pnpm:stats"/)
+      assert.match(result.stderr, /Visible installer warning/)
+    }
   })
+
+test('pnpm fatal diagnostics without a trailing newline survive child closure and keep recovery instructions', async (t) => {
+  const root = await fixture(t)
+  const installer = path.join(root, 'failed installer.mjs')
+  await writeFile(
+    installer,
+    `process.stdout.write(JSON.stringify({name:'pnpm',level:'error',err:{code:'ERR_PNPM_FIXTURE',message:'Fixture install failed'}}));process.exitCode=17`
+  )
+  const result = spawnSync(process.execPath, [cli, 'docs'], {
+    cwd: root,
+    encoding: 'utf8',
+    timeout: 15000,
+    env: {
+      ...process.env,
+      npm_config_user_agent: 'pnpm/11.5.1',
+      npm_execpath: installer,
+    },
+  })
+  assert.ifError(result.error)
+  assert.equal(result.status, 1)
+  assert.match(result.stderr, /ERR_PNPM_FIXTURE/)
+  assert.match(result.stderr, /Fixture install failed/)
+  assert.match(result.stderr, /Project files were kept/)
+  assert.match(result.stderr, /pnpm install/)
+  assert.doesNotMatch(
+    result.stdout,
+    /Dependencies installed|Preparing RDX|created successfully/
+  )
+  await readFile(path.join(root, 'docs/package.json'))
+})
 
 test('installed runtime resolution follows a workspace-hoisted framework and reports missing executables', async (t) => {
   const root = await fixture(t)
