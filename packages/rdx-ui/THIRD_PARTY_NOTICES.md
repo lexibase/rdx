@@ -33,3 +33,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Mermaid browser distribution
+
+RDX distributes Mermaid's complete official minified ESM browser build in
+`dist/mermaid/`. Its source modules and embedded third-party license notices are
+preserved; source map references are omitted. Mermaid's MIT license is included
+at `dist/mermaid/LICENSE`. Mermaid remains a build dependency of this package.

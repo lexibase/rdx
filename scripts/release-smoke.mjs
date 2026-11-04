@@ -120,6 +120,9 @@ const required = {
     'src/components/docs-page-transition.tsx',
     'src/components/mdx-image.tsx',
     'src/lib/docs-search.ts',
+    'dist/mermaid/mermaid.esm.min.mjs',
+    'dist/mermaid/mermaid.esm.min.d.mts',
+    'dist/mermaid/LICENSE',
     'src/lib/i18n.ts',
     'src/providers/locale-provider.tsx',
   ],
@@ -856,6 +859,11 @@ for (const [name, release] of releases) {
   if (name === '@lexibase/rdx-next') {
     assert.equal(packed.dependencies?.['@lexibase/rdx-ui'], undefined)
     assert.equal(packed.peerDependencies['@lexibase/rdx-ui'], '^3.3.0')
+  }
+  if (name === '@lexibase/rdx-ui') {
+    assert.equal(packed.dependencies?.mermaid, undefined)
+    assert.ok(packed.dependencies?.['cose-base'])
+    assert.ok(packed.dependencies?.['layout-base'])
   }
   const files = new Set(
     execFileSync('tar', ['-tf', archive], { encoding: 'utf8' })

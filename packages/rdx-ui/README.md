@@ -9,6 +9,12 @@ without bundling so Next.js preserves server/client component boundaries. Add
 the package to `transpilePackages` when using it outside the RDX runtime.
 The RDX runtime already configures this, PostCSS and Tailwind source scanning.
 
+Mermaid uses its complete official browser distribution, prepared by `pnpm build`
+in this workspace and included in the published package. Diagram engines load
+on demand. Generated sites use these local files without a CDN request.
+`cose-base` and `layout-base` remain dependencies because bundlers also resolve
+the upstream distribution's AMD compatibility branches.
+
 ```tsx
 import { Home } from '@lexibase/rdx-ui/components/home'
 

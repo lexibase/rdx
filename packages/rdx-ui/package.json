@@ -9,6 +9,7 @@
   "license": "MIT",
   "files": [
     "THIRD_PARTY_NOTICES.md",
+    "dist/mermaid",
     "src",
     "postcss.config.mjs",
     "postcss-plugin.cjs",
@@ -23,6 +24,8 @@
     "directory": "packages/rdx-ui"
   },
   "scripts": {
+    "build": "node ./build.mjs",
+    "test": "node --test tests/*.test.mjs",
     "lint": "eslint . --max-warnings 0",
     "generate:component": "turbo gen react-component",
     "check-types": "tsc --noEmit"
@@ -33,9 +36,10 @@
     "@tailwindcss/postcss": "^4.3.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cose-base": "^2.2.0",
     "cmdk": "^1.1.1",
     "lucide-react": "^0.577.0",
-    "mermaid": "^12.2.0",
+    "layout-base": "^2.0.1",
     "motion": "^12.43.0",
     "next-themes": "^0.4.6",
     "postcss": "^8.5.31",
@@ -50,6 +54,7 @@
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
+    "mermaid": "^12.2.0",
     "@rdx/eslint-config": "workspace:*",
     "@rdx/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.3.3",
