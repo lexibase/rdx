@@ -70,7 +70,7 @@ export function promoteChangelog(source, version, summaries) {
 
 export async function prepareRelease(
   root,
-  { dryRun = false, run = defaultRun, log = console.log } = {}
+  { dryRun = false, commit = false, run = defaultRun, log = console.log } = {}
 ) {
   const noteDirectory = path.join(root, '.changeset')
   assert.equal(
@@ -188,6 +188,22 @@ export async function prepareRelease(
       return plan
     }
 
+    const trackedNotes = commit
+      ? String(
+          (await run(
+            'git',
+            [
+              'ls-files',
+              '-z',
+              '--',
+              ...notes.map((name) => `.changeset/${name}`),
+            ],
+            root
+          )) || ''
+        )
+          .split('\0')
+          .filter(Boolean)
+      : []
     await run('changeset', ['version'], root)
     const updated = await Promise.all(
       packages.map(async (pkg) => ({
@@ -267,14 +283,31 @@ export async function prepareRelease(
       'apps/web/versions.json',
       `apps/web/versioned_docs/version-${version}`,
       'packages/create-rdx/templates/default/package.json',
-      ...packages.map((pkg) => `packages/${pkg.directory}/package.json`),
+      ...planned.map((pkg) => `packages/${pkg.directory}/package.json`),
     ]
     await run('pnpm', ['exec', 'prettier', '--write', ...files], root)
+    if (commit) {
+      const paths = [...files, ...trackedNotes]
+      await run('git', ['add', '--all', '--', ...paths], root)
+      // --only excludes unrelated files even if the operator staged them earlier.
+      await run(
+        'git',
+        [
+          'commit',
+          '--only',
+          '-m',
+          `chore(release): prepare RDX ${version}`,
+          '--',
+          ...paths,
+        ],
+        root
+      )
+    }
     log(
-      `Prepared RDX ${version}. Review the diff, commit and open one PR. GitHub Actions runs the complete validation.`
+      `Prepared RDX ${version}. ${commit ? 'Review the local commit and open one PR.' : 'Review the diff, commit and open one PR.'} GitHub Actions runs the complete validation.`
     )
     log(
-      'Nothing was committed, tagged, pushed or published. Publication commands are in PUBLISHING.md.'
+      `${commit ? 'A local release commit was created.' : 'Nothing was committed.'} Nothing was tagged, pushed or published. Publication commands are in PUBLISHING.md.`
     )
     return plan
   } finally {
@@ -284,6 +317,8 @@ export async function prepareRelease(
 }
 
 function defaultRun(tool, args, root) {
+  if (tool === 'git')
+    return execFileSync('git', args, { cwd: root, encoding: 'utf8' })
   const entry =
     tool === 'changeset'
       ? require.resolve('@changesets/cli/bin.js')
@@ -305,15 +340,16 @@ if (
   const args = process.argv.slice(2)
   if (args.includes('--help'))
     console.log(
-      'Usage: pnpm release:prepare [--dry-run]\nRecord changes with pnpm release:note; review with pnpm release:plan. Full validation runs in CI.'
+      'Usage: pnpm release:prepare [--dry-run] [--commit]\n--commit creates a local commit after all preparation steps succeed.\nRecord changes with pnpm release:note; review with pnpm release:plan. Full validation runs in CI.'
     )
-  else if (args.some((arg) => arg !== '--dry-run')) {
+  else if (args.some((arg) => !['--dry-run', '--commit'].includes(arg))) {
     console.error('Unknown option. Use --help.')
     process.exitCode = 1
   } else
     try {
       await prepareRelease(fileURLToPath(new URL('../', import.meta.url)), {
         dryRun: args.includes('--dry-run'),
+        commit: args.includes('--commit'),
       })
     } catch (error) {
       console.error(

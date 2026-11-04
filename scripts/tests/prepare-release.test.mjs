@@ -112,6 +112,8 @@ async function fixture(t, bump = 'minor') {
   const calls = []
   const run = async (tool, args, cwd) => {
     calls.push([tool, ...args])
+    if (tool === 'git' && args[0] === 'ls-files')
+      return '.changeset/feature.md\0'
     if (tool === 'changeset') {
       try {
         execFileSync(process.execPath, [cli, ...args], {
@@ -269,6 +271,49 @@ test('a compatible UI minor keeps independent packages and does not force a runt
   assert.equal(
     plan.releases.find((item) => item.name === '@lexibase/rdx-next'),
     undefined
+  )
+})
+
+test('opt-in commit runs after formatting and selects only the generated release paths', async (t) => {
+  const { root, calls, run } = await fixture(t, 'patch')
+  await prepareRelease(root, { commit: true, run, log: () => {} })
+  const commit = calls.find((call) => call[0] === 'git' && call[1] === 'commit')
+  assert.ok(commit.includes('--only'))
+  assert.ok(commit.includes('chore(release): prepare RDX 4.2.1'))
+  assert.ok(commit.includes('apps/web/versioned_docs/version-4.2.1'))
+  assert.ok(commit.includes('.changeset/feature.md'))
+  assert.ok(!commit.includes('packages/rdx-ui/package.json'))
+  assert.equal(calls.at(-1), commit)
+  assert.ok(calls.slice(0, -1).some((call) => call.includes('prettier')))
+  assert.ok(
+    calls.every(
+      (call) =>
+        !call.includes('push') &&
+        !call.includes('publish') &&
+        !call.includes('tag')
+    )
+  )
+})
+
+test('dry-run never stages or commits, and preparation failure never reaches commit', async (t) => {
+  const { root, calls, run } = await fixture(t, 'patch')
+  await prepareRelease(root, { dryRun: true, commit: true, run, log: () => {} })
+  assert.ok(calls.every((call) => call[0] !== 'git'))
+  await assert.rejects(
+    prepareRelease(root, {
+      commit: true,
+      log: () => {},
+      run: async (tool, args, cwd) => {
+        if (args.includes('prettier')) throw new Error('Formatting failed')
+        return run(tool, args, cwd)
+      },
+    }),
+    /Formatting failed/
+  )
+  assert.ok(
+    calls.every(
+      (call) => !(call[0] === 'git' && ['add', 'commit'].includes(call[1]))
+    )
   )
 })
 

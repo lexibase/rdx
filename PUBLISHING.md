@@ -34,6 +34,19 @@ The command publishes the documentation edition locally using the existing
 It formats the resulting snapshot and release files before you stage them.
 No Git commit, tag, push, GitHub Release or npm publication happens automatically.
 
+To create a local commit after snapshot generation and formatting, opt in with:
+
+```sh
+pnpm release:prepare --commit
+```
+
+This stages the generated release paths and consumed tracked notes, then commits
+them as `chore(release): prepare RDX <version>`. Other staged files are excluded
+with Git's `--only` option. The default command keeps edits uncommitted, and
+`--dry-run --commit` still performs no Git writes. Push, tags and publication
+remain manual. Commit hooks and any configured signing still run normally;
+a hook failure leaves the prepared files available for review.
+
 Review the generated diff and any required migration guidance, then commit one
 release PR. Local verification should focus on changed behavior. GitHub Actions
 runs `pnpm check` and the full packed-installation suite; do not repeat that full

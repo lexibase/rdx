@@ -13,6 +13,9 @@ Run `pnpm release:plan` to preview, then `pnpm release:prepare`. Preparation upd
 versions, the creator template, the root changelog, publishing instructions, API
 edition and documentation snapshot. It does not commit, tag, push or publish.
 
+Use `pnpm release:prepare --commit` to opt into one local commit after preparation
+and formatting. It selects only release paths; push and publication remain manual.
+
 Review and commit all prepared files in one PR. GitHub Actions runs the complete
 checks and installed-package suite. Use the generated publication checklist after
 merging. See [PUBLISHING.md](../PUBLISHING.md).
