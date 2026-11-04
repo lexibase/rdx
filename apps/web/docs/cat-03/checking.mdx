@@ -43,13 +43,15 @@ run the same command in your CI before building or deploying.
 
 ## What is checked?
 
-- Relative `.mdx` links and local documentation URLs.
+- Duplicate page routes, including a `.md` and `.mdx` file with the same path.
+- Relative `.md` and `.mdx` links and local documentation URLs.
 - Section fragments such as `#installation`, using the same heading IDs as the
   Markdown renderer, including repeated headings.
 - Literal IDs in MDX, such as `<span id="details" />`.
 - Markdown images and download links that point to files in `public/`.
+- The public image file configured in `navbar.logo`.
 - Reference-style links and images, and literal HTML `href` and image `src` values.
-- Frontmatter and MDX parsing errors.
+- Frontmatter, Markdown component syntax, and MDX parsing errors.
 
 Line numbers refer to the original file, including its frontmatter. Examples
 inside code blocks are treated as code, not as links to validate.

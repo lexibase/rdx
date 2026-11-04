@@ -49,7 +49,7 @@ async function contentFiles(directory) {
       const filename = path.join(directory, entry.name)
       if (entry.isDirectory()) return contentFiles(filename)
       return entry.isFile() &&
-        (entry.name.endsWith('.mdx') || entry.name === '_category.json')
+        (/\.mdx?$/.test(entry.name) || entry.name === '_category.json')
         ? [filename]
         : []
     })

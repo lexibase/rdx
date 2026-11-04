@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Prepare new npm and pnpm projects directly through their installed RDX
+  executable, avoiding a second package-manager startup and dependency preflight.
+  Preserve Yarn's execution environment and existing pnpm approvals. Show timed
+  creation stages and periodic activity messages while installation is running.
+
+- Accept public image paths in `navbar.logo` alongside React logo components.
+  Preserve image proportions across the navbar, built-in homepage, and 404 pages;
+  report missing logo assets through `rdx check` and production builds.
+
+- Support `.md` pages alongside `.mdx`, including Markdown components, relative
+  document links, static checks, search, localized content, and version snapshots.
+  Reject duplicate page routes across the two extensions.
+
 ## 4.1.0 — Prepared
 
 - Add optional i18n contribution links through `contributionUrl`: a shared

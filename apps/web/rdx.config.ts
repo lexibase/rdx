@@ -72,7 +72,7 @@ const config = {
   navbar: {
     // Text beside the logo; empty or omitted shows only the logo.
     title: '',
-    // Imported React component, not an image path or JSX. Accepts className.
+    // Image from public/ (e.g. '/images/logo.png') or a React component accepting className.
     logo: Logo,
 
     actions: {

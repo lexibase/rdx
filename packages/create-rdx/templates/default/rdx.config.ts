@@ -32,7 +32,8 @@ export default defineConfig({
   // Optional navbar text does not change metadata.applicationName.
   navbar: {
     title: '', // Text beside the logo; empty or omitted shows only the logo.
-    // logo: Logo, // Import a React component that accepts className, not an image path.
+    // logo: '/images/logo.png', // File in public/images/; PNG, SVG and other image formats work.
+    // Or import your components/logo.tsx and set logo: Logo.
     actions: {
       github: {
         visible: true,

@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { existsSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 
 import { validateMetadata } from './metadata.js'
 import { RdxConfigError } from './error.js'
@@ -53,7 +53,7 @@ function component(value: unknown, field: string) {
     )
   )
     throw new RdxConfigError(
-      `${field} must be a React component, not JSX or a file path.`
+      `${field} must be an imported React component, not JSX.`
     )
 }
 
@@ -157,7 +157,16 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
   if (config.navbar !== undefined) {
     const navbar = object(config.navbar, 'navbar')
     keys(navbar, ['title', 'logo', 'actions'], 'navbar.')
-    if (navbar.logo !== undefined) component(navbar.logo, 'navbar.logo')
+    if (typeof navbar.logo === 'string') {
+      if (
+        !/^\/(?!\/)/.test(navbar.logo) ||
+        /[\s\\\0]/.test(navbar.logo) ||
+        new URL(navbar.logo, 'https://rdx.invalid').pathname === '/'
+      )
+        throw new RdxConfigError(
+          "navbar.logo must be a root-relative image path from public/, e.g. '/images/logo.png', or an imported React component."
+        )
+    } else if (navbar.logo !== undefined) component(navbar.logo, 'navbar.logo')
     if (navbar.title !== undefined) text(navbar.title, 'navbar.title', true)
     if (navbar.actions !== undefined) {
       const actions = object(navbar.actions, 'navbar.actions')
@@ -358,18 +367,13 @@ export async function createRdxProject(
           `duplicate content source id or route prefix: ${id}.`
         )
       }
+      // Compare the live directory inventory without tracing a dynamic file glob.
+      const liveNames = existsSync(/* turbopackIgnore: true */ docsRoot)
+        ? readdirSync(/* turbopackIgnore: true */ docsRoot)
+        : []
       if (
-        existsSync(
-          /* turbopackIgnore: true */ path.join(
-            /* turbopackIgnore: true */ docsRoot,
-            prefix
-          )
-        ) ||
-        existsSync(
-          /* turbopackIgnore: true */ path.join(
-            /* turbopackIgnore: true */ docsRoot,
-            `${prefix}.mdx`
-          )
+        [prefix, `${prefix}.md`, `${prefix}.mdx`].some((name) =>
+          liveNames.includes(name)
         )
       ) {
         throw new RdxConfigError(

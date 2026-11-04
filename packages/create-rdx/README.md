@@ -39,6 +39,12 @@ npm create @lexibase/rdx@latest my-docs -- --skip-install
 `.rdx/`. Otherwise the creator uses the invoking package manager and prepares
 the runtime. Follow the commands printed by the generator.
 
+The creator reports file creation, dependency installation, and runtime preparation
+as separate stages, with elapsed time and periodic activity messages during long
+operations. Package-manager output and prompts stay visible. npm and pnpm projects
+prepare using their installed RDX executable directly; Yarn provides its project
+execution environment for Plug'n'Play compatibility.
+
 ## Recovery
 
 In a pnpm workspace, installation uses the workspace's existing dependencies and

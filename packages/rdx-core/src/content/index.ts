@@ -11,7 +11,8 @@ import type {
   RdxDocument,
 } from '@lexibase/rdx-types'
 
-const MDX_EXTENSION = '.mdx'
+const DOCUMENT_EXTENSIONS = ['.md', '.mdx']
+const documentExtension = /\.mdx?$/
 const DEFAULT_POSITION = Number.MAX_SAFE_INTEGER
 
 function getDocsRoot(docsDir = 'docs') {
@@ -39,12 +40,14 @@ function numberValue(value: unknown, fallback = DEFAULT_POSITION) {
 
 function readCategoryMeta(categoryPath: string, fallbackTitle: string) {
   const metaPath = path.join(categoryPath, '_category.json')
-  if (!fs.existsSync(metaPath)) {
+  if (!fs.existsSync(/* turbopackIgnore: true */ metaPath)) {
     return { title: fallbackTitle, position: DEFAULT_POSITION }
   }
 
   try {
-    const parsed: unknown = JSON.parse(fs.readFileSync(metaPath, 'utf8'))
+    const parsed: unknown = JSON.parse(
+      fs.readFileSync(/* turbopackIgnore: true */ metaPath, 'utf8')
+    )
     if (!isRecord(parsed)) {
       return { title: fallbackTitle, position: DEFAULT_POSITION }
     }
@@ -58,26 +61,23 @@ function readCategoryMeta(categoryPath: string, fallbackTitle: string) {
   }
 }
 
-function findMdxFiles(directory: string): string[] {
+function findDocumentFiles(directory: string): string[] {
   const entries = fs
-    .readdirSync(directory, { withFileTypes: true })
+    .readdirSync(/* turbopackIgnore: true */ directory, { withFileTypes: true })
     .sort((a, b) => a.name.localeCompare(b.name))
 
   return entries.flatMap((entry) => {
     const entryPath = path.join(directory, entry.name)
 
-    if (entry.isDirectory()) return findMdxFiles(entryPath)
-    if (entry.isFile() && entry.name.endsWith(MDX_EXTENSION)) return [entryPath]
+    if (entry.isDirectory()) return findDocumentFiles(entryPath)
+    if (entry.isFile() && documentExtension.test(entry.name)) return [entryPath]
 
     return []
   })
 }
 
 function slugFromRelativePath(relativePath: string) {
-  return relativePath
-    .split(path.sep)
-    .join('/')
-    .replace(/\.mdx$/, '')
+  return relativePath.split(path.sep).join('/').replace(documentExtension, '')
 }
 
 function isSafeSlug(slug: string) {
@@ -125,14 +125,26 @@ export function getDocsIndex(
     }))
   }
   const docsRoot = getDocsRoot(docsDir)
-  if (!fs.existsSync(docsRoot)) return []
+  if (!fs.existsSync(/* turbopackIgnore: true */ docsRoot)) return []
 
   const categories = new Map<
     string,
     RdxDocCategory & { categoryPath: string }
   >()
 
-  for (const filePath of findMdxFiles(docsRoot)) {
+  const slugs = new Map<string, string>()
+  for (const filePath of findDocumentFiles(docsRoot)) {
+    const slug = slugFromRelativePath(path.relative(docsRoot, filePath))
+    const previous = slugs.get(slug)
+    if (previous) {
+      const error = new Error(
+        `[RDX] Duplicate documentation route "${slug}": ${previous} and ${filePath}. Keep one page per route.`
+      )
+      if (!onError) throw error
+      onError(error, filePath)
+      continue
+    }
+    slugs.set(slug, filePath)
     const relativePath = path.relative(docsRoot, filePath)
     const pathParts = relativePath.split(path.sep)
     const categoryId =
@@ -158,14 +170,13 @@ export function getDocsIndex(
 
     let frontmatter: Record<string, unknown> = {}
     try {
-      const raw = fs.readFileSync(filePath, 'utf8')
+      const raw = fs.readFileSync(/* turbopackIgnore: true */ filePath, 'utf8')
       const parsed = onError ? parseStaticDocument(raw) : matter(raw)
       frontmatter = isRecord(parsed.data) ? parsed.data : {}
     } catch (error) {
       if (!onError) throw error
       onError(error, filePath)
     }
-    const slug = slugFromRelativePath(relativePath)
     const fallbackTitle = toTitle(path.basename(slug))
 
     category.pages.push({
@@ -208,19 +219,32 @@ export function getDocument(
     return getDocument(slug, { docsDir: fallbackDocsDir ?? docsDir })
 
   const docsRoot = getDocsRoot(docsDir)
-  const sourcePath = path.resolve(docsRoot, `${slug}${MDX_EXTENSION}`)
+  const candidates = DOCUMENT_EXTENSIONS.map((extension) =>
+    path.resolve(docsRoot, `${slug}${extension}`)
+  ).filter(
+    (filename) =>
+      fs.existsSync(/* turbopackIgnore: true */ filename) &&
+      fs.statSync(/* turbopackIgnore: true */ filename).isFile()
+  )
+  if (candidates.length > 1)
+    throw new Error(
+      `[RDX] Duplicate documentation route "${slug}": ${candidates.join(' and ')}. Keep one page per route.`
+    )
+  const sourcePath = candidates[0] ?? path.resolve(docsRoot, `${slug}.mdx`)
   const relativePath = path.relative(docsRoot, sourcePath)
 
   if (relativePath.startsWith('..') || path.isAbsolute(relativePath))
     return null
   if (fallbackDocsDir && !getDocument(slug, { docsDir: fallbackDocsDir }))
     return null
-  if (!fs.existsSync(sourcePath))
+  if (!fs.existsSync(/* turbopackIgnore: true */ sourcePath))
     return fallbackDocsDir
       ? getDocument(slug, { docsDir: fallbackDocsDir })
       : null
 
-  const parsed = matter(fs.readFileSync(sourcePath, 'utf8'))
+  const parsed = matter(
+    fs.readFileSync(/* turbopackIgnore: true */ sourcePath, 'utf8')
+  )
 
   return {
     slug,

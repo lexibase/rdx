@@ -51,7 +51,8 @@ public/images/rdx.svg        → /images/rdx.svg
 public/downloads/example.txt → /downloads/example.txt
 ```
 
-Use site-root URLs in MDX:
+Write pages as `.md` or `.mdx` inside `docs/`. Both formats support RDX's
+Markdown components. Use site-root URLs for assets:
 
 ```md
 ![RDX logo](/images/rdx.svg)

@@ -26,6 +26,7 @@ export async function compileDocument(
       blockJS: true,
       blockDangerousJS: true,
       mdxOptions: {
+        format: document.sourcePath.endsWith('.md') ? 'md' : 'mdx',
         remarkPlugins: [
           remarkGfm,
           remarkDocumentationComponents,

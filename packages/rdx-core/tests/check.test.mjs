@@ -252,3 +252,68 @@ test('JSON frontmatter and BOM/CRLF files preserve static parsing and original l
   assert.equal(report.diagnostics[0].line, 5)
   assert.equal(report.diagnostics[0].column, 1)
 })
+
+test('mixed Markdown and MDX pages share routes, anchors and static validation', async (t) => {
+  const project = await fixture(t, {
+    'docs/guides/intro.md':
+      '---\ntitle: Intro\n---\n## Literal {value}\n\n[Guide](guide.mdx#setup)\n\n> [!TIP]\n> Press :kbd[Enter].\n\n:::tabs\n### pnpm\npnpm dev\n### npm\nnpm run dev\n:::',
+    'docs/guides/guide.mdx': '## Setup\n\n[Intro](intro.md#literal-value)',
+  })
+  const { getDocument, getDocsPaths } = await import('../dist/index.js')
+  const options = { docsDir: path.join(project.rootDir, 'docs') }
+  assert.deepEqual(
+    new Set(getDocsPaths(options)),
+    new Set(['guides/intro', 'guides/guide'])
+  )
+  assert.match(getDocument('guides/intro', options).sourcePath, /intro\.md$/)
+  assert.deepEqual(checkDocumentation(project).diagnostics, [])
+  fs.appendFileSync(
+    path.join(project.rootDir, 'docs/guides/intro.md'),
+    '\n[Missing](missing.md)\n[Missing section](guide.mdx#absent)'
+  )
+  assert.deepEqual(
+    checkDocumentation(project).diagnostics.map(({ code }) => code),
+    ['page', 'anchor']
+  )
+})
+
+test('duplicate Markdown and MDX slugs fail reads and produce actionable check diagnostics', async (t) => {
+  const project = await fixture(t, {
+    'docs/intro.md': '# Markdown',
+    'docs/intro.mdx': '# MDX',
+  })
+  const { getDocument, getDocsIndex } = await import('../dist/index.js')
+  const options = { docsDir: path.join(project.rootDir, 'docs') }
+  assert.throws(
+    () => getDocsIndex(options),
+    /Duplicate documentation route "intro"/
+  )
+  assert.throws(
+    () => getDocument('intro', options),
+    /Duplicate documentation route "intro"/
+  )
+  assert.ok(
+    checkDocumentation(project).diagnostics.some(({ message }) =>
+      /intro\.md.*intro\.mdx/.test(message)
+    )
+  )
+})
+
+test('configured logo assets are checked without executing React components', async (t) => {
+  const project = await fixture(t, {
+    'docs/intro.md': 'Welcome',
+    'public/images/brand mark.svg': '<svg />',
+  })
+  project.config.navbar = { logo: '/images/brand%20mark.svg?v=2' }
+  assert.deepEqual(checkDocumentation(project).diagnostics, [])
+  project.config.navbar.logo = '/images/missing.png'
+  const report = checkDocumentation(project)
+  assert.equal(report.diagnostics.length, 1)
+  assert.equal(report.diagnostics[0].file, 'rdx.config.ts')
+  assert.equal(report.diagnostics[0].code, 'asset')
+  assert.match(report.diagnostics[0].message, /navbar.logo.*missing\.png/)
+  project.config.navbar.logo = () => {
+    throw new Error('Do not execute components')
+  }
+  assert.deepEqual(checkDocumentation(project).diagnostics, [])
+})

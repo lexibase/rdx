@@ -34,6 +34,7 @@ export async function showcaseSearchResponse(source: string) {
             category: category.title,
             href: `/docs/${encodeURIComponent(source)}/${slug.split('/').map(encodeURIComponent).join('/')}`,
             content: document.content,
+            sourcePath: document.sourcePath,
           }
         })
       )

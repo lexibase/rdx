@@ -394,3 +394,36 @@ test('pre-existing translation targets, unsafe contributions and source metadata
   assert.equal(f.read('docs/.rdx-locales.json'), 'User metadata')
   assert.equal(f.exists('locale/ptbr/versioned_docs/version-2.0.0'), false)
 })
+
+test('Markdown translations with a different extension are frozen, resolved and checked by slug', async (t) => {
+  const f = fixture(t)
+  fs.renameSync(
+    path.join(f.rootDir, 'locale/ptbr/docs/guides/intro.mdx'),
+    path.join(f.rootDir, 'locale/ptbr/docs/guides/intro.md')
+  )
+  f.write(
+    'docs/guides/markdown.md',
+    '## Original {value}\n\n[Intro](intro.mdx)'
+  )
+  f.write(
+    'locale/ptbr/docs/guides/intro.md',
+    '## Traduzido {value}\n\n[Fallback](reference.mdx)'
+  )
+  const initial = await f.project()
+  f.run(initial, 'version', '1.0.0')
+  const metadata = JSON.parse(
+    f.read('versioned_docs/version-1.0.0/.rdx-locales.json')
+  )
+  assert.equal(metadata.translations['pt-BR'].hasDocuments, true)
+  f.write('locale/ptbr/docs/guides/intro.md', 'Live edit')
+  const pt = getLocalizedProject(await f.project(), 'pt-br')
+  assert.match(
+    resolveDocsRoute(pt, ['1.0.0', 'guides', 'intro']).document.content,
+    /Traduzido/
+  )
+  assert.match(
+    resolveDocsRoute(pt, ['1.0.0', 'guides', 'markdown']).document.content,
+    /Original/
+  )
+  assert.deepEqual(checkDocumentation(await f.project()).diagnostics, [])
+})

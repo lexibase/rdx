@@ -74,6 +74,10 @@ const parser = unified()
   .use(remarkGfm)
   .use(remarkMdx)
   .use(remarkDocumentationComponents)
+const markdownParser = unified()
+  .use(remarkParse)
+  .use(remarkGfm)
+  .use(remarkDocumentationComponents)
 const sourceRoute = (source: RdxContentSource) =>
   [source.basePath ?? '/docs', source.routePrefix].filter(Boolean).join('/')
 const documentRoute = (source: RdxContentSource, page: RdxDocPage) =>
@@ -86,8 +90,11 @@ function walk(node: Node, visit: (node: Node) => void) {
   for (const child of node.children ?? []) walk(child, visit)
 }
 
-function parse(content: string): Parsed {
-  const tree = parser.runSync(parser.parse(content), { value: content }) as Node
+function parse(content: string, markdown: boolean): Parsed {
+  const processor = markdown ? markdownParser : parser
+  const tree = processor.runSync(processor.parse(content), {
+    value: content,
+  }) as Node
   const anchors = new Set<string>()
   const references: Reference[] = []
   const definitions = new Map<string, string>()
@@ -185,6 +192,42 @@ export function checkDocumentation(
       message: value.message ?? String(error),
     })
   }
+  function publicFileExists(pathname: string) {
+    if (pathname.includes('\\') || pathname.includes('\0'))
+      throw new Error('Use a valid URL with forward slashes.')
+    const publicRoot = path.resolve(project.rootDir, 'public')
+    const asset = path.resolve(publicRoot, `.${pathname}`)
+    const relative = path.relative(publicRoot, asset)
+    if (
+      relative === '..' ||
+      relative.startsWith(`..${path.sep}`) ||
+      path.isAbsolute(relative)
+    )
+      throw new Error('The destination escapes public/.')
+    let exists = false
+    try {
+      exists = fs.statSync(asset).isFile()
+    } catch {
+      /* Missing assets are reported below. */
+    }
+    return exists
+  }
+  const logo = project.config.navbar?.logo
+  if (typeof logo === 'string') {
+    try {
+      const pathname = decodeURIComponent(new URL(logo, origin).pathname)
+      if (!publicFileExists(pathname))
+        throw new Error(`Local file "${pathname}" does not exist in public/.`)
+    } catch (error) {
+      diagnostics.push({
+        file: 'rdx.config.ts',
+        line: 1,
+        column: 1,
+        code: 'asset',
+        message: `navbar.logo "${logo}": ${error instanceof Error ? error.message : String(error)}`,
+      })
+    }
+  }
   const sources = getContentSources(
     project.locale ? { ...project, locale: undefined } : project
   )
@@ -225,7 +268,7 @@ export function checkDocumentation(
                 column: 1,
                 code: 'page',
                 message:
-                  'Translation has no primary-language counterpart with the same relative MDX path.',
+                  'Translation has no primary-language counterpart with the same relative document path (without the extension).',
               })
       }
       pages = getDocsIndex(getSourceOptions(project, source), (error, file) => {
@@ -268,7 +311,7 @@ export function checkDocumentation(
       document.lineOffset = (
         raw.slice(0, raw.length - content.length).match(/\n/g) ?? []
       ).length
-      document.parsed = parse(content)
+      document.parsed = parse(content, document.page.sourcePath.endsWith('.md'))
     } catch (error) {
       syntax(error, document.page.sourcePath, document.lineOffset)
     }
@@ -335,11 +378,11 @@ export function checkDocumentation(
           continue
         let target: Document | undefined
         let pathname: string
-        const explicitMdx =
+        const explicitDocument =
           !reference.image &&
           !/^(?:[a-z][\w+.-]*:|\/|#|\?)/i.test(reference.href) &&
-          /\.mdx(?:[?#]|$)/.test(decodeURIComponent(reference.href))
-        if (explicitMdx) {
+          /\.mdx?(?:[?#]|$)/.test(decodeURIComponent(reference.href))
+        if (explicitDocument) {
           const resolved = resolve(reference.href)
           pathname = key(resolved)
           target = coreRoutes.get(pathname)
@@ -367,24 +410,7 @@ export function checkDocumentation(
           reference.image || !/^\/(?:[^/]+\/)?docs(?:\/|$)/.test(pathname)
             ? 'asset'
             : 'page'
-        if (pathname.includes('\\') || pathname.includes('\0'))
-          throw new Error('Use a valid URL with forward slashes.')
-        const publicRoot = path.resolve(project.rootDir, 'public')
-        const asset = path.resolve(publicRoot, `.${pathname}`)
-        const relative = path.relative(publicRoot, asset)
-        if (
-          relative === '..' ||
-          relative.startsWith(`..${path.sep}`) ||
-          path.isAbsolute(relative)
-        )
-          throw new Error('The destination escapes public/.')
-        let exists = false
-        try {
-          exists = fs.statSync(asset).isFile()
-        } catch {
-          /* Missing assets are reported below. */
-        }
-        if (!exists)
+        if (!publicFileExists(pathname))
           throw new Error(
             code === 'page'
               ? `Documentation page "${pathname}" does not exist.`

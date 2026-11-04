@@ -108,8 +108,10 @@ locale/
         installation.mdx
 ```
 
-Translate the title, description, headings and body. Use the same relative filename
-as the primary page. Translate category labels with `_category.json`; categories
+Translate the title, description, headings and body. Match the primary page's
+relative path without the extension: `guides/installation.mdx` can be translated
+as `guides/installation.md`. Both formats support RDX's Markdown components.
+Translate category labels with `_category.json`; categories
 and pages keep the primary tree's ordering. Store shared images and downloads in
 root `public/`.
 

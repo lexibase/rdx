@@ -21,7 +21,7 @@ import { DocsSearch } from '@lexibase/rdx-ui/components/docs-search'
 import { Home } from '@lexibase/rdx-ui/components/home'
 import { SkipLink } from '@lexibase/rdx-ui/components/skip-link'
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
-import { Logo } from '@lexibase/rdx-ui/components/logo'
+import { BrandLogo } from '@lexibase/rdx-ui/components/brand-logo'
 import { getMdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { getMessages, formatMessage } from '@lexibase/rdx-ui/lib/i18n'
 import { LocaleProvider } from '@lexibase/rdx-ui/providers/locale-provider'
@@ -111,7 +111,6 @@ function RdxHeader({
         href: getDocsHref(project, edition, destination),
       }
     })
-  const BrandLogo = config.navbar?.logo ?? Logo
   return (
     <Navbar
       lang={config.lang}
@@ -129,7 +128,7 @@ function RdxHeader({
         ) : undefined
       }
       siteTitle={config.metadata.applicationName}
-      logo={<BrandLogo className="size-5" />}
+      logo={<BrandLogo source={config.navbar?.logo} className="size-5" />}
       homeHref={config.homepage?.enabled ? '/' : getDocsHref(project)}
       docsHref={getDocsHref(project, source)}
       languageMenu={
@@ -158,7 +157,6 @@ export function HomePage({ project }: { project: RdxProject }) {
   if (!config.homepage?.enabled) redirect(getDocsHref(project))
   const homepage = config.homepage
   const CustomHome = homepage.component
-  const BrandLogo = config.navbar?.logo ?? Logo
   return (
     <>
       <RdxHeader project={project} />
@@ -173,7 +171,10 @@ export function HomePage({ project }: { project: RdxProject }) {
           <Home
             title={homepage.title ?? config.metadata.applicationName}
             logo={
-              <BrandLogo className="size-52 hover:scale-105 hover:rotate-1 transition-[scale,rotation] duration-1000" />
+              <BrandLogo
+                source={config.navbar?.logo}
+                className="size-52 hover:scale-105 hover:rotate-1 transition-[scale,rotation] duration-1000"
+              />
             }
             description={homepage.description}
             buttons={homepage.buttons}
@@ -187,7 +188,6 @@ export function HomePage({ project }: { project: RdxProject }) {
 export function NotFoundPage({ project }: { project: RdxProject }) {
   if (project.localization) {
     const { config, localization } = project
-    const BrandLogo = config.navbar?.logo ?? Logo
     return (
       <LocalizedNotFound
         locales={localization.locales}
@@ -198,7 +198,7 @@ export function NotFoundPage({ project }: { project: RdxProject }) {
           siteTitle: config.metadata.applicationName,
           github: config.navbar?.actions?.github,
           showToggleMode: config.navbar?.actions?.showToggleMode,
-          logo: <BrandLogo className="size-5" />,
+          logo: <BrandLogo source={config.navbar?.logo} className="size-5" />,
         }}
       />
     )

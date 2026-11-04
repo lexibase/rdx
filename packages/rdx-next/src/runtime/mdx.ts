@@ -20,6 +20,7 @@ export function compileDocumentation(
       blockJS: true,
       blockDangerousJS: true,
       mdxOptions: {
+        format: links?.sourcePath.endsWith('.md') ? 'md' : 'mdx',
         remarkPlugins: [
           remarkGfm,
           remarkDocumentationComponents,

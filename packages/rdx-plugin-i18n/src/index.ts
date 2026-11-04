@@ -9,7 +9,7 @@ function hasDocuments(directory: string): boolean {
     .some((entry) => {
       if (entry.isDirectory())
         return hasDocuments(path.join(directory, entry.name))
-      return entry.isFile() && entry.name.endsWith('.mdx')
+      return entry.isFile() && /\.mdx?$/.test(entry.name)
     })
 }
 

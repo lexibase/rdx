@@ -482,3 +482,67 @@ test('duplicate plugins, unsupported APIs, reserved commands, unsafe paths and s
     /docsDir/
   )
 })
+
+test('plugin route prefixes cannot hide a live Markdown page', async (t) => {
+  const rootDir = await fixture(t)
+  await writeFile(path.join(rootDir, 'docs/published.md'), '# Live page')
+  await assert.rejects(
+    createRdxProject(
+      {
+        metadata: { applicationName: 'Docs' },
+        plugins: [
+          {
+            name: 'fixture',
+            apiVersion: 1,
+            setup: () => ({
+              sources: [
+                {
+                  id: 'published',
+                  label: 'Published',
+                  docsDir: 'snapshot',
+                  routePrefix: 'published',
+                },
+              ],
+            }),
+          },
+        ],
+      },
+      { rootDir }
+    ),
+    /conflicts with live documentation/
+  )
+})
+
+test('navbar logos accept public image URLs or React components and reject invalid paths', () => {
+  for (const logo of [
+    '/logo.png',
+    '/images/logo.svg',
+    '/images/brand%20mark.webp?v=2',
+    '/logo.avif',
+  ])
+    assert.equal(
+      resolveConfig({ metadata: { applicationName: 'Docs' }, navbar: { logo } })
+        .navbar.logo,
+      logo
+    )
+  for (const logo of [
+    '',
+    '/',
+    '//example.com/logo.png',
+    'https://example.com/logo.png',
+    './logo.png',
+    'logo.svg',
+    '/images/logo.png\n',
+    '/\\example.com/logo.png',
+    null,
+    { src: '/logo.png' },
+  ])
+    assert.throws(
+      () =>
+        resolveConfig({
+          metadata: { applicationName: 'Docs' },
+          navbar: { logo },
+        }),
+      /navbar.logo/
+    )
+})

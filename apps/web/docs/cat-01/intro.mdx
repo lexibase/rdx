@@ -4,13 +4,13 @@ description: Simple documentation, built on Next.js, Tailwind CSS, and shadcn/ui
 link_position: 1
 ---
 
-RDX turns folders and `.mdx` files into a documentation website. Write your content,
+RDX turns folders and `.md` or `.mdx` files into a documentation website. Write your content,
 choose the features you need, and keep the framework's internal application out of your way.
 
 ## The idea
 
 - A folder inside `docs/` becomes a sidebar category.
-- An `.mdx` file becomes a page.
+- A `.md` or `.mdx` file becomes a page.
 - `rdx.config.ts` controls branding, metadata, navigation, and optional features.
 - `.rdx/` contains the generated Next.js application. You do not maintain it.
 
@@ -22,11 +22,11 @@ search, heading navigation, and optional version snapshots.
 
 | Feature                                     | How to use it                                 |
 | :------------------------------------------ | :-------------------------------------------- |
-| File-based pages and categories             | Add folders and MDX files                     |
+| File-based pages and categories             | Add folders and Markdown or MDX files         |
 | Markdown, tables, and highlighted code      | Write standard Markdown                       |
 | Code diffs and directory trees              | Use `diff` and `folder` fences                |
 | Image previews                              | Click an image written with standard Markdown |
-| Callouts, Tabs, and Accordion               | Use the built-in MDX components               |
+| Callouts, Tabs, and Accordion               | Use the built-in Markdown components          |
 | Navbar, sidebar, theme, and page navigation | Included in the shared layout                 |
 | Local search                                | Enable `search: true`                         |
 | Floating table of contents                  | Enable `TOC: true`                            |
