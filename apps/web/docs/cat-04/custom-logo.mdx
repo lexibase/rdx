@@ -1,10 +1,51 @@
 ---
 title: Custom logo
-description: Use your own SVG component for the navbar and built-in homepage.
+description: Use an image or your own SVG component for site branding.
 link_position: 6
 ---
 
-## Create the logo component
+## Use an image
+
+Place your image in `public/`, for example `public/images/logo.png`:
+
+```folder
+my-docs/
+  docs/
+  public/
+    images/
+      logo.png
+  rdx.config.ts
+```
+
+Set `navbar.logo` to its site-root URL in `rdx.config.ts`:
+
+```ts
+import { defineConfig } from '@lexibase/rdx'
+
+export default defineConfig({
+  metadata: {
+    applicationName: 'My project',
+  },
+  navbar: {
+    title: '',
+    logo: '/images/logo.png',
+  },
+})
+```
+
+The URL starts with `/` and omits `public`. No image import or React component
+is needed. PNG, SVG, JPEG, WebP, GIF, and AVIF files can be used. For an SVG
+file, use `logo: '/images/logo.svg'` in the same configuration.
+
+The image keeps its proportions inside RDX's logo area. Its colors remain the
+same in light and dark themes. The shared navbar, built-in homepage, and 404
+pages use this logo. A custom homepage controls its own body.
+
+Run `rdx check` to check the image path; production builds also report missing
+logo files. Use `metadata.applicationName` for the accessible name of the
+navbar's home link, and `navbar.title` for optional visible text beside it.
+
+## Create an SVG component
 
 Create a `components/` folder at the project root to organize your custom React
 components. Save your SVG component in `components/logo.tsx`:
@@ -19,8 +60,8 @@ my-docs/
   tsconfig.json
 ```
 
-The default RDX logo is an SVG rendered by a React component. Your custom logo
-uses the same format:
+Use a React component when you want to control the SVG markup, including colors
+that follow the interface theme. The default RDX logo uses this format:
 
 ```tsx
 // components/logo.tsx
@@ -53,7 +94,7 @@ For a single-color logo, `fill="currentColor"` or `stroke="currentColor"` follow
 the interface's text color in light and dark mode. Keep your own fill and stroke
 colors for multicolor artwork.
 
-## Configure the logo
+## Configure the SVG component
 
 Import the component in `rdx.config.ts` and assign it to `navbar.logo`:
 

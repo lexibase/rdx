@@ -184,8 +184,9 @@ search engines decide whether and when to include a page in their results.
 
 ## Navbar and homepage
 
-Set `navbar.title: ''` for logo-only branding. `navbar.logo` accepts an imported
-React component that accepts `className`, not an image path. The shared navbar
+Set `navbar.title: ''` for logo-only branding. Set `navbar.logo` to an image URL
+from `public/`, such as `'/images/logo.png'` or `'/images/logo.svg'`, or pass an
+imported React component that accepts `className`. The shared navbar
 keeps its Docs link, enabled search, optional GitHub action, and theme toggle.
 
 See [Homepage](../cat-04/homepage.mdx) for a project-owned `components/home.tsx`.

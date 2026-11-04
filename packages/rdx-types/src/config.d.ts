@@ -68,12 +68,16 @@ export type RDXConfig = {
      */
     title?: string
     /**
-     * Imported React component accepting an optional className for styling.
-     * Pass the component itself, not JSX or an image path. Defaults to the RDX logo.
+     * Image URL from public/, e.g. '/images/logo.png' or '/images/logo.svg',
+     * or an imported React component accepting className. Pass the component
+     * itself rather than JSX. Defaults to the RDX logo.
+     * Images retain their proportions and original colors in both themes.
+     * @example
+     * logo: '/images/logo.png'
      * @example
      * logo: MyLogo
      */
-    logo?: ComponentType<{ className?: string }>
+    logo?: string | ComponentType<{ className?: string }>
     /** Optional GitHub link and theme toggle. Omitted actions remain hidden. */
     actions?: {
       /** Show the system/light/dark theme switcher in the navbar. */

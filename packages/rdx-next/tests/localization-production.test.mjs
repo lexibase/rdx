@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { Buffer } from 'node:buffer'
 import { spawnSync } from 'node:child_process'
 import { createRequire } from 'node:module'
 import {
@@ -92,6 +93,11 @@ test(
       'public/logo.svg',
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4"/></svg>'
     )
+    const brandPng = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg==',
+      'base64'
+    )
+    await write('public/brand.png', brandPng)
     await write(
       'components/home.tsx',
       'export default function Home() { return <h1>CustomHomepageMarker</h1> }'
@@ -132,6 +138,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       const translated = await html('/pt-br/docs/guides/intro')
       assert.match(translated, /<html[^>]*lang="pt-BR"/)
       assert.match(translated, /TranslatedIntroMarker/)
+      assert.match(translated, /aria-label="Custom logo"/)
       assert.match(translated, /data-rdx-language-trigger/)
       assert.match(
         translated,
@@ -218,7 +225,15 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
     await writeFile(
       configFile,
       "import { versioning } from '@lexibase/rdx-versioning'\n" +
-        config.replace('plugins: [', 'plugins: [versioning(), ')
+        config
+          .replace('plugins: [', 'plugins: [versioning(), ')
+          .replace("import Logo from './components/logo'", '')
+          .replace("import Home from './components/home'", '')
+          .replace('navbar: { logo: Logo }', "navbar: { logo: '/brand.png' }")
+          .replace(
+            'homepage: { enabled: true, component: Home }',
+            'homepage: { enabled: true }'
+          )
     )
     const command = (...args) => {
       const result = spawnSync(process.execPath, [cli, ...args], {
@@ -296,7 +311,27 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         assert.equal(response.status, 200, url)
         return response.text()
       }
+      const home = await html('/')
+      assert.match(home, /data-rdx-home/)
+      assert.equal((home.match(/src="\/brand\.png"/g) ?? []).length, 2)
+      const missingPage = await fetch(base + '/pt-br/docs/no-page')
+      assert.equal(missingPage.status, 404)
+      // Next may stream the not-found boundary as Flight data before hydration.
+      const missingHtml = await missingPage.text()
+      const flight = [
+        ...missingHtml.matchAll(/self\.__next_f\.push\((.*?)\)<\/script>/gs),
+      ]
+        .map((match) => JSON.parse(match[1]))
+        .filter((chunk) => chunk[0] === 1)
+        .map((chunk) => chunk[1])
+        .join('')
+      assert.match(flight, /LocalizedNotFound/)
+      assert.match(flight, /"logo":\["\$","img",null,\{"src":"\/brand\.png"/)
+      const image = await fetch(base + '/brand.png')
+      assert.equal(image.status, 200)
+      assert.deepEqual(Buffer.from(await image.arrayBuffer()), brandPng)
       const archived = await html('/pt-br/docs/1.1.0/guides/intro')
+      assert.match(archived, /<nav[\s\S]*?<img[^>]*src="\/brand\.png"/)
       assert.match(archived, /<html[^>]*lang="pt-BR"/)
       assert.match(archived, /UpdatedPortugueseMarker/)
       assert.doesNotMatch(archived, /UnreleasedPortugueseMarker/)

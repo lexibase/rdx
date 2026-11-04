@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Accept public image paths in `navbar.logo` alongside React logo components.
+  Preserve image proportions across the navbar, built-in homepage, and 404 pages;
+  report missing logo assets through `rdx check` and production builds.
+
 - Support `.md` pages alongside `.mdx`, including Markdown components, relative
   document links, static checks, search, localized content, and version snapshots.
   Reject duplicate page routes across the two extensions.

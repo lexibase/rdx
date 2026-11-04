@@ -1,10 +1,9 @@
+import { BrandLogo } from '@lexibase/rdx-ui/components/brand-logo'
 import { Button } from '@lexibase/rdx-ui/components/button'
 
 import config from '@/rdx.config'
 
 export function NavbarLogo() {
-  const LogoComponent = config.navbar.logo
-
   return config.navbar.title === '' ? (
     <Button
       variant="ghost"
@@ -13,7 +12,7 @@ export function NavbarLogo() {
       href="/"
       className="cursor-default"
     >
-      <LogoComponent className="size-5" />
+      <BrandLogo source={config.navbar.logo} className="size-5" />
     </Button>
   ) : (
     <Button
@@ -23,7 +22,8 @@ export function NavbarLogo() {
       href="/"
       className="cursor-default flex items-center gap-2"
     >
-      <LogoComponent className="size-5" /> <span>{config.navbar.title}</span>
+      <BrandLogo source={config.navbar.logo} className="size-5" />{' '}
+      <span>{config.navbar.title}</span>
     </Button>
   )
 }

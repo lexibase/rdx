@@ -53,7 +53,7 @@ function component(value: unknown, field: string) {
     )
   )
     throw new RdxConfigError(
-      `${field} must be a React component, not JSX or a file path.`
+      `${field} must be an imported React component, not JSX.`
     )
 }
 
@@ -157,7 +157,16 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
   if (config.navbar !== undefined) {
     const navbar = object(config.navbar, 'navbar')
     keys(navbar, ['title', 'logo', 'actions'], 'navbar.')
-    if (navbar.logo !== undefined) component(navbar.logo, 'navbar.logo')
+    if (typeof navbar.logo === 'string') {
+      if (
+        !/^\/(?!\/)/.test(navbar.logo) ||
+        /[\s\\\0]/.test(navbar.logo) ||
+        new URL(navbar.logo, 'https://rdx.invalid').pathname === '/'
+      )
+        throw new RdxConfigError(
+          "navbar.logo must be a root-relative image path from public/, e.g. '/images/logo.png', or an imported React component."
+        )
+    } else if (navbar.logo !== undefined) component(navbar.logo, 'navbar.logo')
     if (navbar.title !== undefined) text(navbar.title, 'navbar.title', true)
     if (navbar.actions !== undefined) {
       const actions = object(navbar.actions, 'navbar.actions')

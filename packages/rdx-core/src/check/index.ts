@@ -192,6 +192,42 @@ export function checkDocumentation(
       message: value.message ?? String(error),
     })
   }
+  function publicFileExists(pathname: string) {
+    if (pathname.includes('\\') || pathname.includes('\0'))
+      throw new Error('Use a valid URL with forward slashes.')
+    const publicRoot = path.resolve(project.rootDir, 'public')
+    const asset = path.resolve(publicRoot, `.${pathname}`)
+    const relative = path.relative(publicRoot, asset)
+    if (
+      relative === '..' ||
+      relative.startsWith(`..${path.sep}`) ||
+      path.isAbsolute(relative)
+    )
+      throw new Error('The destination escapes public/.')
+    let exists = false
+    try {
+      exists = fs.statSync(asset).isFile()
+    } catch {
+      /* Missing assets are reported below. */
+    }
+    return exists
+  }
+  const logo = project.config.navbar?.logo
+  if (typeof logo === 'string') {
+    try {
+      const pathname = decodeURIComponent(new URL(logo, origin).pathname)
+      if (!publicFileExists(pathname))
+        throw new Error(`Local file "${pathname}" does not exist in public/.`)
+    } catch (error) {
+      diagnostics.push({
+        file: 'rdx.config.ts',
+        line: 1,
+        column: 1,
+        code: 'asset',
+        message: `navbar.logo "${logo}": ${error instanceof Error ? error.message : String(error)}`,
+      })
+    }
+  }
   const sources = getContentSources(
     project.locale ? { ...project, locale: undefined } : project
   )
@@ -374,24 +410,7 @@ export function checkDocumentation(
           reference.image || !/^\/(?:[^/]+\/)?docs(?:\/|$)/.test(pathname)
             ? 'asset'
             : 'page'
-        if (pathname.includes('\\') || pathname.includes('\0'))
-          throw new Error('Use a valid URL with forward slashes.')
-        const publicRoot = path.resolve(project.rootDir, 'public')
-        const asset = path.resolve(publicRoot, `.${pathname}`)
-        const relative = path.relative(publicRoot, asset)
-        if (
-          relative === '..' ||
-          relative.startsWith(`..${path.sep}`) ||
-          path.isAbsolute(relative)
-        )
-          throw new Error('The destination escapes public/.')
-        let exists = false
-        try {
-          exists = fs.statSync(asset).isFile()
-        } catch {
-          /* Missing assets are reported below. */
-        }
-        if (!exists)
+        if (!publicFileExists(pathname))
           throw new Error(
             code === 'page'
               ? `Documentation page "${pathname}" does not exist.`

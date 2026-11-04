@@ -512,3 +512,37 @@ test('plugin route prefixes cannot hide a live Markdown page', async (t) => {
     /conflicts with live documentation/
   )
 })
+
+test('navbar logos accept public image URLs or React components and reject invalid paths', () => {
+  for (const logo of [
+    '/logo.png',
+    '/images/logo.svg',
+    '/images/brand%20mark.webp?v=2',
+    '/logo.avif',
+  ])
+    assert.equal(
+      resolveConfig({ metadata: { applicationName: 'Docs' }, navbar: { logo } })
+        .navbar.logo,
+      logo
+    )
+  for (const logo of [
+    '',
+    '/',
+    '//example.com/logo.png',
+    'https://example.com/logo.png',
+    './logo.png',
+    'logo.svg',
+    '/images/logo.png\n',
+    '/\\example.com/logo.png',
+    null,
+    { src: '/logo.png' },
+  ])
+    assert.throws(
+      () =>
+        resolveConfig({
+          metadata: { applicationName: 'Docs' },
+          navbar: { logo },
+        }),
+      /navbar.logo/
+    )
+})

@@ -298,3 +298,22 @@ test('duplicate Markdown and MDX slugs fail reads and produce actionable check d
     )
   )
 })
+
+test('configured logo assets are checked without executing React components', async (t) => {
+  const project = await fixture(t, {
+    'docs/intro.md': 'Welcome',
+    'public/images/brand mark.svg': '<svg />',
+  })
+  project.config.navbar = { logo: '/images/brand%20mark.svg?v=2' }
+  assert.deepEqual(checkDocumentation(project).diagnostics, [])
+  project.config.navbar.logo = '/images/missing.png'
+  const report = checkDocumentation(project)
+  assert.equal(report.diagnostics.length, 1)
+  assert.equal(report.diagnostics[0].file, 'rdx.config.ts')
+  assert.equal(report.diagnostics[0].code, 'asset')
+  assert.match(report.diagnostics[0].message, /navbar.logo.*missing\.png/)
+  project.config.navbar.logo = () => {
+    throw new Error('Do not execute components')
+  }
+  assert.deepEqual(checkDocumentation(project).diagnostics, [])
+})
