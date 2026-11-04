@@ -43,6 +43,25 @@ first section below that header. `link_position` sets the page order within its
 category. Lower positions come first; ties and pages without positions use slug
 ordering. The filename supplies the fallback title when one is not provided.
 
+## Choose a file format
+
+Use `.md` or `.mdx` for your pages. Both formats support frontmatter,
+headings, tables, Callouts, Tabs, Accordion, keyboard shortcuts, and all code
+block modes through RDX's Markdown syntax. You can mix both formats in a category.
+
+For example, `docs/guides/first-page.md` has the URL
+`/docs/guides/first-page`. File extensions are omitted from page URLs.
+Keep one file per route: `first-page.md` and `first-page.mdx` would conflict.
+
+Choose `.md` for Markdown content, including literal braces such as
+`{placeholder}`. Choose `.mdx` when you need MDX syntax. RDX's built-in
+components use the same Markdown notation in either format.
+
+Search, section links, and the table of contents use both formats. Translated
+pages match the original by their path without the extension, so an original
+`guides/first-page.mdx` can have a `guides/first-page.md` translation.
+Version snapshots retain the files in their original format.
+
 ## Write for readers
 
 Use paragraphs, headings, lists, links, and code fences. The shared renderer

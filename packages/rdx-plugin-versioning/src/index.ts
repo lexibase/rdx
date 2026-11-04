@@ -23,9 +23,10 @@ export type VersioningOptions = {
 const versionPattern = /^\d+\.\d+\.\d+(?:-[a-zA-Z0-9][a-zA-Z0-9.-]*)?$/
 
 function hasLiveRoute(docsDir: string, version: string) {
-  return (
-    fs.existsSync(path.join(docsDir, version)) ||
-    fs.existsSync(path.join(docsDir, `${version}.mdx`))
+  if (!fs.existsSync(/* turbopackIgnore: true */ docsDir)) return false
+  const names = fs.readdirSync(/* turbopackIgnore: true */ docsDir)
+  return [version, `${version}.md`, `${version}.mdx`].some((name) =>
+    names.includes(name)
   )
 }
 

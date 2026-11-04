@@ -35,6 +35,7 @@ export function getSearchResponse(project: RdxProject, key: string) {
       description: page.description,
       category: category.title,
       href: getDocsHref(project, source, page.slug),
+      sourcePath: page.sourcePath,
       content: getDocument(page.slug, options)?.content ?? '',
     }))
   )

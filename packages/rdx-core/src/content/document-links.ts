@@ -21,7 +21,7 @@ export class RdxDocumentLinkError extends Error {
   }
 }
 
-/** Resolve only explicit relative MDX links within the current content source. */
+/** Resolve only explicit relative Markdown links within the current content source. */
 export function createDocumentLinkResolver(options: DocumentLinkOptions) {
   const root = path.resolve(options.sourceRoot)
   const current = path.resolve(options.sourcePath)
@@ -29,7 +29,15 @@ export function createDocumentLinkResolver(options: DocumentLinkOptions) {
     options.documents.flatMap((page) => [
       [path.resolve(page.sourcePath), page.slug] as const,
       ...(options.virtualPaths
-        ? [[path.resolve(root, `${page.slug}.mdx`), page.slug] as const]
+        ? [
+            [
+              path.resolve(
+                root,
+                `${page.slug}${path.extname(page.sourcePath)}`
+              ),
+              page.slug,
+            ] as const,
+          ]
         : []),
     ])
   )
@@ -46,7 +54,7 @@ export function createDocumentLinkResolver(options: DocumentLinkOptions) {
     try {
       decoded = decodeURIComponent(pathname)
     } catch {
-      if (/\.mdx$/i.test(pathname))
+      if (/\.mdx?$/i.test(pathname))
         throw new RdxDocumentLinkError(
           current,
           href,
@@ -54,7 +62,7 @@ export function createDocumentLinkResolver(options: DocumentLinkOptions) {
         )
       return href
     }
-    if (!decoded.endsWith('.mdx')) return href
+    if (!/\.mdx?$/.test(decoded)) return href
     const fail = (reason: string): never => {
       throw new RdxDocumentLinkError(current, href, reason)
     }

@@ -74,6 +74,10 @@ const parser = unified()
   .use(remarkGfm)
   .use(remarkMdx)
   .use(remarkDocumentationComponents)
+const markdownParser = unified()
+  .use(remarkParse)
+  .use(remarkGfm)
+  .use(remarkDocumentationComponents)
 const sourceRoute = (source: RdxContentSource) =>
   [source.basePath ?? '/docs', source.routePrefix].filter(Boolean).join('/')
 const documentRoute = (source: RdxContentSource, page: RdxDocPage) =>
@@ -86,8 +90,11 @@ function walk(node: Node, visit: (node: Node) => void) {
   for (const child of node.children ?? []) walk(child, visit)
 }
 
-function parse(content: string): Parsed {
-  const tree = parser.runSync(parser.parse(content), { value: content }) as Node
+function parse(content: string, markdown: boolean): Parsed {
+  const processor = markdown ? markdownParser : parser
+  const tree = processor.runSync(processor.parse(content), {
+    value: content,
+  }) as Node
   const anchors = new Set<string>()
   const references: Reference[] = []
   const definitions = new Map<string, string>()
@@ -225,7 +232,7 @@ export function checkDocumentation(
                 column: 1,
                 code: 'page',
                 message:
-                  'Translation has no primary-language counterpart with the same relative MDX path.',
+                  'Translation has no primary-language counterpart with the same relative document path (without the extension).',
               })
       }
       pages = getDocsIndex(getSourceOptions(project, source), (error, file) => {
@@ -268,7 +275,7 @@ export function checkDocumentation(
       document.lineOffset = (
         raw.slice(0, raw.length - content.length).match(/\n/g) ?? []
       ).length
-      document.parsed = parse(content)
+      document.parsed = parse(content, document.page.sourcePath.endsWith('.md'))
     } catch (error) {
       syntax(error, document.page.sourcePath, document.lineOffset)
     }
@@ -335,11 +342,11 @@ export function checkDocumentation(
           continue
         let target: Document | undefined
         let pathname: string
-        const explicitMdx =
+        const explicitDocument =
           !reference.image &&
           !/^(?:[a-z][\w+.-]*:|\/|#|\?)/i.test(reference.href) &&
-          /\.mdx(?:[?#]|$)/.test(decodeURIComponent(reference.href))
-        if (explicitMdx) {
+          /\.mdx?(?:[?#]|$)/.test(decodeURIComponent(reference.href))
+        if (explicitDocument) {
           const resolved = resolve(reference.href)
           pathname = key(resolved)
           target = coreRoutes.get(pathname)

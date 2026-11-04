@@ -23,6 +23,11 @@ const parser = unified()
   .use(remarkMdx)
   .use(remarkDocumentationComponents)
 
+const markdownParser = unified()
+  .use(remarkParse)
+  .use(remarkGfm)
+  .use(remarkDocumentationComponents)
+
 function text(node: Node): string {
   if (node.type === 'break') return ' '
   if (
@@ -63,6 +68,8 @@ export interface SearchDocument {
   category: string
   href: string
   content: string
+  /** Original filename selects Markdown or MDX parsing. Omitted defaults to MDX. */
+  sourcePath?: string
 }
 
 /** Parse text/sections without compiling MDX, evaluating JS, or exposing paths. */
@@ -71,7 +78,10 @@ export function buildSearchIndex(documents: SearchDocument[]): RdxSearchIndex {
   for (const document of documents) {
     const firstEntry = entries.length
     const slugger = new GithubSlugger()
-    const tree = parser.runSync(parser.parse(document.content), {
+    const processor = document.sourcePath?.endsWith('.md')
+      ? markdownParser
+      : parser
+    const tree = processor.runSync(processor.parse(document.content), {
       value: document.content,
     }) as Node
     let current = {

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Support `.md` pages alongside `.mdx`, including Markdown components, relative
+  document links, static checks, search, localized content, and version snapshots.
+  Reject duplicate page routes across the two extensions.
+
 ## 4.1.0 — Prepared
 
 - Add optional i18n contribution links through `contributionUrl`: a shared

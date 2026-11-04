@@ -11,7 +11,7 @@
 
 ## About
 
-**RDX** is a tool for building documentation with **MDX** in a friendly and focused way — fast, easy, and built for clarity.  
+**RDX** is a tool for building documentation with **Markdown and MDX** in a friendly and focused way — fast, easy, and built for clarity.
 Crafted with **Next.js**, **TailwindCSS**, and **shadcn/ui**, it delivers a sleek and modern design out of the box.
 
 ## Using RDX

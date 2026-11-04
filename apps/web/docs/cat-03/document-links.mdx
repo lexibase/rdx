@@ -16,6 +16,8 @@ Jump directly to the [Markdown example](./mdx-components.mdx#native-markdown).
 
 RDX resolves the file path inside the same documentation version. Use relative
 paths from the source document to keep links aligned with your content files.
+Include the target file extension: `[Guide](./guide.md)` can link from an MDX
+page to a Markdown page, and `[Reference](./reference.mdx)` works in reverse.
 
 ## Section links
 
@@ -24,7 +26,7 @@ IDs for direct section links.
 
 ## Paths, assets, and versions
 
-Relative `.mdx` links keep readers in the same edition. A snapshot cannot fall
+Relative `.md` and `.mdx` links keep readers in the same edition. A snapshot cannot fall
 back to a newer page that did not exist when it was created. Query strings and
 fragments are preserved:
 
@@ -40,6 +42,6 @@ rewritten. For images, use paths from [public/](../cat-05/assets.mdx).
 ## Link errors
 
 > [!NOTE] Portable documentation
-> Use `.mdx` file paths with forward slashes. A missing document or a path outside
+> Use `.md` or `.mdx` file paths with forward slashes. A missing document or a path outside
 > this version's documentation directory produces an error identifying the link
 > and source file. Links inside code samples and image paths are not rewritten.

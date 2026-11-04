@@ -210,3 +210,23 @@ test('nested directives keep each group and Markdown link content', async () => 
   // Closed accordion panels are mounted by the Base UI component on demand.
   assert.match(html, /Commands/)
 })
+
+test('Markdown files render directives, highlighted code and headings without interpreting braces as JSX', async () => {
+  const html = await render(
+    '## Literal {value}\n\n> [!TIP] Useful\n> Press :kbd[Enter].\n\n:::tabs\n### pnpm\npnpm dev\n### npm\nnpm run dev\n:::\n\n:::accordion\n### Question\nAnswer\n:::\n\n[Guide](guide.mdx#setup)\n\n\x60\x60\x60ts title="sample.ts"\nconst answer = 42\n\x60\x60\x60',
+    {
+      sourceRoot: '/docs',
+      sourcePath: '/docs/plain.md',
+      documents: [{ sourcePath: '/docs/guide.mdx', slug: 'guide' }],
+    }
+  )
+  assert.match(html, /id="literal-value"/)
+  assert.match(html, /Literal \{value\}/)
+  assert.match(html, /data-rdx-callout="tip"/)
+  assert.match(html, /<kbd[^>]*>Enter<\/kbd>/)
+  assert.match(html, /role="tablist"/)
+  assert.match(html, /data-slot="accordion-trigger"/)
+  assert.match(html, /href="\/docs\/guide#setup"/)
+  assert.match(html, /sample\.ts/)
+  assert.match(html, /<span style=/)
+})

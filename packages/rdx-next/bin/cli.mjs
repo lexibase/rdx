@@ -74,7 +74,7 @@ export async function runRdxCli({ templateDir } = {}) {
         ['--help', '-h'].includes(commandArgs[0])
       ) {
         console.log(
-          'Usage: rdx check\nValidate static MDX links, section anchors and local public/ files without building the site.'
+          'Usage: rdx check\nValidate static Markdown and MDX links, section anchors and local public/ files without building the site.'
         )
         return
       }

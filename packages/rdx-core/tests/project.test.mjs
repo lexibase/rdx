@@ -482,3 +482,33 @@ test('duplicate plugins, unsupported APIs, reserved commands, unsafe paths and s
     /docsDir/
   )
 })
+
+test('plugin route prefixes cannot hide a live Markdown page', async (t) => {
+  const rootDir = await fixture(t)
+  await writeFile(path.join(rootDir, 'docs/published.md'), '# Live page')
+  await assert.rejects(
+    createRdxProject(
+      {
+        metadata: { applicationName: 'Docs' },
+        plugins: [
+          {
+            name: 'fixture',
+            apiVersion: 1,
+            setup: () => ({
+              sources: [
+                {
+                  id: 'published',
+                  label: 'Published',
+                  docsDir: 'snapshot',
+                  routePrefix: 'published',
+                },
+              ],
+            }),
+          },
+        ],
+      },
+      { rootDir }
+    ),
+    /conflicts with live documentation/
+  )
+})

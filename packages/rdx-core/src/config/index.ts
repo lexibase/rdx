@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { existsSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 
 import { validateMetadata } from './metadata.js'
 import { RdxConfigError } from './error.js'
@@ -358,18 +358,13 @@ export async function createRdxProject(
           `duplicate content source id or route prefix: ${id}.`
         )
       }
+      // Compare the live directory inventory without tracing a dynamic file glob.
+      const liveNames = existsSync(/* turbopackIgnore: true */ docsRoot)
+        ? readdirSync(/* turbopackIgnore: true */ docsRoot)
+        : []
       if (
-        existsSync(
-          /* turbopackIgnore: true */ path.join(
-            /* turbopackIgnore: true */ docsRoot,
-            prefix
-          )
-        ) ||
-        existsSync(
-          /* turbopackIgnore: true */ path.join(
-            /* turbopackIgnore: true */ docsRoot,
-            `${prefix}.mdx`
-          )
+        [prefix, `${prefix}.md`, `${prefix}.mdx`].some((name) =>
+          liveNames.includes(name)
         )
       ) {
         throw new RdxConfigError(

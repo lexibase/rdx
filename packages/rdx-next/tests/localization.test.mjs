@@ -136,3 +136,34 @@ test('localized root layouts are repeatable, use server-side language and are re
     '/* user owned */'
   )
 })
+
+test('Markdown translations feed localized search, metadata and sitemap using the same slug', async (t) => {
+  const { project, write } = await fixture(t)
+  write('docs/markdown.mdx', '---\ntitle: Original\n---\nOriginal marker')
+  write(
+    'locale/ptbr/docs/markdown.md',
+    '---\ntitle: Traduzido\ndescription: Descrição\n---\n## Literal {value}\n\nTranslatedMarkdownMarker'
+  )
+  const pt = getLocalizedProject(project, 'pt-br')
+  const metadata = getDocumentMetadata({ project: pt, slug: ['markdown'] })
+  assert.equal(metadata.title, 'Traduzido')
+  assert.equal(metadata.description, 'Descrição')
+  assert.equal(
+    metadata.alternates.languages.en,
+    'https://docs.example.test/en/docs/markdown'
+  )
+  assert.ok(
+    getRdxSitemap(project).some(
+      (entry) => entry.url === 'https://docs.example.test/pt-br/docs/markdown'
+    )
+  )
+  const search = await getSearchResponse(pt, '_').json()
+  assert.ok(
+    search.entries.some(
+      (entry) =>
+        entry.href === '/pt-br/docs/markdown#literal-value' &&
+        entry.text.includes('TranslatedMarkdownMarker')
+    )
+  )
+  assert.doesNotMatch(JSON.stringify(search), /sourcePath/)
+})

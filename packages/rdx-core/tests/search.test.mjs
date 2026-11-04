@@ -141,3 +141,24 @@ test('disabled tab metadata and unreachable panels do not enter search or shift 
   assert.doesNotMatch(JSON.stringify(index), /disabled|Unavailable command/)
   assert.equal(index.entries[2].href, '/docs/guide#hidden')
 })
+
+test('Markdown pages retain literal braces and index directive content and section IDs', () => {
+  const index = buildSearchIndex([
+    {
+      title: 'Markdown',
+      category: 'Guides',
+      href: '/docs/plain',
+      sourcePath: 'docs/plain.md',
+      content:
+        '## Literal {value}\n\n> [!TIP]\n> Searchable tip :kbd[Enter].\n\n:::tabs\n### pnpm\npnpm dev\n### npm\nnpm run dev\n:::',
+    },
+  ])
+  assert.ok(
+    index.entries.some((entry) => entry.href.endsWith('#literal-value'))
+  )
+  assert.match(
+    index.entries.map((entry) => entry.text).join(' '),
+    /Searchable tip/
+  )
+  assert.match(index.entries.map((entry) => entry.text).join(' '), /pnpm dev/)
+})

@@ -22,7 +22,7 @@ async function file(root, name, text = '') {
   await writeFile(filename, text)
 }
 
-test('tracing includes only configured MDX, category metadata and declared plugin runtime files', async (t) => {
+test('tracing includes only configured Markdown, MDX, category metadata and declared plugin runtime files', async (t) => {
   const rootDir = await fixture(t)
   await file(
     rootDir,
@@ -39,6 +39,8 @@ test('tracing includes only configured MDX, category metadata and declared plugi
     'docs/guides [live]/intro.mdx',
     'docs/guides [live]/_category.json',
     'snapshots/v1/guide.mdx',
+    'snapshots/v1/plain.md',
+    'docs/guides [live]/plain.md',
     'metadata/releases.data',
   ]
   for (const name of expected)

@@ -187,6 +187,10 @@ test(
       path.join(rootDir, 'docs/init/_category.json'),
       JSON.stringify({ title: 'Init', sidebar_position: 0 })
     )
+    await writeFile(
+      path.join(rootDir, 'docs/init/plain.md'),
+      '---\ntitle: Plain Markdown\n---\n## Literal {value}\n\nMarkdownProductionMarker\n\n> [!TIP] Markdown callout\n> Press :kbd[Enter].\n\n:::tabs\n### pnpm\npnpm dev\n### npm\nnpm run dev\n:::\n\n[Introduction](intro.mdx#details)'
+    )
     const configPath = path.join(rootDir, 'rdx.config.ts')
     await writeFile(
       path.join(rootDir, 'docs/init/keyboard.mdx'),
@@ -490,6 +494,23 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
       /text\/plain/
     )
     await assertPublicFile(running.base, '/favicon.ico', favicon, /image\//)
+    for (const prefix of ['', '/2.1.0', '/1.0.0']) {
+      const response = await fetch(`${running.base}/docs${prefix}/init/plain`)
+      assert.equal(response.status, 200)
+      const markdown = await response.text()
+      assert.match(markdown, /id="literal-value"/)
+      assert.match(markdown, /Literal \{value\}/)
+      assert.match(markdown, /data-rdx-callout="tip"/)
+      assert.match(markdown, /role="tablist"/)
+      assert.ok(markdown.includes(`href="/docs${prefix}/init/intro#details"`))
+    }
+    assert.ok(
+      currentSearch.entries.some(
+        (entry) =>
+          entry.href === '/docs/init/plain#literal-value' &&
+          entry.text.includes('MarkdownProductionMarker')
+      )
+    )
     const live = await (await fetch(`${running.base}/docs/init/intro`)).text()
     const productionComponents = await (
       await fetch(`${running.base}/docs/init/components`)

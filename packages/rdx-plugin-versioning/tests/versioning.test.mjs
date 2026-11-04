@@ -525,31 +525,35 @@ test('invalid manifests are not overwritten, and missing snapshots are actionabl
   )
 })
 
-test('snapshot creation rejects live page collisions before copying content', async (t) => {
-  const rootDir = await fixture(t)
-  await writeFile(path.join(rootDir, 'docs/1.0.0.mdx'), 'Existing live page')
-  const project = await createRdxProject(config(), {
-    rootDir,
-    command: 'prepare',
+for (const extension of ['md', 'mdx'])
+  test(`snapshot creation rejects live ${extension} page collisions before copying content`, async (t) => {
+    const rootDir = await fixture(t)
+    await writeFile(
+      path.join(rootDir, `docs/1.0.0.${extension}`),
+      'Existing live page'
+    )
+    const project = await createRdxProject(config(), {
+      rootDir,
+      command: 'prepare',
+    })
+    await assert.rejects(
+      async () =>
+        project.commands[0].run({
+          rootDir,
+          config: project.config,
+          command: 'version',
+          args: ['1.0.0'],
+        }),
+      /conflicts with live documentation/
+    )
+    await assert.rejects(
+      access(path.join(rootDir, 'versioned_docs/version-1.0.0'))
+    )
+    assert.deepEqual(
+      JSON.parse(await readFile(path.join(rootDir, 'versions.json'))),
+      { active: [], archived: [] }
+    )
   })
-  await assert.rejects(
-    async () =>
-      project.commands[0].run({
-        rootDir,
-        config: project.config,
-        command: 'version',
-        args: ['1.0.0'],
-      }),
-    /conflicts with live documentation/
-  )
-  await assert.rejects(
-    access(path.join(rootDir, 'versioned_docs/version-1.0.0'))
-  )
-  assert.deepEqual(
-    JSON.parse(await readFile(path.join(rootDir, 'versions.json'))),
-    { active: [], archived: [] }
-  )
-})
 
 test('snapshot paths cannot overlap live docs or escape the project', async (t) => {
   const rootDir = await fixture(t)

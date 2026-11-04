@@ -115,3 +115,23 @@ test('legacy filename routes are mapped from source paths, with ambiguous routes
   })
   assert.throws(() => ambiguous('./install.mdx'), /ambiguous/)
 })
+
+test('mixed extensions resolve exact source files and translated fallback paths', () => {
+  const resolve = createDocumentLinkResolver({
+    sourceRoot: root,
+    sourcePath: path.join(root, 'guides/intro.md'),
+    virtualPaths: true,
+    documents: [
+      { slug: 'guides/intro', sourcePath: path.join(root, 'guides/intro.md') },
+      {
+        slug: 'guides/reference',
+        sourcePath: path.resolve(root, '../primary/guides/reference.mdx'),
+      },
+    ],
+  })
+  assert.equal(resolve('./intro.md#heading'), '/docs/guides/intro#heading')
+  assert.equal(resolve('./reference.mdx'), '/docs/guides/reference')
+  assert.throws(() => resolve('./intro.mdx'), /does not exist/)
+  for (const href of ['./missing.md', '../../escape.md', './bad%ZZ.md'])
+    assert.throws(() => resolve(href), RdxDocumentLinkError)
+})
