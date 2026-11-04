@@ -523,6 +523,14 @@ async function verifySite(
     async (base) => {
       const redirect = await request(base, '/', 307)
       assert.equal(redirect.headers.get('location'), '/docs')
+      if (framework && !runtimeCwd) {
+        const markdown = await (
+          await request(base, '/docs/examples/plain')
+        ).text()
+        assert.match(markdown, /MarkdownReleaseProbe \{literal\}/)
+        assert.match(markdown, /src="\/images\/rdx\.svg"/)
+        assert.match(markdown, /href="\/docs\/init\/intro"/)
+      }
       await redirect.arrayBuffer()
       const docsRoot = await (await request(base, '/docs')).text()
       assert.ok(
@@ -858,7 +866,7 @@ for (const [name, release] of releases) {
   }
   if (name === '@lexibase/rdx-next') {
     assert.equal(packed.dependencies?.['@lexibase/rdx-ui'], undefined)
-    assert.equal(packed.peerDependencies['@lexibase/rdx-ui'], '^3.3.0')
+    assert.equal(packed.peerDependencies['@lexibase/rdx-ui'], '^3.4.0')
   }
   if (name === '@lexibase/rdx-ui') {
     assert.equal(packed.dependencies?.mermaid, undefined)
@@ -970,6 +978,11 @@ if (process.argv.includes('--install')) {
       )
       .replace('TOC: false', 'TOC: true')
       .replace('search: false', 'search: true')
+      .replace('navbar: {', "navbar: { logo: '/images/rdx.svg',")
+  )
+  await writeFile(
+    path.join(project, 'docs/examples/plain.md'),
+    '---\ntitle: Plain Markdown\n---\n\n## Markdown features\n\n> [!TIP]\n> MarkdownReleaseProbe {literal}\n\n[Introduction](../init/intro.mdx)\n'
   )
   const original = `SnapshotSentinel${randomUUID().replaceAll('-', '')}`
   const current = `CurrentSentinel${randomUUID().replaceAll('-', '')}`
@@ -1006,6 +1019,13 @@ if (process.argv.includes('--install')) {
     'pnpm',
   ])
   pnpm(project, ['exec', 'rdx', 'version', '1.0.0'])
+  assert.equal(
+    await readFile(
+      path.join(project, 'versioned_docs/version-1.0.0/examples/plain.md'),
+      'utf8'
+    ),
+    await readFile(path.join(project, 'docs/examples/plain.md'), 'utf8')
+  )
   pnpm(project, ['exec', 'rdx', 'check'])
   const versionsFile = path.join(project, 'versions.json')
   const snapshotFile = path.join(

@@ -1,6 +1,6 @@
-# RDX public API — 4.1
+# RDX public API — 4.2
 
-This document describes the public API of RDX 4.1. See the release instructions
+This document describes the public API of RDX 4.2. See the release instructions
 in [PUBLISHING.md](./PUBLISHING.md).
 
 RDX 3.0 installs the complete shadcn Code Block and Dialog compositions. Markdown
@@ -29,9 +29,11 @@ The official CodeBlock root uses div props; pass wrapping and line-number option
 to `CodeBlockContent` and explicit clipboard values to `CodeBlockCopyButton`.
 `DialogContent` defaults to the official centered layout; set `className` for
 custom positioning/sizing and `showCloseButton` for the native close control.
-Runtime 4.1 requires UI ^3.3.0, which includes the language selector and localized
-404 modules; the main package selects UI 3.3.0. Optional multilingual content is
-provided by @lexibase/rdx-i18n 1.0.0. Types/core 2.0 remove metadata.robots, now managed automatically. See the
+Runtime 4.2 requires UI ^3.4.0, including image/component branding across the
+navbar, homepage and localized 404 pages; the main package selects UI 3.4.0.
+Types/core 2.2 support `.md` and `.mdx` pages. Optional multilingual content uses
+@lexibase/rdx-i18n 1.0.1, and versioning uses 1.3.1. Types/core 2.0 remove
+metadata.robots, now managed automatically. See the
 [4.0 migration guide](apps/web/docs/cat-05/updating.mdx#update-from-rdx-3x-to-40).
 
 RDX 2.0 removes the published `ButtonLink` module. Use `Button` with `href`
@@ -61,7 +63,7 @@ Live documentation lives in the project's `docs/` folder.
 | `TOC`, `search`            | Booleanos, ambos `false` por padrão; preservar a grafia `TOC`                                                                    |
 | `theme.defaultTheme`       | `'system'`, `'light'` ou `'dark'`; padrão `'system'`                                                                             |
 | `homepage`                 | Opcional e desativada por padrão; aceita conteúdo da Home padrão ou `component`                                                  |
-| `navbar`                   | Título, componente de logo e ações opcionais; o template explicita GitHub e alternância de tema                                  |
+| `navbar`                   | Título, logo como componente React ou caminho de imagem em `public/`, e ações opcionais; o template explicita GitHub e tema      |
 | `plugins`                  | Array de objetos de plugins; padrão vazio; instalar um pacote não o ativa                                                        |
 
 Detalhes e exemplos de propriedades aninhadas ficam em
