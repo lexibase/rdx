@@ -233,12 +233,6 @@ importers:
         specifier: 19.3.0
         version: 19.3.0
 
-  packages/rdx-legacy-types:
-    dependencies:
-      '@lexibase/rdx-types':
-        specifier: workspace:*
-        version: link:../rdx-types
-
   packages/rdx-next:
     dependencies:
       '@lexibase/rdx-core':

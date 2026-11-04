@@ -2,13 +2,7 @@
   "extends": "@rdx/typescript-config/react-library.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
-
-    "paths": {
-      "@/*": ["./*"],
-      "@rdx/src/*": ["./src/*"],
-      "@rdx/typescript-config": ["../typescript-config/*"]
-    }
+    "rootDir": "src"
   },
   "include": ["."],
   "exclude": ["node_modules", "dist"]
