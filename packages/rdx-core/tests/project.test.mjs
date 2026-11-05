@@ -11,6 +11,7 @@ import {
   getProjectDocsPaths,
   resolveDocsRoute,
 } from '../dist/index.js'
+import { getEditPageHref } from '../dist/config/index.js'
 
 async function fixture(t) {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), 'rdx-core-'))
@@ -22,6 +23,47 @@ async function fixture(t) {
   )
   return rootDir
 }
+
+test('edit links use the live file path within the project', () => {
+  const metadata = { applicationName: 'Docs' }
+  const baseUrl = 'https://github.com/example/docs/edit/main/apps/web/'
+  const rootDir = path.resolve('example-project')
+  const file = path.join(rootDir, 'locale', 'ptbr', 'docs', 'Quick start #1.md')
+  const source = { id: 'current' }
+  const project = {
+    rootDir,
+    config: resolveConfig({ metadata, editPage: { baseUrl } }),
+  }
+  assert.equal(
+    getEditPageHref(project, source, file),
+    `${baseUrl}locale/ptbr/docs/Quick%20start%20%231.md`
+  )
+  assert.equal(getEditPageHref(project, { id: '1.0.0' }, file), undefined)
+  assert.equal(
+    getEditPageHref(project, source, path.resolve('outside.md')),
+    undefined
+  )
+  for (const editPage of [undefined, false]) {
+    assert.equal(
+      getEditPageHref(
+        { rootDir, config: resolveConfig({ metadata, editPage }) },
+        source,
+        file
+      ),
+      undefined
+    )
+  }
+  for (const baseUrl of [
+    'javascript:alert(1)',
+    'https://user@example.com/edit/main',
+    'https://example.com/edit/main?ref=main',
+  ]) {
+    assert.throws(
+      () => resolveConfig({ metadata, editPage: { baseUrl } }),
+      /editPage\.baseUrl/
+    )
+  }
+})
 
 test('configuration defaults and legacy runtime config objects remain usable', () => {
   const input = { metadata: { applicationName: 'RDX' } }

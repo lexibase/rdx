@@ -2,6 +2,7 @@ import path from 'node:path'
 
 import { getMessages, formatMessage } from '@lexibase/rdx-ui/lib/i18n'
 import { getDocument, getDocsIndex, getSourceOptions } from '@lexibase/rdx-core'
+import { getEditPageHref } from '@lexibase/rdx-core/config'
 import type { RdxProject } from '@lexibase/rdx-types'
 import type { DocumentationCheckOptions } from '@lexibase/rdx-core/check'
 import { getSourceRobots, getRdxSitemap } from '@lexibase/rdx-next/runtime'
@@ -145,6 +146,9 @@ export function createDocumentation(project: RdxProject) {
       })
     },
     source,
+    editPageHref(version: string, sourcePath: string) {
+      return getEditPageHref(project, contentSource(version), sourcePath)
+    },
     index,
     pages: routePages,
     document,

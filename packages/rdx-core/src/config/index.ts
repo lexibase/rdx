@@ -21,6 +21,7 @@ export { resolveProjectPath } from './paths'
 export { normalizeLocalization } from './localization'
 export { collectSnapshotContributions } from './snapshots'
 export { getContentSources } from '../project/localization'
+export { getEditPageHref } from './edit-page'
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -90,6 +91,7 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
       'homepage',
       'TOC',
       'search',
+      'editPage',
     ],
     ''
   )
@@ -101,6 +103,23 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
     text(config.description, 'description', true)
   if (config.lang !== undefined) text(config.lang, 'lang')
   validateMetadata(config.metadata)
+
+  if (config.editPage !== undefined && config.editPage !== false) {
+    const editPage = object(config.editPage, 'editPage')
+    keys(editPage, ['baseUrl'], 'editPage.')
+    const value = text(editPage.baseUrl, 'editPage.baseUrl')
+    const url = URL.parse(value)
+    if (
+      !/^https?:\/\//i.test(value) ||
+      /[\s\\?#]/.test(value) ||
+      !url ||
+      url.username ||
+      url.password
+    )
+      throw new RdxConfigError(
+        'editPage.baseUrl must be an absolute HTTP(S) edit URL without credentials, a query, or a fragment.'
+      )
+  }
 
   if (config.homepage !== undefined) {
     const homepage = object(config.homepage, 'homepage')

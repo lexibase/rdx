@@ -27,6 +27,13 @@ export type RDXConfig = {
    * @defaultValue false
    */
   TOC?: boolean
+  /** Link live documentation pages to their source editor. Omit or set false to hide the link. */
+  editPage?:
+    | false
+    | {
+        /** Absolute HTTP(S) edit URL up to the RDX project root, including the branch and any monorepo subdirectory. */
+        baseUrl: string
+      }
   /**
    * Default HTML and social-preview description of the project.
    * This does not replace descriptions authored in documents or the homepage.
