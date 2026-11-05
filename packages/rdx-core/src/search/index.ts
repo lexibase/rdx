@@ -97,7 +97,7 @@ export function buildSearchIndex(documents: SearchDocument[]): RdxSearchIndex {
         const title = plain(text(node))
         const id = slugger.slug(headingText(node))
         if (!title) return
-        // Hidden tabs/accordion panels may not be mounted in the page. Index
+        // Hidden component panels may not be mounted in the page. Index
         // their text under the enclosing section, not an unreachable anchor.
         if (interactive) {
           current.text += ` ${title}`
@@ -128,7 +128,8 @@ export function buildSearchIndex(documents: SearchDocument[]): RdxSearchIndex {
         const nestedInteractive =
           interactive ||
           node.name === 'TabsContent' ||
-          node.name === 'AccordionContent'
+          node.name === 'AccordionContent' ||
+          node.name === 'Step'
         if (node.name === 'Callout') {
           const title = node.attributes?.find(
             (attribute) =>

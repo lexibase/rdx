@@ -41,6 +41,7 @@ import {
   TableRow,
 } from './table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs'
+import { Steps, Step, StepTitle } from './steps'
 import { Separator } from '@lexibase/rdx-ui/components/separator'
 
 function linkedImages(children: ReactNode): ReactNode {
@@ -169,6 +170,9 @@ export const mdxComponents = {
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
+  Steps,
+  Step,
+  StepTitle,
   Tabs,
   TabsList,
   TabsTrigger,
