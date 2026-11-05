@@ -187,6 +187,10 @@ test('a real Changesets preview preserves files and preparation updates only the
   assert.equal(commands.length, 2)
   assert.ok(commands[0].includes('@lexibase/rdx publish'))
   assert.ok(commands[1].includes('@lexibase/create-rdx publish'))
+  assert.deepEqual(await json(path.join(root, 'release-manifest.json')), {
+    version: '4.3.0',
+    packages: { '@lexibase/rdx': '4.3.0', '@lexibase/create-rdx': '4.3.0' },
+  })
   assert.match(await read('PUBLIC_API.md'), /# RDX public API — 4.3/)
   assert.ok(calls.some((call) => call.includes('--offline')))
   assert.ok(
@@ -281,6 +285,7 @@ test('opt-in commit runs after formatting and selects only the generated release
   assert.ok(commit.includes('--only'))
   assert.ok(commit.includes('chore(release): prepare RDX 4.2.1'))
   assert.ok(commit.includes('apps/web/versioned_docs/version-4.2.1'))
+  assert.ok(commit.includes('release-manifest.json'))
   assert.ok(commit.includes('.changeset/feature.md'))
   assert.ok(!commit.includes('packages/rdx-ui/package.json'))
   assert.equal(calls.at(-1), commit)

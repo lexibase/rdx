@@ -247,6 +247,15 @@ export async function prepareRelease(
           `| ${pkg.manifest.name} | ${releases.find((item) => item.name === pkg.manifest.name).newVersion} |`
       )
       .join('\n')
+    await writeJson(path.join(root, 'release-manifest.json'), {
+      version,
+      packages: Object.fromEntries(
+        planned.map(({ manifest }) => [
+          manifest.name,
+          releases.find((item) => item.name === manifest.name).newVersion,
+        ])
+      ),
+    })
     const commands = planned
       .map(
         (pkg) =>
@@ -279,6 +288,7 @@ export async function prepareRelease(
       'CHANGELOG.md',
       'PUBLISHING.md',
       'PUBLIC_API.md',
+      'release-manifest.json',
       'pnpm-lock.yaml',
       'apps/web/versions.json',
       `apps/web/versioned_docs/version-${version}`,
