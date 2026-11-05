@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { getPageMetadata } from '@lexibase/rdx-next/runtime'
+import { getMarkdownHref, getPageMetadata } from '@lexibase/rdx-next/runtime'
 import { getMdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
 import { DocsPageTransition } from '@lexibase/rdx-ui/components/docs-page-transition'
@@ -96,6 +96,9 @@ export default async function DocPage({
                 version={version}
                 filename={filename}
                 title={page.title}
+                markdownHref={getMarkdownHref(
+                  `/docs/${encodeURIComponent(version)}/${filename.split('/').map(encodeURIComponent).join('/')}`
+                )}
               />
             </header>
             <div className="h-full w-full flex-1 max-w-[960px]">{content}</div>

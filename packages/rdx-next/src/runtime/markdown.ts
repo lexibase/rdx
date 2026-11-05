@@ -44,7 +44,7 @@ function text(value: string) {
     .replace(/[\\`*_[\]<>]/g, '\\$&')
 }
 
-function markdownPath(htmlPath: string) {
+export function getMarkdownHref(htmlPath: string) {
   return `/rdx-markdown${htmlPath}.md`
 }
 
@@ -85,7 +85,7 @@ export function getLlmIndexResponse(
           documentPath?.(source, page) ??
           getDocsHref(project, source, page.slug)
         lines.push(
-          `- [${text(page.title)}](<${publicUrl(project, markdownPath(href))}>)${page.description ? `: ${text(page.description)}` : ''}`
+          `- [${text(page.title)}](<${publicUrl(project, getMarkdownHref(href))}>)${page.description ? `: ${text(page.description)}` : ''}`
         )
       }
       lines.push('')
