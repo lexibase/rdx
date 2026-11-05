@@ -215,6 +215,9 @@ test('showcase compilation preserves relative links, missing-document handling a
 })
 
 test('the website exposes Canary and one edition per major, with historical routes', async () => {
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(root, 'versions.json'), 'utf8')
+  )
   const docs = createDocumentation(
     await createRdxProject(config, { rootDir: root })
   )
@@ -222,22 +225,15 @@ test('the website exposes Canary and one edition per major, with historical rout
     docs.editions.map(({ id, kind }) => ({ id, kind })),
     [
       { id: 'canary', kind: 'live' },
-      { id: '4.2.0', kind: 'version' },
-      { id: '3.2.0', kind: 'version' },
-      { id: '2.0.0', kind: 'version' },
-      { id: '1.0.1', kind: 'version' },
+      ...manifest.active.map((id) => ({ id, kind: 'version' })),
+      ...manifest.archived.map((id) => ({ id, kind: 'archived' })),
     ]
   )
   for (const version of [
     'canary',
-    '4.2.0',
-    '4.1.0',
-    '4.0.0',
-    '3.2.0',
-    '3.1.0',
-    '3.0.0',
-    '2.0.0',
-    '1.0.1',
+    ...manifest.active,
+    ...manifest.archived,
+    ...Object.keys(manifest.redirects || {}),
   ]) {
     const pages = docs.pages(version)
     assert.ok(pages.length > 0, version)
@@ -258,14 +254,9 @@ test('the website exposes Canary and one edition per major, with historical rout
     for (const page of pages) assert.ok(docs.document(version, page.slug))
   }
   assert.deepEqual(docs.index('../canary'), [])
-  assert.equal(docs.canonicalVersion('3.0.0'), '3.2.0')
-  assert.equal(docs.canonicalVersion('4.0.0'), '4.2.0')
-  assert.equal(docs.canonicalVersion('4.1.0'), '4.2.0')
-  assert.equal(docs.canonicalVersion('3.1.0'), '3.2.0')
+  for (const [alias, target] of Object.entries(manifest.redirects || {}))
+    assert.equal(docs.canonicalVersion(alias), target)
   assert.equal(docs.canonicalVersion('canary'), 'canary')
-  for (const retired of ['2.1.1', '2.1.0']) {
-    assert.equal(docs.document(retired, 'intro'), null)
-  }
   assert.equal(docs.document('unknown', 'intro'), null)
   assert.equal(docs.document('canary', '../intro'), null)
   assert.equal(docs.document('canary', 'invented/path/intro'), null)

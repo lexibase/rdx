@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import test from 'node:test'
+import { assertCompatibleUi } from '../prepare-release.mjs'
 import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('../../', import.meta.url))
@@ -55,7 +56,7 @@ test('the creator template pins the main framework without exposing internal pac
 test('the optional language plugin is public and belongs to the grouped release', async () => {
   const plugin = await manifest('packages/rdx-plugin-i18n/package.json')
   assert.notEqual(plugin.private, true)
-  assert.equal(plugin.version, '1.0.1')
+  assert.match(plugin.version, /^\d+\.\d+\.\d+$/)
   assert.equal(plugin.publishConfig.access, 'public')
   assert.equal(plugin.dependencies['@lexibase/rdx-core'], 'workspace:*')
 })
@@ -81,7 +82,8 @@ test('the runtime consumes a compatible project-owned UI while workspace develop
   const runtime = await manifest('packages/rdx-next/package.json')
   assert.equal(runtime.dependencies['@lexibase/rdx-ui'], undefined)
   assert.equal(runtime.optionalDependencies?.['@lexibase/rdx-ui'], undefined)
-  assert.equal(runtime.peerDependencies['@lexibase/rdx-ui'], '^3.4.0')
+  const ui = await manifest('packages/rdx-ui/package.json')
+  assertCompatibleUi(runtime.peerDependencies['@lexibase/rdx-ui'], ui.version)
   assert.equal(runtime.devDependencies['@lexibase/rdx-ui'], 'workspace:*')
   assert.notEqual(
     runtime.peerDependenciesMeta?.['@lexibase/rdx-ui']?.optional,

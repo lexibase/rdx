@@ -1,5 +1,68 @@
 # Publishing RDX
 
+## Automated preparation
+
+Use Changesets to record package changes and the RDX command to prepare a grouped
+release. Tooling is a workspace development dependency; generated projects do not
+install it. Run these commands from the repository root:
+
+```sh
+pnpm release:note
+pnpm release:plan
+pnpm release:prepare
+```
+
+`release:note` asks which public packages changed, the bump type and an English
+summary. Choose patch for fixes, minor for compatible features and major only
+for incompatible public API changes. Review the framework's bump severity;
+dependency propagation cannot decide whether a feature deserves a framework
+minor. The framework and creator share their release number; the runtime, UI,
+types, core and optional plugins keep independent versions. For plugin-only
+releases, include the framework in the note to select a documentation edition.
+
+`release:plan` previews the affected packages without applying versions or
+snapshots. `release:prepare` consumes the pending notes, updates package versions
+and dependencies, pins the template's framework version, promotes the root
+changelog, refreshes the public package table and generates publication commands
+for only the changed packages. It updates the lockfile offline and builds the
+small dependency set needed by `docs:version`; it does not build every website
+or run the installed-package test suite. Stop development watchers before
+preparing a release so they do not compete with those package builds.
+
+The command publishes the documentation edition locally using the existing
+`docs:version` command, preserving historical snapshots, redirects and Canary.
+It formats the resulting snapshot and release files before you stage them.
+No Git commit, tag, push, GitHub Release or npm publication happens automatically.
+
+To create a local commit after snapshot generation and formatting, opt in with:
+
+```sh
+pnpm release:prepare --commit
+```
+
+This stages the generated release paths and consumed tracked notes, then commits
+them as `chore(release): prepare RDX <version>`. Other staged files are excluded
+with Git's `--only` option. The default command keeps edits uncommitted, and
+`--dry-run --commit` still performs no Git writes. Push, tags and publication
+remain manual. Commit hooks and any configured signing still run normally;
+a hook failure leaves the prepared files available for review.
+
+Review the generated diff and any required migration guidance, then commit one
+release PR. Local verification should focus on changed behavior. GitHub Actions
+runs `pnpm check` and the full packed-installation suite; do not repeat that full
+suite locally for routine release preparation. Reproduce a specific failing
+scenario locally when needed.
+
+Preparation makes ordinary working-tree edits, without backup copies or automatic
+rollback. If a step fails after versioning, inspect the diff and follow the
+reported command to finish the remaining steps; consumed notes and updated
+versions stay available for review. Install workspace dependencies first so the
+offline lockfile update has the required metadata.
+
+GitHub Releases are optional announcements. A release can contain a tag, notes
+and links to the npm packages without any binary attachments. Create it manually
+after checking npm publication if you want that announcement.
+
 ## Release workflow: one PR
 
 Prepare each release in a single PR containing the implementation, package

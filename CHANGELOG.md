@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Remove the unused private `@rdx/types` compatibility package and obsolete type
+  aliases. Keep shared declarations in `@lexibase/rdx-types`.
+
+- Automate release planning and preparation with Changesets, independent package
+  versions, template alignment, changelog promotion, publication checklists and
+  formatted documentation snapshots. Keep full release validation in CI and
+  preserve manual control of commits, tags and publication.
+
 - Show pnpm installation progress through RDX's own terminal renderer: an activity
   spinner, real package-linking progress, elapsed time, cache/download counts,
   visible diagnostics and plain status lines in non-interactive logs.
