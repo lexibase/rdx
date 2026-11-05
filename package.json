@@ -16,6 +16,7 @@
     "release:note": "changeset",
     "release:plan": "node scripts/prepare-release.mjs --dry-run",
     "release:prepare": "node scripts/prepare-release.mjs",
+    "release:pack": "node scripts/publish-release.mjs pack",
     "prepare": "husky",
     "format:check": "node scripts/check-staged-format.mjs"
   },
