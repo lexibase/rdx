@@ -145,7 +145,10 @@ function PageToc({ contentId }: { contentId: string }) {
         elements
           .map((element) => ({
             id: element.id,
-            title: element.textContent?.trim() ?? '',
+            title:
+              (
+                element.querySelector('[data-rdx-heading-text]') ?? element
+              ).textContent?.trim() ?? '',
             depth: Number(element.tagName.slice(1)),
           }))
           .filter((heading) => heading.title)
