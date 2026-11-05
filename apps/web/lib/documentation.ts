@@ -7,6 +7,14 @@ import type { RdxProject } from '@lexibase/rdx-types'
 import type { DocumentationCheckOptions } from '@lexibase/rdx-core/check'
 import { getSourceRobots, getRdxSitemap } from '@lexibase/rdx-next/runtime'
 
+const canaryCategoryAliases = new Map([
+  ['cat-01', 'documentation'],
+  ['cat-02', 'getting-started'],
+  ['cat-03', 'writing-documentation'],
+  ['cat-04', 'features'],
+  ['cat-05', 'guides'],
+])
+
 /** Only the official site's historical URL aliases differ from installed sites. */
 export function createDocumentation(project: RdxProject) {
   const messages = getMessages(project.config.lang)
@@ -71,7 +79,13 @@ export function createDocumentation(project: RdxProject) {
     const options = source(version)
     if (!options) return null
     const entries = pages(version)
-    const exact = entries.find((page) => page.slug === slug)
+    const [category, ...segments] = slug.split('/')
+    const renamed =
+      version === 'canary' && segments.length > 0
+        ? canaryCategoryAliases.get(category!)
+        : undefined
+    const fullSlug = renamed ? [renamed, ...segments].join('/') : slug
+    const exact = entries.find((page) => page.slug === fullSlug)
     const matches = entries.filter(
       (page) => path.posix.basename(page.slug) === slug
     )
@@ -86,7 +100,7 @@ export function createDocumentation(project: RdxProject) {
     return index(version).map((category) => ({
       title: category.title,
       links: category.pages.map((page) => ({
-        label: page.title,
+        label: page.navTitle ?? page.title,
         description: page.description,
         href: `/docs/${canonicalVersion(version)}/${routes.get(page.sourcePath)}`,
       })),
@@ -113,7 +127,15 @@ export function createDocumentation(project: RdxProject) {
                 ])
               )
             )
-          return [routes.get(version)!.get(page.sourcePath)!, page.slug].map(
+          const slugs = [routes.get(version)!.get(page.sourcePath)!, page.slug]
+          if (version === 'canary') {
+            const [category, ...segments] = page.slug.split('/')
+            for (const [alias, current] of canaryCategoryAliases) {
+              if (category === current && segments.length)
+                slugs.push([alias, ...segments].join('/'))
+            }
+          }
+          return slugs.map(
             (slug) =>
               `/docs/${version}/${slug.split('/').map(encodeURIComponent).join('/')}`
           )

@@ -283,10 +283,6 @@ export async function DocsPage({
       documents: contentCategories.flatMap((category) => category.pages),
     }
   )
-  const title =
-    typeof document.frontmatter.title === 'string'
-      ? document.frontmatter.title
-      : currentSlug
   const description =
     typeof document.frontmatter.description === 'string'
       ? document.frontmatter.description
@@ -295,12 +291,13 @@ export async function DocsPage({
   const sidebarCategories = categories.map((category) => ({
     title: category.title,
     links: category.pages.map((page) => ({
-      label: page.title,
+      label: page.navTitle ?? page.title,
       href: hrefFor(page.slug),
     })),
   }))
   const pages = categories.flatMap((category) => category.pages)
   const index = pages.findIndex((page) => page.slug === currentSlug)
+  const title = pages[index]?.title ?? currentSlug
   const previous = pages[index - 1]
   const next = pages[index + 1]
   const category = categories.find((entry) =>

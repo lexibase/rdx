@@ -49,11 +49,11 @@ framework selects the tested runtime and UI packages. Current package versions:
 
 Types/core 2.0 remove
 metadata.robots, now managed automatically. See the
-[4.0 migration guide](apps/web/docs/cat-05/updating.mdx#update-from-rdx-3x-to-40).
+[4.0 migration guide](apps/web/docs/05-guides/updating.mdx#update-from-rdx-3x-to-40).
 
 RDX 2.0 removes the published `ButtonLink` module. Use `Button` with `href`
 from `@lexibase/rdx/ui/components/button`. See the
-[upgrade guide](apps/web/docs/cat-05/updating.mdx#upgrade-from-rdx-1x-to-2x).
+[upgrade guide](apps/web/docs/05-guides/updating.mdx#upgrade-from-rdx-1x-to-2x).
 
 ## Configuração e autoria
 

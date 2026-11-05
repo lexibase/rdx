@@ -51,7 +51,10 @@ test('documentation licensing distinguishes official prose from MIT code and use
   assert.match(notice, /CLI starter templates[\s\S]*remain MIT licensed/)
   assert.match(notice, /using RDX does not select a license/)
   assert.match(await read('LICENSE'), /The MIT License/)
-  for (const filename of ['README.md', 'apps/web/docs/cat-01/license.mdx']) {
+  for (const filename of [
+    'README.md',
+    'apps/web/docs/01-documentation/license.mdx',
+  ]) {
     const text = await read(filename)
     assert.match(text, /CC BY 4\.0/)
     assert.match(text, /LICENSE-docs/)

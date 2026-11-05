@@ -3,9 +3,11 @@ import { docsIndexer } from '@/lib/docs'
 export async function DocHeader({
   version,
   filename,
+  title,
 }: {
   version: string
   filename: string
+  title: string
 }) {
   const sidebarLinks = await docsIndexer(version)
   const slug = `/docs/${version}/${filename}`
@@ -21,9 +23,7 @@ export async function DocHeader({
       <span className="text-xs text-zinc-600 font-semibold uppercase block -mb-0.5">
         {currentCategory?.title}
       </span>
-      <h1 className="text-4xl uppercase font-bold mb-2">
-        {currentLink?.label}
-      </h1>
+      <h1 className="text-4xl uppercase font-bold mb-2">{title}</h1>
       <p className="text-sm text-ring max-w-[726px]">
         {currentLink?.description || 'Sem descrição disponível'}
       </p>

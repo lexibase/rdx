@@ -10,6 +10,9 @@ import {
   resolveConfig,
   getProjectDocsPaths,
   resolveDocsRoute,
+  getDocsIndex,
+  getDocument,
+  createDocumentLinkResolver,
 } from '../dist/index.js'
 import { getEditPageHref } from '../dist/config/index.js'
 
@@ -77,6 +80,78 @@ test('configuration defaults and legacy runtime config objects remain usable', (
     theme: { defaultTheme: 'system' },
     plugins: [],
   })
+})
+
+test('numbered source names order the sidebar without becoming route segments', async (t) => {
+  const root = await fixture(t)
+  const docsDir = path.join(root, 'docs')
+  const category = path.join(docsDir, '02-getting-started')
+  await mkdir(path.join(category, '01-details'), { recursive: true })
+  await writeFile(
+    path.join(category, '08-install.mdx'),
+    '---\ntitle: Install the framework\nnavTitle: Install\norder: 0\nlink_position: 99\n---\nInstall the package.'
+  )
+  await writeFile(path.join(category, '01-intro.md'), 'Introduction')
+  const detail = path.join(category, '01-details', '03-config.md')
+  await writeFile(detail, 'Configuration details')
+
+  const [first] = getDocsIndex({ docsDir })
+  assert.equal(first.title, 'Getting Started')
+  assert.deepEqual(
+    first.pages.map((page) => page.slug),
+    [
+      'getting-started/install',
+      'getting-started/intro',
+      'getting-started/details/config',
+    ]
+  )
+  assert.equal(first.pages[0].title, 'Install the framework')
+  assert.equal(first.pages[0].navTitle, 'Install')
+  assert.equal(first.pages[1].navTitle, undefined)
+  assert.equal(
+    getDocument('getting-started/details/config', { docsDir }).sourcePath,
+    detail
+  )
+
+  const translated = path.join(root, 'locale/ptbr/docs')
+  const translatedCategory = path.join(translated, '04-getting-started')
+  await mkdir(translatedCategory, { recursive: true })
+  const translatedIntro = path.join(translatedCategory, '03-intro.md')
+  await writeFile(
+    translatedIntro,
+    '---\nnavTitle: Introdução\n---\nTexto em português.'
+  )
+  const options = { docsDir: translated, fallbackDocsDir: docsDir }
+  const [localized] = getDocsIndex(options)
+  assert.equal(localized.pages[1].navTitle, 'Introdução')
+  assert.equal(
+    getDocument('getting-started/intro', options).sourcePath,
+    translatedIntro
+  )
+  assert.equal(
+    getDocument('getting-started/details/config', options).sourcePath,
+    detail
+  )
+  const resolveLink = createDocumentLinkResolver({
+    sourceRoot: translated,
+    sourcePath: translatedIntro,
+    virtualPaths: true,
+    documents: localized.pages,
+  })
+  assert.equal(
+    resolveLink('./01-details/03-config.md'),
+    '/docs/getting-started/details/config'
+  )
+
+  await writeFile(path.join(category, '99-intro.mdx'), 'Collision')
+  assert.throws(
+    () => getDocsIndex({ docsDir }),
+    /Duplicate documentation route "getting-started\/intro"/
+  )
+  assert.throws(
+    () => getDocument('getting-started/intro', { docsDir }),
+    /Duplicate documentation route/
+  )
 })
 
 test('historical prefixes resolve content but do not multiply static pages, and reject unsafe redirect targets', async (t) => {

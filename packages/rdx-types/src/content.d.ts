@@ -1,6 +1,9 @@
 export type RdxDocFrontmatter = {
   title?: string
   description?: string
+  order?: number
+  navTitle?: string
+  /** @deprecated Use order. */
   link_position?: number
   [key: string]: unknown
 }
@@ -8,6 +11,7 @@ export type RdxDocFrontmatter = {
 export type RdxDocPage = {
   slug: string
   title: string
+  navTitle?: string
   description: string
   position: number
   sourcePath: string
