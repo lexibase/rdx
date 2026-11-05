@@ -29,6 +29,7 @@ import {
 } from './code-block'
 import { MdxCodeBlock } from './mdx-code-block'
 import { Kbd, KbdGroup } from './kbd'
+import { HeadingPermalink } from './heading-permalink'
 import { MdxKeyboardShortcut } from './mdx-keyboard-shortcut'
 import {
   Table,
@@ -72,16 +73,46 @@ function MdxTable({ lang, className, ...props }: ComponentProps<'table'>) {
   )
 }
 
+function containsLink(children: ReactNode): boolean {
+  return Children.toArray(children).some(
+    (child) =>
+      isValidElement<{ href?: string; children?: ReactNode }>(child) &&
+      (child.type === 'a' ||
+        child.props.href !== undefined ||
+        containsLink(child.props.children))
+  )
+}
+
+function heading(Tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6', styles: string) {
+  return function MdxHeading({
+    className,
+    children,
+    id,
+    ...props
+  }: ComponentProps<'h2'>) {
+    const title = <span data-rdx-heading-text>{children}</span>
+    return (
+      <Tag
+        id={id}
+        className={cn('group/mdx-heading', styles, className)}
+        {...props}
+      >
+        {id && !containsLink(children) ? (
+          <HeadingPermalink key={id} id={id}>
+            {title}
+          </HeadingPermalink>
+        ) : (
+          title
+        )}
+      </Tag>
+    )
+  }
+}
+
 export const mdxComponents = {
-  h1: ({ className, ...props }: ComponentProps<'h1'>) => (
-    <h1 className={cn('text-4xl font-bold my-6', className)} {...props} />
-  ),
-  h2: ({ className, ...props }: ComponentProps<'h2'>) => (
-    <h2 className={cn('text-2xl font-bold my-6', className)} {...props} />
-  ),
-  h3: ({ className, ...props }: ComponentProps<'h3'>) => (
-    <h3 className={cn('text-xl font-bold my-6', className)} {...props} />
-  ),
+  h1: heading('h1', 'text-4xl font-bold my-6'),
+  h2: heading('h2', 'text-2xl font-bold my-6'),
+  h3: heading('h3', 'text-xl font-bold my-6'),
   p: ({ className, ...props }: ComponentProps<'p'>) => (
     <p className={cn('my-4', className)} {...props} />
   ),
@@ -123,15 +154,9 @@ export const mdxComponents = {
     />
   ),
 
-  h4: ({ className, ...props }: ComponentProps<'h4'>) => (
-    <h4 className={cn('text-lg font-semibold my-4', className)} {...props} />
-  ),
-  h5: ({ className, ...props }: ComponentProps<'h5'>) => (
-    <h5 className={cn('text-base font-semibold my-4', className)} {...props} />
-  ),
-  h6: ({ className, ...props }: ComponentProps<'h6'>) => (
-    <h6 className={cn('text-sm font-semibold my-4', className)} {...props} />
-  ),
+  h4: heading('h4', 'text-lg font-semibold my-4'),
+  h5: heading('h5', 'text-base font-semibold my-4'),
+  h6: heading('h6', 'text-sm font-semibold my-4'),
   hr: ({ className, ...props }: ComponentProps<'hr'>) => (
     <hr className={cn('my-8 border-border', className)} {...props} />
   ),
