@@ -23,6 +23,7 @@ import { Home } from '@lexibase/rdx-ui/components/home'
 import { SkipLink } from '@lexibase/rdx-ui/components/skip-link'
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
 import { EditPageLink } from '@lexibase/rdx-ui/components/edit-page-link'
+import { CopyPage } from '@lexibase/rdx-ui/components/copy-page'
 import { BrandLogo } from '@lexibase/rdx-ui/components/brand-logo'
 import { getMdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { getMessages, formatMessage } from '@lexibase/rdx-ui/lib/i18n'
@@ -38,6 +39,7 @@ import { ThemeProvider } from '@lexibase/rdx-ui/providers/theme-provider'
 import { notFound, redirect, permanentRedirect } from 'next/navigation'
 
 import { compileDocumentation } from './mdx'
+import { getMarkdownHref } from './markdown'
 
 export {
   createRdxProject,
@@ -48,6 +50,7 @@ export { getSearchResponse, getSearchSources } from './search'
 export { getSourceRobots, getRdxRobots, getRdxSitemap } from './indexing'
 export {
   getLlmIndexResponse,
+  getMarkdownHref,
   getMarkdownPaths,
   getMarkdownResponse,
   getDocumentMarkdownResponse,
@@ -296,6 +299,9 @@ export async function DocsPage({
       ? document.frontmatter.description
       : null
   const hrefFor = (pageSlug: string) => getDocsHref(project, source, pageSlug)
+  const markdownHref = fallback
+    ? undefined
+    : getMarkdownHref(hrefFor(currentSlug))
   const sidebarCategories = categories.map((category) => ({
     title: category.title,
     links: category.pages.map((page) => ({
@@ -390,7 +396,14 @@ export async function DocsPage({
                   <span className="text-xs text-zinc-600 font-semibold uppercase block -mb-0.5">
                     {category?.title}
                   </span>
-                  <h1 className="text-4xl uppercase font-bold mb-2">{title}</h1>
+                  <div className="mb-2 flex flex-wrap items-start gap-x-4 gap-y-2">
+                    <h1 className="min-w-0 max-w-full break-words text-4xl font-bold uppercase">
+                      {title}
+                    </h1>
+                    {markdownHref && (
+                      <CopyPage key={markdownHref} href={markdownHref} />
+                    )}
+                  </div>
                   {description && (
                     <p className="text-sm text-ring max-w-[726px]">
                       {description}
