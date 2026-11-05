@@ -89,7 +89,7 @@ test('numbered source names order the sidebar without becoming route segments', 
   await mkdir(path.join(category, '01-details'), { recursive: true })
   await writeFile(
     path.join(category, '08-install.mdx'),
-    '---\ntitle: Install the framework\nnavTitle: Install\norder: 0\nlink_position: 99\n---\nInstall the package.'
+    '---\ntitle: Install the framework\nnavTitle: Install\nhighlighting: important\norder: 0\nlink_position: 99\n---\nInstall the package.'
   )
   await writeFile(path.join(category, '01-intro.md'), 'Introduction')
   const detail = path.join(category, '01-details', '03-config.md')
@@ -107,6 +107,8 @@ test('numbered source names order the sidebar without becoming route segments', 
   )
   assert.equal(first.pages[0].title, 'Install the framework')
   assert.equal(first.pages[0].navTitle, 'Install')
+  assert.equal(first.pages[0].highlighting, 'important')
+  assert.equal(first.pages[1].highlighting, undefined)
   assert.equal(first.pages[1].navTitle, undefined)
   assert.equal(
     getDocument('getting-started/details/config', { docsDir }).sourcePath,
@@ -119,11 +121,12 @@ test('numbered source names order the sidebar without becoming route segments', 
   const translatedIntro = path.join(translatedCategory, '03-intro.md')
   await writeFile(
     translatedIntro,
-    '---\nnavTitle: Introdução\n---\nTexto em português.'
+    '---\nnavTitle: Introdução\nhighlighting: new\n---\nTexto em português.'
   )
   const options = { docsDir: translated, fallbackDocsDir: docsDir }
   const [localized] = getDocsIndex(options)
   assert.equal(localized.pages[1].navTitle, 'Introdução')
+  assert.equal(localized.pages[1].highlighting, 'new')
   assert.equal(
     getDocument('getting-started/intro', options).sourcePath,
     translatedIntro

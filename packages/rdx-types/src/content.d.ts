@@ -1,8 +1,12 @@
+export type RdxPageHighlight = 'important' | 'new'
+
 export type RdxDocFrontmatter = {
   title?: string
   description?: string
   order?: number
   navTitle?: string
+  /** Show a semantic highlight next to the page in the sidebar. */
+  highlighting?: RdxPageHighlight
   /** @deprecated Use order. */
   link_position?: number
   [key: string]: unknown
@@ -12,6 +16,7 @@ export type RdxDocPage = {
   slug: string
   title: string
   navTitle?: string
+  highlighting?: RdxPageHighlight
   description: string
   position: number
   sourcePath: string

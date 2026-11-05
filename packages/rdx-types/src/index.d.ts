@@ -25,6 +25,7 @@ export {
   RdxDocCategory,
   RdxDocFrontmatter,
   RdxDocPage,
+  RdxPageHighlight,
   RdxDocument,
   RdxDocsOptions,
 } from './content'

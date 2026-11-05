@@ -5,6 +5,7 @@ import { useMessages } from '../providers/locale-provider'
 import { useEffect, useRef, useState } from 'react'
 import { SidebarClose, SidebarOpen } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import type { RdxPageHighlight } from '@lexibase/rdx-types'
 
 import { Button } from './button'
 import { Separator } from './separator'
@@ -18,7 +19,7 @@ import {
 
 export type SidebarCategory = {
   title: string
-  links: { href: string; label: string }[]
+  links: { href: string; label: string; highlighting?: RdxPageHighlight }[]
 }
 
 export function DocsSidebar({
@@ -73,7 +74,11 @@ export function DocsSidebar({
               variant="ghost"
               size="sm"
               active={pathname === link.href}
-              aria-label={link.label}
+              aria-label={
+                link.highlighting
+                  ? `${link.label} (${link.highlighting === 'important' ? messages.sidebarImportant : messages.sidebarNew})`
+                  : link.label
+              }
               href={link.href}
               transitionTypes={
                 currentIndex < 0 || link.href === pathname
@@ -89,6 +94,15 @@ export function DocsSidebar({
               className={`h-auto min-h-8 w-full min-w-0 justify-start whitespace-normal py-1.5 text-left text-sm [overflow-wrap:anywhere] ${pathname === link.href ? 'text-accent-foreground' : 'text-primary'}`}
             >
               {link.label}
+              {link.highlighting && (
+                <span
+                  aria-hidden="true"
+                  data-rdx-sidebar-highlight={link.highlighting}
+                  className={`relative ms-auto size-2 shrink-0 rounded-full bg-current ${link.highlighting === 'important' ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400'}`}
+                >
+                  <span className="absolute inset-0 rounded-full bg-current opacity-0 motion-safe:animate-[rdx-sidebar-highlight_2.8s_ease-out_infinite]" />
+                </span>
+              )}
             </Button>
           ))}
           {index < categories.length - 1 && <Separator className="my-4" />}
