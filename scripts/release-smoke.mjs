@@ -141,6 +141,8 @@ const required = {
     'dist/runtime/index.d.ts',
     'templates/runtime/app/rdx-search/[source]/route.ts',
     'templates/runtime/app/docs/[[...slug]]/page.tsx',
+    'templates/runtime/app/docs/llms.txt/route.ts',
+    'templates/runtime/app/rdx-markdown/[...path]/route.ts',
     'templates/runtime/app/not-found.tsx',
     'templates/runtime/app/sitemap.ts',
     'templates/runtime/app/robots.ts',
@@ -613,6 +615,15 @@ async function verifySite(
         )
       )
       assert.doesNotMatch(sitemap, /rdx-search|_not-found/)
+      const introExport = `/rdx-markdown/docs/${versioned ? '1.0.0/' : ''}init/intro.md`
+      const llmIndex = await (await request(base, '/docs/llms.txt')).text()
+      assert.ok(llmIndex.includes(`https://docs.example.test${introExport}`))
+      const exported = await request(base, introExport)
+      assert.match(exported.headers.get('content-type'), /^text\/markdown/)
+      assert.match(
+        await exported.text(),
+        /docs_index: "https:\/\/docs\.example\.test\/docs\/llms\.txt"/
+      )
       if (versioned)
         assert.ok(
           !sitemap.includes('https://docs.example.test/docs/init/intro')

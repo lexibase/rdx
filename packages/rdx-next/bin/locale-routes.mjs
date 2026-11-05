@@ -1,4 +1,4 @@
-import { lstat, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { lstat, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 const defaultFiles = [
@@ -14,6 +14,7 @@ const generated = [
   'app/(rdx-locales)/[locale]/not-found.tsx',
   'app/(rdx-locales)/[locale]/docs/[[...slug]]/page.tsx',
   'app/(rdx-locales)/[locale]/rdx-search/[source]/route.ts',
+  'app/(rdx-locales)/[locale]/docs/llms.txt/route.ts',
 ]
 
 /** Root layouts keep HTML language correct on the server, without middleware. */
@@ -34,6 +35,18 @@ export async function prepareLocaleRoutes(project, runtime, template) {
     }
     return current
   }
+  // An existing public index owns this URL. Keep it when upgrading a project.
+  const publicIndex = path.join(project.rootDir, 'public', 'docs', 'llms.txt')
+  const hasPublicIndex = await stat(publicIndex).then(
+    (entry) => entry.isFile(),
+    (error) => {
+      if (error.code === 'ENOENT' || error.code === 'ENOTDIR') return false
+      throw error
+    }
+  )
+  if (hasPublicIndex)
+    await rm(await safe('app/docs/llms.txt/route.ts'), { force: true })
+
   const marker = await safe('.rdx-localization.json')
   let owned = false
   try {
@@ -130,6 +143,23 @@ export async function generateStaticParams() {
   return project.localization!.locales.flatMap(locale => getSearchSources(getLocalizedProject(project, locale.path)).map(source => ({ locale: locale.path, ...source })))
 }
 export async function GET(_request: Request, { params }: { params: Promise<{ locale: string, source: string }> }) { const { locale, source } = await params; return getSearchResponse(getLocalizedProject(await getProject(), locale), source) }
+`
+  )
+  await emit(
+    'app/(rdx-locales)/[locale]/docs/llms.txt/route.ts',
+    `import { getLlmIndexResponse, getLocalizedProject } from '${provider}'
+import { getProject } from '../../../../../rdx-project'
+export const dynamic = 'force-static'
+export const dynamicParams = false
+export async function generateStaticParams() {
+  return (await getProject()).localization!.locales.map(locale => ({ locale: locale.path }))
+}
+export async function GET(_request: Request, { params }: { params: Promise<{ locale: string }> }) {
+  const project = await getProject()
+  const { locale } = await params
+  if (!project.localization?.locales.some(entry => entry.path === locale)) return new Response(null, { status: 404 })
+  return getLlmIndexResponse(getLocalizedProject(project, locale))
+}
 `
   )
   await writeFile(marker, JSON.stringify({ version: 1 }) + '\n')

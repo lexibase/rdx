@@ -47,6 +47,14 @@ export {
 export { getSearchResponse, getSearchSources } from './search'
 export { getSourceRobots, getRdxRobots, getRdxSitemap } from './indexing'
 export {
+  getLlmIndexResponse,
+  getMarkdownPaths,
+  getMarkdownResponse,
+  getDocumentMarkdownResponse,
+  parseMarkdownPath,
+  markdownNotFound,
+} from './markdown'
+export {
   getDocumentMetadata,
   getPageMetadata,
   getRdxMetadata,
