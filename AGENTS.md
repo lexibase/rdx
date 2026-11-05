@@ -33,4 +33,6 @@
 - O usuário faz commits, merges e publicações pelo terminal. Não os execute automaticamente sem autorização explícita para essas ações.
 - Não publique pacotes nem incremente versões a cada ajuste; as publicações são agrupadas quando solicitadas.
 
+- Para testar ajustes de terminal, quando solicitado, publique somente a CLI com versão prerelease e tag `beta`, mantendo a framework estável no template. Use uma branch de beta e não avance o snapshot da documentação a cada tentativa. Antes de preparar a release estável com Changesets, restaure a versão-base estável da CLI; não mescle os metadados de beta diretamente em `main`.
+
 - Prepare cada release em uma única PR, reunindo implementação, versões dos pacotes, migrações, changelog, guias e snapshot da documentação. Valide tudo junto. Após o merge, o deploy da documentação pode ocorrer automaticamente; o usuário publica os pacotes no npm e confirma as versões, tags e instalação pelo registro. Não crie uma segunda PR apenas para liberar a documentação nem condicione o snapshot à publicação prévia no npm. Esta preferência substitui o fluxo anterior de pacotes primeiro e documentação separada.
