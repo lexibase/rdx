@@ -12,6 +12,8 @@ const { getSourceRobots, getRdxRobots, getRdxSitemap } = await jiti.import(
 )
 const { getDocumentMetadata } = await jiti.import('../src/runtime/metadata.ts')
 const { getSearchResponse } = await jiti.import('../src/runtime/search.ts')
+const { getLlmIndexResponse, getMarkdownPaths, getMarkdownResponse } =
+  await jiti.import('../src/runtime/markdown.ts')
 
 function fixture(t, metadata = { metadataBase: 'https://docs.example.com' }) {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rdx-indexing-'))
@@ -34,6 +36,51 @@ function fixture(t, metadata = { metadataBase: 'https://docs.example.com' }) {
     ],
   }
 }
+
+test('LLM index links to the latest published Markdown and export resolves edition links', async (t) => {
+  const project = fixture(t)
+  project.sources.push(
+    { id: 'v2', label: '2.1.0', docsDir: 'v2', routePrefix: '2.1.0' },
+    { id: 'v1', label: '1.2.0', docsDir: 'v1', routePrefix: '1.2.0' }
+  )
+  fs.writeFileSync(
+    path.join(project.rootDir, 'v2/guides/details.mdx'),
+    `---\ntitle: Details\ndescription: Reference page\norder: 1\nprivateField: HiddenMarker\n---\n\nexport const internal = 'PrivateMarker'\n\n[Introduction](./intro.mdx#start)\n\n:::steps\n\n### Install\n\nRun the command.\n\n:::\n`
+  )
+  const index = await getLlmIndexResponse(project).text()
+  assert.match(
+    index,
+    /\[Details\]\(<https:\/\/docs\.example\.com\/rdx-markdown\/docs\/2\.1\.0\/guides\/details\.md>\): Reference page/
+  )
+  assert.doesNotMatch(index, /\/docs\/(?:1\.2\.0\/|guides\/)/)
+  const params = getMarkdownPaths(project).find(
+    ({ path }) => path.at(-1) === 'details.md'
+  )
+  const exported = getMarkdownResponse(project, params.path)
+  assert.equal(
+    exported.headers.get('content-type'),
+    'text/markdown; charset=utf-8'
+  )
+  const markdown = await exported.text()
+  assert.match(
+    markdown,
+    /url: "https:\/\/docs\.example\.com\/docs\/2\.1\.0\/guides\/details"/
+  )
+  assert.match(
+    markdown,
+    /docs_index: "https:\/\/docs\.example\.com\/docs\/llms\.txt"/
+  )
+  assert.match(
+    markdown,
+    /\[Introduction\]\(https\\?:\/\/docs\.example\.com\/docs\/2\.1\.0\/guides\/intro#start\)/
+  )
+  assert.match(markdown, /:::steps/)
+  assert.doesNotMatch(markdown, /PrivateMarker|HiddenMarker|lastUpdated|order:/)
+  assert.equal(
+    getMarkdownResponse(project, ['docs', '2.1.0', 'missing.md']).status,
+    404
+  )
+})
 
 test('plain sites index their documents, encode path segments and include only enabled homepages', (t) => {
   const project = fixture(t)

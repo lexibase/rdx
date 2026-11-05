@@ -9,6 +9,7 @@ export interface DocumentLinkOptions {
   /** Resolve missing translated files against the effective primary inventory. */
   virtualPaths?: boolean
   documents: readonly { sourcePath: string; slug: string }[]
+  documentHref?: (slug: string) => string
 }
 
 export class RdxDocumentLinkError extends Error {
@@ -96,13 +97,15 @@ export function createDocumentLinkResolver(options: DocumentLinkOptions) {
       )
     if ((routeCounts.get(slug) ?? 0) > 1)
       fail('the destination has an ambiguous documentation route.')
-    const route = [
-      options.basePath ?? '/docs',
-      options.routePrefix && encodeURIComponent(options.routePrefix),
-      ...slug.split('/').map(encodeURIComponent),
-    ]
-      .filter(Boolean)
-      .join('/')
+    const route =
+      options.documentHref?.(slug) ??
+      [
+        options.basePath ?? '/docs',
+        options.routePrefix && encodeURIComponent(options.routePrefix),
+        ...slug.split('/').map(encodeURIComponent),
+      ]
+        .filter(Boolean)
+        .join('/')
     return route + suffix
   }
 }

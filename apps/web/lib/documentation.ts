@@ -5,7 +5,15 @@ import { getDocument, getDocsIndex, getSourceOptions } from '@lexibase/rdx-core'
 import { getEditPageHref } from '@lexibase/rdx-core/config'
 import type { RdxProject } from '@lexibase/rdx-types'
 import type { DocumentationCheckOptions } from '@lexibase/rdx-core/check'
-import { getSourceRobots, getRdxSitemap } from '@lexibase/rdx-next/runtime'
+import {
+  getSourceRobots,
+  getRdxSitemap,
+  getLlmIndexResponse,
+  getMarkdownPaths,
+  getDocumentMarkdownResponse,
+  parseMarkdownPath,
+  markdownNotFound,
+} from '@lexibase/rdx-next/runtime'
 
 const canaryCategoryAliases = new Map([
   ['cat-01', 'documentation'],
@@ -107,6 +115,26 @@ export function createDocumentation(project: RdxProject) {
     }))
   }
 
+  function documentPaths() {
+    const routes = new Map<string, Map<string, string>>()
+    return (
+      entry: RdxProject['sources'][number],
+      page: { sourcePath: string }
+    ) => {
+      const version = entry.id === 'current' ? 'canary' : entry.routePrefix
+      if (!routes.has(version)) {
+        routes.set(
+          version,
+          new Map(
+            routePages(version).map((page) => [page.sourcePath, page.slug])
+          )
+        )
+      }
+      const slug = routes.get(version)!.get(page.sourcePath)!
+      return `/docs/${version}/${slug.split('/').map(encodeURIComponent).join('/')}`
+    }
+  }
+
   return {
     checkOptions(): DocumentationCheckOptions {
       const published =
@@ -150,22 +178,34 @@ export function createDocumentation(project: RdxProject) {
         : { index: false, follow: true }
     },
     sitemap() {
-      const routes = new Map<string, Map<string, string>>()
-      return getRdxSitemap(project, {
-        documentPath(entry, page) {
-          const version = entry.id === 'current' ? 'canary' : entry.routePrefix
-          if (!routes.has(version)) {
-            routes.set(
-              version,
-              new Map(
-                routePages(version).map((page) => [page.sourcePath, page.slug])
-              )
-            )
-          }
-          const slug = routes.get(version)!.get(page.sourcePath)!
-          return `/docs/${version}/${slug.split('/').map(encodeURIComponent).join('/')}`
-        },
-      })
+      return getRdxSitemap(project, { documentPath: documentPaths() })
+    },
+    llmIndex() {
+      return getLlmIndexResponse(project, documentPaths())
+    },
+    markdownPaths() {
+      return getMarkdownPaths(project, documentPaths())
+    },
+    markdownResponse(path: string[]) {
+      const segments = parseMarkdownPath(path)
+      if (!segments || segments[0] !== 'docs' || segments.length < 3)
+        return markdownNotFound()
+      const [, version, ...slug] = segments
+      const entry = contentSource(version!)
+      if (!entry || entry.redirectTo !== undefined) return markdownNotFound()
+      const canonical = routePages(version!).find(
+        (page) => page.slug === slug.join('/')
+      )
+      if (!canonical) return markdownNotFound()
+      const original = document(version!, canonical.slug)
+      return original
+        ? getDocumentMarkdownResponse(
+            project,
+            entry,
+            original.slug,
+            documentPaths()
+          )
+        : markdownNotFound()
     },
     source,
     editPageHref(version: string, sourcePath: string) {

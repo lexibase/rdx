@@ -11,6 +11,9 @@ const jiti = createJiti(import.meta.url, { moduleCache: false, fsCache: false })
 const { getDocumentMetadata } = await jiti.import('../src/runtime/metadata.ts')
 const { getSearchResponse } = await jiti.import('../src/runtime/search.ts')
 const { getRdxSitemap } = await jiti.import('../src/runtime/indexing.ts')
+const { getLlmIndexResponse, getMarkdownResponse } = await jiti.import(
+  '../src/runtime/markdown.ts'
+)
 
 async function fixture(t) {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rdx-locale-runtime-'))
@@ -57,6 +60,32 @@ async function fixture(t) {
   )
   return { project, write }
 }
+
+test('localized Markdown links to its own index and excludes fallback copies', async (t) => {
+  const { project } = await fixture(t)
+  const pt = getLocalizedProject(project, 'pt-br')
+  const index = await getLlmIndexResponse(pt).text()
+  assert.match(index, /\/rdx-markdown\/pt-br\/docs\/intro\.md/)
+  assert.doesNotMatch(index, /install\.md|\/en\/docs/)
+  const markdown = await getMarkdownResponse(project, [
+    'pt-br',
+    'docs',
+    'intro.md',
+  ]).text()
+  assert.match(
+    markdown,
+    /docs_index: "https:\/\/docs\.example\.test\/pt-br\/docs\/llms\.txt"/
+  )
+  assert.match(markdown, /TranslatedIntroMarker/)
+  assert.equal(
+    getMarkdownResponse(project, ['pt-br', 'docs', 'install.md']).status,
+    404
+  )
+  assert.match(
+    await getLlmIndexResponse(project).text(),
+    /\/rdx-markdown\/en\/docs\/intro\.md/
+  )
+})
 
 test('search indexes only authored content for the selected locale', async (t) => {
   const { project } = await fixture(t)
@@ -113,6 +142,13 @@ test('localized root layouts are repeatable, use server-side language and are re
     assert.match(layout, /RdxLayout/)
     assert.match(
       fs.readFileSync(
+        path.join(runtime, 'app/(rdx-locales)/[locale]/docs/llms.txt/route.ts'),
+        'utf8'
+      ),
+      /getLlmIndexResponse\(getLocalizedProject/
+    )
+    assert.match(
+      fs.readFileSync(
         path.join(runtime, 'app/(rdx-default)/layout.tsx'),
         'utf8'
       ),
@@ -120,6 +156,7 @@ test('localized root layouts are repeatable, use server-side language and are re
     )
   }
   write('rdx.css', '/* user owned */')
+  write('public/docs/llms.txt', '# Curated index')
   fs.cpSync(appTemplate, runtime, { recursive: true })
   await prepareLocaleRoutes(
     { ...project, localization: undefined },
@@ -127,6 +164,14 @@ test('localized root layouts are repeatable, use server-side language and are re
     appTemplate
   )
   assert.equal(fs.existsSync(path.join(runtime, 'app/layout.tsx')), true)
+  assert.equal(
+    fs.existsSync(path.join(runtime, 'app/docs/llms.txt/route.ts')),
+    false
+  )
+  assert.equal(
+    fs.readFileSync(path.join(project.rootDir, 'public/docs/llms.txt'), 'utf8'),
+    '# Curated index'
+  )
   assert.equal(
     fs.existsSync(path.join(runtime, 'app/(rdx-locales)/[locale]/layout.tsx')),
     false
