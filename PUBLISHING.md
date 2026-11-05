@@ -511,7 +511,7 @@ republish them. The instructions below describe the previous release.
 
 The 2.0 release removes the published ButtonLink module. Project-owned imports
 must migrate to Button with href; the implementation stays in button.tsx.
-See the [upgrade guide](apps/web/docs/cat-05/updating.mdx#upgrade-from-rdx-1x-to-2x).
+See the [upgrade guide](apps/web/docs/05-guides/updating.mdx#upgrade-from-rdx-1x-to-2x).
 Existing MDX, content, public assets, configuration, and snapshots are preserved.
 
 | Package                  | Version | Reason                                                                     |
@@ -564,7 +564,7 @@ pnpm --config.dlxCacheMaxAge=0 create @lexibase/rdx@2.0.0 docs-validacao-2
 ```
 
 If a release-age policy blocks the new release, review and approve its exact
-versions following the [policy guide](apps/web/docs/cat-05/troubleshooting.mdx#a-release-age-policy-blocks-installation),
+versions following the [policy guide](apps/web/docs/05-guides/troubleshooting.mdx#a-release-age-policy-blocks-installation),
 or wait for the configured age. A cache refresh does not override this policy.
 
 Existing main-package projects update with pnpm add @lexibase/rdx@latest after

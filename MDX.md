@@ -261,7 +261,7 @@ imports and event handlers are not a documentation authoring API. This pipeline
 is not a general HTML sanitizer: compile trusted project sources and review
 externally supplied MDX.
 
-Examples live in `apps/web/docs/cat-03/` and the generated project's
+Examples live in `apps/web/docs/03-writing-documentation/` and the generated project's
 `docs/examples/`.
 
 ## Floating table of contents

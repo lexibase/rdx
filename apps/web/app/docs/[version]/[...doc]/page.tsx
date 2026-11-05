@@ -47,9 +47,10 @@ export default async function DocPage({
   const slug = doc.join('/')
   const document = documentation.document(version, slug)
   if (!document) return notFound()
-  const filename = documentation
+  const page = documentation
     .pages(version)
-    .find((page) => page.sourcePath === document.sourcePath)!.slug
+    .find((page) => page.sourcePath === document.sourcePath)!
+  const filename = page.slug
   if (slug !== filename) redirect(`/docs/${version}/${filename}`)
 
   const result = await compileDocument(
@@ -91,7 +92,11 @@ export default async function DocPage({
                   )?.id
                 }
               />
-              <DocHeader version={version} filename={filename} />
+              <DocHeader
+                version={version}
+                filename={filename}
+                title={page.title}
+              />
             </header>
             <div className="h-full w-full flex-1 max-w-[960px]">{content}</div>
           </main>

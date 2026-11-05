@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { slugFromRelativePath } from './filenames'
 
 export interface DocumentLinkOptions {
   sourceRoot: string
@@ -82,6 +83,14 @@ export function createDocumentLinkResolver(options: DocumentLinkOptions) {
       fail('the destination escapes this documentation source.')
     const slug =
       documents.get(target) ??
+      (options.virtualPaths
+        ? documents.get(
+            path.resolve(
+              root,
+              `${slugFromRelativePath(relative)}${path.extname(relative)}`
+            )
+          )
+        : undefined) ??
       fail(
         `"${relative}" does not exist in this documentation source${options.routePrefix ? ` (${options.routePrefix})` : ''}.`
       )

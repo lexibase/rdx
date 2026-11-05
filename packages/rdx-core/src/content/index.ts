@@ -3,6 +3,12 @@ import path from 'node:path'
 
 import matter from 'gray-matter'
 import { parseStaticDocument } from './static-source'
+import {
+  DEFAULT_POSITION,
+  documentExtension,
+  orderedName,
+  slugFromRelativePath,
+} from './filenames'
 import type {
   RdxDocCategory,
   RdxDocFrontmatter,
@@ -10,10 +16,6 @@ import type {
   RdxDocsOptions,
   RdxDocument,
 } from '@lexibase/rdx-types'
-
-const DOCUMENT_EXTENSIONS = ['.md', '.mdx']
-const documentExtension = /\.mdx?$/
-const DEFAULT_POSITION = Number.MAX_SAFE_INTEGER
 
 function getDocsRoot(docsDir = 'docs') {
   // The Next adapter includes configured content explicitly in server traces.
@@ -38,10 +40,14 @@ function numberValue(value: unknown, fallback = DEFAULT_POSITION) {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback
 }
 
-function readCategoryMeta(categoryPath: string, fallbackTitle: string) {
+function readCategoryMeta(
+  categoryPath: string,
+  fallbackTitle: string,
+  position = DEFAULT_POSITION
+) {
   const metaPath = path.join(categoryPath, '_category.json')
   if (!fs.existsSync(/* turbopackIgnore: true */ metaPath)) {
-    return { title: fallbackTitle, position: DEFAULT_POSITION }
+    return { title: fallbackTitle, position }
   }
 
   try {
@@ -49,15 +55,15 @@ function readCategoryMeta(categoryPath: string, fallbackTitle: string) {
       fs.readFileSync(/* turbopackIgnore: true */ metaPath, 'utf8')
     )
     if (!isRecord(parsed)) {
-      return { title: fallbackTitle, position: DEFAULT_POSITION }
+      return { title: fallbackTitle, position }
     }
 
     return {
       title: stringValue(parsed.title, fallbackTitle),
-      position: numberValue(parsed.sidebar_position),
+      position: numberValue(parsed.sidebar_position, position),
     }
   } catch {
-    return { title: fallbackTitle, position: DEFAULT_POSITION }
+    return { title: fallbackTitle, position }
   }
 }
 
@@ -76,8 +82,24 @@ function findDocumentFiles(directory: string): string[] {
   })
 }
 
-function slugFromRelativePath(relativePath: string) {
-  return relativePath.split(path.sep).join('/').replace(documentExtension, '')
+function matchingEntries(directory: string, name: string, folders: boolean) {
+  if (!fs.existsSync(/* turbopackIgnore: true */ directory)) return []
+  return fs
+    .readdirSync(/* turbopackIgnore: true */ directory, { withFileTypes: true })
+    .flatMap((entry) => {
+      if (
+        folders
+          ? !entry.isDirectory()
+          : !entry.isFile() || !documentExtension.test(entry.name)
+      )
+        return []
+      const candidate = folders
+        ? entry.name
+        : entry.name.replace(documentExtension, '')
+      return orderedName(candidate).name === name
+        ? [path.join(directory, entry.name)]
+        : []
+    })
 }
 
 function isSafeSlug(slug: string) {
@@ -109,13 +131,14 @@ export function getDocsIndex(
         category.pages.map((page) => [page.slug, page] as const)
       )
     )
+    const translatedRoot = getDocsRoot(docsDir)
     return primary.map((category) => ({
       ...category,
       title: readCategoryMeta(
-        path.join(
-          getDocsRoot(docsDir),
-          category.id === '_root' ? '' : category.id
-        ),
+        category.id === '_root'
+          ? translatedRoot
+          : (matchingEntries(translatedRoot, category.id, true)[0] ??
+              path.join(translatedRoot, category.id)),
         category.title
       ).title,
       pages: category.pages.map((page) => ({
@@ -147,16 +170,24 @@ export function getDocsIndex(
     slugs.set(slug, filePath)
     const relativePath = path.relative(docsRoot, filePath)
     const pathParts = relativePath.split(path.sep)
-    const categoryId =
+    const categoryFolder =
       pathParts.length > 1 ? (pathParts[0] ?? '_root') : '_root'
+    const { name: categoryId, position: categoryPosition } =
+      orderedName(categoryFolder)
     const categoryPath =
-      categoryId === '_root' ? docsRoot : path.join(docsRoot, categoryId)
+      categoryFolder === '_root'
+        ? docsRoot
+        : path.join(docsRoot, categoryFolder)
     const fallbackCategoryTitle =
       categoryId === '_root' ? 'Overview' : toTitle(categoryId)
 
     let category = categories.get(categoryId)
     if (!category) {
-      const meta = readCategoryMeta(categoryPath, fallbackCategoryTitle)
+      const meta = readCategoryMeta(
+        categoryPath,
+        fallbackCategoryTitle,
+        categoryPosition
+      )
       const createdCategory = {
         id: categoryId,
         title: meta.title,
@@ -178,12 +209,20 @@ export function getDocsIndex(
       onError(error, filePath)
     }
     const fallbackTitle = toTitle(path.basename(slug))
+    const navTitle = stringValue(frontmatter.navTitle, '')
+    const filePosition = orderedName(
+      path.basename(relativePath).replace(documentExtension, '')
+    ).position
 
     category.pages.push({
       slug,
       title: stringValue(frontmatter.title, fallbackTitle),
+      ...(navTitle ? { navTitle } : {}),
       description: stringValue(frontmatter.description, ''),
-      position: numberValue(frontmatter.link_position),
+      position: numberValue(
+        frontmatter.order,
+        numberValue(frontmatter.link_position, filePosition)
+      ),
       sourcePath: filePath,
     })
   }
@@ -219,25 +258,24 @@ export function getDocument(
     return getDocument(slug, { docsDir: fallbackDocsDir ?? docsDir })
 
   const docsRoot = getDocsRoot(docsDir)
-  const candidates = DOCUMENT_EXTENSIONS.map((extension) =>
-    path.resolve(docsRoot, `${slug}${extension}`)
-  ).filter(
-    (filename) =>
-      fs.existsSync(/* turbopackIgnore: true */ filename) &&
-      fs.statSync(/* turbopackIgnore: true */ filename).isFile()
+  const parts = slug.split('/')
+  const name = parts.pop()!
+  let directories = [docsRoot]
+  for (const part of parts)
+    directories = directories.flatMap((directory) =>
+      matchingEntries(directory, part, true)
+    )
+  const candidates = directories.flatMap((directory) =>
+    matchingEntries(directory, name, false)
   )
   if (candidates.length > 1)
     throw new Error(
       `[RDX] Duplicate documentation route "${slug}": ${candidates.join(' and ')}. Keep one page per route.`
     )
-  const sourcePath = candidates[0] ?? path.resolve(docsRoot, `${slug}.mdx`)
-  const relativePath = path.relative(docsRoot, sourcePath)
-
-  if (relativePath.startsWith('..') || path.isAbsolute(relativePath))
-    return null
   if (fallbackDocsDir && !getDocument(slug, { docsDir: fallbackDocsDir }))
     return null
-  if (!fs.existsSync(/* turbopackIgnore: true */ sourcePath))
+  const sourcePath = candidates[0]
+  if (!sourcePath)
     return fallbackDocsDir
       ? getDocument(slug, { docsDir: fallbackDocsDir })
       : null
