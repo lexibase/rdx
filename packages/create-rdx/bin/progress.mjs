@@ -9,10 +9,13 @@ export async function runStep(
   const started = performance.now()
   const elapsed = () => ((performance.now() - started) / 1000).toFixed(1)
   log(`\n${label}`)
-  const timer = setInterval(() => {
-    log(`[RDX] ${label} (${elapsed()}s elapsed)`)
-  }, intervalMs)
-  timer.unref()
+  const timer =
+    intervalMs > 0
+      ? setInterval(() => {
+          log(`[RDX] ${label} (${elapsed()}s elapsed)`)
+        }, intervalMs)
+      : undefined
+  timer?.unref()
   try {
     const result = await operation()
     log(`[RDX] Completed in ${elapsed()}s.`)

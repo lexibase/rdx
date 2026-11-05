@@ -41,7 +41,12 @@ the runtime. Follow the commands printed by the generator.
 
 The creator reports file creation, dependency installation, and runtime preparation
 as separate stages, with elapsed time and periodic activity messages during long
-operations. Package-manager output and prompts stay visible. npm and pnpm projects
+operations. During pnpm installation, RDX shows a rotating activity indicator and
+a bar based on the number of packages linked. Resolution, cache and download
+counts come from pnpm's structured logs; the bar waits for a known package total.
+Warnings, errors and lifecycle output remain visible. Logs without a terminal use
+plain status lines instead of animation. npm and Yarn retain their native output.
+npm and pnpm projects
 prepare using their installed RDX executable directly; Yarn provides its project
 execution environment for Plug'n'Play compatibility.
 
