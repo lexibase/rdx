@@ -95,7 +95,11 @@ export default async function DocPage({
             </header>
             <div className="h-full w-full flex-1 max-w-[960px]">{content}</div>
           </main>
-          <DocFooter version={version} filename={filename} />
+          <DocFooter
+            version={version}
+            filename={filename}
+            editHref={documentation.editPageHref(version, document.sourcePath)}
+          />
         </section>
       </DocsPageTransition>
     </>

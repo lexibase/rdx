@@ -10,6 +10,7 @@ import {
   getLanguageLinks,
   isFallbackPage,
 } from '@lexibase/rdx-core'
+import { getEditPageHref } from '@lexibase/rdx-core/config'
 import type { RdxProject, RDXConfig } from '@lexibase/rdx-types'
 import { Button } from '@lexibase/rdx-ui/components/button'
 import { Callout } from '@lexibase/rdx-ui/components/callout'
@@ -21,6 +22,7 @@ import { DocsSearch } from '@lexibase/rdx-ui/components/docs-search'
 import { Home } from '@lexibase/rdx-ui/components/home'
 import { SkipLink } from '@lexibase/rdx-ui/components/skip-link'
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
+import { EditPageLink } from '@lexibase/rdx-ui/components/edit-page-link'
 import { BrandLogo } from '@lexibase/rdx-ui/components/brand-logo'
 import { getMdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { getMessages, formatMessage } from '@lexibase/rdx-ui/lib/i18n'
@@ -249,6 +251,9 @@ export async function DocsPage({
     )
   if (!document) notFound()
   const fallback = isFallbackPage(project, source, document.sourcePath)
+  const editHref = fallback
+    ? undefined
+    : getEditPageHref(project, source, document.sourcePath)
   const primaryLocale = (
     source.localization ?? project.localization
   )?.locales.find(
@@ -392,6 +397,9 @@ export async function DocsPage({
                 </div>
               </main>
               <footer className="flex flex-col">
+                {editHref && (
+                  <EditPageLink href={editHref} lang={project.config.lang} />
+                )}
                 <section className="flex items-center justify-between">
                   {previous ? (
                     <Button

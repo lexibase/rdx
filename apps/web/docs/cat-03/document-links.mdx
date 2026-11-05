@@ -44,6 +44,27 @@ Use exact filename capitalization and forward slashes, including on Windows.
 Root-relative URLs, external links, downloads, images, and code samples are not
 rewritten. For images, use paths from [public/](../cat-05/assets.mdx).
 
+## Edit this page
+
+Add `editPage` to your [configuration](../cat-02/config.mdx) to show an edit
+link above the previous and next buttons on live documentation pages.
+
+```ts
+export default defineConfig({
+  metadata: { applicationName: 'My documentation' },
+  editPage: {
+    baseUrl: 'https://github.com/your-org/your-repo/edit/main/apps/web',
+  },
+})
+```
+
+Point `baseUrl` to the editor URL for your branch, ending at the directory
+that contains `rdx.config.ts`. For a project at the repository root, end the
+example URL at `/edit/main`. RDX appends the path of the page's Markdown file,
+including `docs/` or its translation directory. Published snapshots and pages
+showing a translation fallback omit the link. Set `editPage: false` to turn
+it off.
+
 ## Link errors
 
 > [!NOTE] Portable documentation

@@ -62,6 +62,8 @@ const config = {
   TOC: true,
   // Local documentation search in the navbar; no external search service needed.
   search: true,
+  // Edit URL up to this project root in the repository.
+  editPage: { baseUrl: 'https://github.com/lexibase/rdx/edit/main/apps/web' },
   description:
     'Simple documentation built on Next.js, Tailwind CSS, and shadcn/ui. Write MDX, add folders, and publish your docs.',
 
