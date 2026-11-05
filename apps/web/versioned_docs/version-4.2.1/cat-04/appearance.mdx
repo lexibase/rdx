@@ -1,0 +1,49 @@
+---
+title: Highlight color
+description: Match documentation highlights to your project's colors.
+link_position: 7
+---
+
+## Choose a color
+
+Create `rdx.css` beside `rdx.config.ts` and set `--rdx-highlighting`:
+
+```css title="rdx.css"
+:root {
+  --rdx-highlighting: #7c3aed;
+}
+```
+
+RDX loads this stylesheet automatically after its shared theme. The color is used
+for document links, focus indicators, selected navigation items and active tabs.
+Subtle selected backgrounds are derived from the same color.
+
+## Light and dark themes
+
+Add a `.dark` rule to choose a different color for the dark theme:
+
+```css title="rdx.css"
+:root {
+  --rdx-highlighting: #7c3aed;
+}
+
+.dark {
+  --rdx-highlighting: #a78bfa;
+}
+```
+
+The theme switch applies the matching color automatically. Without a `.dark`
+override, the `:root` color is used in both themes. Choose colors that remain
+readable against their respective backgrounds.
+
+Callouts keep their semantic colors, and code blocks retain their syntax theme.
+
+## Edit your styles
+
+Create the file before starting the development server. Save changes while the
+server is running to preview them. If you add or remove the file with the server
+already running, restart `dev` to refresh its stylesheet imports. Removing the
+override restores the default highlights.
+
+The file stays in your project and is preserved when you update RDX. It is a
+regular CSS stylesheet, so you can also add your own selectors and media queries.

@@ -1,0 +1,65 @@
+---
+title: Images and downloads
+description: Serve project-owned files from public/.
+link_position: 1
+---
+
+## Add a public file
+
+Place files in `public/` beside `docs/`:
+
+```folder
+my-docs/
+  docs/
+  public/
+    images/
+      diagram.svg
+    files/
+      manual.pdf
+  rdx.config.ts
+```
+
+Use URLs without `public`:
+
+```md
+![Architecture diagram](/images/diagram.svg)
+
+[Download the manual](/files/manual.pdf)
+```
+
+Root-relative URLs work from nested documents and version snapshots.
+
+## A real example
+
+This image is served from the official site's `public/icons/logo.svg`:
+
+![RDX logo](/icons/logo.svg)
+
+Give images meaningful alt text. RDX keeps their aspect ratio and constrains them
+to the document width.
+
+## Image preview
+
+Click an image to open a larger preview. With a keyboard, focus the image and
+press Enter or Space. Press Escape, use the close button, or click outside the
+preview to return to the document.
+
+The same Markdown syntax enables the preview automatically. Images inside links
+follow the link, while images with empty alt text remain decorative.
+
+## Development and production
+
+The generated runtime links its internal public directory to your original
+`public/`; it does not keep a stale copied cache. Edit the project-owned files.
+Rebuild/redeploy after production asset changes.
+
+For favicon, share images, and the web app manifest, also configure their paths
+in [metadata](../cat-02/config.mdx#seo-and-social-previews).
+
+## Shared across versions
+
+The versioning plugin snapshots MDX, not public assets. Use paths such as
+`/images/1.0.0/diagram.svg` when historical documentation must retain an old image.
+
+All files in `public/` are public. Do not store credentials, private documents,
+or internal configuration there.
