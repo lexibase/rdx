@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.2.1 — Prepared
+
 - Remove the unused private `@rdx/types` compatibility package and obsolete type
   aliases. Keep shared declarations in `@lexibase/rdx-types`.
 

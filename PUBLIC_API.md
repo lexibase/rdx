@@ -1,6 +1,6 @@
 # RDX public API — 4.2
 
-This document describes the public API of RDX 4.2. See the release instructions
+This document describes the public API of RDX 4.2 See the release instructions
 in [PUBLISHING.md](./PUBLISHING.md).
 
 RDX 3.0 installs the complete shadcn Code Block and Dialog compositions. Markdown
@@ -42,8 +42,8 @@ framework selects the tested runtime and UI packages. Current package versions:
 | @lexibase/rdx-versioning | 1.3.1   |
 | @lexibase/rdx-i18n       | 1.0.1   |
 | @lexibase/rdx-next       | 4.2.0   |
-| @lexibase/rdx            | 4.2.0   |
-| @lexibase/create-rdx     | 4.2.0   |
+| @lexibase/rdx            | 4.2.1   |
+| @lexibase/create-rdx     | 4.2.1   |
 
 <!-- rdx:packages:end -->
 
