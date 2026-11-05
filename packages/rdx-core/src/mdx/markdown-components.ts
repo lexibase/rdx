@@ -185,6 +185,18 @@ function container(node: Node, source: string): Node {
       ),
     ])
   }
+  if (node.name === 'steps') {
+    return component(
+      'Steps',
+      {},
+      groups.map((group) =>
+        component('Step', {}, [
+          component('StepTitle', {}, [{ type: 'text', value: group.title }]),
+          ...group.children,
+        ])
+      )
+    )
+  }
   return component(
     'Accordion',
     {},
@@ -214,7 +226,9 @@ export function remarkDocumentationComponents(
           node.type
         )
       ) {
-        const known = ['tabs', 'accordion', 'kbd'].includes(node.name ?? '')
+        const known = ['tabs', 'accordion', 'steps', 'kbd'].includes(
+          node.name ?? ''
+        )
         if (!known) {
           // Unrecognized directives remain literal Markdown, never arbitrary tags.
           const value = source.slice(

@@ -46,7 +46,7 @@ ordering. The filename supplies the fallback title when one is not provided.
 ## Choose a file format
 
 Use `.md` or `.mdx` for your pages. Both formats support frontmatter,
-headings, tables, Callouts, Tabs, Accordion, keyboard shortcuts, and all code
+headings, tables, Callouts, Tabs, Accordion, Steps, keyboard shortcuts, and all code
 block modes through RDX's Markdown syntax. You can mix both formats in a category.
 
 For example, `docs/guides/first-page.md` has the URL
@@ -65,8 +65,9 @@ Version snapshots retain the files in their original format.
 ## Write for readers
 
 Use paragraphs, headings, lists, links, and code fences. The shared renderer
-handles their styling. Add [Callouts](./callouts.mdx), [Tabs](./tabs.mdx),
-or an [Accordion](./accordion.mdx) when the content benefits from them.
+handles their styling. Use [Steps](./steps.mdx) for procedures, [Tabs](./tabs.mdx)
+for alternatives, an [Accordion](./accordion.mdx) for optional details, and
+[Callouts](./callouts.mdx) for notes and warnings.
 
 Write these components with Markdown: `> [!TIP]` for a Callout, `:::tabs` for
 Tabs, `:::accordion` for an Accordion, and `:kbd[Enter]` for a keyboard key.
@@ -93,7 +94,20 @@ touch interactions. The previous and next buttons also remain available.
 
 ## Preview and publish
 
-Save the file while `pnpm dev` is running. Use
-[relative document links](./document-links.mdx) to connect pages.
-Run a production build before deploying; missing relative document links fail
-compilation rather than silently sending readers to another version.
+:::steps
+
+### Preview your changes
+
+Save the file while `pnpm dev` is running and open the page in your browser.
+
+### Check the links
+
+Use [relative document links](./document-links.mdx) to connect pages, then follow
+them in the preview.
+
+### Build for production
+
+Run a production build before deploying. Broken relative document links fail
+the build.
+
+:::

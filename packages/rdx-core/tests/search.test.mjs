@@ -127,6 +127,26 @@ test('natural Markdown components index labels and hidden content under reachabl
   assert.doesNotMatch(index.entries[1].text, /:::|\[!TIP\]|:kbd|item-1/)
 })
 
+test('later Steps panels are searchable without linking to hidden headings', () => {
+  const index = buildSearchIndex([
+    {
+      title: 'Guide',
+      href: '/docs/guide',
+      category: 'Docs',
+      content:
+        '## Setup\n\n:::steps\n\n### Install\n\nInstall the plugin.\n\n### Verify\n\n#### Verify the output\n\nInspect the generated files.\n\n:::',
+    },
+  ])
+  assert.deepEqual(
+    index.entries.map((entry) => entry.href),
+    ['/docs/guide', '/docs/guide#setup']
+  )
+  assert.match(
+    index.entries[1].text,
+    /Verify the output Inspect the generated files/
+  )
+})
+
 test('disabled tab metadata and unreachable panels do not enter search or shift heading IDs', () => {
   const index = buildSearchIndex([
     {

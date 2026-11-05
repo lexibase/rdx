@@ -9,11 +9,10 @@ import {
   remarkDocumentLinks,
 } from '../dist/mdx/index.js'
 
-function parse(source, links) {
-  const parser = unified()
-    .use(remarkParse)
-    .use(remarkMdx)
-    .use(remarkDocumentationComponents)
+function parse(source, links, { mdx = true } = {}) {
+  const parser = unified().use(remarkParse)
+  if (mdx) parser.use(remarkMdx)
+  parser.use(remarkDocumentationComponents)
   if (links) parser.use(remarkDocumentLinks, links)
   return parser.runSync(parser.parse(source), { value: source })
 }
@@ -23,6 +22,30 @@ function nodes(tree, name) {
     ...(tree.children ?? []).flatMap((child) => nodes(child, name)),
   ]
 }
+
+test('Steps keep their order and nested tabs in Markdown and MDX', () => {
+  const source =
+    '::::steps\n\n### Install\n\n:::tabs\n\n### pnpm\n\npnpm install\n\n:::\n\n### Verify\n\nOpen the page.\n\n::::'
+  for (const mdx of [false, true]) {
+    const tree = parse(source, undefined, { mdx })
+    const [steps] = nodes(tree, 'Steps')
+    assert.deepEqual(
+      steps.children.map((step) => [
+        step.name,
+        step.children[0].children[0].value,
+        step.children[1].name ?? step.children[1].type,
+      ]),
+      [
+        ['Step', 'Install', 'Tabs'],
+        ['Step', 'Verify', 'paragraph'],
+      ]
+    )
+    assert.throws(
+      () => parse(':::steps\nMissing title\n:::', undefined, { mdx }),
+      /Start :::steps items with ### Title/
+    )
+  }
+})
 
 test('nested groups keep all panels, literal labels, and independent values', () => {
   const tree = parse(

@@ -138,6 +138,7 @@ function PageToc({ contentId }: { contentId: string }) {
           element.getClientRects().length > 0 &&
           !!element.id &&
           !!element.textContent?.trim() &&
+          !element.closest('[data-slot="step-panel"][inert]') &&
           getComputedStyle(element).visibility !== 'hidden'
       )
       setHeadings(
@@ -158,7 +159,7 @@ function PageToc({ contentId }: { contentId: string }) {
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ['hidden', 'style', 'class', 'id'],
+      attributeFilter: ['hidden', 'style', 'class', 'id', 'inert'],
     })
     scrollTarget.addEventListener('scroll', schedule, { passive: true })
     window.addEventListener('resize', collect)
