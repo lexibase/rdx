@@ -42,8 +42,8 @@ framework selects the tested runtime and UI packages. Current package versions:
 | @lexibase/rdx-versioning | 1.3.1   |
 | @lexibase/rdx-i18n       | 1.0.1   |
 | @lexibase/rdx-next       | 4.2.0   |
-| @lexibase/rdx            | 4.2.1   |
-| @lexibase/create-rdx     | 4.2.1   |
+| @lexibase/rdx            | 4.2.2   |
+| @lexibase/create-rdx     | 4.2.2   |
 
 <!-- rdx:packages:end -->
 

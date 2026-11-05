@@ -1,0 +1,108 @@
+---
+title: Troubleshooting
+description: Resolve common installation, configuration, and production issues.
+link_position: 4
+---
+
+## Run commands from the project root
+
+RDX commands expect the directory containing `package.json` and
+`rdx.config.ts`. A missing manifest or configuration error often means the
+terminal is in the parent directory.
+
+For a generated project, use `pnpm dev`, `pnpm build`, and `pnpm start`.
+For framework development, use the monorepo commands in
+[Development](./development.mdx).
+
+## A package cannot be installed
+
+Use the scoped creator command `pnpm create @lexibase/rdx@latest` or
+`npm create @lexibase/rdx@latest`. Check your registry connection and the error
+reported by your package manager. Keep authentication tokens out of issue reports.
+
+## A release-age policy blocks installation
+
+pnpm 11 uses a default minimum release age of **24 hours**. Projects can configure
+a different period. This policy applies to direct and transitive dependencies,
+so an installation, update, or lockfile check before `pnpm dev` can report
+`ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` for a newly published RDX package.
+
+Read the package names and versions in the error, and check their release notes
+before approving them. You can wait for the configured period or add exact
+version approvals to the project's `minimumReleaseAgeExclude` list in
+`pnpm-workspace.yaml`. In a monorepo, edit the workspace-root file.
+
+For example, after reviewing these two releases:
+
+```yaml
+minimumReleaseAgeExclude:
+  - '@lexibase/rdx@1.2.2'
+  - '@lexibase/rdx-next@1.2.2'
+```
+
+Use the versions reported by your error and preserve the list's existing
+approvals. Keep one entry per package name: if both `1.2.1` and `1.2.2` are
+approved, combine them as `'@lexibase/rdx@1.2.1 || 1.2.2'`.
+pnpm 11.9 and later also handle separate exact-version entries correctly;
+see the [pnpm 11.9 release notes](https://github.com/pnpm/pnpm/releases/tag/v11.9.0).
+
+Run `pnpm install`, then retry your original command. The package manager
+applies the updated approvals while retaining the age policy for other releases.
+
+For a persistent exception covering all versions of Lexibase packages, use the
+`'@lexibase/*'` pattern described in [pnpm workspaces](../cat-02/installation.mdx#pnpm-workspaces).
+This includes RDX's internal packages and creator, so the exclusion can stay the
+same across updates. Packages outside that scope retain their age policy.
+
+If `rdx add versioning` fails, inspect the reported error and any package or
+lockfile changes before retrying activation.
+
+### Cache and command-line overrides
+
+`--config.dlxCacheMaxAge=0` refreshes the creator's execution cache; release
+selection still follows the configured age policy. Check the creator with
+`pnpm create @lexibase/rdx@latest --version` and use an explicit creator version
+from the release notes when validating a specific release.
+
+`--config.minimumReleaseAge=0` sets the age threshold to zero for that command,
+including its transitive dependencies. The next command uses the project's
+normal policy again. Exact-version exclusions remain recorded for subsequent
+commands and apply only to the listed releases.
+
+See [pnpm's release-age settings](https://github.com/pnpm/pnpm/blob/main/pnpm/docs/settings/dependency-resolution.md#minimumreleaseage)
+for the complete policy options.
+
+## A document or link is missing
+
+Use exact filename capitalization and forward slashes. Links to other documents
+should use relative `.mdx` paths. A target must exist in the same edition;
+a missing snapshot page does not fall back to Current.
+
+Page URLs include the path inside `docs/`; for example,
+`docs/guides/setup.mdx` is served at `/docs/guides/setup`.
+
+## Configuration fails validation
+
+Check the named field in the error. `metadata.applicationName` is required,
+`TOC` is uppercase, and live files always belong in `docs/`. Restart the
+development server after changing configuration.
+
+If a configured plugin cannot be resolved, install its package in this project.
+Do not add unknown options to silence errors.
+
+## A production page returns 500
+
+Check deployment logs. Confirm that documentation, the versions manifest, and
+snapshots were included during the build. Use the generated project's RDX
+commands and the correct Next.js output directory.
+
+Do not solve missing runtime content by creating snapshots on every request.
+See [Build and deployment](./deployment.mdx).
+
+## Copy or search is unavailable
+
+Copying requires HTTPS or localhost and clipboard permission. The source remains
+selectable when permission is denied.
+
+Search must be explicitly enabled. Rebuild after changing its setting or content.
+A disabled search endpoint returning 404 is expected.
