@@ -1,11 +1,19 @@
 ---
-title: Migrating sidebar ordering
-description: Move an existing sidebar to numbered folders and the order field.
-order: 4
+title: Migrating from RDX 4 to 5
+navTitle: Migrating to v5
+highlighting: important
+description: Review public URLs and migrate sidebar ordering when upgrading to RDX 5.
+order: 3
 ---
 
-Use this guide to migrate a project that uses `link_position` or
-`_category.json` for its sidebar. For new projects, see
+> [!WARNING] Check numbered URLs before upgrading
+> RDX 5 removes two-digit ordering prefixes from generated URLs. If you already
+> published `/docs/guides/02-installation`, the new URL is
+> `/docs/guides/installation`. Add a permanent redirect on your hosting platform
+> for any old public URL you want to keep working.
+
+If your project uses `link_position` or `_category.json`, use the steps below
+to adopt the shorter sidebar configuration. For a new project, see
 [Categories and URLs](../03-writing-documentation/docs.mdx#categories-and-urls).
 
 ## Update page frontmatter
@@ -37,6 +45,5 @@ If you keep it, remove `sidebar_position` to let the folder prefix set the order
 
 ## Check existing links
 
-Run `rdx check` after renaming files. If your source names already started with
-two-digit prefixes, review public links to those pages. RDX now omits those
-prefixes from generated URLs.
+Run `rdx check` after renaming files. Test any redirects from your old public
+URLs in a preview deployment before publishing.

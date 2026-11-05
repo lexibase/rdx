@@ -306,6 +306,7 @@ export async function DocsPage({
     title: category.title,
     links: category.pages.map((page) => ({
       label: page.navTitle ?? page.title,
+      highlighting: page.highlighting,
       href: hrefFor(page.slug),
     })),
   }))

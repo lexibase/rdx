@@ -109,6 +109,7 @@ export function createDocumentation(project: RdxProject) {
       title: category.title,
       links: category.pages.map((page) => ({
         label: page.navTitle ?? page.title,
+        ...(page.highlighting ? { highlighting: page.highlighting } : {}),
         description: page.description,
         href: `/docs/${canonicalVersion(version)}/${routes.get(page.sourcePath)}`,
       })),

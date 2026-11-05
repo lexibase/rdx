@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 5.0.0 — Prepared
+
+- Add interactive Steps, section permalinks, edit links, Markdown exports, llms.txt, page copying, and sidebar highlights. Simplify sidebar ordering with order and optional navTitle.
+
 ## 4.2.2 — Prepared
 
 - Refine creator terminal output: redraw progress frames

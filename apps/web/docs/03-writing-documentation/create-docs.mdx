@@ -39,15 +39,35 @@ Use `##` for the first section below the document header.
 All fields are optional. Add `navTitle` when a shorter label reads better in
 the sidebar.
 
-| Field         | Type   | What it controls                                                |
-| ------------- | ------ | --------------------------------------------------------------- |
-| `title`       | String | Document title. RDX derives it from the filename when omitted.  |
-| `description` | String | Summary for the document header and page metadata.              |
-| `order`       | Number | Sidebar position within the category. Lower numbers come first. |
-| `navTitle`    | String | Sidebar label. Defaults to the document title.                  |
+| Field          | Type                 | What it controls                                                |
+| -------------- | -------------------- | --------------------------------------------------------------- |
+| `title`        | String               | Document title. RDX derives it from the filename when omitted.  |
+| `description`  | String               | Summary for the document header and page metadata.              |
+| `order`        | Number               | Sidebar position within the category. Lower numbers come first. |
+| `navTitle`     | String               | Sidebar label. Defaults to the document title.                  |
+| `highlighting` | `important` or `new` | Highlights the page with a dot in the sidebar.                  |
 
 Existing pages can migrate `link_position` to `order` using the
 [sidebar migration guide](../05-guides/migrating-sidebar.mdx).
+
+### Highlight a page in the sidebar
+
+Set `highlighting: important` for an amber dot beside an important page, such
+as a [migration guide](../05-guides/migrating-sidebar.mdx). Set
+`highlighting: new` for a blue dot beside a new guide or feature. Omit the field
+for a regular sidebar entry.
+
+```yaml
+---
+title: Migrating from version 4 to 5
+navTitle: Migrating to v5
+highlighting: important
+---
+```
+
+The dot pulses while the sidebar is visible. Readers who prefer reduced motion
+see a steady dot. Assistive technology receives the highlight as part of the
+link label.
 
 ## Choose a file format
 

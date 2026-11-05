@@ -210,6 +210,7 @@ export function getDocsIndex(
     }
     const fallbackTitle = toTitle(path.basename(slug))
     const navTitle = stringValue(frontmatter.navTitle, '')
+    const { highlighting } = frontmatter
     const filePosition = orderedName(
       path.basename(relativePath).replace(documentExtension, '')
     ).position
@@ -218,6 +219,9 @@ export function getDocsIndex(
       slug,
       title: stringValue(frontmatter.title, fallbackTitle),
       ...(navTitle ? { navTitle } : {}),
+      ...(highlighting === 'important' || highlighting === 'new'
+        ? { highlighting }
+        : {}),
       description: stringValue(frontmatter.description, ''),
       position: numberValue(
         frontmatter.order,
