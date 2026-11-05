@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Test creator terminal refinements under the beta tag: redraw progress frames
+  without clearing the line between writes, and summarize confirmed optional
+  platform skips while preserving required-package and engine diagnostics.
+
 ## 4.2.1 — Prepared
 
 - Remove the unused private `@rdx/types` compatibility package and obsolete type

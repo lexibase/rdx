@@ -165,3 +165,93 @@ test('high-volume package records update counters without repainting on every ev
   assert.equal(stdout.length, initial)
   progress.finish(true)
 })
+
+test('normal frames replace the row in one write without an intermediate blank line', () => {
+  const { progress, stdout, event } = fixture()
+  assert.equal(stdout.length, 1)
+  event({ name: 'pnpm:stats', prefix: 'project', added: 2 })
+  event({ name: 'pnpm:stage', stage: 'importing_started' })
+  assert.ok(
+    stdout.at(-1).endsWith('  '),
+    'shorter frames erase trailing text with padding'
+  )
+  assert.ok(
+    stdout.every((frame) => frame.startsWith('\r') && frame.includes('['))
+  )
+  assert.doesNotMatch(stdout.join(''), /\x1b\[2K|\n/)
+  progress.finish(true)
+})
+
+test('only confirmed matching optional platform warnings are summarized', () => {
+  const { progress, stdout, stderr, event } = fixture(false)
+  event({
+    name: 'pnpm:install-check',
+    level: 'warn',
+    prefix: 'root',
+    message:
+      'Unsupported platform for @native/linux@1.0.0: wanted linux (current: win32)',
+  })
+  assert.equal(stderr.length, 0)
+  event({
+    name: 'pnpm:skipped-optional-dependency',
+    reason: 'unsupported_platform',
+    prefix: 'root',
+    package: { id: '@native/linux@1.0.0' },
+  })
+  progress.finish(true)
+  assert.equal(stderr.length, 0)
+  assert.match(
+    stdout.join(''),
+    /Skipped 1 optional package for other platforms/
+  )
+  assert.doesNotMatch(stdout.join(''), /Unsupported platform|wanted linux/)
+})
+
+test('required platform failures, engine warnings and unconfirmed warnings stay visible', () => {
+  const { progress, stderr, event } = fixture(false)
+  event({
+    name: 'pnpm:install-check',
+    level: 'warn',
+    prefix: 'root',
+    message: 'Unsupported platform for required-native@1: wanted linux',
+  })
+  event({
+    name: 'pnpm',
+    level: 'error',
+    err: {
+      code: 'ERR_PNPM_UNSUPPORTED_PLATFORM',
+      message: 'Required package cannot run here',
+    },
+  })
+  event({
+    name: 'pnpm:install-check',
+    level: 'warn',
+    message: 'Unsupported engine: Node.js 30 required',
+  })
+  event({
+    name: 'pnpm:install-check',
+    level: 'warn',
+    prefix: 'other',
+    message: 'Unsupported platform for unmatched-native@1: wanted linux',
+  })
+  event({
+    name: 'pnpm:skipped-optional-dependency',
+    reason: 'unsupported_platform',
+    prefix: 'other',
+    package: { id: 'different-package@1' },
+  })
+  event({
+    name: 'pnpm:install-check',
+    level: 'warn',
+    message: 'Unsupported platform for last-native@1: wanted linux',
+  })
+  progress.finish(false)
+  for (const text of [
+    'required-native',
+    'ERR_PNPM_UNSUPPORTED_PLATFORM',
+    'Node.js 30 required',
+    'unmatched-native',
+    'last-native',
+  ])
+    assert.ok(stderr.join('').includes(text), text)
+})

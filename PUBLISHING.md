@@ -1,5 +1,34 @@
 # Publishing RDX
 
+## Creator-only terminal beta
+
+Terminal refinements can be tested by publishing only `@lexibase/create-rdx`
+as `4.2.2-beta.0` with `--tag beta`. Its template keeps the stable framework
+dependency. Do not run stable `release:prepare` or generate a documentation
+snapshot for each terminal experiment. Keep these prerelease versions on the
+beta branch until the behavior is approved.
+
+```sh
+pnpm --filter @lexibase/create-rdx publish --tag beta --access public --no-git-checks
+npm view @lexibase/create-rdx dist-tags
+```
+
+Commit and validate the beta branch first. `--no-git-checks` permits publication
+from that beta branch instead of `main`; publication remains a manual action.
+Confirm that `beta` points to the intended prerelease and `latest` still points
+to the stable creator. Test in a fresh directory:
+
+```sh
+pnpm --config.minimumReleaseAge=0 --config.dlxCacheMaxAge=0 create @lexibase/rdx@beta docs-terminal-beta
+```
+
+The age override applies to this test command; it does not change global policy.
+For later attempts, increment only the creator prerelease to `4.2.2-beta.1`, etc.,
+and keep publishing with the beta tag. Once approved, restore the creator's
+stable baseline version before adding a patch changeset and preparing the stable
+release through the normal workflow. Stable package versions and documentation
+are advanced once, rather than once per terminal experiment.
+
 ## Automated preparation
 
 Use Changesets to record package changes and the RDX command to prepare a grouped

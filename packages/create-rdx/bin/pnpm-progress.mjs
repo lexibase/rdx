@@ -6,7 +6,7 @@ export function createPnpmProgress({
   output = process.stdout,
   errors = process.stderr,
   interactive = Boolean(output.isTTY) && process.env.TERM !== 'dumb',
-  intervalMs = 100,
+  intervalMs = 125,
   heartbeatMs = 15_000,
   now = () => performance.now(),
 } = {}) {
@@ -26,9 +26,15 @@ export function createPnpmProgress({
   let finished = false
   let promptOpen = false
   let previousPhase
+  let frameWidth = 0
+  let platformWarning
+  let skippedPlatforms = 0
   const elapsed = () => `${((now() - started) / 1000).toFixed(1)}s`
   const clear = () => {
-    if (interactive) output.write('\r\x1b[2K')
+    if (interactive && frameWidth) {
+      output.write('\r\x1b[2K')
+      frameWidth = 0
+    }
   }
   function render() {
     const total = totals.size
@@ -60,8 +66,15 @@ export function createPnpmProgress({
       // pnpm emits many debug records per package. Paint on the timer instead
       // of turning each record into terminal writes during large installations.
       if (!force && intervalMs > 0 && previousPhase === phase) return
-      clear()
-      output.write(render())
+      const line = render()
+      const previousWidth = Math.min(
+        frameWidth,
+        Math.max(1, (output.columns || 100) - 1)
+      )
+      // Write the replacement and any trailing padding atomically. Clearing the
+      // row in a separate write exposes a blank frame in Windows terminals.
+      output.write('\r' + line.padEnd(previousWidth, ' '))
+      frameWidth = line.length
     } else if (force || previousPhase !== phase) {
       output.write(
         `[RDX] ${phase}: resolved ${counts.resolved}, cached ${counts.cached}, downloaded ${counts.downloaded}, linked ${counts.linked} (${elapsed()}).\n`
@@ -70,11 +83,30 @@ export function createPnpmProgress({
     previousPhase = phase
   }
   function message(text, stream = output) {
+    flushPlatformWarning()
     if (!promptOpen) clear()
     stream.write(text)
     // Keep prompts without a newline visible and leave the cursor after them.
     promptOpen = !text.endsWith('\n')
     if (text.endsWith('\n')) draw(true)
+  }
+  function diagnostic(event) {
+    const error = event.err || event
+    const text = [
+      error.code,
+      error.message || event.message,
+      error.hint,
+      error.pkgsStack && JSON.stringify(error.pkgsStack),
+    ]
+      .filter(Boolean)
+      .join('\n')
+    message(`[pnpm] ${text || JSON.stringify(event)}\n`, errors)
+  }
+  function flushPlatformWarning() {
+    if (!platformWarning) return
+    const { event } = platformWarning
+    platformWarning = undefined
+    diagnostic(event)
   }
   function record(line) {
     if (!line.trim()) {
@@ -100,6 +132,30 @@ export function createPnpmProgress({
     if (promptOpen) {
       output.write('\n')
       promptOpen = false
+    }
+    if (platformWarning) {
+      if (
+        event.name === 'pnpm:skipped-optional-dependency' &&
+        event.reason === 'unsupported_platform' &&
+        event.package?.id === platformWarning.id &&
+        event.prefix === platformWarning.event.prefix
+      ) {
+        platformWarning = undefined
+        skippedPlatforms++
+        return
+      }
+      flushPlatformWarning()
+    }
+    if (event.name === 'pnpm:install-check' && event.level === 'warn') {
+      const match = /^Unsupported platform for (.+?): wanted /.exec(
+        event.message || ''
+      )
+      if (match) {
+        // pnpm emits the warning before confirming that this is an optional
+        // package for another OS/CPU. Suppress only the confirmed matching pair.
+        platformWarning = { id: match[1], event }
+        return
+      }
     }
     if (
       event.name === 'pnpm:progress' &&
@@ -129,16 +185,7 @@ export function createPnpmProgress({
     } else if (event.name === 'pnpm:lifecycle' && event.line) {
       message(`[pnpm:${event.stage || 'script'}] ${event.line}\n`)
     } else if (event.level === 'warn' || event.level === 'error') {
-      const error = event.err || event
-      const text = [
-        error.code,
-        error.message || event.message,
-        error.hint,
-        error.pkgsStack && JSON.stringify(error.pkgsStack),
-      ]
-        .filter(Boolean)
-        .join('\n')
-      message(`[pnpm] ${text || JSON.stringify(event)}\n`, errors)
+      diagnostic(event)
     } else if (event.name === 'pnpm:peer-dependency-issues') {
       message(
         `[pnpm] Peer dependency issues:\n${JSON.stringify(event.issuesByProjects || event, null, 2)}\n`,
@@ -179,12 +226,17 @@ export function createPnpmProgress({
         record(buffer)
         buffer = ''
       }
+      flushPlatformWarning()
       finished = true
       if (promptOpen) {
         output.write('\n')
         promptOpen = false
       }
       clear()
+      if (skippedPlatforms)
+        output.write(
+          `[RDX] Skipped ${skippedPlatforms} optional package${skippedPlatforms === 1 ? '' : 's'} for other platforms.\n`
+        )
       output.write(
         `[RDX] ${success ? 'Dependencies installed' : 'Installation stopped'}: ${counts.linked} linked, ${counts.cached} cached, ${counts.downloaded} downloaded (${elapsed()}).\n`
       )
