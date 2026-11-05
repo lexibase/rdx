@@ -1,5 +1,6 @@
-import { docsIndexer } from '@/lib/docs'
 import { CopyPage } from '@lexibase/rdx-ui/components/copy-page'
+
+import { docsIndexer } from '@/lib/docs'
 
 export async function DocHeader({
   version,
