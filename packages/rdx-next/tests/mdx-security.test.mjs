@@ -843,6 +843,8 @@ test('shared MDX renders GFM, headings, code, images and Callout without imports
 
 ###### Small heading
 
+#### [Linked title](/docs/init/intro)
+
 | Feature | Status |
 | :------ | -----: |
 | Callout | Ready |
@@ -872,7 +874,14 @@ const framework = 'RDX'
     mdxComponents
   )
   const html = renderToStaticMarkup(content)
-  assert.match(html, /<h4\b[^>]*>Details<\/h4>/)
+  assert.match(
+    html,
+    /<h4\b[^>]*\bid="details"[^>]*><a\b[^>]*\bhref="#details"[^>]*><span\b[^>]*>Details<\/span><\/a>/
+  )
+  assert.match(
+    html,
+    /<h4\b[^>]*\bid="linked-title"[^>]*><span\b[^>]*><a\b[^>]*\bhref="\/docs\/init\/intro"[^>]*>Linked title<\/a><\/span><\/h4>/
+  )
   assert.match(html, /<h5\b/)
   assert.match(html, /<h6\b/)
   assert.match(html, /data-slot="mdx-table-scroll"/)
