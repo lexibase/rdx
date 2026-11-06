@@ -158,7 +158,7 @@ export function rehypeDocumentationCode(
     ],
   }
   const highlight: ReturnType<typeof rehypeShiki> = grammars?.length
-    ? async (tree, file) => {
+    ? async (tree, ...args) => {
         const key = JSON.stringify(grammars)
         if (customHighlighter?.key !== key)
           customHighlighter = {
@@ -170,7 +170,9 @@ export function rehypeDocumentationCode(
           }
         const highlighter = await customHighlighter.value
         const transform = rehypeShikiFromHighlighter(highlighter, options)
-        return transform(tree, file)
+        const result = await transform(tree, ...args)
+        if (result instanceof Error) throw result
+        return result
       }
     : rehypeShiki.call(this, options)
   if (typeof highlight !== 'function') return highlight
