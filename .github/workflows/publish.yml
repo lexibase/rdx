@@ -71,7 +71,7 @@ jobs:
     if: inputs.publish && github.repository == 'lexibase/rdx' && github.ref == 'refs/heads/main'
     needs: pack
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     permissions:
       contents: read
       id-token: write
