@@ -33,7 +33,7 @@ export async function DocHeader({
         </h1>
         <CopyPage key={markdownHref} href={markdownHref} />
       </div>
-      <p className="text-sm text-ring max-w-[726px]">
+      <p className="text-sm text-muted-foreground max-w-[726px]">
         {currentLink?.description || 'Sem descrição disponível'}
       </p>
     </>

@@ -106,6 +106,7 @@ export function MdxCodeBlock({
         if (lineNumbers && node === '\n') return null
         if (!isValidElement<LineProps>(node)) return node
         const variant = node.props['data-rdx-line-variant']
+        const hasDiffMarker = variant === 'added' || variant === 'removed'
         if (
           !variant &&
           !(lineNumbers && node.props.className?.split(/\s+/).includes('line'))
@@ -124,15 +125,20 @@ export function MdxCodeBlock({
         return (
           <CodeBlockLine
             key={node.key}
+            className={
+              hasDiffMarker
+                ? '[&>[data-slot=code-block-line-content]]:ps-[1ch]'
+                : undefined
+            }
             variant={
-              variant === 'added' || variant === 'removed'
+              hasDiffMarker
                 ? variant
                 : variant === 'hunk'
                   ? 'highlighted'
                   : 'default'
             }
           >
-            {variant === 'added' || variant === 'removed'
+            {hasDiffMarker
               ? withoutMarker(node.props.children)
               : node.props.children}
           </CodeBlockLine>

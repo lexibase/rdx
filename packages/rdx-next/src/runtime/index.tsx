@@ -406,7 +406,7 @@ export async function DocsPage({
                     )}
                   </div>
                   {description && (
-                    <p className="text-sm text-ring max-w-[726px]">
+                    <p className="text-sm text-muted-foreground max-w-[726px]">
                       {description}
                     </p>
                   )}

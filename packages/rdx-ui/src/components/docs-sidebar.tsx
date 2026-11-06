@@ -130,7 +130,7 @@ export function DocsSidebar({
       </div>
       <aside
         data-rdx-sidebar
-        className="hidden md:block h-full w-40 lg:w-56 shrink-0 border-r border-border overflow-y-auto p-4"
+        className="hidden md:block h-full w-40 lg:w-56 shrink-0 border-r border-border overflow-y-auto scrollbar-none p-4"
       >
         {content}
       </aside>
@@ -142,7 +142,7 @@ export function DocsSidebar({
             showCloseButton={false}
             portalProps={{ keepMounted: true }}
             data-rdx-mobile-sidebar
-            className="md:hidden w-full! max-w-none! h-dvh border-0 bg-background text-foreground gap-0 p-4 overflow-y-auto translate-none! opacity-100! transition-none!"
+            className="md:hidden w-full! max-w-none! h-dvh border-0 bg-background text-foreground gap-0 p-4 overflow-y-auto scrollbar-none translate-none! opacity-100! transition-none!"
             render={
               <motion.div
                 initial="closed"
