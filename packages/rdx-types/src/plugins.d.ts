@@ -93,8 +93,10 @@ export type RdxProject = {
   config: ResolvedRdxConfig
   sources: RdxContentSource[]
   commands: RdxPluginCommand[]
-  /** Project-relative files plugins need when serving deployed documentation. */
+  /** Project-relative files needed when serving deployed documentation. */
   runtimeFiles: string[]
+  /** Parsed project-owned TextMate grammars, registered under their fence names. */
+  syntaxGrammars?: { name: string; scopeName: string; patterns: unknown[] }[]
   localization?: RdxLocalization
   /** Selected locale on a request-scoped view, never a global mutable setting. */
   locale?: RdxLocale

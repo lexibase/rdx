@@ -46,6 +46,54 @@ Highlighting runs on the server with Shiki. Its palette follows the light/dark
 theme. Unknown languages and unlabelled fences remain readable as plain text;
 inline code is not highlighted.
 
+## Highlight a custom language
+
+Save a TextMate JSON grammar in your project, for example at
+`grammars/task-example.tmLanguage.json`:
+
+```json title="grammars/task-example.tmLanguage.json"
+{
+  "scopeName": "source.task-example",
+  "patterns": [
+    { "match": "\\b(task|run)\\b", "name": "keyword.control.task-example" },
+    {
+      "begin": "\"",
+      "end": "\"",
+      "name": "string.quoted.double.task-example"
+    }
+  ]
+}
+```
+
+Add the grammar to your existing `defineConfig` options:
+
+```ts title="rdx.config.ts"
+syntaxHighlighting: {
+  languages: {
+    'task-example': './grammars/task-example.tmLanguage.json',
+  },
+},
+```
+
+Use the key as the fence language in any `.md` or `.mdx` page:
+
+````md
+```task-example title="build.task" lineNumbers
+task "build"
+run "rdx build"
+```
+````
+
+```task-example title="build.task" lineNumbers
+task "build"
+run "rdx build"
+```
+
+Paths are relative to the project root. Use a lowercase fence name and a
+self-contained grammar with its own `scopeName`. The grammar identifies
+tokens, and RDX's light and dark themes supply their colors. Include the JSON
+file when deploying your project.
+
 ## Show a filename
 
 Add `title="rdx.config.ts"` after the language to display a filename or label in

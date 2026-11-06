@@ -1,4 +1,8 @@
 import rehypeShiki from '@shikijs/rehype'
+import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
+import { createHighlighter, type LanguageRegistration } from 'shiki'
+
+import type { RdxProject } from '@lexibase/rdx-types'
 
 import { formatFolderTree } from './folder-tree'
 
@@ -90,13 +94,22 @@ function prepareCodeBlocks(node: CodeNode) {
   node.children?.forEach(prepareCodeBlocks)
 }
 
+type SyntaxGrammars = NonNullable<RdxProject['syntaxGrammars']>
+
+const themes = { light: 'github-light', dark: 'github-dark' } as const
+// Keep custom grammars out of Shiki's shared singleton. Reuse the current
+// configuration across pages and recreate it when its files change.
+let customHighlighter:
+  { key: string; value: ReturnType<typeof createHighlighter> } | undefined
+
 /** shadcn's Shiki/GitHub palette, applied to MDX on the server. */
 export function rehypeDocumentationCode(
-  this: ThisParameterType<typeof rehypeShiki>
+  this: ThisParameterType<typeof rehypeShiki>,
+  grammars?: SyntaxGrammars
 ): ReturnType<typeof rehypeShiki> {
   const diffVariants = new WeakMap<object, string[]>()
-  const highlight = rehypeShiki.call(this, {
-    themes: { light: 'github-light', dark: 'github-dark' },
+  const options: NonNullable<Parameters<typeof rehypeShiki>[0]> = {
+    themes,
     defaultColor: false,
     addLanguageClass: true,
     // Load grammars only when a document uses them, not the whole bundle.
@@ -143,7 +156,25 @@ export function rehypeDocumentationCode(
         },
       },
     ],
-  })
+  }
+  const highlight: ReturnType<typeof rehypeShiki> = grammars?.length
+    ? async (tree, ...args) => {
+        const key = JSON.stringify(grammars)
+        if (customHighlighter?.key !== key)
+          customHighlighter = {
+            key,
+            value: createHighlighter({
+              themes: Object.values(themes),
+              langs: grammars as LanguageRegistration[],
+            }),
+          }
+        const highlighter = await customHighlighter.value
+        const transform = rehypeShikiFromHighlighter(highlighter, options)
+        const result = await transform(tree, ...args)
+        if (result instanceof Error) throw result
+        return result
+      }
+    : rehypeShiki.call(this, options)
   if (typeof highlight !== 'function') return highlight
   // Three named parameters make unified expect a callback instead of a Promise.
   return (tree, ...args) => {
