@@ -143,8 +143,9 @@ filename `publish.yml`, no environment name, and allow `npm publish`. Configure
 this near the first publish because unused configurations expire after two days.
 The workflow requests short-lived OIDC credentials in its publish job.
 
-After the release PR merges and CI passes on that `main` commit, run the workflow with
-**publish** checked. It publishes the verified archives in dependency order,
+After the release PR merges, run the workflow with **publish** checked. It waits
+up to 35 minutes for push CI on that exact `main` commit and prints the CI run
+link if CI fails or the wait expires. After CI passes, it publishes the verified archives in dependency order,
 waiting for each new version and its `latest` tag before continuing. If a run
 stops partway through, rerun it for the same version. Existing versions with the
 correct tag are skipped. If a version already exists under a different tag,
