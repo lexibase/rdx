@@ -46,6 +46,23 @@ Highlighting runs on the server with Shiki. Its palette follows the light/dark
 theme. Unknown languages and unlabelled fences remain readable as plain text;
 inline code is not highlighted.
 
+## Choose syntax themes
+
+Set a [bundled Shiki theme](https://shiki.style/themes) for either appearance in
+`rdx.config.ts`. For example, use Catppuccin Mocha in dark mode:
+
+```ts title="rdx.config.ts"
+syntaxHighlighting: {
+  themes: {
+    dark: 'catppuccin-mocha',
+  },
+},
+```
+
+Set `light: 'catppuccin-latte'` to use Catppuccin in light mode too. When a theme
+is omitted, RDX uses `github-light` or `github-dark` for that appearance.
+The palette applies to syntax tokens in built-in and custom languages.
+
 ## Highlight a custom language
 
 Save a TextMate JSON grammar in your project, for example at

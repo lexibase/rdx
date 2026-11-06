@@ -974,12 +974,24 @@ for (const name of ['@lexibase/rdx'])
 
 const checkI18n = process.argv.includes('--i18n')
 const checkInstallation = process.argv.includes('--install')
+const tailwindOverrides = {}
 const generatorRoot = path.join(
   temporary,
   checkI18n ? 'i18n-generator' : 'generator'
 )
 const generatorPackage = path.join(generatorRoot, 'package')
 if (checkI18n || checkInstallation) {
+  // Keep the Tailwind toolchain aligned with the workspace lockfile. Fresh
+  // resolution can see a new PostCSS release before its matching Oxide exists.
+  for (const name of ['@tailwindcss/postcss', 'tailwindcss']) {
+    const manifest = JSON.parse(
+      await readFile(
+        path.join(root, 'packages/rdx-ui/node_modules', name, 'package.json'),
+        'utf8'
+      )
+    )
+    tailwindOverrides[name] = manifest.version
+  }
   await mkdir(generatorRoot)
   execFileSync('tar', ['-xf', generator.archive, '-C', generatorRoot])
   await writeFile(
@@ -992,7 +1004,12 @@ if (checkI18n || checkInstallation) {
 if (checkI18n) {
   const { verifyMultilingualArchives } =
     await import('./multilingual-release-smoke.mjs')
-  await verifyMultilingualArchives({ temporary, releases, pnpm })
+  await verifyMultilingualArchives({
+    temporary,
+    releases,
+    pnpm,
+    tailwindOverrides,
+  })
 }
 
 if (checkInstallation) {
@@ -1025,7 +1042,7 @@ if (checkInstallation) {
       `file:${releases.get(name).archive.replaceAll('\\', '/')}`
   overrides['@lexibase/rdx>@lexibase/rdx-ui'] =
     `file:${releases.get('@lexibase/rdx-ui').archive.replaceAll('\\', '/')}`
-  pkg.pnpm = { overrides }
+  pkg.pnpm = { overrides: { ...tailwindOverrides, ...overrides } }
   await writeFile(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`)
   // Isolate this fixture from the enclosing monorepo workspace.
   await writeFile(

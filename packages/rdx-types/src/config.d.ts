@@ -21,9 +21,17 @@ export type RDXConfig = {
    * @defaultValue false
    */
   search?: boolean
-  /** Project-relative TextMate JSON files keyed by the language used in Markdown fences. */
+  /** Syntax highlighting for Markdown code blocks. */
   syntaxHighlighting?: {
-    languages: Record<string, string>
+    /** Project-relative TextMate JSON files keyed by the fence language. */
+    languages?: Record<string, string>
+    /** Bundled Shiki theme names for each site appearance. */
+    themes?: {
+      /** @defaultValue 'github-light' */
+      light?: string
+      /** @defaultValue 'github-dark' */
+      dark?: string
+    }
   }
   /**
    * Enable floating heading navigation on documentation pages.

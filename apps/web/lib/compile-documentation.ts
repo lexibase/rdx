@@ -42,7 +42,7 @@ export async function compileDocument(
         ],
         rehypePlugins: [
           rehypeDocumentationHeadings,
-          [rehypeDocumentationCode, docs.syntaxGrammars],
+          [rehypeDocumentationCode, docs.syntaxGrammars, docs.syntaxThemes],
         ],
       },
     },
