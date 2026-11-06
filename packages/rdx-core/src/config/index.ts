@@ -1,6 +1,8 @@
 import path from 'node:path'
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 
+import { bundledThemes } from 'shiki/themes'
+
 import { validateMetadata } from './metadata.js'
 import { RdxConfigError } from './error.js'
 import { resolveLocalization } from './localization'
@@ -113,9 +115,21 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
 
   if (config.syntaxHighlighting !== undefined) {
     const highlighting = object(config.syntaxHighlighting, 'syntaxHighlighting')
-    keys(highlighting, ['languages'], 'syntaxHighlighting.')
+    keys(highlighting, ['languages', 'themes'], 'syntaxHighlighting.')
+    if (highlighting.themes !== undefined) {
+      const themes = object(highlighting.themes, 'syntaxHighlighting.themes')
+      keys(themes, ['light', 'dark'], 'syntaxHighlighting.themes.')
+      for (const [mode, value] of Object.entries(themes)) {
+        const field = `syntaxHighlighting.themes.${mode}`
+        const name = text(value, field)
+        if (!Object.hasOwn(bundledThemes, name))
+          throw new RdxConfigError(
+            `${field} must name a bundled Shiki theme. Unknown theme "${name}".`
+          )
+      }
+    }
     const languages = object(
-      highlighting.languages,
+      highlighting.languages === undefined ? {} : highlighting.languages,
       'syntaxHighlighting.languages'
     )
     for (const [name, filename] of Object.entries(languages)) {

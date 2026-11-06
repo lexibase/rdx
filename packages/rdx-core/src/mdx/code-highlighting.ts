@@ -1,8 +1,12 @@
 import rehypeShiki from '@shikijs/rehype'
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
-import { createHighlighter, type LanguageRegistration } from 'shiki'
+import {
+  createHighlighter,
+  type BundledTheme,
+  type LanguageRegistration,
+} from 'shiki'
 
-import type { RdxProject } from '@lexibase/rdx-types'
+import type { RDXConfig, RdxProject } from '@lexibase/rdx-types'
 
 import { formatFolderTree } from './folder-tree'
 
@@ -96,17 +100,21 @@ function prepareCodeBlocks(node: CodeNode) {
 
 type SyntaxGrammars = NonNullable<RdxProject['syntaxGrammars']>
 
-const themes = { light: 'github-light', dark: 'github-dark' } as const
 // Keep custom grammars out of Shiki's shared singleton. Reuse the current
-// configuration across pages and recreate it when its files change.
+// configuration across pages and recreate it when its grammars or themes change.
 let customHighlighter:
   { key: string; value: ReturnType<typeof createHighlighter> } | undefined
 
-/** shadcn's Shiki/GitHub palette, applied to MDX on the server. */
+/** Apply syntax highlighting to Markdown code blocks on the server. */
 export function rehypeDocumentationCode(
   this: ThisParameterType<typeof rehypeShiki>,
-  grammars?: SyntaxGrammars
+  grammars?: SyntaxGrammars,
+  configuredThemes?: NonNullable<RDXConfig['syntaxHighlighting']>['themes']
 ): ReturnType<typeof rehypeShiki> {
+  const themes = {
+    light: configuredThemes?.light ?? 'github-light',
+    dark: configuredThemes?.dark ?? 'github-dark',
+  }
   const diffVariants = new WeakMap<object, string[]>()
   const options: NonNullable<Parameters<typeof rehypeShiki>[0]> = {
     themes,
@@ -159,12 +167,12 @@ export function rehypeDocumentationCode(
   }
   const highlight: ReturnType<typeof rehypeShiki> = grammars?.length
     ? async (tree, ...args) => {
-        const key = JSON.stringify(grammars)
+        const key = JSON.stringify([grammars, themes])
         if (customHighlighter?.key !== key)
           customHighlighter = {
             key,
             value: createHighlighter({
-              themes: Object.values(themes),
+              themes: Object.values(themes) as BundledTheme[],
               langs: grammars as LanguageRegistration[],
             }),
           }

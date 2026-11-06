@@ -46,12 +46,13 @@ test('project TextMate grammars highlight Markdown fences and are traced for dep
 
   const source =
     '```test-grammar title="Example" lineNumbers\nactivate other\n```'
-  const render = async (grammars) => {
+  const render = async (grammars, themes) => {
     const { content } = await compileDocumentation(
       source,
       {},
       undefined,
-      grammars
+      grammars,
+      themes
     )
     return renderToStaticMarkup(content)
   }
@@ -59,8 +60,48 @@ test('project TextMate grammars highlight Markdown fences and are traced for dep
   assert.match(html, /data-rdx-code-title="Example"/)
   assert.match(html, /data-rdx-code-line-numbers="true"/)
   assert.match(html, /<span style="[^"]*--shiki-light:[^"]*">activate<\/span>/)
+  const themed = await render((await load()).syntaxGrammars, {
+    dark: 'catppuccin-mocha',
+  })
+  assert.match(
+    themed,
+    /<span style="[^"]*--shiki-dark:#cba6f7[^"]*">activate<\/span>/i
+  )
   assert.doesNotMatch(await render(), /<span style="[^"]*">activate<\/span>/)
   await writeGrammar('other')
   const updated = await render((await load()).syntaxGrammars)
   assert.match(updated, /<span style="[^"]*--shiki-light:[^"]*">other<\/span>/)
+})
+
+test('bundled syntax themes work without custom grammars and keep the other mode default', async () => {
+  const input = {
+    metadata: { applicationName: 'Syntax themes' },
+    syntaxHighlighting: { themes: { dark: 'catppuccin-mocha' } },
+  }
+  const { config } = await createRdxProject(input)
+  const render = async (themes) => {
+    const { content } = await compileDocumentation(
+      '```js\nconst example = "hello"\n```',
+      {},
+      undefined,
+      undefined,
+      themes
+    )
+    return renderToStaticMarkup(content)
+  }
+  const lightColor = (html) =>
+    html.match(/--shiki-light:([^;"]+)[^"]*">const<\/span>/i)?.[1]
+  const defaults = await render()
+  const themed = await render(config.syntaxHighlighting.themes)
+  assert.ok(lightColor(defaults))
+  assert.equal(lightColor(themed), lightColor(defaults))
+  assert.match(themed, /--shiki-dark:#cba6f7[^"]*">const<\/span>/i)
+  assert.notEqual(themed, defaults)
+  await assert.rejects(
+    createRdxProject({
+      ...input,
+      syntaxHighlighting: { themes: { dark: 'missing-theme' } },
+    }),
+    /syntaxHighlighting.themes.dark.*Unknown theme "missing-theme"/
+  )
 })
