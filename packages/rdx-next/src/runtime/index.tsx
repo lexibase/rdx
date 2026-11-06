@@ -362,11 +362,17 @@ export async function DocsPage({
                     <div className="flex flex-wrap items-center gap-x-2">
                       <Button
                         variant="link"
-                        href={getDocsHref(
-                          originalProject,
-                          contentSource,
-                          currentSlug
-                        )}
+                        nativeButton={false}
+                        render={
+                          <a
+                            href={getDocsHref(
+                              originalProject,
+                              contentSource,
+                              currentSlug
+                            )}
+                            hrefLang={contentLanguage}
+                          />
+                        }
                       >
                         {messages.viewOriginal}
                       </Button>
