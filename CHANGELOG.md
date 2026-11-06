@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 5.1.2 — Prepared
+
+- Load a new document when switching languages or opening the original language
+  from a translation fallback. The selected theme initializes normally without
+  the React script warning.
+
 ## 5.1.1 — Prepared
 
 - Serve localized documentation entry points such as `/en/docs` and
