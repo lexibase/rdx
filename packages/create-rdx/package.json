@@ -1,6 +1,6 @@
 {
   "name": "@lexibase/create-rdx",
-  "version": "5.0.1",
+  "version": "5.1.0",
   "description": "Create a new RDX documentation project.",
   "license": "MIT",
   "bin": {
