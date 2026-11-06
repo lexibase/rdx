@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 5.0.1 — Prepared
+
+- Fix missing Markdown export and llms.txt routes in generated projects, include
+  last updated dates when available, and refresh the starter documentation. Space
+  diff markers, keep page descriptions neutral, and hide sidebar scrollbars while
+  preserving scrolling.
+
 ## 5.0.0 — Prepared
 
 - Add interactive Steps, section permalinks, edit links, Markdown exports, llms.txt, page copying, and sidebar highlights. Simplify sidebar ordering with order and optional navTitle.

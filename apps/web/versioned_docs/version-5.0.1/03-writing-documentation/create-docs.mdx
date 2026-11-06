@@ -1,0 +1,139 @@
+---
+title: Writing documentation pages
+navTitle: Writing pages
+description: Add categories, order pages, and write your first document.
+order: 2
+---
+
+## Create a category
+
+Create `docs/guides/`. Each top-level folder becomes a sidebar category. Use
+`docs/01-guides/` to place Guides first. See [Categories and URLs](./docs.mdx#categories-and-urls)
+for the ordering rules.
+
+## Create a page
+
+Add `docs/guides/first-page.mdx`:
+
+```mdx
+---
+title: Write your first documentation page
+navTitle: First page
+description: Everything you need to begin.
+order: 1
+---
+
+## Before you begin
+
+Install the tools for your project.
+
+## Your first example
+
+Write a short, useful example.
+```
+
+Use `##` for the first section below the document header.
+
+## Page frontmatter
+
+All fields are optional. Add `navTitle` when a shorter label reads better in
+the sidebar.
+
+| Field          | Type                 | What it controls                                                |
+| -------------- | -------------------- | --------------------------------------------------------------- |
+| `title`        | String               | Document title. RDX derives it from the filename when omitted.  |
+| `description`  | String               | Summary for the document header and page metadata.              |
+| `order`        | Number               | Sidebar position within the category. Lower numbers come first. |
+| `navTitle`     | String               | Sidebar label. Defaults to the document title.                  |
+| `highlighting` | `important` or `new` | Highlights the page with a dot in the sidebar.                  |
+
+Existing pages can migrate `link_position` to `order` using the
+[sidebar migration guide](../05-guides/migrating-sidebar.mdx).
+
+### Highlight a page in the sidebar
+
+Set `highlighting: important` for an amber dot beside an important page, such
+as a [migration guide](../05-guides/migrating-sidebar.mdx). Set
+`highlighting: new` for a blue dot beside a new guide or feature. Omit the field
+for a regular sidebar entry.
+
+```yaml
+---
+title: Migrating from version 4 to 5
+navTitle: Migrating to v5
+highlighting: important
+---
+```
+
+The dot pulses while the sidebar is visible. Readers who prefer reduced motion
+see a steady dot. Assistive technology receives the highlight as part of the
+link label.
+
+## Choose a file format
+
+Use `.md` or `.mdx` for your pages. Both formats support frontmatter,
+headings, tables, Callouts, Tabs, Accordion, Steps, keyboard shortcuts, and all code
+block modes through RDX's Markdown syntax. You can mix both formats in a category.
+
+For example, `docs/guides/first-page.md` has the URL
+`/docs/guides/first-page`. File extensions are omitted from page URLs.
+Keep one file per route: `first-page.md` and `first-page.mdx` would conflict.
+
+Choose `.md` for Markdown content, including literal braces such as
+`{placeholder}`. Choose `.mdx` when you need MDX syntax. RDX's built-in
+components use the same Markdown notation in either format.
+
+Search, section links, and the table of contents use both formats. Translated
+pages match the original by their path without the extension, so an original
+`guides/first-page.mdx` can have a `guides/first-page.md` translation.
+Version snapshots retain the files in their original format.
+
+## Write for readers
+
+Use paragraphs, headings, lists, links, and code fences. The shared renderer
+handles their styling. Use [Steps](./steps.mdx) for procedures, [Tabs](./tabs.mdx)
+for alternatives, an [Accordion](./accordion.mdx) for optional details, and
+[Callouts](./callouts.mdx) for notes and warnings.
+
+Write these components with Markdown: `> [!TIP]` for a Callout, `:::tabs` for
+Tabs, `:::accordion` for an Accordion, and `:kbd[Enter]` for a keyboard key.
+No imports are required in your pages.
+
+```md
+> [!TIP] Keep examples useful
+> Explain the next step and show the reader what to expect.
+```
+
+For a custom homepage or logo, create `components/home.tsx` or
+`components/logo.tsx` and reference the component in `rdx.config.ts`.
+
+## Page navigation
+
+Press Tab when opening a page to reveal **Skip to content**. Press Enter to
+move keyboard focus past the navbar and sidebar to the page title and content.
+Continue with Tab to reach the links and controls that follow.
+
+On mobile, swipe left across the page text to open the next document, or right
+to return to the previous one. Page order follows the sidebar. Start away from
+the screen edges; code blocks, tables and interactive components keep their own
+touch interactions. The previous and next buttons also remain available.
+
+## Preview and publish
+
+:::steps
+
+### Preview your changes
+
+Save the file while `pnpm dev` is running and open the page in your browser.
+
+### Check the links
+
+Use [relative document links](./document-links.mdx) to connect pages, then follow
+them in the preview.
+
+### Build for production
+
+Run a production build before deploying. Broken relative document links fail
+the build.
+
+:::
