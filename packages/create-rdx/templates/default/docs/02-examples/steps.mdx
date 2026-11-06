@@ -1,0 +1,57 @@
+---
+title: Steps
+description: Present a procedure one step at a time in an interactive card.
+order: 11
+---
+
+## Try Steps
+
+::::steps
+
+### Start the preview
+
+:::tabs
+
+### pnpm
+
+pnpm dev
+
+### npm
+
+npm run dev
+
+### yarn
+
+yarn dev
+
+:::
+
+### Edit a page
+
+Open a Markdown file in `docs/`, make a change, and save it.
+
+### Verify the result
+
+Visit the page in your browser and check that the change appears.
+
+::::
+
+## Write your own Steps
+
+Open with `:::steps` and use `###` for each step title. Readers move between
+steps with **Previous** and **Next**. When nesting a `:::tabs` block, open
+and close Steps with four colons, as in the example above.
+
+```md
+:::steps
+
+### Start the preview
+
+Open the local development URL.
+
+### Verify the result
+
+Check the changed page in your browser.
+
+:::
+```

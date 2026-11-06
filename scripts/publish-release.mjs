@@ -58,6 +58,21 @@ function validateArchives(packages, directory) {
     assert.equal(packed.name, pkg.name)
     assert.equal(packed.version, pkg.version)
     assert.doesNotMatch(JSON.stringify(packed), /workspace:/)
+    if (pkg.name === '@lexibase/rdx') {
+      const files = new Set(
+        execFileSync('tar', ['-tf', archive], { encoding: 'utf8' })
+          .trim()
+          .split(/\r?\n/)
+      )
+      for (const route of [
+        'docs/llms.txt/route.ts',
+        'rdx-markdown/[...path]/route.ts',
+      ])
+        assert.ok(
+          files.has(`package/dist/templates/app/${route}`),
+          `Missing runtime route ${route}; rebuild @lexibase/rdx before packing`
+        )
+    }
     return { ...pkg, archive }
   })
 }

@@ -16,6 +16,13 @@ pnpm dev
 
 Edit files in `docs/` to create your documentation. RDX creates and maintains
 its internal runtime in `.rdx/`.
+
+- Start with `docs/01-getting-started/writing-pages.mdx` for page setup, sidebar ordering,
+  and `rdx check`.
+- Browse `docs/02-examples/` for working Markdown components, including Steps.
+- Use **Copy this page** on any document to copy its Markdown, or open
+  `/docs/llms.txt` for an index of the published documentation.
+
 Keep custom React components in `components/` and import them from
 `rdx.config.ts` or `components/home.tsx`. The project-root `tsconfig.json` configures JSX
 and bundler-style imports for these files, including inside a monorepo.
@@ -60,7 +67,7 @@ Markdown components. Use site-root URLs for assets:
 [Download](/downloads/example.txt)
 ```
 
-See `docs/examples/images.mdx` for a working example. Do not include `/public`
+See `docs/02-examples/images.mdx` for a working example. Do not include `/public`
 in URLs and do not store private files or credentials in this directory.
 
 RDX connects `.rdx/public` to this folder automatically. Keep your files in

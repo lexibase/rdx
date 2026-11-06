@@ -1,0 +1,38 @@
+---
+title: Configure your documentation site
+navTitle: Configuration
+description: Set your site identity and enable optional documentation features.
+order: 3
+---
+
+Edit `rdx.config.ts` at the root of your project. Set
+`metadata.applicationName` for the site name and `metadata.metadataBase`
+to the public origin for the sitemap and absolute URLs in Markdown exports.
+
+```ts title="rdx.config.ts"
+import { defineConfig } from '@lexibase/rdx'
+
+export default defineConfig({
+  metadata: {
+    applicationName: 'My documentation',
+    metadataBase: 'https://docs.example.com',
+  },
+  search: true,
+  TOC: true,
+  navbar: {
+    logo: '/images/rdx.svg',
+  },
+})
+```
+
+Use `search: true` to enable search in the navbar. Use `TOC: true` to show
+heading navigation on pages with enough sections. Put your logo in
+`public/images/` and set `navbar.logo` to its public path, starting with `/images/`.
+
+Set `lang` to the language of your documentation. RDX uses it for the page
+language and selects the corresponding interface messages when available.
+To add a custom landing page, create `components/home.tsx`, import it into
+`rdx.config.ts`, and set `homepage: { enabled: true, component: Home }`.
+
+See the [configuration reference](https://rdx-tool.vercel.app/docs) for more
+options, including plugins and the source edit link.

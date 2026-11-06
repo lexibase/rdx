@@ -77,6 +77,8 @@ const required = {
     'dist/styles.css',
     'dist/styles.d.css.ts',
     'dist/templates/app/docs/[[...slug]]/page.tsx',
+    'dist/templates/app/docs/llms.txt/route.ts',
+    'dist/templates/app/rdx-markdown/[...path]/route.ts',
     'dist/templates/app/sitemap.ts',
     'dist/templates/app/robots.ts',
   ],
@@ -160,8 +162,11 @@ const required = {
     'templates/default/package.json',
     'templates/default/rdx.config.ts',
     'templates/default/tsconfig.json',
-    'templates/default/docs/examples/code-blocks.mdx',
-    'templates/default/docs/examples/diagrams.mdx',
+    'templates/default/docs/02-examples/code-blocks.mdx',
+    'templates/default/docs/02-examples/markdown.md',
+    'templates/default/docs/02-examples/diagrams.mdx',
+    'templates/default/docs/02-examples/steps.mdx',
+    'templates/default/docs/02-examples/markdown-exports.mdx',
     'templates/default/gitignore.template',
     'templates/default/public/images/rdx.svg',
   ],
@@ -234,10 +239,13 @@ async function verifyDeploymentTrace(project, versioned) {
     trace.files.map((file) => path.resolve(path.dirname(tracePath), file))
   )
   for (const file of [
-    'docs/init/intro.mdx',
-    'docs/init/_category.json',
+    'docs/01-getting-started/intro.mdx',
+    'docs/01-getting-started/writing-pages.mdx',
     ...(versioned
-      ? ['versions.json', 'versioned_docs/version-1.0.0/init/intro.mdx']
+      ? [
+          'versions.json',
+          'versioned_docs/version-1.0.0/01-getting-started/intro.mdx',
+        ]
       : []),
   ])
     assert.ok(
@@ -439,7 +447,7 @@ async function verifyFrameworkUpgrade(project) {
   )
   await verifySharedUi(project, uiManifest.version)
   await writeFile(
-    path.join(project, 'docs/examples/ui-upgrade.mdx'),
+    path.join(project, 'docs/02-examples/ui-upgrade.mdx'),
     '---\ntitle: UI upgrade\n---\n\n<UiUpgradeProbe />\n'
   )
   await writeFile(
@@ -533,7 +541,7 @@ async function verifySite(
         ).text()
         assert.match(markdown, /MarkdownReleaseProbe \{literal\}/)
         assert.match(markdown, /src="\/images\/rdx\.svg"/)
-        assert.match(markdown, /href="\/docs\/init\/intro"/)
+        assert.match(markdown, /href="\/docs\/getting-started\/intro"/)
       }
       await redirect.arrayBuffer()
       const docsRoot = await (await request(base, '/docs')).text()
@@ -541,7 +549,9 @@ async function verifySite(
         docsRoot.includes(current),
         'Dynamic /docs must read live project content'
       )
-      const html = await (await request(base, '/docs/init/intro')).text()
+      const html = await (
+        await request(base, '/docs/getting-started/intro')
+      ).text()
       assert.match(html, /<title>Introduction \| My documentation<\/title>/)
       assert.match(docsRoot, /<title>Introduction \| My documentation<\/title>/)
       assert.match(
@@ -549,11 +559,11 @@ async function verifySite(
         /<meta name="description" content="Start building your documentation with RDX\."/
       )
       const secondPage = await (
-        await request(base, '/docs/init/getting-started')
+        await request(base, '/docs/getting-started/writing-pages')
       ).text()
       assert.match(
         secondPage,
-        /<title>Getting started \| My documentation<\/title>/
+        /<title>Writing pages \| My documentation<\/title>/
       )
       assert.match(
         html,
@@ -611,22 +621,37 @@ async function verifySite(
       const sitemap = await (await request(base, '/sitemap.xml')).text()
       assert.ok(
         sitemap.includes(
-          `https://docs.example.test/docs/${versioned ? '1.0.0/' : ''}init/intro`
+          `https://docs.example.test/docs/${versioned ? '1.0.0/' : ''}getting-started/intro`
         )
       )
       assert.doesNotMatch(sitemap, /rdx-search|_not-found/)
-      const introExport = `/rdx-markdown/docs/${versioned ? '1.0.0/' : ''}init/intro.md`
+      const introExport = `/rdx-markdown/docs/${versioned ? '1.0.0/' : ''}getting-started/intro.md`
       const llmIndex = await (await request(base, '/docs/llms.txt')).text()
       assert.ok(llmIndex.includes(`https://docs.example.test${introExport}`))
       const exported = await request(base, introExport)
       assert.match(exported.headers.get('content-type'), /^text\/markdown/)
+      if (!versioned) {
+        const markdownExample = await request(
+          base,
+          '/rdx-markdown/docs/examples/markdown.md'
+        )
+        assert.match(
+          markdownExample.headers.get('content-type'),
+          /^text\/markdown/
+        )
+        assert.match(await markdownExample.text(), /^## Markdown works$/m)
+        const steps = await (await request(base, '/docs/examples/steps')).text()
+        assert.match(steps, /data-slot="steps"/)
+      }
       assert.match(
         await exported.text(),
         /docs_index: "https:\/\/docs\.example\.test\/docs\/llms\.txt"/
       )
       if (versioned)
         assert.ok(
-          !sitemap.includes('https://docs.example.test/docs/init/intro')
+          !sitemap.includes(
+            'https://docs.example.test/docs/getting-started/intro'
+          )
         )
       assert.match(
         html,
@@ -724,7 +749,7 @@ async function verifySite(
           'Dynamic version root must read its snapshot'
         )
         const snapshot = await (
-          await request(base, '/docs/1.0.0/init/intro')
+          await request(base, '/docs/1.0.0/getting-started/intro')
         ).text()
         assert.ok(snapshot.includes(original))
         assert.match(
@@ -751,7 +776,9 @@ async function verifySite(
         } else
           await (await request(base, '/rdx-search/1.0.0', 404)).arrayBuffer()
       } else {
-        await (await request(base, '/docs/1.0.0/init/intro', 404)).arrayBuffer()
+        await (
+          await request(base, '/docs/1.0.0/getting-started/intro', 404)
+        ).arrayBuffer()
         await (await request(base, '/rdx-search/1.0.0', 404)).arrayBuffer()
       }
     }
@@ -761,7 +788,7 @@ async function verifySite(
   )
 }
 async function verifyRollingEditions(project) {
-  const introPath = path.join(project, 'docs/init/intro.mdx')
+  const introPath = path.join(project, 'docs/01-getting-started/intro.mdx')
   const configPath = path.join(project, 'rdx.config.ts')
   const intro = await readFile(introPath, 'utf8')
   await writeFile(introPath, `${intro}\n\nRollingMinorPublishedMarker\n`)
@@ -789,18 +816,28 @@ async function verifyRollingEditions(project) {
     path.join(project, 'node_modules/@lexibase/rdx/bin/rdx.mjs'),
     project,
     async (base) => {
-      const live = await (await request(base, '/docs/init/intro')).text()
+      const live = await (
+        await request(base, '/docs/getting-started/intro')
+      ).text()
       assert.match(live, /RollingLiveDevelopmentMarker/)
-      const minor = await (await request(base, '/docs/1.1.0/init/intro')).text()
+      const minor = await (
+        await request(base, '/docs/1.1.0/getting-started/intro')
+      ).text()
       assert.match(minor, /RollingMinorPublishedMarker/)
       assert.doesNotMatch(
         minor,
         /RollingLiveDevelopmentMarker|RollingMajorPublishedMarker/
       )
-      const major = await (await request(base, '/docs/2.0.0/init/intro')).text()
+      const major = await (
+        await request(base, '/docs/2.0.0/getting-started/intro')
+      ).text()
       assert.match(major, /RollingMajorPublishedMarker/)
       assert.doesNotMatch(major, /RollingLiveDevelopmentMarker/)
-      for (const suffix of ['', '/init/intro', '/init/intro?from=old']) {
+      for (const suffix of [
+        '',
+        '/getting-started/intro',
+        '/getting-started/intro?from=old',
+      ]) {
         const response = await request(base, `/docs/1.0.0${suffix}`, 308)
         assert.equal(response.headers.get('location'), `/docs/1.1.0${suffix}`)
         await response.arrayBuffer()
@@ -997,12 +1034,12 @@ if (process.argv.includes('--install')) {
       .replace('navbar: {', "navbar: { logo: '/images/rdx.svg',")
   )
   await writeFile(
-    path.join(project, 'docs/examples/plain.md'),
-    '---\ntitle: Plain Markdown\n---\n\n## Markdown features\n\n> [!TIP]\n> MarkdownReleaseProbe {literal}\n\n[Introduction](../init/intro.mdx)\n'
+    path.join(project, 'docs/02-examples/plain.md'),
+    '---\ntitle: Plain Markdown\n---\n\n## Markdown features\n\n> [!TIP]\n> MarkdownReleaseProbe {literal}\n\n[Introduction](../01-getting-started/intro.mdx)\n'
   )
   const original = `SnapshotSentinel${randomUUID().replaceAll('-', '')}`
   const current = `CurrentSentinel${randomUUID().replaceAll('-', '')}`
-  const introPath = path.join(project, 'docs/init/intro.mdx')
+  const introPath = path.join(project, 'docs/01-getting-started/intro.mdx')
   const intro = `${await readFile(introPath, 'utf8')}\n\n${original}\n`
   await writeFile(introPath, intro)
   const projectStyles =
@@ -1037,16 +1074,16 @@ if (process.argv.includes('--install')) {
   pnpm(project, ['exec', 'rdx', 'version', '1.0.0'])
   assert.equal(
     await readFile(
-      path.join(project, 'versioned_docs/version-1.0.0/examples/plain.md'),
+      path.join(project, 'versioned_docs/version-1.0.0/02-examples/plain.md'),
       'utf8'
     ),
-    await readFile(path.join(project, 'docs/examples/plain.md'), 'utf8')
+    await readFile(path.join(project, 'docs/02-examples/plain.md'), 'utf8')
   )
   pnpm(project, ['exec', 'rdx', 'check'])
   const versionsFile = path.join(project, 'versions.json')
   const snapshotFile = path.join(
     project,
-    'versioned_docs/version-1.0.0/init/intro.mdx'
+    'versioned_docs/version-1.0.0/01-getting-started/intro.mdx'
   )
   const snapshotBefore = await readFile(snapshotFile, 'utf8')
   pnpm(project, ['exec', 'rdx', 'archive', '1.0.0'])
@@ -1061,7 +1098,10 @@ if (process.argv.includes('--install')) {
   })
   assert.equal(await readFile(snapshotFile, 'utf8'), snapshotBefore)
   await writeFile(
-    path.join(project, 'versioned_docs/version-1.0.0/init/intro.mdx'),
+    path.join(
+      project,
+      'versioned_docs/version-1.0.0/01-getting-started/intro.mdx'
+    ),
     intro
       .replace('title: Introduction', 'title: Snapshot introduction')
       .replace(

@@ -142,13 +142,16 @@ export async function verifyMultilingualArchives({
     await writeFile(configPath, config)
     assert.match(cli('add', 'i18n'), /already configured/)
     assert.equal(await readFile(configPath, 'utf8'), config)
-    const originalPath = path.join(project, 'docs/init/intro.mdx')
+    const originalPath = path.join(project, 'docs/01-getting-started/intro.mdx')
     const original = await readFile(originalPath, 'utf8')
     await writeFile(originalPath, original + '\n\nOriginalEnglishMarker\n')
-    await mkdir(path.join(project, 'locale/pt-br/docs/init'), {
+    await mkdir(path.join(project, 'locale/pt-br/docs/01-getting-started'), {
       recursive: true,
     })
-    const translatedPath = path.join(project, 'locale/pt-br/docs/init/intro.md')
+    const translatedPath = path.join(
+      project,
+      'locale/pt-br/docs/01-getting-started/intro.md'
+    )
     await writeFile(
       translatedPath,
       '---\ntitle: Introdução\n---\n\n## Olá\n\nPortuguesePublishedMarker\n'
@@ -158,7 +161,7 @@ export async function verifyMultilingualArchives({
     cli('version', '3.1.0')
     const snapshotPath = path.join(
       project,
-      'locale/pt-br/versioned_docs/version-3.1.0/init/intro.md'
+      'locale/pt-br/versioned_docs/version-3.1.0/01-getting-started/intro.md'
     )
     const frozen = await readFile(snapshotPath, 'utf8')
     cli('archive', '3.1.0')
@@ -196,17 +199,19 @@ export async function verifyMultilingualArchives({
           return response
         }
         const published = await (
-          await request('/pt-br/docs/3.1.0/init/intro')
+          await request('/pt-br/docs/3.1.0/getting-started/intro')
         ).text()
         assert.match(published, /PortuguesePublishedMarker/)
         assert.doesNotMatch(published, /PortugueseLiveOnlyMarker/)
         assert.match(published, /<html[^>]*lang="pt-BR"/)
         assert.match(published, /data-rdx-language-trigger/)
         assert.match(published, /data-rdx-version-trigger/)
-        const live = await (await request('/pt-br/docs/init/intro')).text()
+        const live = await (
+          await request('/pt-br/docs/getting-started/intro')
+        ).text()
         assert.match(live, /PortugueseLiveOnlyMarker/)
         const missing = await (
-          await request('/es/docs/3.1.0/init/intro')
+          await request('/es/docs/3.1.0/getting-started/intro')
         ).text()
         assert.match(missing, /OriginalEnglishMarker/)
         assert.match(missing, /data-rdx-translation-fallback/)
@@ -216,12 +221,12 @@ export async function verifyMultilingualArchives({
           /href="https:\/\/github.com\/example\/project\/tree\/main\/locale"/
         )
         const previous = await request(
-          '/pt-br/docs/3.0.0/init/intro?from=old',
+          '/pt-br/docs/3.0.0/getting-started/intro?from=old',
           308
         )
         assert.equal(
           previous.headers.get('location'),
-          '/pt-br/docs/3.1.0/init/intro?from=old'
+          '/pt-br/docs/3.1.0/getting-started/intro?from=old'
         )
         await previous.arrayBuffer()
         const index = await (await request('/pt-br/rdx-search/3.1.0')).text()
@@ -233,7 +238,7 @@ export async function verifyMultilingualArchives({
         await (await request('/pt-br/docs/missing', 404)).arrayBuffer()
         await (await request('/images/rdx.svg')).arrayBuffer()
       },
-      { readyPath: '/pt-br/docs/3.1.0/init/intro' }
+      { readyPath: '/pt-br/docs/3.1.0/getting-started/intro' }
     )
     const tracePath = path.join(
       project,

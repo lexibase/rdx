@@ -1,7 +1,7 @@
 ---
 title: Markdown
 description: A small Markdown and MDX example.
-link_position: 1
+order: 1
 ---
 
 ## Markdown works
@@ -41,7 +41,7 @@ Wider tables scroll horizontally on small screens without widening the page.
 
 > Keep explanations close to the content they describe.
 >
-> A quotation can contain **formatted text**, [links](/docs/init/intro), and `inline code`.
+> A quotation can contain **formatted text**, [links](/docs/getting-started/intro), and `inline code`.
 
 You can also use ~~strikethrough~~ text.
 
