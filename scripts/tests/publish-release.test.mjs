@@ -33,17 +33,20 @@ test('a retry skips published archives and waits for the remaining package and t
     ['@lexibase/consumer@latest', '1.0.0'],
   ])
   const published = []
+  let polls = 0
   await publishPackages(packages, {
     dryRun: false,
     lookup: (spec) => registry.get(spec),
     publish: (archive) => published.push(archive),
     wait: () => {
+      if (++polls < 13) return
       registry.set('@lexibase/consumer@2.0.0', '2.0.0')
       registry.set('@lexibase/consumer@latest', '2.0.0')
     },
     log: () => {},
   })
   assert.deepEqual(published, ['consumer.tgz'])
+  assert.equal(polls, 13)
 })
 
 test('publication stops on registry errors and never downgrades latest', async () => {

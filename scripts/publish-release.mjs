@@ -172,7 +172,7 @@ export async function publishPackages(
         (await lookup(`${name}@latest`)) === version
       )
         break
-      if (attempt === 11)
+      if (attempt === 36)
         throw new Error(
           `${spec} is not visible with the latest tag yet. Check npm and retry the workflow.`
         )
