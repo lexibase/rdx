@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import {
   mkdtemp,
@@ -17,6 +18,10 @@ import {
   getProjectDocsPaths,
   resolveDocsRoute,
 } from '@lexibase/rdx-core'
+import {
+  createDocumentDateReader,
+  getSnapshotDocumentDate,
+} from '@lexibase/rdx-core/config'
 import { versioning } from '../dist/index.js'
 
 async function fixture(t) {
@@ -33,6 +38,61 @@ async function fixture(t) {
 const config = () => ({
   metadata: { applicationName: 'Docs' },
   plugins: [versioning()],
+})
+
+test('snapshot stores the committed source date and omits uncommitted content dates', async (t) => {
+  const rootDir = await fixture(t)
+  const git = (...args) =>
+    execFileSync('git', args, {
+      cwd: rootDir,
+      stdio: 'pipe',
+      env: {
+        ...process.env,
+        GIT_AUTHOR_DATE: '2026-04-10T12:00:00Z',
+        GIT_COMMITTER_DATE: '2026-04-10T12:00:00Z',
+      },
+    })
+  git('init')
+  git('add', '--', 'docs')
+  git(
+    '-c',
+    'user.name=RDX Test',
+    '-c',
+    'user.email=test@example.invalid',
+    '-c',
+    'commit.gpgsign=false',
+    'commit',
+    '--no-verify',
+    '-m',
+    'test: add sample document'
+  )
+  const live = path.join(rootDir, 'docs/guides/intro.mdx')
+  const pending = path.join(rootDir, 'docs/guides/pending.md')
+  await writeFile(pending, 'Draft')
+  const dateFor = createDocumentDateReader(rootDir)
+  assert.equal(dateFor(live), '2026-04-10')
+  assert.equal(dateFor(pending), undefined)
+  const project = await createRdxProject(config(), {
+    rootDir,
+    command: 'prepare',
+  })
+  await project.commands[0].run({
+    rootDir,
+    config: project.config,
+    command: 'version',
+    args: ['1.0.0'],
+  })
+  await writeFile(live, 'Uncommitted edits')
+  assert.equal(dateFor(live), undefined)
+  const snapshot = path.join(rootDir, 'versioned_docs/version-1.0.0')
+  assert.equal(
+    getSnapshotDocumentDate(snapshot, path.join(snapshot, 'guides/intro.mdx')),
+    '2026-04-10'
+  )
+  assert.equal(
+    getSnapshotDocumentDate(snapshot, path.join(snapshot, 'guides/pending.md')),
+    undefined
+  )
 })
 
 test('patch and minor releases advance one edition per major and retain historical route aliases', async (t) => {

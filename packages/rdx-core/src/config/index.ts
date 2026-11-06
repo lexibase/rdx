@@ -22,6 +22,12 @@ export { normalizeLocalization } from './localization'
 export { collectSnapshotContributions } from './snapshots'
 export { getContentSources } from '../project/localization'
 export { getEditPageHref } from './edit-page'
+export {
+  createDocumentDateReader,
+  collectSnapshotDocumentDates,
+  getSnapshotDocumentDate,
+  snapshotDatesFilename,
+} from './document-dates'
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)

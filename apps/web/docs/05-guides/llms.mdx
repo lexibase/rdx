@@ -37,3 +37,8 @@ The export includes the page title, description when supplied, `url` for the
 source page, and `docs_index` for the corresponding index. Relative document
 links resolve to public page URLs. RDX generates the export from your content
 without editing the Markdown file you authored.
+
+When Git can identify the last commit that changed a page, the export includes
+`lastUpdated` in `YYYY-MM-DD` format. Version snapshots preserve the source
+date they captured when created. The field is omitted when a date cannot be
+determined from the available history or snapshot metadata.
