@@ -91,29 +91,33 @@ development server. The plugin is installed once for all configured languages.
 ## Organize translations
 
 Keep primary content in `docs/`. Create `locale/<folder>/docs/` for every secondary
-language, matching the relative paths of the original pages:
+language. Mirror the structure of the original pages using the same folder
+and file names:
 
 ```folder
 docs/
-  guides/
-    installation.mdx
+  01-guides/
+    02-installation.mdx
 locale/
   ptbr/
     docs/
-      guides/
-        installation.mdx
+      01-guides/
+        02-installation.md
   es-es/
     docs/
-      guides/
-        installation.mdx
+      01-guides/
+        02-installation.mdx
 ```
 
-Translate the title, description, headings and body. Match the primary page's
-relative path without the extension: `guides/installation.mdx` can be translated
-as `guides/installation.md`. Both formats support RDX's Markdown components.
-Translate category labels with `_category.json`; categories
-and pages keep the primary tree's ordering. Store shared images and downloads in
-root `public/`.
+Translate the title, description, headings and body. Use `navTitle` to give
+the translated page a shorter sidebar label. Both `.md` and `.mdx` support
+RDX's Markdown components.
+
+RDX matches translations by route. The numeric prefixes and file extension
+are omitted from the URL, so both files above map to `guides/installation`.
+Category labels come from the primary folder names by default. Category and page
+order follow the primary tree, including any `order` values in its frontmatter.
+Store shared images and downloads in root `public/`.
 
 The examples above have English as the primary language. When English is a
 secondary language, its content belongs in `locale/en/docs/` instead.
@@ -242,17 +246,17 @@ their live language trees:
 ```folder
 versioned_docs/
   version-1.0.0/
-    guides/
-      installation.mdx
+    01-guides/
+      02-installation.mdx
 locale/
   ptbr/
     docs/
-      guides/
-        installation.mdx
+      01-guides/
+        02-installation.md
     versioned_docs/
       version-1.0.0/
-        guides/
-          installation.mdx
+        01-guides/
+          02-installation.md
 versions.json
 ```
 
