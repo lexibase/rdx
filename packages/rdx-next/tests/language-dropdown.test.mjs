@@ -44,6 +44,19 @@ test('language menu keeps all configured languages and omits contribution contro
   )
 })
 
+test('switching languages uses native links to load the new locale document', () => {
+  const tree = LanguageDropdown({ options, current: 'en' })
+  const items = nodes(tree, (node) => node.type.name === 'DropdownMenuLinkItem')
+  assert.deepEqual(
+    items.map(({ props }) => ({
+      type: props.render.type,
+      href: props.render.props.href,
+      hrefLang: props.render.props.hrefLang,
+    })),
+    options.map(({ code, href }) => ({ type: 'a', href, hrefLang: code }))
+  )
+})
+
 test('language menu adds a separated, localized external contribution link', () => {
   const url = 'https://github.com/example/project/tree/main/locale'
   for (const [lang, label, newTab] of [

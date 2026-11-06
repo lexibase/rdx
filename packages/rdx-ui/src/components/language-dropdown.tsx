@@ -1,7 +1,6 @@
 'use client'
 
 import { ExternalLink, Languages } from 'lucide-react'
-import Link from 'next/link'
 import { Button } from './button'
 import {
   DropdownMenu,
@@ -51,7 +50,8 @@ export function LanguageDropdown({
               key={option.code}
               className={option.code === current ? 'bg-accent/30' : undefined}
               closeOnClick
-              render={<Link href={option.href} hrefLang={option.code} />}
+              // A new document lets the locale layout initialize its theme script.
+              render={<a href={option.href} hrefLang={option.code} />}
               aria-current={option.code === current ? 'true' : undefined}
             >
               {option.label}
