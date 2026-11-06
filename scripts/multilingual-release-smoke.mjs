@@ -14,23 +14,7 @@ export async function verifyMultilingualArchives({
   pnpm,
   resume = false,
 }) {
-  const generatorRoot = path.join(temporary, 'i18n-generator')
-  await mkdir(generatorRoot, { recursive: resume })
-  if (!resume) {
-    execFileSync('tar', [
-      '-xf',
-      releases.get('@lexibase/create-rdx').archive,
-      '-C',
-      generatorRoot,
-    ])
-    const generator = path.join(generatorRoot, 'package')
-    await writeFile(
-      path.join(generator, 'pnpm-workspace.yaml'),
-      "packages:\n  - '.'\n"
-    )
-    pnpm(generator, ['install', '--ignore-scripts', '--prefer-offline'])
-  }
-  const generator = path.join(generatorRoot, 'package')
+  const generator = path.join(temporary, 'i18n-generator', 'package')
   const archives = Object.fromEntries(
     [...releases]
       .filter(([name]) => name !== '@lexibase/create-rdx')
@@ -108,7 +92,7 @@ export async function verifyMultilingualArchives({
     console.log(
       `Installing multilingual ${monorepo ? 'monorepo' : 'standalone'} fixture...`
     )
-    pnpm(project, ['install', '--strict-peer-dependencies', '--prefer-offline'])
+    pnpm(project, ['install', '--strict-peer-dependencies'])
     const host = createRequire(pkgPath)
     const framework = path.dirname(host.resolve('@lexibase/rdx/package.json'))
     assert.ok(

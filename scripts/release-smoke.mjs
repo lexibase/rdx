@@ -172,11 +172,27 @@ const required = {
   ],
 }
 function pnpm(cwd, args, capture = false) {
-  return execFileSync(process.execPath, [pnpmEntry, ...args], {
-    cwd,
-    encoding: 'utf8',
-    stdio: capture ? 'pipe' : 'inherit',
-  })
+  const [command] = args
+  const installsDependencies = command === 'install' || command === 'add'
+  const started = performance.now()
+  try {
+    return execFileSync(
+      process.execPath,
+      [
+        pnpmEntry,
+        ...args,
+        ...(installsDependencies ? ['--prefer-offline'] : []),
+      ],
+      { cwd, encoding: 'utf8', stdio: capture ? 'pipe' : 'inherit' }
+    )
+  } finally {
+    if (installsDependencies || command === 'build') {
+      const seconds = ((performance.now() - started) / 1000).toFixed(1)
+      console.log(
+        `[release smoke] pnpm ${command} (${path.relative(temporary, cwd)}): ${seconds}s`
+      )
+    }
+  }
 }
 
 function buildProject(project) {
@@ -956,22 +972,30 @@ const template = JSON.parse(
 for (const name of ['@lexibase/rdx'])
   assert.equal(template.dependencies[name], releases.get(name).manifest.version)
 
-if (process.argv.includes('--i18n')) {
-  const { verifyMultilingualArchives } =
-    await import('./multilingual-release-smoke.mjs')
-  await verifyMultilingualArchives({ temporary, releases, pnpm })
-}
-
-if (process.argv.includes('--install')) {
-  const generatorRoot = path.join(temporary, 'generator')
+const checkI18n = process.argv.includes('--i18n')
+const checkInstallation = process.argv.includes('--install')
+const generatorRoot = path.join(
+  temporary,
+  checkI18n ? 'i18n-generator' : 'generator'
+)
+const generatorPackage = path.join(generatorRoot, 'package')
+if (checkI18n || checkInstallation) {
   await mkdir(generatorRoot)
   execFileSync('tar', ['-xf', generator.archive, '-C', generatorRoot])
-  const generatorPackage = path.join(generatorRoot, 'package')
   await writeFile(
     path.join(generatorPackage, 'pnpm-workspace.yaml'),
     "packages:\n  - '.'\n"
   )
   pnpm(generatorPackage, ['install', '--ignore-scripts'])
+}
+
+if (checkI18n) {
+  const { verifyMultilingualArchives } =
+    await import('./multilingual-release-smoke.mjs')
+  await verifyMultilingualArchives({ temporary, releases, pnpm })
+}
+
+if (checkInstallation) {
   execFileSync(
     process.execPath,
     [path.join(generatorPackage, 'bin/index.js'), 'project', '--skip-install'],
