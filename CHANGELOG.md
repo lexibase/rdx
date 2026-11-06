@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 5.1.0 — Prepared
+
+- Register project-owned TextMate grammars for Markdown code fences and select
+  bundled Shiki themes for light and dark mode. Omitted themes keep the GitHub
+  defaults, and grammar files are included in the deployment trace.
+
 ## 5.0.1 — Prepared
 
 - Fix missing Markdown export and llms.txt routes in generated projects, include
