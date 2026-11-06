@@ -64,6 +64,9 @@ const config = {
   search: true,
   // Edit URL up to this project root in the repository.
   editPage: { baseUrl: 'https://github.com/lexibase/rdx/edit/main/apps/web' },
+  syntaxHighlighting: {
+    languages: { 'task-example': './grammars/task-example.tmLanguage.json' },
+  },
   description:
     'Simple documentation built on Next.js, Tailwind CSS, and shadcn/ui. Write MDX, add folders, and publish your docs.',
 

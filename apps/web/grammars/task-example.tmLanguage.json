@@ -1,0 +1,11 @@
+{
+  "scopeName": "source.task-example",
+  "patterns": [
+    { "match": "\\b(task|run)\\b", "name": "keyword.control.task-example" },
+    {
+      "begin": "\"",
+      "end": "\"",
+      "name": "string.quoted.double.task-example"
+    }
+  ]
+}

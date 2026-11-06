@@ -137,6 +137,7 @@ export function createDocumentation(project: RdxProject) {
   }
 
   return {
+    syntaxGrammars: project.syntaxGrammars,
     checkOptions(): DocumentationCheckOptions {
       const published =
         editions.find((edition) => edition.kind === 'version') ?? editions[0]!

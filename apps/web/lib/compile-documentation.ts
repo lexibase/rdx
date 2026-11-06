@@ -40,7 +40,10 @@ export async function compileDocument(
             },
           ],
         ],
-        rehypePlugins: [rehypeDocumentationHeadings, rehypeDocumentationCode],
+        rehypePlugins: [
+          rehypeDocumentationHeadings,
+          [rehypeDocumentationCode, docs.syntaxGrammars],
+        ],
       },
     },
   })

@@ -292,7 +292,8 @@ export async function DocsPage({
       basePath: contentSource.basePath,
       virtualPaths: !!contentOptions.fallbackDocsDir,
       documents: contentCategories.flatMap((category) => category.pages),
-    }
+    },
+    originalProject.syntaxGrammars
   )
   const description =
     typeof document.frontmatter.description === 'string'

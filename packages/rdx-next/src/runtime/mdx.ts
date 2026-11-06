@@ -11,7 +11,8 @@ import {
 export function compileDocumentation(
   source: string,
   components: Parameters<typeof compileMDX>[0]['components'],
-  links?: DocumentLinkOptions
+  links?: DocumentLinkOptions,
+  grammars?: Parameters<typeof rehypeDocumentationCode>[0]
 ) {
   return compileMDX({
     source,
@@ -26,7 +27,10 @@ export function compileDocumentation(
           remarkDocumentationComponents,
           [remarkDocumentLinks, links],
         ],
-        rehypePlugins: [rehypeDocumentationHeadings, rehypeDocumentationCode],
+        rehypePlugins: [
+          rehypeDocumentationHeadings,
+          [rehypeDocumentationCode, grammars],
+        ],
       },
     },
   })

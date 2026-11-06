@@ -1,10 +1,10 @@
 import path from 'node:path'
-import { existsSync, readdirSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 
 import { validateMetadata } from './metadata.js'
 import { RdxConfigError } from './error.js'
 import { resolveLocalization } from './localization'
-import { resolveProjectPath } from './paths'
+import { boundedProjectPath, resolveProjectPath } from './paths'
 import { hydrateSourceLocalizations } from './source-localization'
 
 import type {
@@ -98,6 +98,7 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
       'TOC',
       'search',
       'editPage',
+      'syntaxHighlighting',
     ],
     ''
   )
@@ -109,6 +110,36 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
     text(config.description, 'description', true)
   if (config.lang !== undefined) text(config.lang, 'lang')
   validateMetadata(config.metadata)
+
+  if (config.syntaxHighlighting !== undefined) {
+    const highlighting = object(config.syntaxHighlighting, 'syntaxHighlighting')
+    keys(highlighting, ['languages'], 'syntaxHighlighting.')
+    const languages = object(
+      highlighting.languages,
+      'syntaxHighlighting.languages'
+    )
+    for (const [name, filename] of Object.entries(languages)) {
+      const field = `syntaxHighlighting.languages.${name}`
+      if (
+        !/^[a-z0-9][a-z0-9_+-]*$/.test(name) ||
+        [
+          'ansi',
+          'diff',
+          'folder',
+          'mermaid',
+          'plain',
+          'plaintext',
+          'text',
+          'txt',
+        ].includes(name)
+      )
+        throw new RdxConfigError(
+          `${field} must use a lowercase, non-reserved fence name.`
+        )
+      if (!text(filename, field).endsWith('.json'))
+        throw new RdxConfigError(`${field} must point to a TextMate JSON file.`)
+    }
+  }
 
   if (config.editPage !== undefined && config.editPage !== false) {
     const editPage = object(config.editPage, 'editPage')
@@ -292,6 +323,43 @@ export async function createRdxProject(
   ]
   const commands: RdxPluginCommand[] = []
   const runtimeFiles = new Set<string>()
+  const syntaxGrammars = Object.entries(
+    config.syntaxHighlighting?.languages ?? {}
+  ).map(([name, filename]) => {
+    const field = `syntaxHighlighting.languages.${name}`
+    const resolved = boundedProjectPath(rootDir, filename, field)
+    let grammar: unknown
+    try {
+      if (!statSync(/* turbopackIgnore: true */ resolved).isFile())
+        throw new Error('Expected a regular file')
+      grammar = JSON.parse(
+        readFileSync(/* turbopackIgnore: true */ resolved, 'utf8')
+      )
+    } catch (error) {
+      throw new RdxConfigError(
+        `${field} could not read "${filename}": ${(error as Error).message}`
+      )
+    }
+    if (
+      !record(grammar) ||
+      typeof grammar.scopeName !== 'string' ||
+      !grammar.scopeName.trim() ||
+      !Array.isArray(grammar.patterns)
+    )
+      throw new RdxConfigError(
+        `${field} must contain a TextMate grammar with scopeName and patterns.`
+      )
+    runtimeFiles.add(
+      path.relative(rootDir, resolveProjectPath(rootDir, filename, field))
+    )
+    runtimeFiles.add(path.relative(rootDir, resolved))
+    return {
+      ...grammar,
+      name,
+      scopeName: grammar.scopeName,
+      patterns: grammar.patterns,
+    }
+  })
   let localization: RdxProject['localization']
   const commandNames = new Set([
     'dev',
@@ -471,6 +539,7 @@ export async function createRdxProject(
     sources,
     commands,
     runtimeFiles: [...runtimeFiles],
+    ...(syntaxGrammars.length ? { syntaxGrammars } : {}),
     ...(localization ? { localization } : {}),
   }
 }

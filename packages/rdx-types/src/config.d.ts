@@ -21,6 +21,10 @@ export type RDXConfig = {
    * @defaultValue false
    */
   search?: boolean
+  /** Project-relative TextMate JSON files keyed by the language used in Markdown fences. */
+  syntaxHighlighting?: {
+    languages: Record<string, string>
+  }
   /**
    * Enable floating heading navigation on documentation pages.
    * Hidden when a page has too few sections to navigate.
