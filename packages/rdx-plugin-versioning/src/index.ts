@@ -5,6 +5,9 @@ import { randomUUID } from 'node:crypto'
 import {
   resolveProjectPath,
   collectSnapshotContributions,
+  collectSnapshotDocumentDates,
+  createDocumentDateReader,
+  snapshotDatesFilename,
 } from '@lexibase/rdx-core/config'
 import type { RdxPlugin, RdxPluginContext } from '@lexibase/rdx-types'
 
@@ -295,6 +298,7 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
             }
           )
           const reserved: string[] = []
+          const dateFor = createDocumentDateReader(snapshotRoot)
           try {
             for (const directory of plan.directories) {
               fs.mkdirSync(path.dirname(directory.to), { recursive: true })
@@ -302,6 +306,10 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
               reserved.push(directory.to)
             }
             for (const directory of plan.directories) {
+              const dates = collectSnapshotDocumentDates(
+                directory.from,
+                dateFor
+              )
               for (const entry of fs.readdirSync(
                 /* turbopackIgnore: true */ directory.from
               )) {
@@ -311,6 +319,15 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
                   { recursive: true, force: false, errorOnExist: true }
                 )
               }
+              if (dates)
+                fs.writeFileSync(
+                  path.join(
+                    /* turbopackIgnore: true */ directory.to,
+                    snapshotDatesFilename
+                  ),
+                  dates,
+                  { flag: 'wx' }
+                )
             }
             for (const file of plan.files) {
               fs.mkdirSync(path.dirname(file.filename), { recursive: true })

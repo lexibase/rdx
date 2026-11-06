@@ -40,7 +40,13 @@ function fixture(t, metadata = { metadataBase: 'https://docs.example.com' }) {
 test('LLM index links to the latest published Markdown and export resolves edition links', async (t) => {
   const project = fixture(t)
   project.sources.push(
-    { id: 'v2', label: '2.1.0', docsDir: 'v2', routePrefix: '2.1.0' },
+    {
+      id: 'v2',
+      label: '2.1.0',
+      docsDir: 'v2',
+      routePrefix: '2.1.0',
+      version: '2.1.0',
+    },
     { id: 'v1', label: '1.2.0', docsDir: 'v1', routePrefix: '1.2.0' }
   )
   fs.writeFileSync(
@@ -76,6 +82,14 @@ test('LLM index links to the latest published Markdown and export resolves editi
   )
   assert.match(markdown, /:::steps/)
   assert.doesNotMatch(markdown, /PrivateMarker|HiddenMarker|lastUpdated|order:/)
+  fs.writeFileSync(
+    path.join(project.rootDir, 'v2/_rdx-last-updated.json'),
+    JSON.stringify({ 'guides/details.mdx': '2026-04-10' })
+  )
+  assert.match(
+    await getMarkdownResponse(project, params.path).text(),
+    /lastUpdated: "2026-04-10"/
+  )
   assert.equal(
     getMarkdownResponse(project, ['docs', '2.1.0', 'missing.md']).status,
     404

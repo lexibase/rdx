@@ -8,6 +8,10 @@ import {
   isFallbackPage,
 } from '@lexibase/rdx-core'
 import { exportMarkdownBody } from '@lexibase/rdx-core/mdx'
+import {
+  createDocumentDateReader,
+  getSnapshotDocumentDate,
+} from '@lexibase/rdx-core/config'
 import type {
   RdxContentSource,
   RdxDocPage,
@@ -168,11 +172,15 @@ export function getDocumentMarkdownResponse(
       documentPath?.(source, page) ?? getDocsHref(project, source, page.slug)
     )
   const page = bySlug.get(document.slug)!
+  const lastUpdated = source.version
+    ? getSnapshotDocumentDate(options.docsDir, document.sourcePath)
+    : createDocumentDateReader(project.rootDir)(document.sourcePath)
   const frontmatter = {
     title: page.title,
     ...(page.description ? { description: page.description } : {}),
     url: href(document),
     docs_index: publicUrl(project, indexPath(project)),
+    ...(lastUpdated ? { lastUpdated } : {}),
   }
   const fields = Object.entries(frontmatter).map(
     ([key, value]) => `${key}: ${JSON.stringify(value)}`

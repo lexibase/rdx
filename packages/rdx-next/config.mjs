@@ -6,6 +6,7 @@ import {
   createRdxProject,
   resolveProjectPath,
   getContentSources,
+  snapshotDatesFilename,
 } from '@lexibase/rdx-core/config'
 import { createJiti } from 'jiti'
 
@@ -49,7 +50,9 @@ async function contentFiles(directory) {
       const filename = path.join(directory, entry.name)
       if (entry.isDirectory()) return contentFiles(filename)
       return entry.isFile() &&
-        (/\.mdx?$/.test(entry.name) || entry.name === '_category.json')
+        (/\.mdx?$/.test(entry.name) ||
+          entry.name === '_category.json' ||
+          entry.name === snapshotDatesFilename)
         ? [filename]
         : []
     })
