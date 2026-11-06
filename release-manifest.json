@@ -1,8 +1,9 @@
 {
-  "version": "5.1.1",
+  "version": "5.1.2",
   "packages": {
-    "@lexibase/rdx-next": "5.1.1",
-    "@lexibase/rdx": "5.1.1",
-    "@lexibase/create-rdx": "5.1.1"
+    "@lexibase/rdx-ui": "3.5.3",
+    "@lexibase/rdx-next": "5.1.2",
+    "@lexibase/rdx": "5.1.2",
+    "@lexibase/create-rdx": "5.1.2"
   }
 }
