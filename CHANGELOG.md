@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 5.1.1 — Prepared
+
+- Serve localized documentation entry points such as `/en/docs` and
+  `/pt-br/docs`, including when the homepage redirects to the primary language.
+  Document the folder-based translation structure and sidebar ordering.
+
 ## 5.1.0 — Prepared
 
 - Register project-owned TextMate grammars for Markdown code fences and select
