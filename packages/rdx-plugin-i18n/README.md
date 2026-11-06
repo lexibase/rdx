@@ -48,11 +48,16 @@ default to the lower-case language tag. Declare the primary language in the
 list without a folder override. Secondary directories must exist, but pages can
 be untranslated.
 
-Matching relative MDX paths identify translations. A missing translation displays
+Translations match the primary page's route. For example,
+`locale/ptbr/docs/01-guides/02-intro.md` translates `docs/01-guides/02-intro.mdx`.
+Numeric prefixes and extensions are omitted from the URL. Use the translated
+page's `title` or `navTitle` to label it in the sidebar.
+
+A missing translation displays
 the primary page with an explicit notice, at the requested language URL. There
 is no machine translation or file copying. Missing primary and translated pages
-return 404. Sidebar ordering follows the primary tree; translated labels overlay
-it. Keep shared assets in root `public/`.
+return 404. Sidebar ordering follows the primary tree. Keep shared assets in
+root `public/`.
 
 URLs use language tags, not folder aliases: `/en/docs/guides/intro` and
 `/pt-br/docs/guides/intro`. Existing `/docs/...` URLs redirect to the primary

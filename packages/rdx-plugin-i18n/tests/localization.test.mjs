@@ -19,25 +19,18 @@ function fixture(t) {
     fs.mkdirSync(path.dirname(path.join(rootDir, file)), { recursive: true })
     fs.writeFileSync(path.join(rootDir, file), content)
   }
+  write('docs/02-reference/api.md', '---\ntitle: API\n---\n\n## API')
   write(
-    'docs/guides/_category.json',
-    JSON.stringify({ title: 'Guides', sidebar_position: 1 })
+    'docs/01-guides/03-intro.mdx',
+    '---\ntitle: Introduction\norder: 1\n---\n\n## Hello\n\n[Install](./02-install.mdx#requirements)'
   )
   write(
-    'docs/guides/intro.mdx',
-    '---\ntitle: Introduction\nlink_position: 1\n---\n\n## Hello\n\n[Install](./install.mdx#requirements)'
+    'docs/01-guides/02-install.mdx',
+    '---\ntitle: Install\n---\n\n## Requirements'
   )
   write(
-    'docs/guides/install.mdx',
-    '---\ntitle: Install\nlink_position: 2\n---\n\n## Requirements'
-  )
-  write(
-    'locale/ptbr/docs/guides/_category.json',
-    JSON.stringify({ title: 'Guias', sidebar_position: 99 })
-  )
-  write(
-    'locale/ptbr/docs/guides/intro.mdx',
-    '---\ntitle: Introdução\nlink_position: 100\n---\n\n## Olá\n\n[Instalar](./install.mdx#requirements)\n\n[English](/en/docs/guides/intro#hello)'
+    'locale/ptbr/docs/09-guides/08-intro.md',
+    '---\ntitle: Introdução\nnavTitle: Começar\norder: 100\n---\n\n## Olá\n\n[Instalar](./02-install.mdx#requirements)\n\n[English](/en/docs/guides/intro#hello)'
   )
   const options = {
     locales: [
@@ -120,13 +113,17 @@ test('optional contribution URLs use explicit HTTP(S) destinations and preserve 
   )
 })
 
-test('locale views preserve primary order, translated labels and whole-page fallback without mutation', async (t) => {
+test('locale views match normalized routes, preserve primary order and use translated page labels', async (t) => {
   const { rootDir, config } = fixture(t)
   const project = await createRdxProject(config, { rootDir })
   const pt = getLocalizedProject(project, 'pt-br')
   const intro = resolveDocsRoute(pt, ['guides', 'intro'])
   assert.equal(intro.document.frontmatter.title, 'Introdução')
-  assert.equal(intro.categories[0].title, 'Guias')
+  assert.deepEqual(
+    intro.categories.map((category) => category.title),
+    ['Guides', 'Reference']
+  )
+  assert.equal(intro.categories[0].pages[0].navTitle, 'Começar')
   assert.deepEqual(
     intro.categories[0].pages.map((page) => page.slug),
     ['guides/intro', 'guides/install']
@@ -149,16 +146,33 @@ test('locale views preserve primary order, translated labels and whole-page fall
   assert.throws(() => getLocalizedProject(project, 'ptbr'), /Unknown/)
 })
 
+test('an existing translated category label still applies', async (t) => {
+  const { rootDir, config, write } = fixture(t)
+  write(
+    'locale/ptbr/docs/09-guides/_category.json',
+    JSON.stringify({ title: 'Guias' })
+  )
+  const project = await createRdxProject(config, { rootDir })
+  const pt = getLocalizedProject(project, 'pt-br')
+  assert.equal(
+    resolveDocsRoute(pt, ['guides', 'intro']).categories[0].title,
+    'Guias'
+  )
+})
+
 test('checking follows translated links and fallback anchors, includes cross-locale URLs and reports authored files once', async (t) => {
   const { rootDir, config, write } = fixture(t)
   let project = await createRdxProject(config, { rootDir })
   let report = checkDocumentation(project)
   assert.deepEqual(report.diagnostics, [])
-  assert.equal(report.checkedPages, 3)
-  write('docs/guides/install.mdx', '## Requirements\n\n[Broken](./missing.mdx)')
+  assert.equal(report.checkedPages, 4)
+  write(
+    'docs/01-guides/02-install.mdx',
+    '## Requirements\n\n[Broken](./missing.mdx)'
+  )
   report = checkDocumentation(project)
   assert.equal(report.diagnostics.length, 1)
-  assert.equal(report.diagnostics[0].file, 'docs/guides/install.mdx')
+  assert.equal(report.diagnostics[0].file, 'docs/01-guides/02-install.mdx')
   write('locale/ptbr/docs/orphan.mdx', '## Orphan')
   project = await createRdxProject(config, { rootDir })
   report = checkDocumentation(project)

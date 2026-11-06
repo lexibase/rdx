@@ -127,7 +127,10 @@ async function selected(locale: string) {
   if (!project.localization!.locales.some(entry => entry.path === locale)) notFound()
   return getLocalizedProject(project, locale)
 }
-export async function generateStaticParams({ params }: { params: { locale: string } }) { return getProjectDocsPaths(await selected(params.locale)).map(slug => ({ slug: slug.split('/') })) }
+export async function generateStaticParams({ params }: { params: { locale: string } }) {
+  const paths = getProjectDocsPaths(await selected(params.locale))
+  return [{ slug: [] }, ...paths.map(slug => ({ slug: slug.split('/') }))]
+}
 export async function generateMetadata({ params }: { params: Promise<Params> }) { const { locale, slug } = await params; return getDocumentMetadata({ project: await selected(locale), slug }) }
 export default async function Page({ params }: { params: Promise<Params> }) { const { locale, slug } = await params; return <DocsPage project={await selected(locale)} slug={slug} /> }
 `

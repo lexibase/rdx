@@ -117,6 +117,9 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       seletor, busca, metadados e snapshots multilíngues com publicação conjunta.
       Instalação assistida, versões e redirecionamentos validados localmente;
       matriz de pacotes e instaláveis preparada para a publicação agrupada 4.1.0.
+- [ ] Traduzir rótulos de categorias da sidebar com um `categoryTitle` opcional
+      no frontmatter de uma página traduzida, uma vez por categoria e idioma.
+      Preservar a ordem da árvore principal e as URLs existentes.
 
 ## Final da lista
 

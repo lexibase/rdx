@@ -136,6 +136,8 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         return response.text()
       }
       const translated = await html('/pt-br/docs/guides/intro')
+      assert.match(await html('/en/docs'), /OriginalIntroMarker/)
+      assert.match(await html('/pt-br/docs'), /TranslatedIntroMarker/)
       assert.match(translated, /<html[^>]*lang="pt-BR"/)
       assert.match(translated, /TranslatedIntroMarker/)
       assert.match(translated, /aria-label="Custom logo"/)
