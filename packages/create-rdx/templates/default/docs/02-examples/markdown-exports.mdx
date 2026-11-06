@@ -1,0 +1,24 @@
+---
+title: Markdown exports and llms.txt
+navTitle: Markdown exports
+description: Copy a page, open its Markdown source, or browse the public index.
+order: 12
+---
+
+## Copy or view a page
+
+Select **Copy this page** beside the title to copy the document as Markdown.
+Open the adjacent menu and choose **View Markdown** to read the same export in
+a new tab. The export includes the page URL and a link to its documentation index.
+
+## Find more pages
+
+Open the documentation index at `/docs/llms.txt` to find the Markdown export for
+each page. With versioning enabled, the index lists the latest active published
+edition. If you publish translations, each language has its own index.
+
+Set `metadata.metadataBase` in `rdx.config.ts` to your site's public URL to use
+absolute links in the index and exported documents.
+
+The export adds `lastUpdated` in `YYYY-MM-DD` format when the date is available
+from Git history or captured in a version snapshot.

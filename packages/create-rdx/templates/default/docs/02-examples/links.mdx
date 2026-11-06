@@ -1,17 +1,17 @@
 ---
 title: Document links
 description: Link to documentation files using their relative paths.
-link_position: 7
+order: 7
 ---
 
 ## Link to a page
 
-Read the [introduction](../init/intro.mdx) or learn how to
-[create a page](../init/getting-started.mdx#create-a-page).
+Read the [introduction](../01-getting-started/intro.mdx) or learn how to
+[create a page](../01-getting-started/writing-pages.mdx#create-a-page).
 
 ```md
-[Introduction](../init/intro.mdx)
-[Create a page](../init/getting-started.mdx#create-a-page)
+[Introduction](../01-getting-started/intro.mdx)
+[Create a page](../01-getting-started/writing-pages.mdx#create-a-page)
 ```
 
 RDX resolves these paths relative to this file. When viewing a snapshot,
@@ -19,11 +19,13 @@ links stay inside that snapshot instead of switching to Current.
 
 ## Link to a section
 
-Jump to the [tables example](./markdown.mdx#tables), or return to
+Jump to the [tables example](./markdown.md#tables), or return to
 [the first section](#link-to-a-page) of this page.
 
 Markdown headings receive automatic IDs. Repeated headings get suffixes such as
-`tables-1`. Relative document links must include the `.mdx` extension.
+`tables-1`. Relative document links must include the actual `.md` or `.mdx`
+extension. Select a section heading to open its anchor and copy its URL.
+The `#` beside the title marks that link.
 
 > [!NOTE] Keep links portable
 > Use forward slashes and match the file's name and capitalization. If a destination

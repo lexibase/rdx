@@ -1,0 +1,21 @@
+---
+title: Colors
+description: Customize the accent used by links and selected documentation controls.
+order: 2
+---
+
+RDX includes a clean default theme that adapts to your system preference.
+To customize the accent, create `rdx.css` beside `rdx.config.ts` and set
+`--rdx-highlighting` for each theme:
+
+```css title="rdx.css"
+:root {
+  --rdx-highlighting: #1d4ed8;
+}
+
+.dark {
+  --rdx-highlighting: #93c5fd;
+}
+```
+
+Use a color that remains legible against the background in each theme.

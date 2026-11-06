@@ -128,11 +128,18 @@ test('generated projects expose homepage and navbar defaults without activating 
   assert.doesNotMatch(config, /^\s*metadataBase:\s*['"]/m)
   assert.doesNotMatch(config, /plugins\s*:/)
   assert.doesNotMatch(config, /docsDir/)
-  await access(path.join(projectDir, 'docs/init/intro.mdx'))
+  await access(path.join(projectDir, 'docs/01-getting-started/intro.mdx'))
   await access(path.join(projectDir, '.gitignore'))
   await access(path.join(projectDir, 'public/images/rdx.svg'))
   await access(path.join(projectDir, 'public/downloads/example.txt'))
-  await access(path.join(projectDir, 'docs/examples/images.mdx'))
+  await access(path.join(projectDir, 'docs/02-examples/images.mdx'))
+  await access(path.join(projectDir, 'docs/02-examples/markdown.md'))
+  for (const category of ['01-getting-started', '02-examples']) {
+    await assert.rejects(
+      access(path.join(projectDir, 'docs', category, '_category.json')),
+      { code: 'ENOENT' }
+    )
+  }
   await assert.rejects(access(path.join(projectDir, 'versions.json')))
   const pkg = JSON.parse(
     await readFile(path.join(projectDir, 'package.json'), 'utf8')
@@ -143,6 +150,8 @@ test('generated projects expose homepage and navbar defaults without activating 
     /^# rdx-defaults\r?\n/
   )
   assert.ok(pkg.dependencies['@lexibase/rdx'])
+  assert.ok(pkg.devDependencies['@types/node'])
+  assert.ok(pkg.devDependencies['@types/react'])
   assert.equal(pkg.dependencies['@lexibase/rdx-next'], undefined)
   assert.equal(pkg.dependencies['@lexibase/rdx-ui'], undefined)
   assert.match(config, /from '@lexibase\/rdx'/)

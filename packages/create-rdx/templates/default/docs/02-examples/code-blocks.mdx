@@ -1,7 +1,7 @@
 ---
 title: Code blocks
 description: Highlight code, compare changes, and draw directory trees.
-link_position: 9
+order: 9
 ---
 
 All fence options are optional. These examples show each one separately before
@@ -19,7 +19,12 @@ Hello, RDX!
 Hello, RDX!
 ```
 
-The header uses the default code label. Add a language for highlighting:
+The header uses the default code label.
+
+## Highlight a language
+
+Add a language such as `ts`, `tsx`, `json`, or `bash` after the opening fence.
+Highlighting follows your light or dark theme. Unknown languages display as plain text.
 
 ````md
 ```tsx
@@ -41,12 +46,22 @@ Place `title="filename"` after the fence language:
 
 ````md
 ```ts title="rdx.config.ts"
-const search = true
+import { defineConfig } from '@lexibase/rdx'
+
+export default defineConfig({
+  metadata: { applicationName: 'My documentation' },
+  search: true,
+})
 ```
 ````
 
 ```ts title="rdx.config.ts"
-const search = true
+import { defineConfig } from '@lexibase/rdx'
+
+export default defineConfig({
+  metadata: { applicationName: 'My documentation' },
+  search: true,
+})
 ```
 
 The title appears in the header; copying keeps only the code. Titles with spaces
@@ -105,6 +120,16 @@ console.log(enabled)
 ```ts title="example.ts" lineNumbers startLine=20
 const enabled = true
 console.log(enabled)
+```
+
+## Wrap long lines
+
+On small screens, use the wrap control in the code block header to fit long lines
+within the available space. Try it on the block below. The copy button preserves
+the original indentation and line breaks.
+
+```text title="Long line"
+Keep explanations close to the example they describe, and use wrapping to read a long line on a narrow screen.
 ```
 
 ## Long blocks on mobile

@@ -1,0 +1,58 @@
+---
+title: Writing pages
+description: Learn how to add pages and categories to your site.
+order: 2
+---
+
+## Create a page
+
+Add a `.md` or `.mdx` file inside a folder in `docs/`. Its path becomes the page URL.
+
+```folder
+docs/
+  03-guides/
+    01-deployment.md
+```
+
+This file is available at `/docs/guides/deployment`.
+
+## Organize the sidebar
+
+Top-level folders become categories. A two-digit prefix sorts folders and files
+without appearing in their URLs. Lower numbers appear first. The `order` field
+overrides the file prefix, and `navTitle` lets you shorten a sidebar label.
+
+```yaml
+---
+title: Deploy your documentation site
+description: Build your site and preview the production output.
+navTitle: Deployment
+order: 1
+highlighting: new
+---
+```
+
+All five fields are optional. `title` and `description` appear in the page
+header. Use `highlighting: new` for a blue dot or `highlighting: important`
+for an amber dot. Remove the field when the page no longer needs attention.
+
+## Validate your content
+
+Run the documentation check before deploying. It reports broken links and
+invalid content with their source locations.
+
+:::tabs
+
+### pnpm
+
+pnpm rdx check
+
+### npm
+
+npm exec -- rdx check
+
+### yarn
+
+yarn rdx check
+
+:::

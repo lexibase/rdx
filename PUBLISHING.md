@@ -113,6 +113,8 @@ must advance within their major. Do not edit or delete redirect history.
 2. Publish the packages from the merged release in dependency order. Use the
    manually dispatched GitHub Actions workflow after configuring Trusted Publishing,
    or follow the terminal commands in the release checklist.
+   Before a terminal publish, run `pnpm build` from the merged checkout so
+   every archive includes current compiled files and runtime templates.
 3. Verify each exact version and its intended dist-tag in npm, allowing for
    registry propagation. Elapsed time alone is not confirmation.
 4. Verify a fresh public-registry installation. Refresh the creator's local cache

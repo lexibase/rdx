@@ -22,7 +22,11 @@ export async function withProductionServer(
   entry,
   cwd,
   verify,
-  { timeoutMs = 90_000, readyPath = '/docs/init/intro', mode = 'start' } = {}
+  {
+    timeoutMs = 90_000,
+    readyPath = '/docs/getting-started/intro',
+    mode = 'start',
+  } = {}
 ) {
   assert.ok(
     ['start', 'dev'].includes(mode),

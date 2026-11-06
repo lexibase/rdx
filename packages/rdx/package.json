@@ -57,6 +57,7 @@
   },
   "scripts": {
     "build": "node build.mjs",
+    "prepublishOnly": "node build.mjs",
     "lint": "eslint . --max-warnings 0",
     "test": "node --test tests/*.test.mjs"
   },

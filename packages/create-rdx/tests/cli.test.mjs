@@ -176,7 +176,10 @@ if (process.argv.includes('install')) {
     assert.doesNotMatch(result.stderr, /\n\s+at /)
     assert.doesNotMatch(result.stdout, /created successfully/)
     assert.ok(
-      await readFile(path.join(root, name, 'docs/init/intro.mdx'), 'utf8')
+      await readFile(
+        path.join(root, name, 'docs/01-getting-started/intro.mdx'),
+        'utf8'
+      )
     )
   }
 })
