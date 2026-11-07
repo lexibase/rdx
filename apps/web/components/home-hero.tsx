@@ -46,7 +46,7 @@ export function HomeHero({ children }: { children: ReactNode }) {
   return (
     <div
       data-rdx-home
-      className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
+      className="relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
     >
       <section
         aria-labelledby="home-title"
