@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 
 import {
   getDocument,
+  getDocsIndex,
   getDocsPaths,
   getSourceOptions,
   resolveDocsRoute,
@@ -19,7 +20,7 @@ import { DocsSidebar } from '@lexibase/rdx-ui/components/docs-sidebar'
 import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
 import { DocsPageTransition } from '@lexibase/rdx-ui/components/docs-page-transition'
 import { DocsSearch } from '@lexibase/rdx-ui/components/docs-search'
-import { Home } from '@lexibase/rdx-ui/components/home'
+import { Home, HomeSection } from '@lexibase/rdx-ui/components/home'
 import { SkipLink } from '@lexibase/rdx-ui/components/skip-link'
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
 import { EditPageLink } from '@lexibase/rdx-ui/components/edit-page-link'
@@ -170,28 +171,67 @@ export function HomePage({ project }: { project: RdxProject }) {
   if (!config.homepage?.enabled) redirect(getDocsHref(project))
   const homepage = config.homepage
   const CustomHome = homepage.component
+  const docsLabel = getMessages(config.lang).docs
+  const source = project.sources[0]!
+  const categories = CustomHome
+    ? []
+    : getDocsIndex(getSourceOptions(project, source))
+  const firstPage = categories[0]?.pages[0]
   return (
     <>
       <RdxHeader project={project} />
       <main
         id="rdx-main"
         tabIndex={-1}
-        className="flex-1 min-h-0 overflow-y-auto"
+        className="relative flex-1 min-h-0 overflow-y-auto"
       >
         {CustomHome ? (
           <CustomHome />
         ) : (
           <Home
             title={homepage.title ?? config.metadata.applicationName}
-            logo={
-              <BrandLogo
-                source={config.navbar?.logo}
-                className="size-52 hover:scale-105 hover:rotate-1 transition-[scale,rotation] duration-1000"
-              />
+            logo={<BrandLogo source={config.navbar?.logo} className="size-5" />}
+            description={homepage.description ?? config.description}
+            buttons={
+              homepage.buttons ?? [
+                { label: docsLabel, href: getDocsHref(project) },
+              ]
             }
-            description={homepage.description}
-            buttons={homepage.buttons}
-          />
+            previewTitle={firstPage?.title}
+            previewDescription={firstPage?.description}
+          >
+            {categories.length > 0 && (
+              <HomeSection
+                aria-labelledby="home-docs-title"
+                className="border-t bg-muted/20"
+              >
+                <div className="mx-auto w-full max-w-6xl">
+                  <h2
+                    id="home-docs-title"
+                    className="text-3xl font-semibold tracking-tight sm:text-4xl"
+                  >
+                    {docsLabel}
+                  </h2>
+                  <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {categories.map((category) => {
+                      const page = category.pages[0]!
+                      return (
+                        <li key={category.id}>
+                          <Button
+                            href={getDocsHref(project, source, page.slug)}
+                            variant="link"
+                            className="h-auto whitespace-normal p-0 text-left"
+                          >
+                            {category.title}
+                          </Button>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              </HomeSection>
+            )}
+          </Home>
         )}
       </main>
     </>

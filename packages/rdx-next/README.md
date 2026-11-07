@@ -50,8 +50,8 @@ through `@lexibase/rdx-ui`: logo, navbar, Base UI version dropdown, mobile/deskt
 sidebar, landing page, MDX styles and theme provider. The adapter owns content
 and route data; it does not implement a parallel UI theme.
 
-Use `homepage: { enabled: true }` in `rdx.config.ts` for the centered-logo
-homepage, or import a project-owned React component with `homepage.component`.
+Use `homepage: { enabled: true }` in `rdx.config.ts` for the built-in landing
+page, or import a project-owned React component with `homepage.component`.
 Without the option, `/` redirects to `/docs`. Additional content sources from
 explicitly configured plugins enable the shared navbar dropdown.
 
