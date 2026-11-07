@@ -14,6 +14,7 @@ export function Navbar({
   siteTitle = 'RDX',
   logo = <Logo className="size-5" />,
   homeHref = '/',
+  leadingLinks,
   docsHref = '/docs',
   docsLink,
   versionMenu,
@@ -27,6 +28,7 @@ export function Navbar({
   siteTitle?: string
   logo?: ReactNode
   homeHref?: string
+  leadingLinks?: ReactNode
   docsHref?: string
   docsLink?: ReactNode
   versionMenu?: ReactNode
@@ -42,7 +44,7 @@ export function Navbar({
       aria-label={messages.mainNavigation}
       className="w-full flex flex-wrap shrink-0 items-center justify-between px-6 py-2 border-b border-border gap-y-2"
     >
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-3 sm:gap-5">
         <Button
           variant="ghost"
           size={title === '' ? 'icon' : 'default'}
@@ -53,6 +55,7 @@ export function Navbar({
           {logo}
           {title !== '' && <span>{title}</span>}
         </Button>
+        {leadingLinks}
       </div>
       <div className="flex items-center gap-x-1 md:gap-x-2 h-4">
         {search}
