@@ -6,7 +6,7 @@ order: 1
 
 ## Enable the homepage
 
-By default, `/` redirects to `/docs`. Enable the minimal logo-and-name homepage:
+By default, `/` redirects to `/docs`. Enable the built-in landing page:
 
 ```ts
 homepage: {
@@ -14,10 +14,10 @@ homepage: {
 }
 ```
 
-This is a configuration fragment inside `defineConfig`. The built-in homepage
-uses `metadata.applicationName` unless you give it a specific title.
-Its logo follows `navbar.logo`. See [Custom logo](./custom-logo.mdx) to supply
-your own image or SVG component.
+The landing page uses the same hero layout as the RDX site. Its preview shows
+the first documentation page, and the section below links to your documentation
+categories. The hero uses `metadata.applicationName`, the site description, and
+`navbar.logo`. See [Custom logo](./custom-logo.mdx) to supply your own branding.
 
 ## Add a description and links
 
@@ -33,25 +33,47 @@ homepage: {
 }
 ```
 
-Descriptions and buttons appear only when configured. The first button is primary.
+The first button is primary. By default, the hero links to your documentation.
+Use `buttons: []` to omit the hero buttons.
 URLs must be root-relative or HTTP(S). Adjust the documentation link to match
 your own page paths.
 
 ## Create components/home.tsx
 
-Create `components/home.tsx` inside your project-root `components/` folder:
+Create `components/home.tsx` inside your project-root `components/` folder. Use
+`<Home>` for the standard hero and add your own content in `<HomeSection>` tags.
+Each section fills at least the visible area below the navbar and grows to fit
+longer content.
 
 ```tsx
 // components/home.tsx
-import { Home } from '@lexibase/rdx/ui/components/home'
+import { Button } from '@lexibase/rdx/ui/components/button'
+import { Home, HomeSection } from '@lexibase/rdx/ui/components/home'
 
 export default function MyHome() {
   return (
     <Home
       title="My project"
       description="Everything you need to get started."
-      buttons={[{ label: 'Read the docs', href: '/docs/init/intro' }]}
-    />
+      buttons={[{ label: 'Read the docs', href: '/docs' }]}
+      previewTitle="Get started"
+      previewDescription="Set up your project and build your first example."
+    >
+      <HomeSection
+        aria-labelledby="quickstart"
+        className="border-t bg-muted/20"
+      >
+        <div className="mx-auto max-w-xl space-y-4">
+          <h2 id="quickstart" className="text-3xl font-semibold">
+            Try it yourself
+          </h2>
+          <p>Follow the setup guide and build your first example.</p>
+          <Button href="/docs" variant="outline">
+            Open the guide
+          </Button>
+        </div>
+      </HomeSection>
+    </Home>
   )
 }
 ```
@@ -74,6 +96,11 @@ export default defineConfig({
 Pass the component itself, not JSX or a string path. The navbar stays shared;
 your component owns the page body. Built-in homepage title, description, and
 buttons are not injected into a custom component.
+
+Add, remove, or reorder `<HomeSection>` tags to shape your landing page. Each
+section can contain headings, images, buttons, or other React components.
+Pass `preview` to `<Home>` to replace the decorative hero preview. To compose
+every section yourself, use `<HomeSections>` as the outer wrapper.
 
 React source files can use React expressions normally. The restrictions on
 JavaScript expressions apply to documentation MDX, not your `components/home.tsx`.

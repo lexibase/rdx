@@ -132,9 +132,9 @@ export type RdxHomepage = {
   component?: ComponentType
   /** Built-in homepage heading. Defaults to metadata.applicationName. */
   title?: string
-  /** Optional text below the built-in heading; omitted means no description. */
+  /** Text below the built-in heading. Defaults to the site description. */
   description?: string
-  /** Buttons below the built-in description. The first button is primary. */
+  /** Hero buttons. The first is primary. Defaults to a Docs link; use [] to hide it. */
   buttons?: {
     /** Visible button text and accessible name; must not be empty. */
     label: string

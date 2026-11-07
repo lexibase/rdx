@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 import { createJiti } from 'jiti'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -51,13 +51,20 @@ test('runtime homepage and plain 404 share image branding while the navbar keeps
       homepage: { enabled: true },
       navbar: { logo: '/images/logo.png' },
     },
-    { rootDir: process.cwd() }
+    {
+      rootDir: fileURLToPath(
+        new URL('../../create-rdx/templates/default/', import.meta.url)
+      ),
+    }
   )
   const home = renderToStaticMarkup(createElement(HomePage, { project }))
   assert.equal((home.match(/<img/g) ?? []).length, 2)
   assert.match(home, /aria-label="Example Docs"/)
   assert.match(home, /data-rdx-home/)
-  assert.match(home, /object-contain[^"]*size-52/)
+  assert.match(home, /object-contain[^"]*size-5/)
+  assert.match(home, /<h1[^>]*>Example Docs<\/h1>/)
+  assert.match(home, /rdx-home-preview-shell/)
+  assert.match(home, /href="\/docs\/getting-started\/intro"/)
   const missing = renderToStaticMarkup(createElement(NotFoundPage, { project }))
   assert.equal((missing.match(/<img/g) ?? []).length, 1)
   assert.match(missing, /src="\/images\/logo.png"/)
