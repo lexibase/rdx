@@ -1,9 +1,8 @@
 import { readFile, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import ts from 'typescript'
-
 const sourceFile = 'components/home.tsx'
+const metadataKey = '$metadata'
 
 function missingFile(error) {
   return error.code === 'ENOENT' || error.code === 'ENOTDIR'
@@ -17,7 +16,11 @@ async function readOptional(file) {
   }
 }
 
-function sourcePhrases(source) {
+async function sourcePhrases(rootDir) {
+  const source = await readOptional(path.join(rootDir, sourceFile))
+  if (source === undefined)
+    throw new Error(`Create ${sourceFile} to use homepage.translations.`)
+  const { default: ts } = await import('typescript')
   const file = ts.createSourceFile(sourceFile, source, ts.ScriptTarget.Latest)
   for (const statement of file.statements) {
     if (
@@ -51,13 +54,11 @@ export async function readHomepageTranslations(
   { report = false } = {}
 ) {
   const { rootDir, config, localization } = project
-  if (!config.homepage?.enabled || !config.homepage.translations) return
-
-  const source = await readOptional(path.join(rootDir, sourceFile))
-  if (source === undefined)
-    throw new Error(`Create ${sourceFile} to use homepage.translations.`)
-  const phrases = sourcePhrases(source)
+  const phrases = config.homepage.translations
+    ? await sourcePhrases(rootDir)
+    : undefined
   const catalogs = []
+  const overrides = []
   for (const locale of localization?.locales ?? []) {
     if (!locale.folder) continue
     const folder = `locale/${locale.folder}`
@@ -68,7 +69,8 @@ export async function readHomepageTranslations(
         throw error
       }
     )
-    if (override) continue
+    if (override) overrides.push({ locale: locale.path, folder })
+    if (!override && !phrases) continue
 
     const file = `${folder}/home.json`
     const raw = await readOptional(path.join(rootDir, file))
@@ -86,8 +88,9 @@ export async function readHomepageTranslations(
         )
       }
     }
-    if (!report) continue
+    if (!report || override || !phrases) continue
     for (const phrase of phrases) {
+      if (phrase === metadataKey) continue
       if (
         !Object.hasOwn(messages, phrase) ||
         typeof messages[phrase] !== 'string' ||
@@ -98,17 +101,19 @@ export async function readHomepageTranslations(
         )
     }
     for (const phrase of Object.keys(messages)) {
-      if (!phrases.has(phrase))
+      if (phrase !== metadataKey && !phrases.has(phrase))
         console.warn(
           `[RDX] ${file}: orphaned translation for ${JSON.stringify(phrase)}`
         )
     }
   }
-  return catalogs
+  return { catalogs, overrides, phrases }
 }
 
-export async function prepareHomepageTranslations(runtime, catalogs) {
-  if (!catalogs) return
+export async function prepareHomepageTranslations(
+  runtime,
+  { catalogs, overrides, phrases }
+) {
   const imports = catalogs.map(
     ({ file }, index) =>
       `import messages${index} from ${JSON.stringify(`../${file}`)}`
@@ -118,15 +123,33 @@ export async function prepareHomepageTranslations(runtime, catalogs) {
   )
   await writeFile(
     path.join(runtime, 'rdx-home.ts'),
-    `import translatedComponent from '../components/home'
+    `${phrases ? "import translatedComponent from '../components/home'" : ''}
 ${imports.join('\n')}
 
 const catalogs = new Map<string, Record<string, unknown>>([
 ${entries.join('\n')}
 ])
 
-export function getHomepageTranslation(locale?: string) {
+const phrases: string[] = ${JSON.stringify([...(phrases ?? [])].filter((phrase) => phrase !== metadataKey))}
+const overrides: string[] = ${JSON.stringify(overrides.map(({ locale }) => locale))}
+
+${
+  phrases
+    ? `export function getHomepageTranslation(locale?: string) {
   return { translatedComponent, messages: locale ? catalogs.get(locale) : undefined }
+}`
+    : 'export const getHomepageTranslation: (locale?: string) => object = () => ({})'
+}
+
+export function getHomepageSeo(locale?: string) {
+  const translatedLocales = new Set(overrides)
+  for (const [path, catalog] of catalogs) {
+    if (phrases.some((phrase) => {
+      const text = Object.hasOwn(catalog, phrase) ? catalog[phrase] : undefined
+      return typeof text === 'string' && text.trim() && text.trim() !== phrase.trim()
+    })) translatedLocales.add(path)
+  }
+  return { translatedLocales, metadata: locale ? catalogs.get(locale)?.${metadataKey} : undefined }
 }
 `
   )

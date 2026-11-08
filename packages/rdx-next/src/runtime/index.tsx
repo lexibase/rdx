@@ -65,6 +65,7 @@ export {
 } from './markdown'
 export {
   getDocumentMetadata,
+  getHomepageMetadata,
   getPageMetadata,
   getRdxMetadata,
 } from './metadata'

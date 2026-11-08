@@ -12,6 +12,90 @@ import { notFound } from 'next/navigation'
 
 import { getSourceRobots } from './indexing'
 
+export function getHomepageMetadata({
+  project,
+  locale,
+  translatedLocales,
+  metadata,
+}: {
+  project: RdxProject
+  locale?: string
+  translatedLocales?: ReadonlySet<string>
+  metadata?: unknown
+}): Metadata {
+  const { config, localization } = project
+  if (!config.homepage?.enabled || !localization) return {}
+  const selected = localization.locales.find((entry) => entry.path === locale)
+  if (locale && (!selected || selected.code === localization.defaultLocale))
+    return {}
+
+  const base = config.metadata.metadataBase
+  const primaryUrl = base ? new URL('/', base).href : undefined
+  if (locale && !translatedLocales?.has(locale)) {
+    // A legacy custom component can translate its own content using lang.
+    if (config.homepage.component) return {}
+    return {
+      robots: { index: false, follow: true },
+      ...(primaryUrl ? { alternates: { canonical: primaryUrl } } : {}),
+    }
+  }
+
+  const url = base && new URL(locale ? `/${locale}` : '/', base).href
+  const site = getRdxMetadata(config)
+  const fields = metadata && typeof metadata === 'object' ? metadata : {}
+  const title =
+    'title' in fields && typeof fields.title === 'string'
+      ? fields.title.trim()
+      : ''
+  const description =
+    'description' in fields && typeof fields.description === 'string'
+      ? fields.description.trim()
+      : ''
+  const defaults = {
+    title: config.metadata.applicationName,
+    description: config.description,
+  }
+  const social = {
+    ...(title ? { title: { absolute: title } } : {}),
+    ...(description ? { description } : {}),
+  }
+  return {
+    ...social,
+    ...(site.openGraph || title || description
+      ? {
+          openGraph: {
+            ...defaults,
+            ...site.openGraph,
+            ...social,
+            ...(url ? { url } : {}),
+          },
+        }
+      : {}),
+    ...(site.twitter || title || description
+      ? { twitter: { ...defaults, ...site.twitter, ...social } }
+      : {}),
+    ...(base && url && primaryUrl
+      ? {
+          alternates: {
+            canonical: url,
+            languages: {
+              [localization.defaultLocale]: primaryUrl,
+              'x-default': primaryUrl,
+              ...Object.fromEntries(
+                localization.locales
+                  .filter((entry) => translatedLocales?.has(entry.path))
+                  .map((entry) => [
+                    entry.code,
+                    new URL(`/${entry.path}`, base).href,
+                  ])
+              ),
+            },
+          },
+        }
+      : {}),
+  }
+}
+
 /** Read metadata from the same content source and index used by the page. */
 export function getDocumentMetadata({
   project,

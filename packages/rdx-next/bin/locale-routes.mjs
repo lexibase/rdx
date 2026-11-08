@@ -19,7 +19,12 @@ const generated = [
 ]
 
 /** Root layouts keep HTML language correct on the server, without middleware. */
-export async function prepareLocaleRoutes(project, runtime, template) {
+export async function prepareLocaleRoutes(
+  project,
+  runtime,
+  template,
+  overrides = []
+) {
   async function safe(file) {
     const parts = file.split('/')
     let current = runtime
@@ -111,49 +116,27 @@ export default async function Layout({ children, params }: { children: React.Rea
 `
   )
   const homeRoute = 'app/(rdx-locales)/[locale]/page.tsx'
-  const localizedHomes = []
-  if (project.config.homepage?.enabled) {
-    for (const locale of project.localization.locales) {
-      if (!locale.folder || locale.code === project.localization.defaultLocale)
-        continue
-
-      const file = path.join(
-        project.rootDir,
-        'locale',
-        locale.folder,
-        'home.tsx'
-      )
-      const exists = await stat(file).then(
-        (entry) => entry.isFile(),
-        (error) => {
-          if (error.code === 'ENOENT' || error.code === 'ENOTDIR') return false
-          throw error
-        }
-      )
-      if (!exists) continue
-
-      // Literal imports let Next compile and trace project-owned components.
-      const specifier = path
-        .relative(path.dirname(path.join(runtime, homeRoute)), file)
-        .split(path.sep)
-        .join('/')
-        .slice(0, -'.tsx'.length)
-      localizedHomes.push(
-        `    case ${JSON.stringify(locale.path)}: return (await import(${JSON.stringify(specifier)})).default`
-      )
-    }
-  }
+  // Literal imports let Next compile and trace project-owned components.
+  const localizedHomes = overrides.map(
+    ({ locale, folder }) =>
+      `    case ${JSON.stringify(locale)}: return (await import(${JSON.stringify(`../../../../${folder}/home`)})).default`
+  )
   await emit(
     homeRoute,
-    `import { HomePage, getLocalizedProject } from '${provider}'
+    `import { HomePage, getHomepageMetadata, getLocalizedProject } from '${provider}'
 import { notFound, permanentRedirect } from 'next/navigation'
-import { getHomepageTranslation } from '../../../rdx-home'
+import { getHomepageSeo, getHomepageTranslation } from '../../../rdx-home'
 import { getProject } from '../../../rdx-project'
 async function getLocalizedHome(locale: string) {
   switch (locale) {
 ${localizedHomes.join('\n')}
     default: return undefined
   }
+}
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const project = await getProject()
+  const { locale } = await params
+  return getHomepageMetadata({ project, locale, ...getHomepageSeo(locale) })
 }
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const project = await getProject()

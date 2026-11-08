@@ -234,6 +234,28 @@ the primary homepage and `docsHref` points to `/fr-fr/docs`.
 
 Restart the development server after adding or removing a translated homepage.
 
+### Localize the title and link preview
+
+Add `$metadata` to `home.json` for a homepage translated with phrases or with
+its own `home.tsx`. The fields are optional and apply to the browser title, page
+description, and Open Graph and Twitter previews.
+
+```json title="locale/ptbr/home.json"
+{
+  "Welcome to Atlas": "Bem-vindo ao Atlas",
+  "$metadata": {
+    "title": "Atlas em português",
+    "description": "Aprenda a criar e publicar documentação com Atlas."
+  }
+}
+```
+
+When `metadata.metadataBase` is set in `rdx.config.ts`, RDX generates canonical
+URLs and `hreflang` links for `/` and homepages with their own `home.tsx` or at
+least one translated `t('literal phrase')`. An empty catalog, outdated phrases,
+or `$metadata` alone leave the language out of the alternates. The language
+selector still lets readers open that homepage and reach the translated docs.
+
 ## Community translations
 
 Set `contributionUrl` on the i18n plugin to invite readers to help translate:
