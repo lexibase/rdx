@@ -105,8 +105,9 @@ export default async function TemplatesPage() {
           )}
         </ul>
         <p className="mt-6 text-sm leading-6 text-muted-foreground">
-          Paste the code into <code>components/home.tsx</code> and set it as
-          your <code>homepage.component</code>.
+          Paste the code into <code>components/home.tsx</code> and set{' '}
+          <code>{'homepage: { enabled: true, translations: true }'}</code> in{' '}
+          <code>rdx.config.ts</code>.
         </p>
       </div>
     </main>
