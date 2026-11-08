@@ -37,6 +37,11 @@ The live documentation remains independent of published editions.
 
 After publishing `1.1.0`, run `pnpm rdx archive 1.1.0` to archive that edition and
 `pnpm rdx unarchive 1.1.0` to restore it at the end of the active list.
+
+Use `pnpm rdx delete 1.1.0` to permanently remove an edition, its redirect
+aliases, and their retained snapshots and frozen translations. To remove only a
+superseded version, pass its exact label. The destination edition and live docs
+remain available.
 Both commands retain the snapshot directory and URLs. Entries can also be moved
 manually between the two arrays. Existing
 snapshots are never overwritten. Removing the plugin does not delete content.

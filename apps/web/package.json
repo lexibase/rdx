@@ -19,7 +19,8 @@
     "docs:check": "tsx scripts/project.ts check",
     "docs:version": "tsx scripts/project.ts version",
     "docs:archive": "tsx scripts/project.ts archive",
-    "docs:unarchive": "tsx scripts/project.ts unarchive"
+    "docs:unarchive": "tsx scripts/project.ts unarchive",
+    "docs:delete": "tsx scripts/project.ts delete"
   },
   "dependencies": {
     "@lexibase/rdx": "workspace:*",

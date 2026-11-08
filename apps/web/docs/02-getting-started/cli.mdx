@@ -191,11 +191,13 @@ yarn rdx unarchive 1.0.0
 
 :::
 
-`version`, `archive`, and `unarchive` are registered only after the versioning
+`version`, `archive`, `unarchive`, and `delete` are registered only after the versioning
 plugin is configured. `version` publishes the ready `docs/` content, replacing
 the published edition of the same major or adding a new major. Superseded URLs
 redirect to the updated edition. Archiving and restoring update the manifest without
-modifying snapshot contents.
+modifying snapshot contents. `rdx delete <version>` permanently removes the
+snapshot. See [Delete a version](../04-features/versioning.mdx#delete-a-version)
+for how it handles superseded versions and frozen translations.
 See [Plugins](../04-features/plugins.mdx) and [Versioning](../04-features/versioning.mdx)
 before creating snapshots. `rdx --help` lists the built-in command usage.
 

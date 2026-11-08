@@ -40,6 +40,106 @@ const config = () => ({
   plugins: [versioning()],
 })
 
+test('delete removes an exact alias or a full edition while preserving live docs and other majors', async (t) => {
+  const rootDir = await fixture(t)
+  const input = {
+    ...config(),
+    plugins: [
+      versioning({
+        versionsFile: 'releases/versions.json',
+        versionsDir: 'snapshots',
+      }),
+    ],
+  }
+  const project = await createRdxProject(input, { rootDir, command: 'prepare' })
+  const run = (name, version) =>
+    project.commands
+      .find((entry) => entry.name === name)
+      .run({ rootDir, config: project.config, command: name, args: [version] })
+  const manifest = path.join(rootDir, 'releases/versions.json')
+  const exists = (label) =>
+    fs.existsSync(path.join(rootDir, `snapshots/version-${label}`))
+  for (const version of ['1.0.0', '1.1.0', '1.2.0', '2.0.0'])
+    run('version', version)
+  run('archive', '1.2.0')
+  run('delete', '1.0.0')
+  assert.equal(exists('1.0.0'), false)
+  assert.equal(exists('1.2.0'), true)
+  assert.deepEqual(JSON.parse(await readFile(manifest, 'utf8')), {
+    active: ['2.0.0'],
+    archived: ['1.2.0'],
+    redirects: { '1.1.0': '1.2.0' },
+  })
+  assert.throws(() => run('delete', '1.0.0'), /does not exist/)
+  assert.throws(() => run('delete', '../docs'), /safe version label/)
+  run('delete', '1.2.0')
+  assert.equal(exists('1.1.0'), false)
+  assert.equal(exists('1.2.0'), false)
+  assert.equal(exists('2.0.0'), true)
+  assert.deepEqual(JSON.parse(await readFile(manifest, 'utf8')), {
+    active: ['2.0.0'],
+    archived: [],
+  })
+  const updated = await createRdxProject(input, { rootDir })
+  assert.deepEqual(
+    updated.sources.map((source) => source.routePrefix),
+    ['', '2.0.0']
+  )
+  run('delete', '2.0.0')
+  assert.equal(exists('2.0.0'), false)
+  assert.equal(
+    await readFile(path.join(rootDir, 'docs/guides/intro.mdx'), 'utf8'),
+    'Original documentation'
+  )
+  assert.deepEqual(fs.readdirSync(path.dirname(manifest)), ['versions.json'])
+})
+
+test('delete refuses a linked snapshot and restores a staged snapshot if manifest replacement fails', async (t) => {
+  const rootDir = await fixture(t)
+  const project = await createRdxProject(config(), {
+    rootDir,
+    command: 'prepare',
+  })
+  const run = (name) =>
+    project.commands
+      .find((entry) => entry.name === name)
+      .run({ rootDir, config: project.config, command: name, args: ['1.0.0'] })
+  run('version')
+  const manifest = path.join(rootDir, 'versions.json')
+  const before = await readFile(manifest, 'utf8')
+  const snapshot = path.join(rootDir, 'versioned_docs/version-1.0.0')
+  const saved = path.join(rootDir, 'saved')
+  const lock = `${manifest}.rdx-lock`
+  await writeFile(lock, '')
+  for (const name of ['archive', 'delete'])
+    assert.throws(() => run(name), /Another version command owns/)
+  await rm(lock)
+  fs.renameSync(snapshot, saved)
+  fs.symlinkSync(
+    path.join(rootDir, 'docs'),
+    snapshot,
+    process.platform === 'win32' ? 'junction' : 'dir'
+  )
+  assert.throws(
+    () => run('delete'),
+    /snapshot directory without filesystem links/
+  )
+  fs.rmSync(snapshot, { force: true })
+  fs.renameSync(saved, snapshot)
+  const rename = fs.renameSync
+  t.mock.method(fs, 'renameSync', (from, to) => {
+    if (to === manifest) throw new Error('Intentional write failure')
+    return rename(from, to)
+  })
+  assert.throws(() => run('delete'), /Intentional write failure/)
+  assert.equal(await readFile(manifest, 'utf8'), before)
+  assert.equal(
+    await readFile(path.join(snapshot, 'guides/intro.mdx'), 'utf8'),
+    'Original documentation'
+  )
+  assert.deepEqual(fs.readdirSync(path.dirname(snapshot)), ['version-1.0.0'])
+})
+
 test('snapshot stores the committed source date and omits uncommitted content dates', async (t) => {
   const rootDir = await fixture(t)
   const git = (...args) =>
