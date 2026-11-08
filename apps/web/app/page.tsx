@@ -15,7 +15,7 @@ export default function HomePage() {
       className="flex min-h-0 flex-1 flex-col outline-none"
     >
       {CustomHome ? (
-        <CustomHome />
+        <CustomHome lang={config.lang} docsHref="/docs" />
       ) : (
         <Home
           title={homepage.title ?? config.metadata.applicationName}
