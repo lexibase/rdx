@@ -154,8 +154,9 @@ in the language of the current documentation page.
 
 To share one homepage across languages, set
 `homepage: { enabled: true, translations: true }` in `rdx.config.ts` and default
-export your server component from `components/home.tsx`. The `translations`
-option loads that file directly. Use it in place of `homepage.component`.
+export your server component from `components/home.tsx`. If you already have a
+custom homepage, adapt that component in place. Replace `homepage.component`
+with `translations: true` so RDX loads your component from that path.
 
 Wrap each translatable phrase in `t()` and use `docsHref` for documentation links.
 
@@ -192,47 +193,31 @@ Keep `t()` in the server homepage and pass the translated strings to interactive
 child components. Edits to an existing catalog are picked up in development.
 Restart the dev server after adding or removing a catalog.
 
-### Use a different homepage for a language
-
-Create `home.tsx` beside the translated `docs/` directory and export its
-component as the default export. This file takes precedence over `home.json`
-for that language. This also works with a primary homepage configured via
-`homepage.component` as shown in the [Homepage guide](./homepage.mdx).
-
-```folder
-components/
-|_ home.tsx
-locale/
-|- ptbr/
-|  |- docs/
-|  |_ home.tsx
-|_ fr-fr/
-   |_ docs/
-```
-
-```tsx title="locale/ptbr/home.tsx"
-import type { RdxHomepageProps } from '@lexibase/rdx'
-import { Home } from '@lexibase/rdx/ui/components/home'
-
-export default function PortugueseHome({ docsHref }: RdxHomepageProps) {
-  return (
-    <Home
-      title="Bem-vindo ao Atlas"
-      buttons={[{ label: 'Leia a documentação', href: docsHref }]}
-    />
-  )
-}
-```
-
-Use `docsHref` for documentation links in both the primary and translated
-homepages. Share layouts and sections through `components/` and write each
-translation in its own `home.tsx`.
-
 When a language has only translated docs, RDX renders the primary homepage and
 keeps the selected language in the dropdown. In this example, `/fr-fr` shows
 the primary homepage and `docsHref` points to `/fr-fr/docs`.
 
-Restart the development server after adding or removing a translated homepage.
+### Localize the title and link preview
+
+Add `$metadata` to the same `home.json` that contains your translated phrases.
+The fields are optional and apply to the browser title, page description, and
+Open Graph and Twitter previews.
+
+```json title="locale/ptbr/home.json"
+{
+  "Welcome to Atlas": "Bem-vindo ao Atlas",
+  "$metadata": {
+    "title": "Atlas em português",
+    "description": "Aprenda a criar e publicar documentação com Atlas."
+  }
+}
+```
+
+When `metadata.metadataBase` is set in `rdx.config.ts`, RDX generates canonical
+URLs and `hreflang` links for `/` and homepages with at least one translated
+`t('literal phrase')`. An empty catalog, outdated phrases,
+or `$metadata` alone leave the language out of the alternates. The language
+selector still lets readers open that homepage and reach the translated docs.
 
 ## Community translations
 

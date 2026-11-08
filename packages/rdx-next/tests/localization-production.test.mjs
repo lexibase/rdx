@@ -90,6 +90,7 @@ test(
       '---\ntitle: Introdução\n---\n\n## Olá\n\nTranslatedIntroMarker\n\n[Instalar](./install.mdx#requirements)'
     )
     await mkdir(path.join(root, 'locale/es-es/docs'), { recursive: true })
+    await mkdir(path.join(root, 'locale/fr-fr/docs'), { recursive: true })
     await write(
       'public/logo.svg',
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4"/></svg>'
@@ -102,24 +103,25 @@ test(
     await write(
       'components/home.tsx',
       `import type { RdxTranslatedHomepageProps } from '@lexibase/rdx'
-export default function Home({ docsHref, t }: RdxTranslatedHomepageProps) {
-  return <><h1>{t('CustomHomepageMarker')}</h1><p>{t('PrimaryOnlyMarker')}</p><a data-home-docs href={docsHref}>{t('Docs')}</a></>
+export default function Home({ lang, docsHref, t }: RdxTranslatedHomepageProps) {
+  return <><h1 data-home-lang={lang}>{t('CustomHomepageMarker')}</h1><p>{t('PrimaryOnlyMarker')}</p><a data-home-docs href={docsHref}>{t('Docs')}</a></>
 }`
     )
     await write(
       'locale/ptbr/home.json',
-      '{"CustomHomepageMarker":"IgnoredHomepageCatalog"}'
+      '{"CustomHomepageMarker":"TranslatedHomepageMarker","Docs":"Documentação","$metadata":{"title":"Início do projeto"}}'
     )
     await write(
       'locale/es-es/home.json',
-      '{"CustomHomepageMarker":"SpanishHomepageMarker","PrimaryOnlyMarker":"  ","Obsolete phrase":"UnusedHomepageCatalogMarker"}'
+      '{"CustomHomepageMarker":"SpanishHomepageMarker","PrimaryOnlyMarker":"  ","Obsolete phrase":"UnusedHomepageCatalogMarker","$metadata":{"title":"Inicio del proyecto","description":"Documentación del proyecto"}}'
+    )
+    await write(
+      'locale/fr-fr/home.json',
+      '{"$metadata":{"title":"Accueil sans traduction"},"Old phrase":"Texte obsolète"}'
     )
     await write(
       'locale/ptbr/home.tsx',
-      `import type { RdxHomepageProps } from '@lexibase/rdx'
-export default function Home({ lang, docsHref }: RdxHomepageProps) {
-  return <><h1 data-home-lang={lang}>TranslatedHomepageMarker</h1><a data-home-docs href={docsHref}>Documentação</a></>
-}`
+      'export default function Home() { return <h1>LocaleOverrideMarker</h1> }'
     )
     await write(
       'components/logo.tsx',
@@ -130,7 +132,7 @@ export default function Home({ lang, docsHref }: RdxHomepageProps) {
       `import { defineConfig } from '@lexibase/rdx'
 import { i18n } from '@lexibase/rdx-i18n'
 import Logo from './components/logo'
-export default defineConfig({ metadata: { applicationName: 'Locale Docs', metadataBase: 'https://docs.example.test' }, lang: 'en', search: true, homepage: { enabled: true, translations: true }, navbar: { logo: Logo }, plugins: [i18n({ contributionUrl: 'https://github.com/example/project/tree/main/locale', locales: [{ code: 'en', label: 'English' }, { code: 'pt-BR', label: 'Português', folder: 'ptbr' }, { code: 'es-ES', label: 'Español' }] })] })`
+export default defineConfig({ metadata: { applicationName: 'Locale Docs', metadataBase: 'https://docs.example.test', openGraph: { images: [{ url: '/brand.png' }] } }, lang: 'en', search: true, homepage: { enabled: true, translations: true }, navbar: { logo: Logo }, plugins: [i18n({ contributionUrl: 'https://github.com/example/project/tree/main/locale', locales: [{ code: 'en', label: 'English' }, { code: 'pt-BR', label: 'Português', folder: 'ptbr' }, { code: 'es-ES', label: 'Español' }, { code: 'fr-FR', label: 'Français' }] })] })`
     )
     const cli = path.resolve(packageRoot, '../rdx/bin/rdx.mjs')
     const checked = spawnSync(process.execPath, [cli, 'check'], {
@@ -144,7 +146,11 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         new RegExp(`missing translation for "${phrase}"`)
       )
     assert.match(checked.stderr, /orphaned translation for "Obsolete phrase"/)
-    assert.doesNotMatch(checked.stderr, /locale\/ptbr\/home\.json/)
+    assert.match(
+      checked.stderr,
+      /locale\/ptbr\/home\.json: missing translation for "PrimaryOnlyMarker"/
+    )
+    assert.doesNotMatch(checked.stderr, /orphaned translation for "\$metadata"/)
     const built = spawnSync(process.execPath, [cli, 'build'], {
       cwd: root,
       encoding: 'utf8',
@@ -236,14 +242,28 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       )
       const home = await html('/')
       assert.match(home, /CustomHomepageMarker/)
+      assert.match(
+        home,
+        /rel="canonical" href="https:\/\/docs.example.test\/?"/
+      )
+      assert.match(
+        home,
+        /hreflang="pt-BR" href="https:\/\/docs.example.test\/pt-br"/i
+      )
+      assert.match(
+        home,
+        /hreflang="es-ES" href="https:\/\/docs.example.test\/es-es"/i
+      )
+      assert.doesNotMatch(home, /hreflang="fr-FR"/i)
       assert.match(home, /<a data-home-docs="true" href="\/en\/docs"/)
       const localizedHome = await html('/pt-br')
       assert.match(localizedHome, /<html[^>]*lang="pt-BR"/)
       assert.match(localizedHome, /TranslatedHomepageMarker/)
+      assert.match(localizedHome, /<title>Início do projeto<\/title>/)
       assert.match(localizedHome, /data-home-lang="pt-BR"/)
       assert.doesNotMatch(
         localizedHome,
-        /CustomHomepageMarker|IgnoredHomepageCatalog/
+        /CustomHomepageMarker|LocaleOverrideMarker/
       )
       assert.match(
         localizedHome,
@@ -253,6 +273,35 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       const fallbackHome = await html('/es-es')
       assert.match(fallbackHome, /<html[^>]*lang="es-ES"/)
       assert.match(fallbackHome, /SpanishHomepageMarker/)
+      assert.match(fallbackHome, /<title>Inicio del proyecto<\/title>/)
+      assert.match(
+        fallbackHome,
+        /name="description" content="Documentación del proyecto"/
+      )
+      assert.match(
+        fallbackHome,
+        /property="og:title" content="Inicio del proyecto"/
+      )
+      assert.match(
+        fallbackHome,
+        /property="og:description" content="Documentación del proyecto"/
+      )
+      assert.match(
+        fallbackHome,
+        /property="og:image" content="https:\/\/docs.example.test\/brand.png"/
+      )
+      assert.match(
+        fallbackHome,
+        /name="twitter:title" content="Inicio del proyecto"/
+      )
+      assert.match(
+        fallbackHome,
+        /hreflang="en" href="https:\/\/docs.example.test\/?"/i
+      )
+      assert.match(
+        fallbackHome,
+        /rel="canonical" href="https:\/\/docs.example.test\/es-es"/
+      )
       assert.match(fallbackHome, /PrimaryOnlyMarker/)
       assert.match(
         fallbackHome,
@@ -261,6 +310,17 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       const primaryHome = await fetch(base + '/en', { redirect: 'manual' })
       assert.equal(primaryHome.status, 308)
       assert.equal(primaryHome.headers.get('location'), '/')
+      const frenchHome = await html('/fr-fr')
+      assert.match(frenchHome, /CustomHomepageMarker/)
+      assert.match(frenchHome, /name="robots" content="noindex, follow"/)
+      assert.match(
+        frenchHome,
+        /rel="canonical" href="https:\/\/docs.example.test\/?"/
+      )
+      assert.doesNotMatch(
+        frenchHome,
+        /<title>Accueil sans traduction<\/title>|hreflang=/i
+      )
       assert.match(await html('/logo.svg'), /<svg/)
     }
     await withProductionServer(cli, root, verify, {
