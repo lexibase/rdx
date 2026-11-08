@@ -11,11 +11,14 @@ export function VideoFirstThumbnail() {
         <span>Atlas</span>
         <span>Docs</span>
       </div>
-      <div className="grid flex-1 content-center gap-2 px-4 py-3 text-center motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:group-hover/card:scale-[1.035] sm:px-5">
+      <div className="grid flex-1 content-center gap-1.5 px-4 py-3 text-center motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:group-hover/card:scale-[1.035] sm:px-5">
         <p className="text-sm leading-tight font-semibold tracking-tight">
-          See Atlas in action.
+          Atlas
         </p>
-        <div className="relative mx-auto w-full max-w-50 overflow-hidden rounded-md border border-border bg-muted">
+        <p className="text-[9px] leading-tight text-muted-foreground">
+          See your API come to life.
+        </p>
+        <div className="relative mx-auto w-full max-w-44 overflow-hidden rounded-md border border-border bg-muted">
           <Image
             src="/videos/atlas-walkthrough-poster.webp"
             alt=""
