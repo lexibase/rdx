@@ -176,11 +176,27 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
     const homepage = object(config.homepage, 'homepage')
     keys(
       homepage,
-      ['enabled', 'component', 'title', 'description', 'buttons'],
+      [
+        'enabled',
+        'component',
+        'translations',
+        'title',
+        'description',
+        'buttons',
+      ],
       'homepage.'
     )
     if (homepage.component !== undefined)
       component(homepage.component, 'homepage.component')
+    if (
+      homepage.translations !== undefined &&
+      typeof homepage.translations !== 'boolean'
+    )
+      throw new RdxConfigError('homepage.translations must be a boolean.')
+    if (homepage.translations && homepage.component !== undefined)
+      throw new RdxConfigError(
+        'homepage.translations loads components/home.tsx. Use either homepage.translations or homepage.component.'
+      )
     if (homepage.enabled !== undefined && typeof homepage.enabled !== 'boolean')
       throw new RdxConfigError('homepage.enabled must be a boolean.')
     if (homepage.title !== undefined) text(homepage.title, 'homepage.title')

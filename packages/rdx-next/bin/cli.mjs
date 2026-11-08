@@ -26,7 +26,7 @@ export async function runRdxCli({ templateDir } = {}) {
     templateDir ?? path.join(packageRoot, 'templates', 'runtime')
   const runtimeDirectory = path.join(projectRoot, '.rdx')
 
-  async function prepareRuntime(project) {
+  async function prepareRuntime(project, homepageCatalogs) {
     await mkdir(runtimeDirectory, { recursive: true })
     await preparePublicAssets(projectRoot, runtimeDirectory)
     await cp(runtimeTemplate, runtimeDirectory, {
@@ -35,6 +35,11 @@ export async function runRdxCli({ templateDir } = {}) {
     })
     await prepareProjectStyles(projectRoot, runtimeDirectory)
     await prepareLocaleRoutes(project, runtimeDirectory, runtimeTemplate)
+    if (homepageCatalogs) {
+      const { prepareHomepageTranslations } =
+        await import('./homepage-translations.mjs')
+      await prepareHomepageTranslations(runtimeDirectory, homepageCatalogs)
+    }
     // Resolve in Node before Next processes this file: UI may be transitive,
     // and native Tailwind plugins must stay outside the Turbopack module graph.
     const resolvePlugin = createRequire(import.meta.url)
@@ -140,6 +145,20 @@ export async function runRdxCli({ templateDir } = {}) {
       rootDir: projectRoot,
       command,
     })
+    let homepageCatalogs
+    if (
+      project.config.homepage?.enabled &&
+      project.config.homepage.translations &&
+      (supportedCommands.has(command) ||
+        command === 'check' ||
+        command === 'prepare')
+    ) {
+      const { readHomepageTranslations } =
+        await import('./homepage-translations.mjs')
+      homepageCatalogs = await readHomepageTranslations(project, {
+        report: command === 'check' || command === 'build',
+      })
+    }
     if (command === 'check' || command === 'build') {
       const { checkDocumentation, formatDocumentationCheck } =
         await import('@lexibase/rdx-core/check')
@@ -153,7 +172,7 @@ export async function runRdxCli({ templateDir } = {}) {
       if (command === 'check') return
     }
     if (command === 'prepare') {
-      await prepareRuntime(project)
+      await prepareRuntime(project, homepageCatalogs)
       console.log('RDX runtime prepared in .rdx/')
       return
     }
@@ -174,7 +193,7 @@ export async function runRdxCli({ templateDir } = {}) {
       return
     }
 
-    await prepareRuntime(project)
+    await prepareRuntime(project, homepageCatalogs)
     const projectRequire = createRequire(path.join(projectRoot, 'package.json'))
     const nextCli = projectRequire.resolve('next/dist/bin/next')
     const child = spawn(

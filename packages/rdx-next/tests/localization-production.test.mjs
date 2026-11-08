@@ -6,6 +6,7 @@ import {
   access,
   mkdir,
   mkdtemp,
+  readdir,
   readFile,
   rmdir,
   rm,
@@ -100,10 +101,18 @@ test(
     await write('public/brand.png', brandPng)
     await write(
       'components/home.tsx',
-      `import type { RdxHomepageProps } from '@lexibase/rdx'
-export default function Home({ docsHref }: RdxHomepageProps) {
-  return <><h1>CustomHomepageMarker</h1><a data-home-docs href={docsHref}>Docs</a></>
+      `import type { RdxTranslatedHomepageProps } from '@lexibase/rdx'
+export default function Home({ docsHref, t }: RdxTranslatedHomepageProps) {
+  return <><h1>{t('CustomHomepageMarker')}</h1><p>{t('PrimaryOnlyMarker')}</p><a data-home-docs href={docsHref}>{t('Docs')}</a></>
 }`
+    )
+    await write(
+      'locale/ptbr/home.json',
+      '{"CustomHomepageMarker":"IgnoredHomepageCatalog"}'
+    )
+    await write(
+      'locale/es-es/home.json',
+      '{"CustomHomepageMarker":"SpanishHomepageMarker","PrimaryOnlyMarker":"  ","Obsolete phrase":"UnusedHomepageCatalogMarker"}'
     )
     await write(
       'locale/ptbr/home.tsx',
@@ -120,11 +129,22 @@ export default function Home({ lang, docsHref }: RdxHomepageProps) {
       'rdx.config.ts',
       `import { defineConfig } from '@lexibase/rdx'
 import { i18n } from '@lexibase/rdx-i18n'
-import Home from './components/home'
 import Logo from './components/logo'
-export default defineConfig({ metadata: { applicationName: 'Locale Docs', metadataBase: 'https://docs.example.test' }, lang: 'en', search: true, homepage: { enabled: true, component: Home }, navbar: { logo: Logo }, plugins: [i18n({ contributionUrl: 'https://github.com/example/project/tree/main/locale', locales: [{ code: 'en', label: 'English' }, { code: 'pt-BR', label: 'Português', folder: 'ptbr' }, { code: 'es-ES', label: 'Español' }] })] })`
+export default defineConfig({ metadata: { applicationName: 'Locale Docs', metadataBase: 'https://docs.example.test' }, lang: 'en', search: true, homepage: { enabled: true, translations: true }, navbar: { logo: Logo }, plugins: [i18n({ contributionUrl: 'https://github.com/example/project/tree/main/locale', locales: [{ code: 'en', label: 'English' }, { code: 'pt-BR', label: 'Português', folder: 'ptbr' }, { code: 'es-ES', label: 'Español' }] })] })`
     )
     const cli = path.resolve(packageRoot, '../rdx/bin/rdx.mjs')
+    const checked = spawnSync(process.execPath, [cli, 'check'], {
+      cwd: root,
+      encoding: 'utf8',
+    })
+    assert.equal(checked.status, 0, checked.stdout + checked.stderr)
+    for (const phrase of ['PrimaryOnlyMarker', 'Docs'])
+      assert.match(
+        checked.stderr,
+        new RegExp(`missing translation for "${phrase}"`)
+      )
+    assert.match(checked.stderr, /orphaned translation for "Obsolete phrase"/)
+    assert.doesNotMatch(checked.stderr, /locale\/ptbr\/home\.json/)
     const built = spawnSync(process.execPath, [cli, 'build'], {
       cwd: root,
       encoding: 'utf8',
@@ -133,6 +153,15 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
     })
     assert.equal(built.status, 0, built.stdout + built.stderr)
     assert.match(built.stdout, /3 pages checked, 0 problems/)
+    assert.match(built.stderr, /orphaned translation for "Obsolete phrase"/)
+    const clientOutput = path.join(root, '.rdx/.next/static')
+    for (const filename of await readdir(clientOutput, { recursive: true })) {
+      if (!filename.endsWith('.js')) continue
+      assert.doesNotMatch(
+        await readFile(path.join(clientOutput, filename), 'utf8'),
+        /SpanishHomepageMarker|UnusedHomepageCatalogMarker/
+      )
+    }
     assert.doesNotMatch(
       built.stdout + built.stderr,
       /Dynamic filesystem access causes tracing of the whole project/
@@ -212,7 +241,10 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       assert.match(localizedHome, /<html[^>]*lang="pt-BR"/)
       assert.match(localizedHome, /TranslatedHomepageMarker/)
       assert.match(localizedHome, /data-home-lang="pt-BR"/)
-      assert.doesNotMatch(localizedHome, /CustomHomepageMarker/)
+      assert.doesNotMatch(
+        localizedHome,
+        /CustomHomepageMarker|IgnoredHomepageCatalog/
+      )
       assert.match(
         localizedHome,
         /<a data-home-docs="true" href="\/pt-br\/docs"/
@@ -220,7 +252,8 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       assert.match(localizedHome, /data-rdx-language-trigger/)
       const fallbackHome = await html('/es-es')
       assert.match(fallbackHome, /<html[^>]*lang="es-ES"/)
-      assert.match(fallbackHome, /CustomHomepageMarker/)
+      assert.match(fallbackHome, /SpanishHomepageMarker/)
+      assert.match(fallbackHome, /PrimaryOnlyMarker/)
       assert.match(
         fallbackHome,
         /<a data-home-docs="true" href="\/es-es\/docs"/
@@ -266,10 +299,9 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         config
           .replace('plugins: [', 'plugins: [versioning(), ')
           .replace("import Logo from './components/logo'", '')
-          .replace("import Home from './components/home'", '')
           .replace('navbar: { logo: Logo }', "navbar: { logo: '/brand.png' }")
           .replace(
-            'homepage: { enabled: true, component: Home }',
+            'homepage: { enabled: true, translations: true }',
             'homepage: { enabled: true }'
           )
     )

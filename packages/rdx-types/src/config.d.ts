@@ -123,6 +123,12 @@ export type RdxHomepageProps = {
   docsHref: string
 }
 
+/** Props for the server homepage enabled by homepage.translations. */
+export type RdxTranslatedHomepageProps = RdxHomepageProps & {
+  /** Translate a source phrase, falling back to the phrase itself. */
+  t: (text: string) => string
+}
+
 /** Options for the built-in landing page or a project-owned home.tsx component. */
 export type RdxHomepage = {
   /**
@@ -138,6 +144,8 @@ export type RdxHomepage = {
    * component: Home // import Home from './home'
    */
   component?: ComponentType<RdxHomepageProps>
+  /** Load components/home.tsx on the server and translate its text from locale folders. */
+  translations?: boolean
   /** Built-in homepage heading. Defaults to metadata.applicationName. */
   title?: string
   /** Text below the built-in heading. Defaults to the site description. */

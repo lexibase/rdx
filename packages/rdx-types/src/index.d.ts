@@ -4,6 +4,7 @@ export {
   RDXConfig,
   RdxHomepage,
   RdxHomepageProps,
+  RdxTranslatedHomepageProps,
   RdxMetadata,
   RdxRuntimeConfig,
   ResolvedRdxConfig,
