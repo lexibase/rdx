@@ -3,6 +3,7 @@ export type {
   RDXConfig,
   RdxHomepage,
   RdxHomepageProps,
+  RdxTranslatedHomepageProps,
   RdxMetadata,
   RdxRuntimeConfig,
   RdxPlugin,

@@ -84,7 +84,7 @@ export async function prepareLocaleRoutes(project, runtime, template) {
     await emit(
       `app/(rdx-default)/${file}`,
       text
-        .replace(/from '(\.\.\/[^']*rdx-project)'/g, "from '../$1'")
+        .replace(/from '(\.\.\/[^']*rdx-(?:home|project))'/g, "from '../$1'")
         .replace("'./globals.css'", "'../globals.css'")
     )
   }
@@ -147,6 +147,7 @@ export default async function Layout({ children, params }: { children: React.Rea
     homeRoute,
     `import { HomePage, getLocalizedProject } from '${provider}'
 import { notFound, permanentRedirect } from 'next/navigation'
+import { getHomepageTranslation } from '../../../rdx-home'
 import { getProject } from '../../../rdx-project'
 async function getLocalizedHome(locale: string) {
   switch (locale) {
@@ -161,7 +162,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   if (!project.config.homepage?.enabled || !selected) notFound()
   if (selected.code === project.localization!.defaultLocale) permanentRedirect('/')
   const component = await getLocalizedHome(locale)
-  return <HomePage project={getLocalizedProject(project, locale)} component={component} />
+  return <HomePage project={getLocalizedProject(project, locale)} component={component} {...getHomepageTranslation(locale)} />
 }
 `
   )

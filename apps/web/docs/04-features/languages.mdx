@@ -150,11 +150,54 @@ as `/pt-br` serves the homepage for that language. The language selector stays
 on the homepage when switching languages. The navbar logo opens the homepage
 in the language of the current documentation page.
 
-Set `homepage.enabled` to `true` and configure your primary homepage as shown in
-the [Homepage guide](./homepage.mdx). To translate it, create `home.tsx` beside
-the translated `docs/` directory and export the component as the default export.
-Use the same folder as the translated docs. For example, with the `ptbr` folder
-alias, create `locale/ptbr/home.tsx` for the `/pt-br` homepage.
+### Translate the text with `home.json`
+
+To share one homepage across languages, set
+`homepage: { enabled: true, translations: true }` in `rdx.config.ts` and default
+export your server component from `components/home.tsx`. The `translations`
+option loads that file directly. Use it in place of `homepage.component`.
+
+Wrap each translatable phrase in `t()` and use `docsHref` for documentation links.
+
+```tsx title="components/home.tsx"
+import type { RdxTranslatedHomepageProps } from '@lexibase/rdx'
+import { Home } from '@lexibase/rdx/ui/components/home'
+
+export default function AtlasHome({ docsHref, t }: RdxTranslatedHomepageProps) {
+  return (
+    <Home
+      title={t('Welcome to Atlas')}
+      buttons={[{ label: t('Read the docs'), href: docsHref }]}
+    />
+  )
+}
+```
+
+Create `home.json` beside each translated `docs/` directory. Use the original
+phrase as the key. With the `ptbr` folder alias, the Portuguese file is:
+
+```json title="locale/ptbr/home.json"
+{
+  "Welcome to Atlas": "Bem-vindo ao Atlas"
+}
+```
+
+The missing `Read the docs` entry falls back to the original phrase. An empty
+translation also falls back, and `docsHref` still points to `/pt-br/docs`.
+`rdx check` and `rdx build` warn about missing translations and keys that no
+longer match a `t('literal phrase')` call in `components/home.tsx`. These
+warnings allow partial translations to ship.
+
+Keep `t()` in the server homepage and pass the translated strings to interactive
+child components. Edits to an existing catalog are picked up in development.
+Restart the dev server after adding or removing a catalog.
+
+### Use a different homepage for a language
+
+Create `home.tsx` beside the translated `docs/` directory and export its
+component as the default export. This file takes precedence over `home.json`
+for that language. This also works with a primary homepage configured via
+`homepage.component` as shown in the [Homepage guide](./homepage.mdx).
 
 ```folder
 components/

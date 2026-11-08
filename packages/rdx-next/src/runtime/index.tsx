@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 
 import {
   getDocument,
@@ -12,7 +12,12 @@ import {
   isFallbackPage,
 } from '@lexibase/rdx-core'
 import { getEditPageHref } from '@lexibase/rdx-core/config'
-import type { RdxLocale, RdxProject, RDXConfig } from '@lexibase/rdx-types'
+import type {
+  RdxLocale,
+  RdxProject,
+  RDXConfig,
+  RdxTranslatedHomepageProps,
+} from '@lexibase/rdx-types'
 import { Button } from '@lexibase/rdx-ui/components/button'
 import { Callout } from '@lexibase/rdx-ui/components/callout'
 import { LanguageDropdown } from '@lexibase/rdx-ui/components/language-dropdown'
@@ -189,9 +194,13 @@ function RdxHeader({
 export function HomePage({
   project,
   component,
+  translatedComponent: TranslatedHome,
+  messages,
 }: {
   project: RdxProject
   component?: NonNullable<RDXConfig['homepage']>['component']
+  translatedComponent?: ComponentType<RdxTranslatedHomepageProps>
+  messages?: Record<string, unknown>
 }) {
   const { config } = project
   const docsHref = getDocsHref(project)
@@ -200,9 +209,10 @@ export function HomePage({
   const CustomHome = component ?? homepage.component
   const docsLabel = getMessages(config.lang).docs
   const source = project.sources[0]!
-  const categories = CustomHome
-    ? []
-    : getDocsIndex(getSourceOptions(project, source))
+  const categories =
+    CustomHome || TranslatedHome
+      ? []
+      : getDocsIndex(getSourceOptions(project, source))
   const firstPage = categories[0]?.pages[0]
   return (
     <>
@@ -214,6 +224,20 @@ export function HomePage({
       >
         {CustomHome ? (
           <CustomHome lang={config.lang} docsHref={docsHref} />
+        ) : TranslatedHome ? (
+          <TranslatedHome
+            lang={config.lang}
+            docsHref={docsHref}
+            t={(text) => {
+              const translation =
+                messages && Object.hasOwn(messages, text)
+                  ? messages[text]
+                  : undefined
+              return typeof translation === 'string' && translation.trim()
+                ? translation
+                : text
+            }}
+          />
         ) : (
           <Home
             title={homepage.title ?? config.metadata.applicationName}
