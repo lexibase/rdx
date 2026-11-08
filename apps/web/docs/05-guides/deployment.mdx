@@ -146,7 +146,13 @@ yarn start
 :::
 
 Configure HTTPS, a process supervisor, and the host's network settings. Keep the
-complete project available to the runtime.
+complete project available to the runtime, including configuration, content,
+local components, and plugin data. Install and build on the destination host
+with its Node.js version.
+
+The process needs permission to read the project and write to `.rdx/` when it
+starts. Keep `public/` as a regular directory so RDX can link it into the
+generated application.
 
 ## Updates
 

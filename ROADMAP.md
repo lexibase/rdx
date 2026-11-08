@@ -15,7 +15,7 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
 ## Próximas prioridades
 
 - [ ] Preparar a primeira versão estável **antes da tradução da interface**.
-      Seguir o checklist e os bloqueadores de `RELEASE_READINESS.md`. Estabilizar
+      Seguir o fluxo de release em `PUBLISHING.md`. Estabilizar
       a experiência atual sem adicionar recursos ou alterar versões a cada ajuste.
 - [x] Suporte completo a `public/` na raiz do projeto: criar a pasta no template,
       disponibilizar imagens, favicon e downloads em desenvolvimento e produção,
@@ -37,7 +37,7 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
 - [x] Testes automáticos nos PRs, incluindo verificação do workspace e testes
       de projetos gerados a partir dos pacotes empacotados.
       Workflow em Linux/Node 22 e Windows/Node 24, sem publicação automática.
-      A execução remota começa após enviar a PR; detalhes em `CI.md`.
+      A execução remota começa após enviar a PR; detalhes no [guia de desenvolvimento](./apps/web/docs/05-guides/development.mdx#pull-request-checks).
 - [ ] Melhorar erros e validação dos argumentos da CLI e a documentação de uso.
       Primeira etapa: validação compartilhada do gerador, ajuda, proteção de
       destinos existentes e recuperação de falhas; conclusão completa depende
@@ -112,7 +112,7 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       Preservar idioma, página e edição na navegação; na ausência de tradução,
       mostrar o original da mesma edição com Callout explícito. Busca isolada
       por idioma/edição e snapshots conjuntos, sem depender da ordem dos plugins.
-      Contratos, limitações atuais e etapas em `MULTILINGUAL_DESIGN.md`.
+      Veja o [guia de idiomas](./apps/web/docs/04-features/languages.mdx) para a configuração.
       Implementado como plugin opcional: rotas por idioma, fallback com Callout,
       seletor, busca, metadados e snapshots multilíngues com publicação conjunta.
       Instalação assistida, versões e redirecionamentos validados localmente;

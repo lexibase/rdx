@@ -102,7 +102,7 @@ automatically registered in MDX. Import them from
 `@lexibase/rdx-ui/components/tabs` in React files. Use an explicit `defaultValue`,
 matching string values and an `aria-label` on each list. Arrow keys move focus;
 Enter or Space activates a tab. The list scrolls on small screens. See
-the repository's `MDX.md` and `docs/examples/tabs.mdx` for complete examples.
+the [Tabs guide](https://github.com/lexibase/rdx/blob/main/apps/web/docs/03-writing-documentation/tabs.mdx) for complete examples.
 
 ## Documentation accordion
 
@@ -111,4 +111,4 @@ Base UI Accordion and are registered in MDX. Import them from
 `@lexibase/rdx-ui/components/accordion` in React files. One item opens at a time
 by default; `multiple` allows independent expansion. Triggers use native buttons
 inside `h3` headings with normal Tab navigation and Enter/Space activation.
-See `MDX.md` and `docs/examples/accordion.mdx` for examples and React options.
+See the [Accordion guide](https://github.com/lexibase/rdx/blob/main/apps/web/docs/03-writing-documentation/accordion.mdx) for examples.

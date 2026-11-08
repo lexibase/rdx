@@ -32,7 +32,7 @@ Node coordinator keeps initial builds cached through Turbo and avoids Windows
 package-manager batch prompts for long-running tasks; real failures remain nonzero.
 See [apps/web/README.md](./apps/web/README.md) for the local workflow.
 
-See [CI.md](./CI.md) for local checks and automatic pull request validation.
+See the [development guide](./apps/web/docs/05-guides/development.mdx#pull-request-checks) for local checks and automatic pull request validation.
 
 `pnpm install` activates the repository's Husky hooks. Before a commit, Prettier
 checks only staged files in supported formats; it does not rewrite files or stage
@@ -41,13 +41,10 @@ additional changes. Run `pnpm format:check` to repeat that check. The manual
 repository. Commit messages are validated against Conventional Commits, for
 example `fix(ui): correct mobile spacing`.
 
-Publishing remains a manual process documented in [PUBLISHING.md](./PUBLISHING.md).
-Release validation is tracked in [RELEASE_READINESS.md](./RELEASE_READINESS.md).
+See [PUBLISHING.md](./PUBLISHING.md) for release preparation and npm publishing.
 The public API is documented in [PUBLIC_API.md](./PUBLIC_API.md).
-Supported Node.js lines and the tested platform matrix are documented in
-[SUPPORT.md](./SUPPORT.md). Prepared release notes are in [CHANGELOG.md](./CHANGELOG.md);
-an Unreleased entry does not mean packages have been published.
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for the Node.js production deployment baseline.
+See the [installation requirements](./apps/web/docs/02-getting-started/installation.mdx#requirements)
+and [deployment guide](./apps/web/docs/05-guides/deployment.mdx). Release notes are in [CHANGELOG.md](./CHANGELOG.md).
 
 ## License
 
