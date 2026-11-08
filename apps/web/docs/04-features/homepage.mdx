@@ -1,6 +1,6 @@
 ---
 title: Homepage
-description: Enable the built-in landing page or bring your own React component.
+description: Enable the built-in landing page, start from a template, or compose your own.
 order: 1
 ---
 
@@ -27,7 +27,7 @@ homepage: {
   title: 'Build with our tools',
   description: 'Guides, examples, and reference in one place.',
   buttons: [
-    { label: 'Get started', href: '/docs/init/intro' },
+    { label: 'Get started', href: '/docs' },
     { label: 'GitHub', href: 'https://github.com/example/project' },
   ],
 }
@@ -38,7 +38,27 @@ Use `buttons: []` to omit the hero buttons.
 URLs must be root-relative or HTTP(S). Adjust the documentation link to match
 your own page paths.
 
-## Create components/home.tsx
+## Start from a template
+
+Open **Templates** in the RDX site navbar to choose a layout:
+
+- **Docs in perspective** pairs a project introduction with a tilted docs
+  preview, an example, and a quickstart.
+- **Code in focus** leads with runnable code, explains how it works, and shows
+  how to run the example locally.
+- **Video first** opens with a video and follows it with a walkthrough, use
+  cases, and a link to get started.
+
+1. Select **Preview** and scroll through the landing page.
+2. Select **Copy code** and paste the full component into `components/home.tsx`
+   at the root of your project.
+3. Edit the content and links, then [activate your homepage](#activate-your-homepage).
+
+For **Video first**, put your video in `public/videos/` and update the video path
+in the component. If you use a poster image, add it to `public/` and update the
+poster path as well.
+
+## Build your own homepage
 
 Create `components/home.tsx` inside your project-root `components/` folder. Use
 `<Home>` for the standard hero and add your own content in `<HomeSection>` tags.
@@ -78,7 +98,16 @@ export default function MyHome() {
 }
 ```
 
-Then import the component into your configuration:
+Add, remove, or reorder `<HomeSection>` tags to shape your landing page. Each
+section can contain headings, images, buttons, or other React components.
+Pass `preview` to `<Home>` to replace the decorative hero preview. To compose
+every section yourself, use `<HomeSections>` as the outer wrapper.
+
+## Activate your homepage
+
+Import the default export of `components/home.tsx` in `rdx.config.ts`. Set
+`homepage.enabled` to `true` and assign the imported component to
+`homepage.component`:
 
 ```ts
 import { defineConfig } from '@lexibase/rdx'
@@ -93,14 +122,5 @@ export default defineConfig({
 })
 ```
 
-Pass the component itself, not JSX or a string path. The navbar stays shared;
-your component owns the page body. Built-in homepage title, description, and
-buttons are not injected into a custom component.
-
-Add, remove, or reorder `<HomeSection>` tags to shape your landing page. Each
-section can contain headings, images, buttons, or other React components.
-Pass `preview` to `<Home>` to replace the decorative hero preview. To compose
-every section yourself, use `<HomeSections>` as the outer wrapper.
-
-React source files can use React expressions normally. The restrictions on
-JavaScript expressions apply to documentation MDX, not your `components/home.tsx`.
+Keep the rest of your existing configuration. The site navbar stays shared and
+`components/home.tsx` defines the content shown at `/`.

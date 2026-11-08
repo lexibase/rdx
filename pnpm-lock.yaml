@@ -35,6 +35,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@lexibase/rdx':
+        specifier: workspace:*
+        version: link:../../packages/rdx
       '@lexibase/rdx-core':
         specifier: workspace:*
         version: link:../../packages/rdx-core

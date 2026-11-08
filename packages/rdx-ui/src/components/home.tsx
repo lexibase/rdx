@@ -32,13 +32,20 @@ export function HomeHeroLayout({
   preview,
   details,
   previewInert,
+  previewProps,
   ...props
 }: Omit<ComponentPropsWithoutRef<'section'>, 'children' | 'className'> & {
   intro: ReactNode
   preview: ReactNode
   details?: ReactNode
   previewInert?: boolean
+  previewProps?: Pick<
+    ComponentPropsWithoutRef<'div'>,
+    'className' | 'onPointerMove' | 'onPointerLeave' | 'onPointerCancel'
+  >
 }) {
+  const { className: previewClassName, ...previewEvents } = previewProps ?? {}
+
   return (
     <section
       className="rdx-home-stage mx-auto grid w-full max-w-[1440px] content-center items-center gap-8 px-6 py-10 md:px-10 md:py-20 lg:min-h-[calc(100svh-3rem)] lg:grid-cols-[0.8fr_1.2fr] lg:gap-x-12 lg:gap-y-5"
@@ -48,10 +55,12 @@ export function HomeHeroLayout({
       <div
         className={cn(
           'rdx-home-preview-shell min-w-0 lg:col-start-2 lg:row-start-1',
-          details && 'lg:row-span-2'
+          details && 'lg:row-span-2',
+          previewClassName
         )}
         inert={previewInert}
         aria-hidden={previewInert || undefined}
+        {...previewEvents}
       >
         {preview}
       </div>

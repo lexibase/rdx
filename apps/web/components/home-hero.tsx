@@ -1,6 +1,12 @@
 'use client'
 
-import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
+import {
+  useEffect,
+  useState,
+  type CSSProperties,
+  type PointerEvent,
+  type ReactNode,
+} from 'react'
 import Link from 'next/link'
 import { ArrowRight, Check, Paintbrush } from 'lucide-react'
 import { Button } from '@lexibase/rdx-ui/components/button'
@@ -32,6 +38,29 @@ const palettes = [
   { name: 'Green', light: '#15803d', dark: '#4ade80', swatch: '#4ade80' },
 ] as const
 
+function tiltPreview(event: PointerEvent<HTMLDivElement>) {
+  if (event.pointerType !== 'mouse') return
+
+  const { currentTarget, clientX, clientY } = event
+  const bounds = currentTarget.getBoundingClientRect()
+  const x = Math.max(
+    -1,
+    Math.min(1, ((clientX - bounds.left) / bounds.width) * 2 - 1)
+  )
+  const y = Math.max(
+    -1,
+    Math.min(1, ((clientY - bounds.top) / bounds.height) * 2 - 1)
+  )
+
+  currentTarget.style.setProperty('--preview-tilt-x', `${y * -3}deg`)
+  currentTarget.style.setProperty('--preview-tilt-y', `${x * 4}deg`)
+}
+
+function resetPreviewTilt({ currentTarget }: PointerEvent<HTMLDivElement>) {
+  currentTarget.style.removeProperty('--preview-tilt-x')
+  currentTarget.style.removeProperty('--preview-tilt-y')
+}
+
 export function HomeHero({ children }: { children: ReactNode }) {
   const [selected, setSelected] = useState(0)
   const [compact, setCompact] = useState(false)
@@ -55,6 +84,12 @@ export function HomeHero({ children }: { children: ReactNode }) {
       <HomeHeroLayout
         aria-labelledby="home-title"
         previewInert={compact}
+        previewProps={{
+          className: 'rdx-home-preview-tracking',
+          onPointerMove: tiltPreview,
+          onPointerLeave: resetPreviewTilt,
+          onPointerCancel: resetPreviewTilt,
+        }}
         intro={
           <>
             <p className="mb-6 hidden items-center gap-2 text-xs text-muted-foreground lg:flex">
