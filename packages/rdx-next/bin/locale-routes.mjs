@@ -11,6 +11,7 @@ const generated = [
   ...defaultFiles.map((file) => `app/(rdx-default)/${file}`),
   'app/(rdx-default)/[...notFound]/page.tsx',
   'app/(rdx-locales)/[locale]/layout.tsx',
+  'app/(rdx-locales)/[locale]/page.tsx',
   'app/(rdx-locales)/[locale]/not-found.tsx',
   'app/(rdx-locales)/[locale]/docs/[[...slug]]/page.tsx',
   'app/(rdx-locales)/[locale]/rdx-search/[source]/route.ts',
@@ -106,6 +107,61 @@ async function configuration(params: Promise<{ locale: string }>) {
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) { return getRdxMetadata(await configuration(params)) }
 export default async function Layout({ children, params }: { children: React.ReactNode, params: Promise<{ locale: string }> }) {
   return <RdxLayout config={await configuration(params)} bodyClassName="antialiased">{children}</RdxLayout>
+}
+`
+  )
+  const homeRoute = 'app/(rdx-locales)/[locale]/page.tsx'
+  const localizedHomes = []
+  if (project.config.homepage?.enabled) {
+    for (const locale of project.localization.locales) {
+      if (!locale.folder || locale.code === project.localization.defaultLocale)
+        continue
+
+      const file = path.join(
+        project.rootDir,
+        'locale',
+        locale.folder,
+        'home.tsx'
+      )
+      const exists = await stat(file).then(
+        (entry) => entry.isFile(),
+        (error) => {
+          if (error.code === 'ENOENT' || error.code === 'ENOTDIR') return false
+          throw error
+        }
+      )
+      if (!exists) continue
+
+      // Literal imports let Next compile and trace project-owned components.
+      const specifier = path
+        .relative(path.dirname(path.join(runtime, homeRoute)), file)
+        .split(path.sep)
+        .join('/')
+        .slice(0, -'.tsx'.length)
+      localizedHomes.push(
+        `    case ${JSON.stringify(locale.path)}: return (await import(${JSON.stringify(specifier)})).default`
+      )
+    }
+  }
+  await emit(
+    homeRoute,
+    `import { HomePage, getLocalizedProject } from '${provider}'
+import { notFound, permanentRedirect } from 'next/navigation'
+import { getProject } from '../../../rdx-project'
+async function getLocalizedHome(locale: string) {
+  switch (locale) {
+${localizedHomes.join('\n')}
+    default: return undefined
+  }
+}
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const project = await getProject()
+  const { locale } = await params
+  const selected = project.localization?.locales.find(entry => entry.path === locale)
+  if (!project.config.homepage?.enabled || !selected) notFound()
+  if (selected.code === project.localization!.defaultLocale) permanentRedirect('/')
+  const component = await getLocalizedHome(locale)
+  return <HomePage project={getLocalizedProject(project, locale)} component={component} />
 }
 `
   )

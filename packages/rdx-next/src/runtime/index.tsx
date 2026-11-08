@@ -12,7 +12,7 @@ import {
   isFallbackPage,
 } from '@lexibase/rdx-core'
 import { getEditPageHref } from '@lexibase/rdx-core/config'
-import type { RdxProject, RDXConfig } from '@lexibase/rdx-types'
+import type { RdxLocale, RdxProject, RDXConfig } from '@lexibase/rdx-types'
 import { Button } from '@lexibase/rdx-ui/components/button'
 import { Callout } from '@lexibase/rdx-ui/components/callout'
 import { LanguageDropdown } from '@lexibase/rdx-ui/components/language-dropdown'
@@ -92,12 +92,20 @@ export function RdxLayout({
   )
 }
 
+function homepageHref(project: RdxProject, locale: RdxLocale | undefined) {
+  return locale && locale.code !== project.localization?.defaultLocale
+    ? `/${locale.path}`
+    : '/'
+}
+
 function RdxHeader({
   project,
   slug,
+  onHomepage = false,
 }: {
   project: RdxProject
   slug?: string[]
+  onHomepage?: boolean
 }) {
   const { config } = project
   const messages = getMessages(config.lang)
@@ -143,14 +151,26 @@ function RdxHeader({
       }
       siteTitle={config.metadata.applicationName}
       logo={<BrandLogo source={config.navbar?.logo} className="size-5" />}
-      homeHref={config.homepage?.enabled ? '/' : getDocsHref(project)}
+      homeHref={
+        config.homepage?.enabled
+          ? homepageHref(project, project.locale)
+          : getDocsHref(project)
+      }
       docsHref={getDocsHref(project, source)}
       languageMenu={
         project.localization ? (
           <LanguageDropdown
             lang={config.lang}
             current={project.locale?.code ?? project.localization.defaultLocale}
-            options={getLanguageLinks(project, source, currentSlug)}
+            options={
+              onHomepage
+                ? project.localization.locales.map((locale) => ({
+                    code: locale.code,
+                    label: locale.label,
+                    href: homepageHref(project, locale),
+                  }))
+                : getLanguageLinks(project, source, currentSlug)
+            }
             contributionUrl={project.localization.contributionUrl}
           />
         ) : undefined
@@ -166,11 +186,18 @@ function RdxHeader({
   )
 }
 
-export function HomePage({ project }: { project: RdxProject }) {
+export function HomePage({
+  project,
+  component,
+}: {
+  project: RdxProject
+  component?: NonNullable<RDXConfig['homepage']>['component']
+}) {
   const { config } = project
-  if (!config.homepage?.enabled) redirect(getDocsHref(project))
+  const docsHref = getDocsHref(project)
+  if (!config.homepage?.enabled) redirect(docsHref)
   const homepage = config.homepage
-  const CustomHome = homepage.component
+  const CustomHome = component ?? homepage.component
   const docsLabel = getMessages(config.lang).docs
   const source = project.sources[0]!
   const categories = CustomHome
@@ -179,23 +206,27 @@ export function HomePage({ project }: { project: RdxProject }) {
   const firstPage = categories[0]?.pages[0]
   return (
     <>
-      <RdxHeader project={project} />
+      <RdxHeader project={project} onHomepage />
       <main
         id="rdx-main"
         tabIndex={-1}
         className="relative flex-1 min-h-0 overflow-y-auto"
       >
         {CustomHome ? (
-          <CustomHome />
+          <CustomHome lang={config.lang} docsHref={docsHref} />
         ) : (
           <Home
             title={homepage.title ?? config.metadata.applicationName}
             logo={<BrandLogo source={config.navbar?.logo} className="size-5" />}
             description={homepage.description ?? config.description}
             buttons={
-              homepage.buttons ?? [
-                { label: docsLabel, href: getDocsHref(project) },
-              ]
+              homepage.buttons?.map((button) => ({
+                ...button,
+                href:
+                  project.locale && /^\/docs(?:[/?#]|$)/.test(button.href)
+                    ? `/${project.locale.path}${button.href}`
+                    : button.href,
+              })) ?? [{ label: docsLabel, href: docsHref }]
             }
             previewTitle={firstPage?.title}
             previewDescription={firstPage?.description}

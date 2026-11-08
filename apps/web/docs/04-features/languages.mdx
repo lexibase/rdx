@@ -137,12 +137,59 @@ unprefixed documentation links redirect to the primary language.
 Restart the development server after enabling, disabling or changing configured
 languages so RDX can regenerate the route structure.
 
-Custom homepages stay at `/`. Their Docs action opens the primary language.
 Search runs in the selected language and indexes the pages authored in it.
 
 The menu lists the primary language and every configured additional language,
 including languages whose translations are still being written. A missing page
 uses the fallback described below.
+
+## Localize your homepage
+
+When the homepage is enabled, `/` serves the primary language and a path such
+as `/pt-br` serves the homepage for that language. The language selector stays
+on the homepage when switching languages. The navbar logo opens the homepage
+in the language of the current documentation page.
+
+Set `homepage.enabled` to `true` and configure your primary homepage as shown in
+the [Homepage guide](./homepage.mdx). To translate it, create `home.tsx` beside
+the translated `docs/` directory and export the component as the default export.
+Use the same folder as the translated docs. For example, with the `ptbr` folder
+alias, create `locale/ptbr/home.tsx` for the `/pt-br` homepage.
+
+```folder
+components/
+|_ home.tsx
+locale/
+|- ptbr/
+|  |- docs/
+|  |_ home.tsx
+|_ fr-fr/
+   |_ docs/
+```
+
+```tsx title="locale/ptbr/home.tsx"
+import type { RdxHomepageProps } from '@lexibase/rdx'
+import { Home } from '@lexibase/rdx/ui/components/home'
+
+export default function PortugueseHome({ docsHref }: RdxHomepageProps) {
+  return (
+    <Home
+      title="Bem-vindo ao Atlas"
+      buttons={[{ label: 'Leia a documentação', href: docsHref }]}
+    />
+  )
+}
+```
+
+Use `docsHref` for documentation links in both the primary and translated
+homepages. Share layouts and sections through `components/` and write each
+translation in its own `home.tsx`.
+
+When a language has only translated docs, RDX renders the primary homepage and
+keeps the selected language in the dropdown. In this example, `/fr-fr` shows
+the primary homepage and `docsHref` points to `/fr-fr/docs`.
+
+Restart the development server after adding or removing a translated homepage.
 
 ## Community translations
 

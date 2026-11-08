@@ -5,3 +5,4 @@
 @source '../../components/**/*.{ts,tsx}';
 @source '../../docs/**/*.mdx';
 @source '../../locale/*/docs/**/*.mdx';
+@source '../../locale/*/home.tsx';
