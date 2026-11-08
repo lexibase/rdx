@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 6.0.0 — Prepared
+
+- Translate a shared homepage through locale catalogs, with per-phrase fallback, translation diagnostics, localized social metadata, and hreflang links. Migrate per-language home.tsx files to home.json and keep the layout in components/home.tsx.
+
 ## 5.2.0 — Prepared
 
 - Support localized homepages through `locale/<folder>/home.tsx`. Fall back to the primary homepage while preserving the selected language and documentation links.

@@ -1,13 +1,13 @@
 {
-  "version": "5.2.0",
+  "version": "6.0.0",
   "packages": {
-    "@lexibase/rdx-types": "2.5.0",
-    "@lexibase/rdx-core": "3.1.1",
-    "@lexibase/rdx-ui": "3.5.4",
-    "@lexibase/rdx-versioning": "1.3.5",
-    "@lexibase/rdx-i18n": "1.0.5",
-    "@lexibase/rdx-next": "5.2.0",
-    "@lexibase/rdx": "5.2.0",
-    "@lexibase/create-rdx": "5.2.0"
+    "@lexibase/rdx-types": "2.6.0",
+    "@lexibase/rdx-core": "3.2.0",
+    "@lexibase/rdx-ui": "3.5.5",
+    "@lexibase/rdx-versioning": "1.3.6",
+    "@lexibase/rdx-i18n": "1.0.6",
+    "@lexibase/rdx-next": "6.0.0",
+    "@lexibase/rdx": "6.0.0",
+    "@lexibase/create-rdx": "6.0.0"
   }
 }
