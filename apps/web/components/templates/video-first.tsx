@@ -78,7 +78,7 @@ const steps = [
 const requirements = ['Node.js 22 or 24', 'TypeScript', 'Browser or curl']
 
 const primaryAction =
-  'bg-sky-500 text-slate-950 hover:bg-sky-400 dark:bg-sky-400 dark:hover:bg-sky-300'
+  'border border-rdx-selected/30 bg-rdx-selected/15 text-foreground hover:bg-rdx-selected/25'
 
 function AtlasMark({ className }: { className: string }) {
   return (
@@ -108,7 +108,7 @@ export default function VideoFirst() {
       >
         <div className="mx-auto w-full max-w-4xl">
           <header className="mx-auto max-w-xl text-center">
-            <AtlasMark className="mx-auto size-16 text-sky-600 dark:text-sky-400" />
+            <AtlasMark className="mx-auto size-16 text-rdx-selected" />
             <h1
               id="video-hero-title"
               className="mt-5 text-5xl font-semibold tracking-tight sm:text-6xl"
@@ -179,7 +179,7 @@ export default function VideoFirst() {
                   <CardContent>
                     <div className="rounded-md border border-border bg-muted/50 px-3 py-2.5">
                       <p className="text-xs text-muted-foreground">{label}</p>
-                      <code className="mt-1 block text-xs leading-5 wrap-anywhere text-sky-700 dark:text-sky-300">
+                      <code className="mt-1 block text-xs leading-5 wrap-anywhere text-rdx-selected">
                         {example}
                       </code>
                     </div>
@@ -207,7 +207,7 @@ export default function VideoFirst() {
               <li key={title} className="rounded-xl border border-border p-5">
                 <span
                   aria-hidden="true"
-                  className="grid size-8 place-items-center rounded-full bg-sky-500 text-sm font-semibold text-slate-950 dark:bg-sky-400"
+                  className="grid size-8 place-items-center rounded-full bg-rdx-selected/15 text-sm font-semibold"
                 >
                   {index + 1}
                 </span>
@@ -222,7 +222,7 @@ export default function VideoFirst() {
             <Button
               href={project.docsHref}
               variant="link"
-              className="text-sky-700 dark:text-sky-300"
+              className="text-rdx-selected"
             >
               Read the setup guide <span aria-hidden="true">→</span>
             </Button>
@@ -265,7 +265,7 @@ export default function VideoFirst() {
       <footer className="border-t border-border px-6 py-6">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <AtlasMark className="size-8 shrink-0 text-sky-600 dark:text-sky-400" />
+            <AtlasMark className="size-8 shrink-0 text-rdx-selected" />
             <div>
               <p className="text-sm font-semibold">{project.name}</p>
               <p className="text-xs text-muted-foreground">

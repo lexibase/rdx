@@ -21,7 +21,7 @@ export function DocumentationPreviewThumbnail() {
             <span className="h-0.5 w-4/5 rounded-full bg-muted-foreground/30" />
             <span className="h-0.5 w-3/5 rounded-full bg-muted-foreground/25" />
           </div>
-          <span className="mt-2.5 inline-flex rounded bg-primary px-1.5 py-1 text-[8px] leading-none font-medium text-primary-foreground">
+          <span className="mt-2.5 inline-flex rounded bg-rdx-selected/15 px-1.5 py-1 text-[8px] leading-none font-medium text-foreground">
             Explore the docs
           </span>
         </div>
@@ -29,7 +29,7 @@ export function DocumentationPreviewThumbnail() {
           <div className="h-3.5 border-b border-border bg-muted/50" />
           <div className="grid min-h-15 grid-cols-[1fr_2.2fr]">
             <div className="space-y-1 border-r border-border p-1.5">
-              <div className="h-1 rounded-sm bg-rdx-highlighting/40" />
+              <div className="h-1 rounded-sm bg-rdx-selected/40" />
               <div className="h-0.5 rounded-full bg-muted-foreground/25" />
               <div className="h-0.5 w-4/5 rounded-full bg-muted-foreground/25" />
             </div>

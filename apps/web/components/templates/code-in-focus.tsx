@@ -27,6 +27,9 @@ const commands = [
   { title: 'Request', command: 'curl http://localhost:3000/' },
 ]
 
+const primaryAction =
+  'border border-rdx-selected/30 bg-rdx-selected/15 text-foreground hover:bg-rdx-selected/25'
+
 export default async function CodeInFocus() {
   const lines = await highlightCode(example, 'typescript')
 
@@ -44,7 +47,11 @@ export default async function CodeInFocus() {
             <p className="mt-4 max-w-md text-base leading-7 text-muted-foreground">
               Start with a minimal TypeScript server and make it your own.
             </p>
-            <Button href="/docs" variant="default" className="mt-6">
+            <Button
+              href="/docs"
+              variant="default"
+              className={`mt-6 ${primaryAction}`}
+            >
               Get started
             </Button>
           </div>
@@ -168,7 +175,11 @@ export default async function CodeInFocus() {
             Change the greeting, add a route of your own, or return data your
             frontend can use.
           </p>
-          <Button href="/docs" variant="default" className="mt-6">
+          <Button
+            href="/docs"
+            variant="default"
+            className={`mt-6 ${primaryAction}`}
+          >
             Explore the docs
           </Button>
         </div>

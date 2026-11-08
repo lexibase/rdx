@@ -14,7 +14,7 @@ export function CodeInFocusThumbnail() {
             Your first API, in minutes.
           </p>
           <div className="mt-2 h-0.5 w-4/5 rounded-full bg-muted-foreground/30" />
-          <span className="mt-2.5 inline-flex rounded bg-primary px-1.5 py-1 text-[8px] leading-none font-medium text-primary-foreground">
+          <span className="mt-2.5 inline-flex rounded bg-rdx-selected/15 px-1.5 py-1 text-[8px] leading-none font-medium text-foreground">
             Get started
           </span>
         </div>

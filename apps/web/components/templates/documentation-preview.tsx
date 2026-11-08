@@ -10,13 +10,17 @@ import {
 import { Home, HomeSection } from '@lexibase/rdx/ui/components/home'
 
 const example = 'pnpm dev'
+const primaryAction =
+  'border border-rdx-selected/30 bg-rdx-selected/15 text-foreground hover:bg-rdx-selected/25'
 
 export default function DocumentationPreview() {
   return (
     <Home
       title="Build with Atlas."
       description="Learn how to connect your project to Atlas, with examples that take you from setup to your first request."
-      buttons={[{ label: 'Explore the docs', href: '/docs' }]}
+      buttons={[
+        { label: 'Explore the docs', href: '/docs', className: primaryAction },
+      ]}
       previewTitle="Getting started"
       previewDescription="Install the client, configure your project, and make your first request."
     >
@@ -63,7 +67,11 @@ export default function DocumentationPreview() {
             Follow the documentation to configure the client and run your first
             example.
           </p>
-          <Button href="/docs" variant="default" className="mt-5">
+          <Button
+            href="/docs"
+            variant="default"
+            className={`mt-5 ${primaryAction}`}
+          >
             Open the docs
           </Button>
         </div>

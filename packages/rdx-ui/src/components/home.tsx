@@ -114,7 +114,7 @@ export function Home({
   title?: string
   logo?: ReactNode
   description?: string
-  buttons?: { label: string; href: string }[]
+  buttons?: { label: string; href: string; className?: string }[]
   preview?: ReactNode
   previewTitle?: string
   previewDescription?: string
@@ -142,6 +142,7 @@ export function Home({
                       key={`${index}:${button.href}`}
                       variant={index === 0 ? 'default' : 'outline'}
                       href={button.href}
+                      className={button.className}
                     >
                       {button.label} {index === 0 && <ArrowRight />}
                     </Button>
