@@ -8,6 +8,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import type { RdxPageHighlight } from '@lexibase/rdx-types'
 
 import { Button } from './button'
+import { HighlightDot } from './highlight-dot'
 import { Separator } from './separator'
 import {
   Sheet,
@@ -95,13 +96,11 @@ export function DocsSidebar({
             >
               {link.label}
               {link.highlighting && (
-                <span
-                  aria-hidden="true"
+                <HighlightDot
+                  kind={link.highlighting}
                   data-rdx-sidebar-highlight={link.highlighting}
-                  className={`relative ms-auto size-2 shrink-0 rounded-full bg-current ${link.highlighting === 'important' ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400'}`}
-                >
-                  <span className="absolute inset-0 rounded-full bg-current opacity-0 motion-safe:animate-[rdx-sidebar-highlight_2.8s_ease-out_infinite]" />
-                </span>
+                  className="ms-auto"
+                />
               )}
             </Button>
           ))}

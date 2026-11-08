@@ -8,11 +8,8 @@ import {
   CardDescription,
 } from '@lexibase/rdx-ui/components/card'
 import { CodeBlockCopyButton } from '@lexibase/rdx-ui/components/code-block'
+import { HighlightDot } from '@lexibase/rdx-ui/components/highlight-dot'
 
-import CodeInFocus from '@/components/templates/code-in-focus'
-import { CodeInFocusThumbnail } from '@/components/templates/code-in-focus-thumbnail'
-import DocumentationPreview from '@/components/templates/documentation-preview'
-import { DocumentationPreviewThumbnail } from '@/components/templates/documentation-preview-thumbnail'
 import { TemplatePreviewDialog } from '@/components/templates/template-preview-dialog'
 import VideoFirst from '@/components/templates/video-first'
 import { VideoFirstThumbnail } from '@/components/templates/video-first-thumbnail'
@@ -22,23 +19,10 @@ const description =
 
 const templates = [
   {
-    id: 'documentation-preview',
-    title: 'Docs in perspective',
-    description: 'A two-column hero with a quickstart section.',
-    Demo: DocumentationPreview,
-    Thumbnail: DocumentationPreviewThumbnail,
-  },
-  {
-    id: 'code-in-focus',
-    title: 'Code in focus',
-    description: 'Lead with runnable code, then explain how it works.',
-    Demo: CodeInFocus,
-    Thumbnail: CodeInFocusThumbnail,
-  },
-  {
     id: 'video-first',
     title: 'Video first',
     description: 'A video hero, illustrated features, and a guided setup.',
+    isNew: true,
     Demo: VideoFirst,
     Thumbnail: VideoFirstThumbnail,
   },
@@ -80,29 +64,40 @@ export default async function TemplatesPage() {
           className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
         >
           {entries.map(
-            ({ id, title, description, Demo, Thumbnail, source }) => (
+            ({ id, title, description, isNew, Demo, Thumbnail, source }) => (
               <li key={id}>
-                <Card className="h-full gap-0 bg-muted/50 py-0 focus-within:ring-foreground/25 hover:shadow-lg hover:ring-foreground/25 motion-safe:transition-[translate,box-shadow] motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:-translate-y-1">
-                  <Thumbnail />
-                  <CardContent className="flex flex-1 flex-col justify-between gap-4 py-4">
+                <Card className="relative h-full gap-0 overflow-visible bg-muted/50 py-0 focus-within:ring-foreground/25 hover:shadow-lg hover:ring-foreground/25 motion-safe:transition-[translate,box-shadow] motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:-translate-y-1">
+                  <div className="relative overflow-hidden rounded-t-xl">
+                    <Thumbnail />
+                    <div className="absolute inset-x-2 bottom-3 flex justify-center motion-safe:transition-opacity motion-safe:duration-200 [@media(hover:hover)_and_(pointer:fine)]:opacity-0 group-hover/card:opacity-100 focus-within:opacity-100">
+                      <div className="flex flex-wrap items-center justify-center gap-2 rounded-lg border border-border bg-background p-1.5 shadow-sm">
+                        <TemplatePreviewDialog title={title} source={source}>
+                          <Demo />
+                        </TemplatePreviewDialog>
+                        <CodeBlockCopyButton
+                          size="sm"
+                          variant="outline"
+                          value={source}
+                        >
+                          Copy code
+                        </CodeBlockCopyButton>
+                      </div>
+                    </div>
+                  </div>
+                  {isNew && (
+                    <HighlightDot
+                      kind="new"
+                      className="pointer-events-none absolute -top-1.5 -end-1 z-10 size-3"
+                    />
+                  )}
+                  <CardContent className="flex-1 py-4">
                     <header className="space-y-1">
                       <h2 className="text-base leading-snug font-semibold tracking-tight">
                         {title}
+                        {isNew && <span className="sr-only"> (new)</span>}
                       </h2>
                       <CardDescription>{description}</CardDescription>
                     </header>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <TemplatePreviewDialog title={title} source={source}>
-                        <Demo />
-                      </TemplatePreviewDialog>
-                      <CodeBlockCopyButton
-                        size="sm"
-                        variant="outline"
-                        value={source}
-                      >
-                        Copy code
-                      </CodeBlockCopyButton>
-                    </div>
                   </CardContent>
                 </Card>
               </li>
