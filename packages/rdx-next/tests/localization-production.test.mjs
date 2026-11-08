@@ -101,8 +101,15 @@ test(
     await write(
       'components/home.tsx',
       `import type { RdxHomepageProps } from '@lexibase/rdx'
+export default function Home({ docsHref }: RdxHomepageProps) {
+  return <><h1>CustomHomepageMarker</h1><a data-home-docs href={docsHref}>Docs</a></>
+}`
+    )
+    await write(
+      'locale/ptbr/home.tsx',
+      `import type { RdxHomepageProps } from '@lexibase/rdx'
 export default function Home({ lang, docsHref }: RdxHomepageProps) {
-  return <><h1>{lang === 'pt-BR' ? 'TranslatedHomepageMarker' : 'CustomHomepageMarker'}</h1><a data-home-docs href={docsHref}>Docs</a></>
+  return <><h1 data-home-lang={lang}>TranslatedHomepageMarker</h1><a data-home-docs href={docsHref}>Documentação</a></>
 }`
     )
     await write(
@@ -204,11 +211,20 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       const localizedHome = await html('/pt-br')
       assert.match(localizedHome, /<html[^>]*lang="pt-BR"/)
       assert.match(localizedHome, /TranslatedHomepageMarker/)
+      assert.match(localizedHome, /data-home-lang="pt-BR"/)
+      assert.doesNotMatch(localizedHome, /CustomHomepageMarker/)
       assert.match(
         localizedHome,
         /<a data-home-docs="true" href="\/pt-br\/docs"/
       )
       assert.match(localizedHome, /data-rdx-language-trigger/)
+      const fallbackHome = await html('/es-es')
+      assert.match(fallbackHome, /<html[^>]*lang="es-ES"/)
+      assert.match(fallbackHome, /CustomHomepageMarker/)
+      assert.match(
+        fallbackHome,
+        /<a data-home-docs="true" href="\/es-es\/docs"/
+      )
       const primaryHome = await fetch(base + '/en', { redirect: 'manual' })
       assert.equal(primaryHome.status, 308)
       assert.equal(primaryHome.headers.get('location'), '/')

@@ -186,12 +186,18 @@ function RdxHeader({
   )
 }
 
-export function HomePage({ project }: { project: RdxProject }) {
+export function HomePage({
+  project,
+  component,
+}: {
+  project: RdxProject
+  component?: NonNullable<RDXConfig['homepage']>['component']
+}) {
   const { config } = project
   const docsHref = getDocsHref(project)
   if (!config.homepage?.enabled) redirect(docsHref)
   const homepage = config.homepage
-  const CustomHome = homepage.component
+  const CustomHome = component ?? homepage.component
   const docsLabel = getMessages(config.lang).docs
   const source = project.sources[0]!
   const categories = CustomHome
