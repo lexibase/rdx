@@ -14,6 +14,8 @@ import { CodeInFocusThumbnail } from '@/components/templates/code-in-focus-thumb
 import DocumentationPreview from '@/components/templates/documentation-preview'
 import { DocumentationPreviewThumbnail } from '@/components/templates/documentation-preview-thumbnail'
 import { TemplatePreviewDialog } from '@/components/templates/template-preview-dialog'
+import VideoFirst from '@/components/templates/video-first'
+import { VideoFirstThumbnail } from '@/components/templates/video-first-thumbnail'
 
 const description =
   'Explore landing page templates and make one your own in RDX.'
@@ -32,6 +34,13 @@ const templates = [
     description: 'Put a runnable example next to your project introduction.',
     Demo: CodeInFocus,
     Thumbnail: CodeInFocusThumbnail,
+  },
+  {
+    id: 'video-first',
+    title: 'Video first',
+    description: 'Open with a walkthrough, demo, or introduction video.',
+    Demo: VideoFirst,
+    Thumbnail: VideoFirstThumbnail,
   },
 ]
 
