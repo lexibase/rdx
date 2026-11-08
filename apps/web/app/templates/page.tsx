@@ -31,14 +31,14 @@ const templates = [
   {
     id: 'code-in-focus',
     title: 'Code in focus',
-    description: 'Put a runnable example next to your project introduction.',
+    description: 'Lead with runnable code, then explain how it works.',
     Demo: CodeInFocus,
     Thumbnail: CodeInFocusThumbnail,
   },
   {
     id: 'video-first',
     title: 'Video first',
-    description: 'Open with a walkthrough, demo, or introduction video.',
+    description: 'Lead with a video, then show the workflow and its uses.',
     Demo: VideoFirst,
     Thumbnail: VideoFirstThumbnail,
   },

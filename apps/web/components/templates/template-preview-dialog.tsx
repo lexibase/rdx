@@ -29,15 +29,22 @@ export function TemplatePreviewDialog({
         overlayClassName="bg-black/45"
       >
         <DialogHeader className="flex-row flex-wrap items-center justify-between gap-x-4 border-b border-border py-2 pl-4 pr-12">
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription className="sr-only">
-            Scroll to explore the landing page or copy its source code.
-          </DialogDescription>
+          <div className="min-w-0 flex-1 space-y-1">
+            <DialogTitle>{title}</DialogTitle>
+            <DialogDescription className="text-xs">
+              Scroll to see the full landing page.
+            </DialogDescription>
+          </div>
           <CodeBlockCopyButton size="sm" variant="outline" value={source}>
             Copy code
           </CodeBlockCopyButton>
         </DialogHeader>
-        <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain bg-background px-3 text-foreground sm:px-6">
+        <div
+          role="region"
+          aria-label="Landing page preview"
+          tabIndex={0}
+          className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain bg-background px-3 text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset sm:px-6"
+        >
           {children}
         </div>
       </DialogContent>

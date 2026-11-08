@@ -5,6 +5,24 @@ import { HomeSection, HomeSections } from '@lexibase/rdx/ui/components/home'
 const video = '/videos/atlas-walkthrough.webm'
 const poster = '/videos/atlas-walkthrough-poster.webp'
 
+const steps = [
+  {
+    title: 'Define a route',
+    description:
+      'Choose a URL path and decide what the API should return when someone opens it.',
+  },
+  {
+    title: 'Start the server',
+    description:
+      'Run the project locally. The server listens on port 3000 and waits for a request.',
+  },
+  {
+    title: 'Read the response',
+    description:
+      'Open the route in your browser and check that the greeting comes back as JSON.',
+  },
+]
+
 export default function VideoFirst() {
   return (
     <HomeSections>
@@ -33,21 +51,106 @@ export default function VideoFirst() {
         </div>
       </HomeSection>
       <HomeSection
-        aria-labelledby="video-quickstart-title"
+        aria-labelledby="video-walkthrough-title"
         className="border-t border-border bg-muted/20"
       >
         <div className="mx-auto w-full max-w-4xl">
           <h2
+            id="video-walkthrough-title"
+            className="text-3xl font-semibold tracking-tight sm:text-4xl"
+          >
+            From route to response.
+          </h2>
+          <p className="mt-3 max-w-xl leading-7 text-muted-foreground">
+            Follow the three actions shown in the walkthrough.
+          </p>
+          <ol className="mt-8 grid gap-6 sm:grid-cols-3">
+            {steps.map(({ title, description }, index) => (
+              <li key={title} className="border-t border-border pt-4">
+                <span
+                  aria-hidden="true"
+                  className="font-mono text-xs text-muted-foreground"
+                >
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <h3 className="mt-2 font-semibold">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {description}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </HomeSection>
+      <HomeSection
+        aria-labelledby="video-use-cases-title"
+        className="border-t border-border"
+      >
+        <div className="mx-auto w-full max-w-4xl">
+          <h2
+            id="video-use-cases-title"
+            className="text-3xl font-semibold tracking-tight sm:text-4xl"
+          >
+            One response, two ways to use it.
+          </h2>
+          <div className="mt-8 grid gap-8 sm:grid-cols-2">
+            <figure className="min-w-0">
+              <div
+                aria-hidden="true"
+                className="overflow-hidden rounded-xl border border-border bg-muted/20 font-mono text-xs"
+              >
+                <div className="border-b border-border px-4 py-2 text-muted-foreground">
+                  localhost:3000
+                </div>
+                <div className="px-4 py-5 break-all">
+                  {'{"message":"Hello from Atlas!"}'}
+                </div>
+              </div>
+              <figcaption className="mt-4">
+                <h3 className="font-semibold">Check it in the browser</h3>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                  Open the local URL to see the response body and confirm the
+                  route returns your greeting.
+                </p>
+              </figcaption>
+            </figure>
+            <figure className="min-w-0">
+              <div
+                aria-hidden="true"
+                className="overflow-hidden rounded-xl border border-border bg-muted/20 font-mono text-xs"
+              >
+                <div className="border-b border-border px-4 py-2 text-muted-foreground">
+                  200 OK
+                </div>
+                <div className="px-4 py-5 break-all">response.message</div>
+              </div>
+              <figcaption className="mt-4">
+                <h3 className="font-semibold">Use it in a frontend</h3>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                  Read the message field from the JSON response and show it in
+                  your own interface.
+                </p>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </HomeSection>
+      <HomeSection
+        aria-labelledby="video-quickstart-title"
+        className="border-t border-border bg-muted/20"
+      >
+        <div className="mx-auto max-w-xl text-center">
+          <h2
             id="video-quickstart-title"
-            className="text-3xl font-semibold tracking-tight"
+            className="text-3xl font-semibold tracking-tight sm:text-4xl"
           >
             Try it yourself.
           </h2>
-          <p className="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">
-            Create a route, start the server, then open the route in your
-            browser. The example returns a JSON greeting.
+          <p className="mt-4 leading-7 text-muted-foreground">
+            Follow the setup guide, create your first endpoint, and send a
+            request of your own.
           </p>
-          <Button href="/docs" variant="default" className="mt-5">
+          <Button href="/docs" variant="default" className="mt-6">
             Open the docs
           </Button>
         </div>
