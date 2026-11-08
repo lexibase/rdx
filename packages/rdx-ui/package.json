@@ -1,6 +1,6 @@
 {
   "name": "@lexibase/rdx-ui",
-  "version": "3.5.3",
+  "version": "3.5.4",
   "type": "module",
   "engines": {
     "node": "^22.18.0 || ^24.11.0"

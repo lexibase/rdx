@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 5.2.0 — Prepared
+
+- Support localized homepages through `locale/<folder>/home.tsx`. Fall back to the primary homepage while preserving the selected language and documentation links.
+
 ## 5.1.2 — Prepared
 
 - Load a new document when switching languages or opening the original language
