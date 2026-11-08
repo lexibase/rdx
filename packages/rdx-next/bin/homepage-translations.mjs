@@ -21,7 +21,12 @@ async function sourcePhrases(rootDir) {
   if (source === undefined)
     throw new Error(`Create ${sourceFile} to use homepage.translations.`)
   const { default: ts } = await import('typescript')
-  const file = ts.createSourceFile(sourceFile, source, ts.ScriptTarget.Latest)
+  const file = ts.createSourceFile(
+    sourceFile,
+    source,
+    ts.ScriptTarget.Latest,
+    true
+  )
   for (const statement of file.statements) {
     if (
       !ts.isExpressionStatement(statement) ||
@@ -34,19 +39,67 @@ async function sourcePhrases(rootDir) {
       )
   }
   const phrases = new Set()
-  function visit(node) {
+  const warnings = []
+  const passedOn =
+    't is passed on or renamed; phrases translated elsewhere are left out of the translation report'
+  const needsLiteral =
+    't() needs a literal phrase; this call is left out of the translation report'
+  function warn(node, message) {
+    const { line } = file.getLineAndCharacterOfPosition(node.getStart(file))
+    warnings.push({ line: line + 1, message })
+  }
+
+  // Bind identifiers within this file so an unrelated or shadowed t is ignored.
+  const options = { noLib: true, noResolve: true, types: [] }
+  const program = ts.createProgram([sourceFile], options, {
+    ...ts.createCompilerHost(options),
+    getSourceFile: (name) => (name === sourceFile ? file : undefined),
+  })
+  const checker = program.getTypeChecker()
+  const bindings = new Set()
+  function findBindings(node) {
     if (
-      ts.isCallExpression(node) &&
-      ts.isIdentifier(node.expression) &&
-      node.expression.text === 't' &&
-      node.arguments.length === 1 &&
-      ts.isStringLiteralLike(node.arguments[0])
-    )
-      phrases.add(node.arguments[0].text)
+      ts.isBindingElement(node) &&
+      ts.isObjectBindingPattern(node.parent) &&
+      ts.isIdentifier(node.name)
+    ) {
+      const key = node.propertyName ?? node.name
+      if (ts.isStringLiteralLike(key) || ts.isIdentifier(key)) {
+        if (key.text === 't') {
+          if (node.name.text === 't')
+            bindings.add(checker.getSymbolAtLocation(node.name))
+          else warn(node, passedOn)
+        }
+      }
+    }
+    ts.forEachChild(node, findBindings)
+  }
+  findBindings(file)
+
+  function visit(node) {
+    if (ts.isIdentifier(node) && node.text === 't') {
+      const parent = node.parent
+      const symbol = ts.isShorthandPropertyAssignment(parent)
+        ? checker.getShorthandAssignmentValueSymbol(parent)
+        : checker.getSymbolAtLocation(node)
+      if (
+        symbol &&
+        bindings.has(symbol) &&
+        !ts.isBindingElement(parent) &&
+        !ts.isTypeQueryNode(parent)
+      ) {
+        if (ts.isCallExpression(parent) && parent.expression === node) {
+          const [argument] = parent.arguments
+          if (parent.arguments.length === 1 && ts.isStringLiteralLike(argument))
+            phrases.add(argument.text)
+          else warn(node, needsLiteral)
+        } else warn(node, passedOn)
+      }
+    }
     ts.forEachChild(node, visit)
   }
   visit(file)
-  return phrases
+  return { phrases, warnings }
 }
 
 export async function readHomepageTranslations(
@@ -54,7 +107,11 @@ export async function readHomepageTranslations(
   { report = false } = {}
 ) {
   const { rootDir, localization } = project
-  const phrases = await sourcePhrases(rootDir)
+  const { phrases, warnings } = await sourcePhrases(rootDir)
+  if (report) {
+    for (const { line, message } of warnings.sort((a, b) => a.line - b.line))
+      console.warn(`[RDX] ${sourceFile}:${line}: ${message}`)
+  }
   phrases.delete(metadataKey)
   const catalogs = []
   for (const locale of localization?.locales ?? []) {
@@ -86,11 +143,14 @@ export async function readHomepageTranslations(
           `[RDX] ${file}: missing translation for ${JSON.stringify(phrase)}`
         )
     }
-    for (const phrase of Object.keys(messages)) {
-      if (phrase !== metadataKey && !phrases.has(phrase))
-        console.warn(
-          `[RDX] ${file}: orphaned translation for ${JSON.stringify(phrase)}`
-        )
+    // An unrecognized call may use any of the remaining keys.
+    if (!warnings.length) {
+      for (const phrase of Object.keys(messages)) {
+        if (phrase !== metadataKey && !phrases.has(phrase))
+          console.warn(
+            `[RDX] ${file}: orphaned translation for ${JSON.stringify(phrase)}`
+          )
+      }
     }
   }
   return { catalogs, phrases }

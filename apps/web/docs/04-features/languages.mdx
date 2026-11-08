@@ -189,6 +189,11 @@ translation also falls back, and `docsHref` still points to `/pt-br/docs`.
 longer match a `t('literal phrase')` call in `components/home.tsx`. These
 warnings allow partial translations to ship.
 
+Write phrases as literal `t('…')` calls in `components/home.tsx` so the check can
+find them. If you pass `t` to another component or helper, rename it, or call it
+with a dynamic value, the check warns with the file and line and skips orphan
+warnings because it cannot verify the entire catalog.
+
 Keep `t()` in the server homepage and pass the translated strings to interactive
 child components. Edits to an existing catalog are picked up in development.
 Restart the dev server after adding or removing a catalog.
