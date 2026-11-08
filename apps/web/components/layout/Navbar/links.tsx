@@ -1,6 +1,7 @@
 'use client'
 
 import { useMessages } from '@lexibase/rdx-ui/providers/locale-provider'
+import { Badge } from '@lexibase/rdx-ui/components/badge'
 import { Button } from '@lexibase/rdx-ui/components/button'
 import { usePathname } from 'next/navigation'
 
@@ -28,9 +29,16 @@ export function NavbarTemplatesLink() {
       variant="link"
       size="sm"
       href="/templates"
+      className="relative"
       aria-current={pathname === '/templates' ? 'page' : undefined}
     >
       Templates
+      <Badge
+        variant="secondary"
+        className="pointer-events-none absolute -top-2 end-0 h-3 px-1 py-0 text-[9px] leading-none"
+      >
+        Beta
+      </Badge>
     </Button>
   )
 }

@@ -67,7 +67,7 @@ export default async function TemplatesPage() {
       className="relative min-h-0 flex-1 overflow-y-auto outline-none"
     >
       <div className="mx-auto w-full max-w-6xl px-6 py-14 md:px-10 md:py-20">
-        <header className="max-w-2xl">
+        <header className="mx-auto max-w-2xl text-center">
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
             Landing page templates
           </h1>
