@@ -28,7 +28,7 @@ export function VideoFirstThumbnail() {
             className="aspect-video w-full object-cover"
           />
           <span className="absolute inset-0 grid place-items-center">
-            <span className="grid size-8 place-items-center rounded-full bg-background/90 text-foreground shadow-sm">
+            <span className="grid size-8 place-items-center rounded-full bg-background/90 text-rdx-selected shadow-sm">
               <Play className="size-3 fill-current" />
             </span>
           </span>
