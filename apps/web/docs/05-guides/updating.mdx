@@ -6,6 +6,10 @@ order: 4
 
 ## Update the framework
 
+> [!WARNING] Upgrading a translated homepage to RDX 6?
+> Follow [Migrate your translated homepage](#migrate-your-translated-homepage)
+> to move your translations into catalogs.
+
 > [!WARNING] Upgrading from RDX 4 to 5?
 > Read [Migrating to v5](./migrating-sidebar.mdx) before updating, especially if
 > your documentation already uses numbered file or folder names.
@@ -35,6 +39,21 @@ configuration and custom components are not replaced by this operation.
 
 Check the release notes for migrations and any required Next.js, React or Node.js
 updates. Those requirements are separate from updating RDX itself.
+
+## Migrate your translated homepage
+
+If you translated your homepage in RDX 5.2, move the text from each
+`locale/<folder>/home.tsx` into `locale/<folder>/home.json`. Keep the layout in
+your existing `components/home.tsx` and wrap its original phrases in `t()`.
+
+In `rdx.config.ts`, replace `homepage.component` with `translations: true` and
+keep `homepage.enabled: true`. Follow [Localize your homepage](../04-features/languages.mdx#localize-your-homepage)
+for the component, catalog, and optional `$metadata` examples. Once the texts
+are in the catalogs, remove the per-language components.
+
+Update the i18n plugin alongside the framework using the [plugin update commands](#optional-plugins).
+Run `rdx check` to review missing and outdated phrases, then switch languages on
+the homepage to verify the text and documentation links.
 
 ## Update from RDX 4.1 to 4.2
 

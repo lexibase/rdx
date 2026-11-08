@@ -1,0 +1,437 @@
+---
+title: Updating RDX
+description: Update the framework and validate your documentation.
+order: 4
+---
+
+## Update the framework
+
+> [!WARNING] Upgrading a translated homepage to RDX 6?
+> Follow [Migrate your translated homepage](#migrate-your-translated-homepage)
+> to move your translations into catalogs.
+
+> [!WARNING] Upgrading from RDX 4 to 5?
+> Read [Migrating to v5](./migrating-sidebar.mdx) before updating, especially if
+> your documentation already uses numbered file or folder names.
+
+Review the release notes, then stop the development server and update the main
+package from the project root:
+
+:::tabs
+
+### pnpm
+
+pnpm add @lexibase/rdx@latest
+
+### npm
+
+npm install @lexibase/rdx@latest
+
+### yarn
+
+yarn add @lexibase/rdx@latest
+
+:::
+
+The main package selects compatible runtime and UI versions. You do not need to
+manage its internal packages individually. Your documents, public files,
+configuration and custom components are not replaced by this operation.
+
+Check the release notes for migrations and any required Next.js, React or Node.js
+updates. Those requirements are separate from updating RDX itself.
+
+## Migrate your translated homepage
+
+If you translated your homepage in RDX 5.2, move the text from each
+`locale/<folder>/home.tsx` into `locale/<folder>/home.json`. Keep the layout in
+your existing `components/home.tsx` and wrap its original phrases in `t()`.
+
+In `rdx.config.ts`, replace `homepage.component` with `translations: true` and
+keep `homepage.enabled: true`. Follow [Localize your homepage](../04-features/languages.mdx#localize-your-homepage)
+for the component, catalog, and optional `$metadata` examples. Once the texts
+are in the catalogs, remove the per-language components.
+
+Update the i18n plugin alongside the framework using the [plugin update commands](#optional-plugins).
+Run `rdx check` to review missing and outdated phrases, then switch languages on
+the homepage to verify the text and documentation links.
+
+## Update from RDX 4.1 to 4.2
+
+Update the main framework using the commands above. Existing documents,
+configuration and custom React components remain compatible.
+
+Pages can use `.md` or `.mdx`. Both formats support the built-in Markdown
+components; use `.mdx` when a page needs JSX or component imports. Keep one file
+per page route: `intro.md` and `intro.mdx` in the same folder share a route.
+
+Use a public image path such as `navbar.logo: '/images/logo.png'` or keep a
+React logo component. Store image files in `public/`; `rdx check` validates the
+configured logo alongside other local assets. See [Custom logo](../04-features/custom-logo.mdx).
+
+If installed, also update the versioning plugin to 1.3.1 or newer and the i18n
+plugin to 1.0.1 or newer using the [plugin update commands](#optional-plugins).
+These releases recognize `.md` content in translated trees and version-route
+validation. Existing snapshots and language configuration remain usable.
+
+The next dev run or build refreshes the generated runtime. Mermaid diagrams
+keep their existing fence syntax and load locally from the UI package.
+
+Direct package integrations should use runtime 4.2 with UI 3.4 or newer within
+major 3, plus types/core 2.2. The main framework selects compatible packages.
+
+## Update from RDX 4.0 to 4.1
+
+Update the main framework using the commands above. Single-language documentation
+keeps its current files and configuration. Builds automatically run `rdx check`
+before compiling; fix reported broken links, assets or Markdown before deploying.
+
+To offer translated content, follow [Languages](../04-features/languages.mdx) and run
+`rdx add i18n`. The installer reuses `lang` and asks for additional languages.
+Primary content stays in `docs/`; translations use `locale/<folder>/docs/`.
+
+For multilingual snapshots, update the optional versioning plugin to 1.3.0 or
+newer using the [plugin update commands](#optional-plugins). One `rdx version`
+captures all configured languages. Existing snapshots keep their original
+content; translated files are authored by the project owner and contributors.
+
+Direct consumers of `@lexibase/rdx-next` must provide `@lexibase/rdx-ui` 3.3.0
+or newer within major 3. The main `@lexibase/rdx` package supplies this compatible
+UI automatically.
+
+## Update from RDX 3.x to 4.0
+
+RDX 4 manages search-engine indexing automatically. Remove `metadata.robots`
+from `rdx.config.ts`, keeping the rest of your configuration:
+
+```ts
+metadata: {
+  applicationName: 'My documentation',
+  metadataBase: 'https://docs.example.com',
+}
+```
+
+This shows only the relevant fields; retain your icons, social images, authors
+and other settings. Set `metadataBase` to the public URL of your site so RDX can
+generate absolute sitemap URLs. Without it, the sitemap contains no entries.
+
+Update the main framework using the commands above. If versioning is installed,
+also [update the optional plugin](#optional-plugins) to 1.2.1 or newer. Its commands
+and manifest format remain compatible. Your Markdown, React component imports,
+assets and custom styles remain usable, and Node.js, Next.js and React requirements
+are unchanged.
+
+Use [`rdx check`](../03-writing-documentation/checking.mdx) to review document links, section anchors
+and local assets, then build and preview your site. After deployment, inspect
+`/sitemap.xml` and `/robots.txt`. The [indexing policy](../02-getting-started/config.mdx#search-engine-indexing)
+is shared by page metadata and the generated sitemap.
+
+The main framework supplies runtime 4.0 and UI 3.2.1. Direct package integrations
+should update runtime to 4.0 and types/core to 2.0. Runtime retains UI ^3.2.0
+compatibility. Native Next.js hosts use `getSourceRobots`, `getRdxSitemap` and
+`getRdxRobots` to apply the same policy to their own routes; generated projects
+already include that integration.
+
+## Update from RDX 3.1 to 3.2
+
+Update the main framework with the commands above. Existing configuration,
+Markdown and custom React imports remain usable. RDX 3.2 includes shared
+skip-to-content navigation, sidebar labels that wrap at narrow widths, and
+accessible text alternatives for combinations written as `:kbd[Ctrl + K]`.
+Write complete combinations with spaces around `+` to display the keys together
+with a localized text alternative.
+
+### Published documentation editions
+
+If you use versioning, also [update the optional plugin](#optional-plugins) to
+version 1.2 or newer. Update the framework and plugin together before running
+the publishing commands or deploying their manifest.
+
+Versioning keeps one published edition per major. Running `rdx version 3.2.0`
+copies the ready content from `docs/` and replaces the previous major-3 entry
+with `3.2.0`. A patch such as `3.2.1` advances that same edition. A new major
+adds an edition and preserves the final documentation of previous majors.
+The live Current/Canary documentation stays independent.
+
+Existing manifests with multiple editions of the same major use the highest
+version of that major. The next versioning command records the consolidated
+manifest and its `redirects` map. Snapshot files stay on disk; historical URLs
+redirect to the updated edition, preserving the requested page path. Removed
+pages return a 404. Keep the redirect map with your documentation in Git.
+
+Archiving and restoring use the published label currently listed for that major.
+Publishing a newer version of an archived major keeps it archived. See
+[Versioning](../04-features/versioning.mdx) for commands and examples.
+
+For direct package integrations, update the runtime and UI to 3.2 together.
+Native Next.js integrations should apply the complete object returned by
+`getRdxTracingConfig` to their Next configuration, including its redirects.
+The generated runtime already applies this configuration.
+
+## Update from RDX 3.0 to 3.1
+
+Update the main framework with the commands above. RDX 3.1 includes natural
+Markdown syntax for Callouts, Tabs, Accordion and keyboard keys; Mermaid diagrams;
+code block titles, line numbers and file trees; mobile navigation motion; and
+custom highlights through `rdx.css`.
+
+Existing Markdown and React component imports remain usable. Create `rdx.css`
+beside `rdx.config.ts` to [customize highlight colors](../04-features/appearance.mdx).
+See [Writing pages](../03-writing-documentation/create-docs.mdx) for component authoring and
+[Code blocks](../03-writing-documentation/code-blocks.mdx) for fence options.
+
+If the optional versioning plugin is installed, update it separately to use
+the archive and restore commands:
+
+:::tabs
+
+### pnpm
+
+pnpm add @lexibase/rdx-versioning@latest
+
+### npm
+
+npm install @lexibase/rdx-versioning@latest
+
+### yarn
+
+yarn add @lexibase/rdx-versioning@latest
+
+:::
+
+Versioning 1.1 provides `rdx archive <version>` and `rdx unarchive <version>`.
+Both preserve snapshot contents and URLs. Follow [Versioning](../04-features/versioning.mdx)
+for the complete workflow. Direct runtime/UI users should update the runtime
+and UI to 3.1 together; the main framework handles that pairing automatically.
+
+## Upgrade from RDX 2.x to 3.x
+
+RDX 3 includes the complete shadcn Code Block, diff and folder fences, responsive
+image previews, and the complete shadcn Dialog composition. Update the main
+package using the commands above. Standard Markdown fences and images continue
+working automatically.
+
+### Custom Code Block components
+
+The React `CodeBlock` export is now the root of the shadcn composition, with a
+separate `CodeBlockContent`. If your custom React components use the former pre
+wrapper, replace that import with the Markdown adapter:
+
+```tsx
+import { MdxCodeBlock } from '@lexibase/rdx/ui/components/mdx-code-block'
+
+export function Example() {
+  return (
+    <MdxCodeBlock>
+      <code className="language-ts">{'const search = true'}</code>
+    </MdxCodeBlock>
+  )
+}
+```
+
+You can also consult the [official component reference](https://ui.shadcn.com/docs/components/base/code-block).
+Pass pre-specific props, wrapping and line-number options to `CodeBlockContent`;
+pass the exact clipboard text to `CodeBlockCopyButton` through `value`.
+
+### Custom Dialog components
+
+`DialogContent` uses the centered shadcn layout. Custom callers can set their
+position, width and padding through `className`, and control the built-in close
+button with `showCloseButton`. The built-in search retains its existing layout.
+
+### Direct runtime and UI dependencies in 3.x
+
+The main framework selects matching runtime and UI versions. If you maintain
+direct dependencies on these packages, update both to 3.x together:
+
+:::tabs
+
+### pnpm
+
+pnpm add @lexibase/rdx-next@3 @lexibase/rdx-ui@3
+
+### npm
+
+npm install @lexibase/rdx-next@3 @lexibase/rdx-ui@3
+
+### yarn
+
+yarn add @lexibase/rdx-next@3 @lexibase/rdx-ui@3
+
+:::
+
+Keep your existing content, configuration, public assets and snapshots. Optional
+plugins remain separate dependencies.
+
+## Upgrade from RDX 1.x to 2.x
+
+Update the main package using the commands above. RDX 2 includes interface
+translations selected by `lang`, keyboard shortcut components, page-specific
+social previews, and the shared custom 404 page. Markdown tables use the default
+shadcn/ui styling.
+
+### Custom navigation components
+
+Replace `ButtonLink` imports from `@lexibase/rdx/ui/components/button-link` with
+`Button` from `@lexibase/rdx/ui/components/button`. For direct UI imports, use
+`@lexibase/rdx-ui/components/button`.
+
+```tsx
+import { Button } from '@lexibase/rdx/ui/components/button'
+
+export function DocumentationLink() {
+  return (
+    <Button href="/docs" variant="link">
+      Documentation
+    </Button>
+  )
+}
+```
+
+Keep your existing `variant` and `size` when preserving button styling. With
+`href`, `Button` renders a native link; without it, it renders an action button.
+Projects using only the generated configuration and MDX pages do not need this
+import change.
+
+### Direct runtime and UI dependencies
+
+The main `@lexibase/rdx` package selects compatible dependencies automatically.
+If your project declares `@lexibase/rdx-next` and `@lexibase/rdx-ui` directly,
+update both to 2.x together:
+
+:::tabs
+
+### pnpm
+
+pnpm add @lexibase/rdx-next@2 @lexibase/rdx-ui@2
+
+### npm
+
+npm install @lexibase/rdx-next@2 @lexibase/rdx-ui@2
+
+### yarn
+
+yarn add @lexibase/rdx-next@2 @lexibase/rdx-ui@2
+
+:::
+
+The next development run or production build refreshes the internal app and its
+404 page. Keep your documents, configuration, public assets, custom components,
+and installed plugins in the existing project.
+
+## Newly published releases with pnpm
+
+pnpm can apply a minimum release age when installing updates and checking the
+lockfile before `pnpm dev`. If an update is blocked with
+`ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION`, follow
+[Release-age policies](./troubleshooting.mdx#a-release-age-policy-blocks-installation)
+to wait for the configured period or approve the exact versions you reviewed.
+The error can name internal RDX dependencies as well as the main framework package.
+
+Apply approvals in the `pnpm-workspace.yaml` that governs the project. In a
+monorepo, this is usually the workspace-root file, shared by its applications.
+
+## Optional plugins
+
+Plugins remain separate dependencies. Update an installed plugin when its release
+notes recommend a compatible update:
+
+### Versioning
+
+:::tabs
+
+### pnpm
+
+pnpm add @lexibase/rdx-versioning@latest
+
+### npm
+
+npm install @lexibase/rdx-versioning@latest
+
+### yarn
+
+yarn add @lexibase/rdx-versioning@latest
+
+:::
+
+### Languages
+
+For projects with the i18n plugin installed:
+
+:::tabs
+
+### pnpm
+
+pnpm add @lexibase/rdx-i18n@latest
+
+### npm
+
+npm install @lexibase/rdx-i18n@latest
+
+### yarn
+
+yarn add @lexibase/rdx-i18n@latest
+
+:::
+
+## Validate and deploy
+
+Restart the development server to check your documentation. For production:
+
+:::tabs
+
+### pnpm
+
+pnpm build\
+pnpm start
+
+### npm
+
+npm run build\
+npm run start
+
+### yarn
+
+yarn build\
+yarn start
+
+:::
+
+Check documents, relative links, components, assets, search and snapshots before
+redeploying. Keep customizations in project-owned files; RDX refreshes generated
+runtime files.
+
+## Migrate sidebar ordering
+
+Follow the [sidebar migration guide](./migrating-sidebar.mdx) to adopt `order`
+and numbered folders in an existing project.
+
+## Adopt the main package in an existing package-level setup
+
+Install `@lexibase/rdx`, then change the configuration import to:
+
+```ts
+import { defineConfig } from '@lexibase/rdx'
+```
+
+For custom React components, use paths such as
+`@lexibase/rdx/ui/components/home` instead of direct UI package imports.
+After migrating those imports, remove direct runtime and UI dependencies:
+
+:::tabs
+
+### pnpm
+
+pnpm remove @lexibase/rdx-next @lexibase/rdx-ui
+
+### npm
+
+npm uninstall @lexibase/rdx-next @lexibase/rdx-ui
+
+### yarn
+
+yarn remove @lexibase/rdx-next @lexibase/rdx-ui
+
+:::
+
+Keep Next.js, React and any installed plugins. Rebuild and validate before
+deploying. Advanced applications can also keep using the lower-level packages.
