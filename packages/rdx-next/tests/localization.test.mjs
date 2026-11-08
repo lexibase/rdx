@@ -142,6 +142,13 @@ test('localized root layouts are repeatable, use server-side language and are re
     assert.match(layout, /RdxLayout/)
     assert.match(
       fs.readFileSync(
+        path.join(runtime, 'app/(rdx-locales)/[locale]/page.tsx'),
+        'utf8'
+      ),
+      /<HomePage project=\{getLocalizedProject\(project, locale\)\}/
+    )
+    assert.match(
+      fs.readFileSync(
         path.join(runtime, 'app/(rdx-locales)/[locale]/docs/llms.txt/route.ts'),
         'utf8'
       ),
@@ -174,6 +181,10 @@ test('localized root layouts are repeatable, use server-side language and are re
   )
   assert.equal(
     fs.existsSync(path.join(runtime, 'app/(rdx-locales)/[locale]/layout.tsx')),
+    false
+  )
+  assert.equal(
+    fs.existsSync(path.join(runtime, 'app/(rdx-locales)/[locale]/page.tsx')),
     false
   )
   assert.equal(

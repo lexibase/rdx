@@ -137,12 +137,45 @@ unprefixed documentation links redirect to the primary language.
 Restart the development server after enabling, disabling or changing configured
 languages so RDX can regenerate the route structure.
 
-Custom homepages stay at `/`. Their Docs action opens the primary language.
 Search runs in the selected language and indexes the pages authored in it.
 
 The menu lists the primary language and every configured additional language,
 including languages whose translations are still being written. A missing page
 uses the fallback described below.
+
+## Localize your homepage
+
+When the homepage is enabled, `/` serves the primary language and a path such
+as `/pt-br` serves the homepage for that language. The language selector stays
+on the homepage when switching languages. The navbar logo opens the homepage
+in the language of the current documentation page.
+
+In a custom `components/home.tsx`, use `lang` to select the text and
+`docsHref` for the documentation link:
+
+```tsx title="components/home.tsx"
+import type { RdxHomepageProps } from '@lexibase/rdx'
+import { Home } from '@lexibase/rdx/ui/components/home'
+
+export default function MyHome({ lang, docsHref }: RdxHomepageProps) {
+  const portuguese = lang === 'pt-BR'
+
+  return (
+    <Home
+      title={portuguese ? 'Bem-vindo ao Atlas' : 'Welcome to Atlas'}
+      buttons={[
+        {
+          label: portuguese ? 'Leia a documentação' : 'Read the docs',
+          href: docsHref,
+        },
+      ]}
+    />
+  )
+}
+```
+
+Set `homepage.component` as shown in the [Homepage guide](./homepage.mdx).
+Author the homepage text for each language in your component.
 
 ## Community translations
 

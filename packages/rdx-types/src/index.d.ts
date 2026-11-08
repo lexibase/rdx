@@ -3,6 +3,7 @@ export { RdxSearchEntry, RdxSearchIndex } from './search'
 export {
   RDXConfig,
   RdxHomepage,
+  RdxHomepageProps,
   RdxMetadata,
   RdxRuntimeConfig,
   ResolvedRdxConfig,

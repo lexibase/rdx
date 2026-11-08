@@ -115,6 +115,14 @@ export type RDXConfig = {
   }
 }
 
+/** Values available to a project-owned homepage. */
+export type RdxHomepageProps = {
+  /** Active language tag, such as 'en' or 'pt-BR'. */
+  lang: string
+  /** Documentation entry point for the active language. */
+  docsHref: string
+}
+
 /** Options for the built-in landing page or a project-owned home.tsx component. */
 export type RdxHomepage = {
   /**
@@ -124,12 +132,12 @@ export type RdxHomepage = {
   enabled?: boolean
   /**
    * Imported React component that owns the homepage body.
-   * The shared navbar remains; built-in title, description and buttons are not
-   * injected into this component. Used only when enabled is true.
+   * The shared navbar remains. Use the lang and docsHref props to localize the
+   * homepage content and navigation. Used only when enabled is true.
    * @example
    * component: Home // import Home from './home'
    */
-  component?: ComponentType
+  component?: ComponentType<RdxHomepageProps>
   /** Built-in homepage heading. Defaults to metadata.applicationName. */
   title?: string
   /** Text below the built-in heading. Defaults to the site description. */

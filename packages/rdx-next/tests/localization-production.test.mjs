@@ -100,7 +100,10 @@ test(
     await write('public/brand.png', brandPng)
     await write(
       'components/home.tsx',
-      'export default function Home() { return <h1>CustomHomepageMarker</h1> }'
+      `import type { RdxHomepageProps } from '@lexibase/rdx'
+export default function Home({ lang, docsHref }: RdxHomepageProps) {
+  return <><h1>{lang === 'pt-BR' ? 'TranslatedHomepageMarker' : 'CustomHomepageMarker'}</h1><a data-home-docs href={docsHref}>Docs</a></>
+}`
     )
     await write(
       'components/logo.tsx',
@@ -141,6 +144,10 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       assert.match(translated, /<html[^>]*lang="pt-BR"/)
       assert.match(translated, /TranslatedIntroMarker/)
       assert.match(translated, /aria-label="Custom logo"/)
+      assert.match(
+        translated,
+        /<a[^>]*aria-label="Locale Docs"[^>]*href="\/pt-br"/
+      )
       assert.match(translated, /data-rdx-language-trigger/)
       assert.match(
         translated,
@@ -191,7 +198,20 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         sitemap,
         /\/pt-br\/docs\/guides\/install|\/es-es\/docs/
       )
-      assert.match(await html('/'), /CustomHomepageMarker/)
+      const home = await html('/')
+      assert.match(home, /CustomHomepageMarker/)
+      assert.match(home, /<a data-home-docs="true" href="\/en\/docs"/)
+      const localizedHome = await html('/pt-br')
+      assert.match(localizedHome, /<html[^>]*lang="pt-BR"/)
+      assert.match(localizedHome, /TranslatedHomepageMarker/)
+      assert.match(
+        localizedHome,
+        /<a data-home-docs="true" href="\/pt-br\/docs"/
+      )
+      assert.match(localizedHome, /data-rdx-language-trigger/)
+      const primaryHome = await fetch(base + '/en', { redirect: 'manual' })
+      assert.equal(primaryHome.status, 308)
+      assert.equal(primaryHome.headers.get('location'), '/')
       assert.match(await html('/logo.svg'), /<svg/)
     }
     await withProductionServer(cli, root, verify, {

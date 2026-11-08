@@ -11,6 +11,7 @@ const generated = [
   ...defaultFiles.map((file) => `app/(rdx-default)/${file}`),
   'app/(rdx-default)/[...notFound]/page.tsx',
   'app/(rdx-locales)/[locale]/layout.tsx',
+  'app/(rdx-locales)/[locale]/page.tsx',
   'app/(rdx-locales)/[locale]/not-found.tsx',
   'app/(rdx-locales)/[locale]/docs/[[...slug]]/page.tsx',
   'app/(rdx-locales)/[locale]/rdx-search/[source]/route.ts',
@@ -106,6 +107,21 @@ async function configuration(params: Promise<{ locale: string }>) {
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) { return getRdxMetadata(await configuration(params)) }
 export default async function Layout({ children, params }: { children: React.ReactNode, params: Promise<{ locale: string }> }) {
   return <RdxLayout config={await configuration(params)} bodyClassName="antialiased">{children}</RdxLayout>
+}
+`
+  )
+  await emit(
+    'app/(rdx-locales)/[locale]/page.tsx',
+    `import { HomePage, getLocalizedProject } from '${provider}'
+import { notFound, permanentRedirect } from 'next/navigation'
+import { getProject } from '../../../rdx-project'
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const project = await getProject()
+  const { locale } = await params
+  const selected = project.localization?.locales.find(entry => entry.path === locale)
+  if (!project.config.homepage?.enabled || !selected) notFound()
+  if (selected.code === project.localization!.defaultLocale) permanentRedirect('/')
+  return <HomePage project={getLocalizedProject(project, locale)} />
 }
 `
   )
