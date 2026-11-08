@@ -29,16 +29,17 @@ export function NavbarTemplatesLink() {
       variant="link"
       size="sm"
       href="/templates"
-      className="relative"
       aria-current={pathname === '/templates' ? 'page' : undefined}
     >
-      Templates
-      <Badge
-        variant="secondary"
-        className="pointer-events-none absolute -top-2 end-0 h-3 px-1 py-0 text-[9px] leading-none"
-      >
-        Beta
-      </Badge>
+      <span className="relative">
+        Templates
+        <Badge
+          variant="secondary"
+          className="pointer-events-none absolute -end-5 -top-1.5 h-2.5 border-0 px-1 py-0 text-[9px] leading-none"
+        >
+          Beta
+        </Badge>
+      </span>
     </Button>
   )
 }
