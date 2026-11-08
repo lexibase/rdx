@@ -38,7 +38,7 @@ const templates = [
   {
     id: 'video-first',
     title: 'Video first',
-    description: 'Lead with a video, then show the workflow and its uses.',
+    description: 'A video hero, illustrated features, and a guided setup.',
     Demo: VideoFirst,
     Thumbnail: VideoFirstThumbnail,
   },
