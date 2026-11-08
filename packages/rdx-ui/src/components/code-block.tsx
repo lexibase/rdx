@@ -90,6 +90,7 @@ function CodeBlockCopyButton({
   value,
   variant = 'ghost',
   size = 'icon-xs',
+  children,
   className,
   onClick,
   ...props
@@ -160,6 +161,7 @@ function CodeBlockCopyButton({
         {...props}
       >
         {copied ? <CheckIcon /> : <CopyIcon />}
+        {children}
       </Button>
       <span
         role="status"

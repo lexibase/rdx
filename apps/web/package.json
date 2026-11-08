@@ -22,6 +22,7 @@
     "docs:unarchive": "tsx scripts/project.ts unarchive"
   },
   "dependencies": {
+    "@lexibase/rdx": "workspace:*",
     "@lexibase/rdx-next": "workspace:*",
     "@lexibase/rdx-core": "workspace:*",
     "@lexibase/rdx-versioning": "workspace:*",
