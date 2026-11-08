@@ -19,12 +19,7 @@ const generated = [
 ]
 
 /** Root layouts keep HTML language correct on the server, without middleware. */
-export async function prepareLocaleRoutes(
-  project,
-  runtime,
-  template,
-  overrides = []
-) {
+export async function prepareLocaleRoutes(project, runtime, template) {
   async function safe(file) {
     const parts = file.split('/')
     let current = runtime
@@ -115,24 +110,12 @@ export default async function Layout({ children, params }: { children: React.Rea
 }
 `
   )
-  const homeRoute = 'app/(rdx-locales)/[locale]/page.tsx'
-  // Literal imports let Next compile and trace project-owned components.
-  const localizedHomes = overrides.map(
-    ({ locale, folder }) =>
-      `    case ${JSON.stringify(locale)}: return (await import(${JSON.stringify(`../../../../${folder}/home`)})).default`
-  )
   await emit(
-    homeRoute,
+    'app/(rdx-locales)/[locale]/page.tsx',
     `import { HomePage, getHomepageMetadata, getLocalizedProject } from '${provider}'
 import { notFound, permanentRedirect } from 'next/navigation'
 import { getHomepageSeo, getHomepageTranslation } from '../../../rdx-home'
 import { getProject } from '../../../rdx-project'
-async function getLocalizedHome(locale: string) {
-  switch (locale) {
-${localizedHomes.join('\n')}
-    default: return undefined
-  }
-}
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const project = await getProject()
   const { locale } = await params
@@ -144,8 +127,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   const selected = project.localization?.locales.find(entry => entry.path === locale)
   if (!project.config.homepage?.enabled || !selected) notFound()
   if (selected.code === project.localization!.defaultLocale) permanentRedirect('/')
-  const component = await getLocalizedHome(locale)
-  return <HomePage project={getLocalizedProject(project, locale)} component={component} {...getHomepageTranslation(locale)} />
+  return <HomePage project={getLocalizedProject(project, locale)} {...getHomepageTranslation(locale)} />
 }
 `
   )

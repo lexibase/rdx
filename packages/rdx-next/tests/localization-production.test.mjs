@@ -103,13 +103,13 @@ test(
     await write(
       'components/home.tsx',
       `import type { RdxTranslatedHomepageProps } from '@lexibase/rdx'
-export default function Home({ docsHref, t }: RdxTranslatedHomepageProps) {
-  return <><h1>{t('CustomHomepageMarker')}</h1><p>{t('PrimaryOnlyMarker')}</p><a data-home-docs href={docsHref}>{t('Docs')}</a></>
+export default function Home({ lang, docsHref, t }: RdxTranslatedHomepageProps) {
+  return <><h1 data-home-lang={lang}>{t('CustomHomepageMarker')}</h1><p>{t('PrimaryOnlyMarker')}</p><a data-home-docs href={docsHref}>{t('Docs')}</a></>
 }`
     )
     await write(
       'locale/ptbr/home.json',
-      '{"CustomHomepageMarker":"IgnoredHomepageCatalog","$metadata":{"title":"Início do projeto"}}'
+      '{"CustomHomepageMarker":"TranslatedHomepageMarker","Docs":"Documentação","$metadata":{"title":"Início do projeto"}}'
     )
     await write(
       'locale/es-es/home.json',
@@ -121,10 +121,7 @@ export default function Home({ docsHref, t }: RdxTranslatedHomepageProps) {
     )
     await write(
       'locale/ptbr/home.tsx',
-      `import type { RdxHomepageProps } from '@lexibase/rdx'
-export default function Home({ lang, docsHref }: RdxHomepageProps) {
-  return <><h1 data-home-lang={lang}>TranslatedHomepageMarker</h1><a data-home-docs href={docsHref}>Documentação</a></>
-}`
+      'export default function Home() { return <h1>LocaleOverrideMarker</h1> }'
     )
     await write(
       'components/logo.tsx',
@@ -149,7 +146,10 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         new RegExp(`missing translation for "${phrase}"`)
       )
     assert.match(checked.stderr, /orphaned translation for "Obsolete phrase"/)
-    assert.doesNotMatch(checked.stderr, /locale\/ptbr\/home\.json/)
+    assert.match(
+      checked.stderr,
+      /locale\/ptbr\/home\.json: missing translation for "PrimaryOnlyMarker"/
+    )
     assert.doesNotMatch(checked.stderr, /orphaned translation for "\$metadata"/)
     const built = spawnSync(process.execPath, [cli, 'build'], {
       cwd: root,
@@ -263,7 +263,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       assert.match(localizedHome, /data-home-lang="pt-BR"/)
       assert.doesNotMatch(
         localizedHome,
-        /CustomHomepageMarker|IgnoredHomepageCatalog/
+        /CustomHomepageMarker|LocaleOverrideMarker/
       )
       assert.match(
         localizedHome,

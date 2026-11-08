@@ -194,12 +194,10 @@ function RdxHeader({
 
 export function HomePage({
   project,
-  component,
   translatedComponent: TranslatedHome,
   messages,
 }: {
   project: RdxProject
-  component?: NonNullable<RDXConfig['homepage']>['component']
   translatedComponent?: ComponentType<RdxTranslatedHomepageProps>
   messages?: Record<string, unknown>
 }) {
@@ -207,7 +205,7 @@ export function HomePage({
   const docsHref = getDocsHref(project)
   if (!config.homepage?.enabled) redirect(docsHref)
   const homepage = config.homepage
-  const CustomHome = component ?? homepage.component
+  const CustomHome = homepage.component
   const docsLabel = getMessages(config.lang).docs
   const source = project.sources[0]!
   const categories =

@@ -34,12 +34,7 @@ export async function runRdxCli({ templateDir } = {}) {
       recursive: true,
     })
     await prepareProjectStyles(projectRoot, runtimeDirectory)
-    await prepareLocaleRoutes(
-      project,
-      runtimeDirectory,
-      runtimeTemplate,
-      homepageTranslations?.overrides
-    )
+    await prepareLocaleRoutes(project, runtimeDirectory, runtimeTemplate)
     if (homepageTranslations) {
       const { prepareHomepageTranslations } =
         await import('./homepage-translations.mjs')
@@ -153,7 +148,7 @@ export async function runRdxCli({ templateDir } = {}) {
     let homepageTranslations
     if (
       project.config.homepage?.enabled &&
-      (project.config.homepage.translations || project.localization) &&
+      project.config.homepage.translations &&
       (supportedCommands.has(command) ||
         command === 'check' ||
         command === 'prepare')

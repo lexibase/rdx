@@ -1,4 +1,4 @@
-import { readFile, stat, writeFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 const sourceFile = 'components/home.tsx'
@@ -53,26 +53,13 @@ export async function readHomepageTranslations(
   project,
   { report = false } = {}
 ) {
-  const { rootDir, config, localization } = project
-  const phrases = config.homepage.translations
-    ? await sourcePhrases(rootDir)
-    : undefined
+  const { rootDir, localization } = project
+  const phrases = await sourcePhrases(rootDir)
+  phrases.delete(metadataKey)
   const catalogs = []
-  const overrides = []
   for (const locale of localization?.locales ?? []) {
     if (!locale.folder) continue
-    const folder = `locale/${locale.folder}`
-    const override = await stat(path.join(rootDir, folder, 'home.tsx')).then(
-      (entry) => entry.isFile(),
-      (error) => {
-        if (missingFile(error)) return false
-        throw error
-      }
-    )
-    if (override) overrides.push({ locale: locale.path, folder })
-    if (!override && !phrases) continue
-
-    const file = `${folder}/home.json`
+    const file = `locale/${locale.folder}/home.json`
     const raw = await readOptional(path.join(rootDir, file))
     let messages = {}
     if (raw !== undefined) {
@@ -88,9 +75,8 @@ export async function readHomepageTranslations(
         )
       }
     }
-    if (!report || override || !phrases) continue
+    if (!report) continue
     for (const phrase of phrases) {
-      if (phrase === metadataKey) continue
       if (
         !Object.hasOwn(messages, phrase) ||
         typeof messages[phrase] !== 'string' ||
@@ -107,12 +93,12 @@ export async function readHomepageTranslations(
         )
     }
   }
-  return { catalogs, overrides, phrases }
+  return { catalogs, phrases }
 }
 
 export async function prepareHomepageTranslations(
   runtime,
-  { catalogs, overrides, phrases }
+  { catalogs, phrases }
 ) {
   const imports = catalogs.map(
     ({ file }, index) =>
@@ -123,26 +109,21 @@ export async function prepareHomepageTranslations(
   )
   await writeFile(
     path.join(runtime, 'rdx-home.ts'),
-    `${phrases ? "import translatedComponent from '../components/home'" : ''}
+    `import translatedComponent from '../components/home'
 ${imports.join('\n')}
 
 const catalogs = new Map<string, Record<string, unknown>>([
 ${entries.join('\n')}
 ])
 
-const phrases: string[] = ${JSON.stringify([...(phrases ?? [])].filter((phrase) => phrase !== metadataKey))}
-const overrides: string[] = ${JSON.stringify(overrides.map(({ locale }) => locale))}
+const phrases: string[] = ${JSON.stringify([...phrases])}
 
-${
-  phrases
-    ? `export function getHomepageTranslation(locale?: string) {
+export function getHomepageTranslation(locale?: string) {
   return { translatedComponent, messages: locale ? catalogs.get(locale) : undefined }
-}`
-    : 'export const getHomepageTranslation: (locale?: string) => object = () => ({})'
 }
 
 export function getHomepageSeo(locale?: string) {
-  const translatedLocales = new Set(overrides)
+  const translatedLocales = new Set<string>()
   for (const [path, catalog] of catalogs) {
     if (phrases.some((phrase) => {
       const text = Object.hasOwn(catalog, phrase) ? catalog[phrase] : undefined

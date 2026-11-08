@@ -121,3 +121,8 @@ export default defineConfig({
 
 Keep the rest of your existing configuration. The site navbar stays shared and
 `components/home.tsx` defines the content shown at `/`.
+
+To translate a custom homepage or a copied template, keep the existing layout
+in `components/home.tsx`. Update that component to receive `t` and wrap the text
+you want to translate, then configure translations and add a catalog for each
+language. Follow [Localize your homepage](./languages.mdx#localize-your-homepage).
