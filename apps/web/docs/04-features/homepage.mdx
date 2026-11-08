@@ -47,13 +47,17 @@ closing call to action.
 1. Select **Preview** and scroll through the landing page.
 2. Select **Copy code** and paste the full component into `components/home.tsx`
    at the root of your project.
-3. Edit the content and links, then [activate your homepage](#activate-your-homepage).
+3. Edit the content and links, then set
+   `homepage: { enabled: true, translations: true }` in `rdx.config.ts`.
 
 For **Video first**, put your video in `public/videos/` and update the video path
 in the component. If you use a poster image, add it to `public/` and update the
 poster path as well.
 
 Template accents follow the project's [highlight color](./appearance.mdx).
+The template already marks its text for translation and uses the documentation
+link for the active language. When you add languages, create a `home.json` beside
+each translated `docs/` directory. See [Localize your homepage](./languages.mdx#localize-your-homepage).
 
 ## Build your own homepage
 
@@ -122,7 +126,7 @@ export default defineConfig({
 Keep the rest of your existing configuration. The site navbar stays shared and
 `components/home.tsx` defines the content shown at `/`.
 
-To translate a custom homepage or a copied template, keep the existing layout
+To translate a custom homepage, keep the existing layout
 in `components/home.tsx`. Update that component to receive `t` and wrap the text
 you want to translate, then configure translations and add a catalog for each
 language. Follow [Localize your homepage](./languages.mdx#localize-your-homepage).

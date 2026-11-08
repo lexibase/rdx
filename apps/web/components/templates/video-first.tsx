@@ -1,3 +1,4 @@
+import type { RdxTranslatedHomepageProps } from '@lexibase/rdx'
 import { Button } from '@lexibase/rdx/ui/components/button'
 import {
   Card,
@@ -10,72 +11,9 @@ import { HomeSection } from '@lexibase/rdx/ui/components/home'
 // Add your video and optional poster to public/videos/, then update these paths.
 const project = {
   name: 'Atlas',
-  tagline: 'See your API come to life.',
-  description:
-    'Go from a route in your editor to a JSON response in your browser. Follow the walkthrough and make the example your own.',
-  docsHref: '/docs',
   video: '/videos/atlas-walkthrough.webm',
   poster: '/videos/atlas-walkthrough-poster.webp',
 }
-
-const features = [
-  {
-    title: 'Start with one route',
-    description: 'Give your API a URL and decide what it should return.',
-    label: 'Route',
-    example: 'GET /',
-  },
-  {
-    title: 'Return structured data',
-    description: 'Send a JSON response your browser or frontend can read.',
-    label: 'Response body',
-    example: '{ "message": "Hello from Atlas!" }',
-  },
-  {
-    title: 'Work locally',
-    description:
-      'Try a change in your editor and send another request from your browser.',
-    label: 'Local server',
-    example: 'localhost:3000',
-  },
-  {
-    title: 'Check the result',
-    description: 'Use the status code to see whether the request succeeded.',
-    label: 'HTTP status',
-    example: '200 OK',
-  },
-  {
-    title: 'Try it from a terminal',
-    description:
-      'Use curl to inspect the response without leaving the command line.',
-    label: 'Request',
-    example: 'curl http://localhost:3000/',
-  },
-  {
-    title: 'Connect your frontend',
-    description:
-      'Read the message field and render the greeting in your interface.',
-    label: 'In your app',
-    example: 'data.message',
-  },
-]
-
-const steps = [
-  {
-    title: 'Define a route',
-    description: 'Choose a URL path and give it a JSON response.',
-  },
-  {
-    title: 'Start the server',
-    description: 'Run your project locally and let it listen on port 3000.',
-  },
-  {
-    title: 'Send a request',
-    description: 'Open the URL and check the greeting in the response.',
-  },
-]
-
-const requirements = ['Node.js 22 or 24', 'TypeScript', 'Browser or curl']
 
 const primaryAction =
   'border border-rdx-selected/30 bg-rdx-selected/15 text-foreground hover:bg-rdx-selected/25'
@@ -99,7 +37,78 @@ function AtlasMark({ className }: { className: string }) {
   )
 }
 
-export default function VideoFirst() {
+export default function VideoFirst({
+  docsHref = '/docs',
+  t = (phrase) => phrase,
+}: Partial<RdxTranslatedHomepageProps>) {
+  const features = [
+    {
+      title: t('Start with one route'),
+      description: t('Give your API a URL and decide what it should return.'),
+      label: t('Route'),
+      example: 'GET /',
+    },
+    {
+      title: t('Return structured data'),
+      description: t('Send a JSON response your browser or frontend can read.'),
+      label: t('Response body'),
+      example: '{ "message": "Hello from Atlas!" }',
+    },
+    {
+      title: t('Work locally'),
+      description: t(
+        'Try a change in your editor and send another request from your browser.'
+      ),
+      label: t('Local server'),
+      example: 'localhost:3000',
+    },
+    {
+      title: t('Check the result'),
+      description: t(
+        'Use the status code to see whether the request succeeded.'
+      ),
+      label: t('HTTP status'),
+      example: '200 OK',
+    },
+    {
+      title: t('Try it from a terminal'),
+      description: t(
+        'Use curl to inspect the response without leaving the command line.'
+      ),
+      label: t('Request'),
+      example: 'curl http://localhost:3000/',
+    },
+    {
+      title: t('Connect your frontend'),
+      description: t(
+        'Read the message field and render the greeting in your interface.'
+      ),
+      label: t('In your app'),
+      example: 'data.message',
+    },
+  ]
+  const steps = [
+    {
+      title: t('Define a route'),
+      description: t('Choose a URL path and give it a JSON response.'),
+    },
+    {
+      title: t('Start the server'),
+      description: t(
+        'Run your project locally and let it listen on port 3000.'
+      ),
+    },
+    {
+      title: t('Send a request'),
+      description: t('Open the URL and check the greeting in the response.'),
+    },
+  ]
+  const requirements = [
+    t('Node.js 22 or 24'),
+    'TypeScript',
+    t('Browser or curl'),
+  ]
+
   return (
     <div className="text-foreground">
       <HomeSection
@@ -116,10 +125,12 @@ export default function VideoFirst() {
               {project.name}
             </h1>
             <p className="mt-3 text-lg text-foreground/80 sm:text-xl">
-              {project.tagline}
+              {t('See your API come to life.')}
             </p>
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-              {project.description}
+              {t(
+                'Go from a route in your editor to a JSON response in your browser. Follow the walkthrough and make the example your own.'
+              )}
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Button
@@ -127,20 +138,20 @@ export default function VideoFirst() {
                 variant="default"
                 className={primaryAction}
               >
-                Get started
+                {t('Get started')}
               </Button>
-              <Button href={project.docsHref} variant="outline">
-                Read the docs
+              <Button href={docsHref} variant="outline">
+                {t('Read the docs')}
               </Button>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              TypeScript example · Runs locally
+              {t('TypeScript example · Runs locally')}
             </p>
           </header>
 
           <video
             id="atlas-walkthrough"
-            aria-label="Atlas API walkthrough"
+            aria-label={t('Atlas API walkthrough')}
             className="mt-10 aspect-video w-full rounded-xl border border-border bg-muted shadow-xl shadow-black/10 dark:shadow-black/30"
             controls
             playsInline
@@ -161,16 +172,17 @@ export default function VideoFirst() {
               id="video-features-title"
               className="text-3xl font-semibold tracking-tight sm:text-4xl"
             >
-              A small API, from end to end.
+              {t('A small API, from end to end.')}
             </h2>
             <p className="mt-3 leading-7 text-muted-foreground">
-              See what changes between the route you write, the request you
-              send, and the data you get back.
+              {t(
+                'See what changes between the route you write, the request you send, and the data you get back.'
+              )}
             </p>
           </header>
           <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {features.map(({ title, description, label, example }) => (
-              <li key={title}>
+              <li key={example}>
                 <Card className="h-full gap-4">
                   <CardHeader className="flex-1">
                     <h3 className="font-semibold">{title}</h3>
@@ -200,11 +212,11 @@ export default function VideoFirst() {
             id="video-setup-title"
             className="scroll-mt-6 text-center text-3xl font-semibold tracking-tight sm:text-4xl"
           >
-            Running in three steps.
+            {t('Running in three steps.')}
           </h2>
           <ol className="mt-8 grid gap-4 md:grid-cols-3">
             {steps.map(({ title, description }, index) => (
-              <li key={title} className="rounded-xl border border-border p-5">
+              <li key={index} className="rounded-xl border border-border p-5">
                 <span
                   aria-hidden="true"
                   className="grid size-8 place-items-center rounded-full bg-rdx-selected/15 text-sm font-semibold"
@@ -220,11 +232,11 @@ export default function VideoFirst() {
           </ol>
           <div className="mt-4 text-center">
             <Button
-              href={project.docsHref}
+              href={docsHref}
               variant="link"
               className="text-rdx-selected"
             >
-              Read the setup guide <span aria-hidden="true">→</span>
+              {t('Read the setup guide')} <span aria-hidden="true">→</span>
             </Button>
           </div>
         </div>
@@ -236,28 +248,30 @@ export default function VideoFirst() {
       >
         <div className="mx-auto w-full max-w-xl">
           <ul
-            aria-label="Requirements"
+            aria-label={t('Requirements')}
             className="mb-12 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground"
           >
-            {requirements.map((requirement) => (
-              <li key={requirement}>{requirement}</li>
+            {requirements.map((requirement, index) => (
+              <li key={index}>{requirement}</li>
             ))}
           </ul>
           <h2
             id="video-next-title"
             className="text-3xl font-semibold tracking-tight sm:text-4xl"
           >
-            Ready to make your first request?
+            {t('Ready to make your first request?')}
           </h2>
           <p className="mt-3 leading-7 text-muted-foreground">
-            Use the walkthrough as a starting point for your own endpoint.
+            {t(
+              'Use the walkthrough as a starting point for your own endpoint.'
+            )}
           </p>
           <Button
-            href={project.docsHref}
+            href={docsHref}
             variant="default"
             className={`mt-6 ${primaryAction}`}
           >
-            Start building
+            {t('Start building')}
           </Button>
         </div>
       </HomeSection>
@@ -269,16 +283,16 @@ export default function VideoFirst() {
             <div>
               <p className="text-sm font-semibold">{project.name}</p>
               <p className="text-xs text-muted-foreground">
-                A sample project for learning how HTTP APIs work.
+                {t('A sample project for learning how HTTP APIs work.')}
               </p>
             </div>
           </div>
           <div className="flex flex-wrap gap-1">
-            <Button href={project.docsHref} variant="link" size="sm">
-              Docs
+            <Button href={docsHref} variant="link" size="sm">
+              {t('Docs')}
             </Button>
             <Button href="#atlas-walkthrough" variant="link" size="sm">
-              Walkthrough
+              {t('Walkthrough')}
             </Button>
           </div>
         </div>
