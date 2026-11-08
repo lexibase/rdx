@@ -1,4 +1,3 @@
-import { Fragment } from 'react'
 import { Button } from '@lexibase/rdx/ui/components/button'
 import {
   CodeBlock,
@@ -6,6 +5,7 @@ import {
   CodeBlockContent,
   CodeBlockCopyButton,
   CodeBlockHeader,
+  CodeBlockLine,
   CodeBlockTitle,
 } from '@lexibase/rdx/ui/components/code-block'
 import { HomeSection, HomeSections } from '@lexibase/rdx/ui/components/home'
@@ -57,10 +57,9 @@ export default async function CodeInFocus() {
             </CodeBlockHeader>
             <CodeBlockContent wrap>
               {lines?.map((line, index) => (
-                <Fragment key={index}>
-                  {index > 0 && '\n'}
+                <CodeBlockLine key={index} className="min-w-0 wrap-anywhere">
                   {line}
-                </Fragment>
+                </CodeBlockLine>
               )) ?? example}
             </CodeBlockContent>
           </CodeBlock>
