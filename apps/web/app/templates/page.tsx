@@ -9,6 +9,8 @@ import {
 } from '@lexibase/rdx-ui/components/card'
 import { CodeBlockCopyButton } from '@lexibase/rdx-ui/components/code-block'
 
+import CodeInFocus from '@/components/templates/code-in-focus'
+import { CodeInFocusThumbnail } from '@/components/templates/code-in-focus-thumbnail'
 import DocumentationPreview from '@/components/templates/documentation-preview'
 import { DocumentationPreviewThumbnail } from '@/components/templates/documentation-preview-thumbnail'
 import { TemplatePreviewDialog } from '@/components/templates/template-preview-dialog'
@@ -16,15 +18,37 @@ import { TemplatePreviewDialog } from '@/components/templates/template-preview-d
 const description =
   'Explore landing page templates and make one your own in RDX.'
 
+const templates = [
+  {
+    id: 'documentation-preview',
+    title: 'Docs in perspective',
+    description: 'A two-column hero with a quickstart section.',
+    Demo: DocumentationPreview,
+    Thumbnail: DocumentationPreviewThumbnail,
+  },
+  {
+    id: 'code-in-focus',
+    title: 'Code in focus',
+    description: 'Put a runnable example next to your project introduction.',
+    Demo: CodeInFocus,
+    Thumbnail: CodeInFocusThumbnail,
+  },
+]
+
 export const metadata: Metadata = {
   title: 'Templates',
   description,
 }
 
 export default async function TemplatesPage() {
-  const source = await readFile(
-    path.join(process.cwd(), 'components/templates/documentation-preview.tsx'),
-    'utf8'
+  const entries = await Promise.all(
+    templates.map(async (template) => ({
+      ...template,
+      source: await readFile(
+        path.join(process.cwd(), 'components/templates', `${template.id}.tsx`),
+        'utf8'
+      ),
+    }))
   )
 
   return (
@@ -46,36 +70,35 @@ export default async function TemplatesPage() {
           aria-label="Landing page templates"
           className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
         >
-          <li>
-            <Card className="h-full gap-0 bg-muted/50 py-0 focus-within:ring-foreground/25 hover:shadow-lg hover:ring-foreground/25 motion-safe:transition-[translate,box-shadow] motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:-translate-y-1">
-              <DocumentationPreviewThumbnail />
-              <CardContent className="flex flex-1 flex-col justify-between gap-4 py-4">
-                <header className="space-y-1">
-                  <h2 className="text-base leading-snug font-semibold tracking-tight">
-                    Docs in perspective
-                  </h2>
-                  <CardDescription>
-                    A two-column hero with a quickstart section.
-                  </CardDescription>
-                </header>
-                <div className="flex flex-wrap items-center gap-2">
-                  <TemplatePreviewDialog
-                    title="Docs in perspective"
-                    source={source}
-                  >
-                    <DocumentationPreview />
-                  </TemplatePreviewDialog>
-                  <CodeBlockCopyButton
-                    size="sm"
-                    variant="outline"
-                    value={source}
-                  >
-                    Copy code
-                  </CodeBlockCopyButton>
-                </div>
-              </CardContent>
-            </Card>
-          </li>
+          {entries.map(
+            ({ id, title, description, Demo, Thumbnail, source }) => (
+              <li key={id}>
+                <Card className="h-full gap-0 bg-muted/50 py-0 focus-within:ring-foreground/25 hover:shadow-lg hover:ring-foreground/25 motion-safe:transition-[translate,box-shadow] motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:-translate-y-1">
+                  <Thumbnail />
+                  <CardContent className="flex flex-1 flex-col justify-between gap-4 py-4">
+                    <header className="space-y-1">
+                      <h2 className="text-base leading-snug font-semibold tracking-tight">
+                        {title}
+                      </h2>
+                      <CardDescription>{description}</CardDescription>
+                    </header>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <TemplatePreviewDialog title={title} source={source}>
+                        <Demo />
+                      </TemplatePreviewDialog>
+                      <CodeBlockCopyButton
+                        size="sm"
+                        variant="outline"
+                        value={source}
+                      >
+                        Copy code
+                      </CodeBlockCopyButton>
+                    </div>
+                  </CardContent>
+                </Card>
+              </li>
+            )
+          )}
         </ul>
         <p className="mt-6 text-sm leading-6 text-muted-foreground">
           Paste the code into <code>components/home.tsx</code> and set it as
