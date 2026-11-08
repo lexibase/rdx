@@ -20,3 +20,16 @@
   --preview-default-accent: oklch(0.269 0 0);
   --preview-default-ring: oklch(0.556 0 0);
 }
+
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .rdx-home-preview-shell.rdx-home-preview-tracking {
+    transform: perspective(1400px)
+      rotateY(calc(-12deg + var(--preview-tilt-y, 0deg)))
+      rotateX(calc(4deg + var(--preview-tilt-x, 0deg))) rotateZ(1deg);
+    transition: transform 200ms ease-out;
+  }
+
+  .rdx-home-preview-shell.rdx-home-preview-tracking:hover {
+    transition-duration: 100ms;
+  }
+}
