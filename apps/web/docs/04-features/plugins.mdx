@@ -103,9 +103,40 @@ globally. See [Troubleshooting](../05-guides/troubleshooting.mdx).
 
 ## Custom plugin authors
 
-The public plugin contract has `apiVersion: 1`. Plugins may contribute named
-content sources and commands. This is an advanced API, not a requirement for
-authoring docs. Consult the
-[configuration and plugin contract](https://github.com/lexibase/rdx/blob/main/CONFIGURATION.md)
-before implementing one; setup can run more than once and must not write content
-during runtime reads.
+Plugins are trusted server-side code and run in configuration order. An
+`RdxPlugin` declares a unique name, `apiVersion: 1`, and optional hooks or
+commands. For example, this plugin publishes a separate documentation tree:
+
+```ts
+import type { RdxPlugin } from '@lexibase/rdx'
+
+export function labs(): RdxPlugin {
+  return {
+    name: 'labs',
+    apiVersion: 1,
+    setup() {
+      return {
+        sources: [
+          {
+            id: 'labs',
+            label: 'Labs',
+            docsDir: 'labs/docs',
+            routePrefix: 'labs',
+          },
+        ],
+      }
+    },
+  }
+}
+```
+
+Add the returned plugin to `plugins` in `rdx.config.ts`. The source's
+project-relative `docsDir` supplies content under `/docs/labs`. Each source
+needs a unique ID and a unique, single-segment route prefix.
+
+`setup` receives the absolute `rootDir`, resolved `config`, and current
+`command`. It may be async and can run more than once, including on runtime
+reads. Keep it idempotent and scope writes to explicit preparation or plugin
+commands. Each entry in `commands` has a `name`, `description`, and
+`run(context)`, which also receives `args: string[]`. Command names must be
+unique and avoid built-in CLI commands.

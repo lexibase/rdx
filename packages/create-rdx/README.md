@@ -3,7 +3,7 @@
 Create a documentation project using Next.js, Tailwind CSS and shadcn/ui Base UI.
 
 Requires Node.js 22.18+ (22.x) or 24.11+ (24.x), preferably the latest patch.
-See the repository's SUPPORT.md for the automated platform/package-manager matrix.
+See the [installation requirements](https://github.com/lexibase/rdx/blob/main/apps/web/docs/02-getting-started/installation.mdx#requirements) and [CI matrix](https://github.com/lexibase/rdx/blob/main/apps/web/docs/05-guides/development.mdx#pull-request-checks).
 
 ## Installation
 

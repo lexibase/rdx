@@ -83,6 +83,17 @@ This opt-in check makes real HTTPS requests to every current page, verifies page
 metadata, public assets, search scoping, and retired-version 404s. Normal local
 checks do not depend on a live Vercel deployment.
 
+To export a standalone deployment fixture, use the path printed by
+`pnpm test:release --install`:
+
+```powershell
+pnpm test:deploy --from .rdx-package-smoke/release-EXAMPLE --out ../rdx-deploy-test
+```
+
+The exporter copies the project sources and required archives into a new
+destination. In that directory, run `pnpm install`, `pnpm build`, and
+`pnpm start` to test the installed application locally.
+
 ## Vercel deployment
 
 The dedicated project is **rdx-tool** in **duh-nunes**, separate from the

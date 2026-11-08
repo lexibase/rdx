@@ -65,6 +65,23 @@ published and archived content on its own. This uses the same checker as
 Release test artifacts are retained for inspection under
 `.rdx-package-smoke/`; use the final path printed by the command.
 
+## Pull request checks
+
+GitHub Actions runs the same checks on Ubuntu with Node.js 22 and Windows with
+Node.js 24 for pull requests and pushes to `main`. Each runner installs the
+pnpm version in `packageManager` and uses the frozen workspace lockfile. It runs
+`pnpm check` and `pnpm test:release --install --i18n`. Dependency and build
+caches are separate for each environment.
+
+The archive tests validate generated projects with pnpm. The installation guide
+also shows the supported npm and Yarn commands for creating and running a project.
+
+```bash
+gh pr checks --watch
+gh run list --workflow ci.yml --limit 5
+gh run view <run-id> --log-failed
+```
+
 ## Documentation editions
 
 Canary is the live documentation in `apps/web/docs/`. To save a documentation

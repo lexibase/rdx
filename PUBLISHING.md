@@ -928,7 +928,7 @@ npm packages. Nothing in the verification scripts uploads packages.
 
 - Verify the MIT code and CC BY 4.0 documentation notices in `LICENSE` and `LICENSE-docs`.
 - Review and merge the preparation PR with successful Linux and Windows checks.
-- Follow the Node.js and package-manager policy in [SUPPORT.md](./SUPPORT.md).
+- Follow the Node.js and package-manager policy in [installation requirements](./apps/web/docs/02-getting-started/installation.mdx#requirements).
 - Confirm the six public manifests are 1.0.0 and the creator template pins
   `@lexibase/rdx-next@1.0.0` and `@lexibase/rdx-ui@1.0.0`.
 - Do not change npm tags or announce availability before actual publication.

@@ -82,7 +82,7 @@ Live documentation lives in the project's `docs/` folder.
 | `plugins`                  | Array de objetos de plugins; padrão vazio; instalar um pacote não o ativa                                                        |
 
 Detalhes e exemplos de propriedades aninhadas ficam em
-[CONFIGURATION.md](./CONFIGURATION.md). The canonical public type is `RDXConfig`.
+[Configuration](./apps/web/docs/02-getting-started/config.mdx). The canonical public type is `RDXConfig`.
 `RdxRuntimeConfig` is an alias for `RDXConfig`.
 
 Search indexing is automatic. `metadata.metadataBase` provides absolute public
@@ -93,7 +93,7 @@ redirect aliases and internal search are excluded. The runtime exports
 
 Pastas do primeiro nível formam categorias. Slugs preservam o caminho completo
 do arquivo MDX, sem a extensão. Os detalhes de frontmatter, componentes e links
-estão em [MDX.md](./MDX.md).
+estão em [Writing pages](./apps/web/docs/03-writing-documentation/create-docs.mdx) e [Markdown](./apps/web/docs/03-writing-documentation/mdx-components.mdx).
 
 ## Comandos
 
@@ -205,7 +205,7 @@ e componentes são código confiável do projeto, não um ambiente sandbox.
 Sem o plugin ativado, `versions.json` e cópias de documentação não mudam as rotas.
 Remover o plugin não apaga conteúdo. Os ativos de `public/` são compartilhados
 entre versões. A segurança de MDX e limitações de autoria permanecem documentadas
-em `CONFIGURATION.md`; não há chave para desabilitar a proteção de expressões.
+no [guia de escrita](./apps/web/docs/03-writing-documentation/create-docs.mdx).
 
 ## Canais e atualização
 

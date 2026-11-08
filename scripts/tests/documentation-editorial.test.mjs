@@ -25,9 +25,6 @@ test('reader guides and starter examples describe available features without dev
   const files = [
     ...(await documents('apps/web/docs')),
     ...(await documents('packages/create-rdx/templates/default')),
-    'CONFIGURATION.md',
-    'MDX.md',
-    'SEARCH.md',
     'packages/create-rdx/README.md',
     'packages/rdx-next/README.md',
     'packages/rdx-ui/README.md',
