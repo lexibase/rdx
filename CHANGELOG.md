@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 6.2.0 — Prepared
+
+- Add rdx i18n sync to create and update homepage translation catalogs without overwriting existing translations. Improve spacing between footer credits.
+
 ## 6.1.0 — Prepared
 
 - Add rdx delete for documentation versions, including frozen translations and superseded redirects. Warn when the homepage translation report cannot analyze a use of t().
