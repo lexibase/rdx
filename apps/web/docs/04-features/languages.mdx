@@ -193,10 +193,13 @@ yarn rdx i18n sync
 
 :::
 
-The command adds new literal phrases as keys with empty values and preserves
-existing translations and metadata. Run it again whenever the homepage adds
-phrases. Fill in the values you want to translate. With the `ptbr` folder alias,
-the Portuguese file looks like this after translating the first phrase:
+The command appends new literal phrases to each catalog with empty values.
+It preserves existing entries, including translations, metadata, and orphaned
+keys. Use `rdx check` to find orphaned keys and review them before removing them
+manually. Run `rdx i18n sync` again whenever the homepage adds phrases.
+
+Fill in the values you want to translate. With the `ptbr` folder alias, the
+Portuguese file looks like this after translating the first phrase:
 
 ```json title="locale/ptbr/home.json"
 {
