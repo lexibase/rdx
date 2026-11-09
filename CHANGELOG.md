@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 6.1.0 — Prepared
+
+- Add rdx delete for documentation versions, including frozen translations and superseded redirects. Warn when the homepage translation report cannot analyze a use of t().
+
 ## 6.0.0 — Prepared
 
 - Translate a shared homepage through locale catalogs, with per-phrase fallback, translation diagnostics, localized social metadata, and hreflang links. Migrate per-language home.tsx files to home.json and keep the layout in components/home.tsx.
