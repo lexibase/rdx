@@ -88,6 +88,29 @@ test('historical editions use the current contribution URL without rewriting fro
   assert.equal(JSON.parse(metadata).contributionUrl, undefined)
 })
 
+test('delete removes frozen translations even when the language is no longer configured', async (t) => {
+  const f = fixture(t)
+  const project = await f.project()
+  f.run(project, 'version', '1.0.0')
+  f.run(project, 'version', '1.1.0')
+  f.run(project, 'version', '2.0.0')
+  const withoutPortuguese = await f.project(
+    { ...f.config(), plugins: [versioning()] },
+    'delete'
+  )
+  f.run(withoutPortuguese, 'delete', '1.1.0')
+  assert.equal(f.exists('locale/ptbr/versioned_docs/version-1.0.0'), false)
+  assert.equal(f.exists('locale/ptbr/versioned_docs/version-1.1.0'), false)
+  assert.equal(
+    f.exists('locale/ptbr/versioned_docs/version-2.0.0/guides/intro.mdx'),
+    true
+  )
+  assert.match(
+    f.read('locale/ptbr/docs/guides/intro.mdx'),
+    /PortugueseSnapshotMarker/
+  )
+})
+
 for (const reversed of [false, true])
   test(`one command freezes all languages independently of plugin order (${reversed})`, async (t) => {
     const f = fixture(t)

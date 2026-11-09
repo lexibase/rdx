@@ -9,7 +9,13 @@ import {
   createDocumentDateReader,
   snapshotDatesFilename,
 } from '@lexibase/rdx-core/config'
-import type { RdxPlugin, RdxPluginContext } from '@lexibase/rdx-types'
+import type {
+  RdxPlugin,
+  RdxPluginCommand,
+  RdxPluginContext,
+} from '@lexibase/rdx-types'
+
+import { deleteSnapshots } from './delete-snapshot'
 
 import {
   consolidateVersions,
@@ -137,6 +143,40 @@ function locations(context: RdxPluginContext, options: VersioningOptions) {
   return { versionsFile, versionsDir, docsDir }
 }
 
+function lockedCommands(
+  options: VersioningOptions,
+  commands: RdxPluginCommand[]
+): RdxPluginCommand[] {
+  return commands.map((entry) => ({
+    ...entry,
+    run(context) {
+      const { versionsFile } = locations(context, options)
+      const root = fs.realpathSync(/* turbopackIgnore: true */ context.rootDir)
+      const parent = fs.realpathSync(
+        /* turbopackIgnore: true */ path.dirname(versionsFile)
+      )
+      if (!inside(root, parent))
+        throw new Error(
+          'The version manifest directory must remain inside the project.'
+        )
+      const lock = path.join(parent, `${path.basename(versionsFile)}.rdx-lock`)
+      try {
+        fs.writeFileSync(lock, '', { flag: 'wx' })
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
+        throw new Error(
+          `Another version command owns ${lock}. If it was interrupted, verify that it stopped before removing the lock.`
+        )
+      }
+      try {
+        return entry.run(context)
+      } finally {
+        fs.unlinkSync(lock)
+      }
+    },
+  }))
+}
+
 /** Installing the package has no effect until versioning() is in config.plugins. */
 export function versioning(options: VersioningOptions = {}): RdxPlugin {
   if (
@@ -221,7 +261,7 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
         }),
       }
     },
-    commands: [
+    commands: lockedCommands(options, [
       {
         name: 'version',
         description:
@@ -401,7 +441,51 @@ export function versioning(options: VersioningOptions = {}): RdxPlugin {
           )
         },
       })),
-    ],
+      {
+        name: 'delete',
+        description:
+          'Permanently remove a documentation snapshot: rdx delete <version>',
+        run(context) {
+          if (context.args.length !== 1)
+            throw new Error('Usage: rdx delete <version>')
+          const version = context.args[0]
+          validateVersion(version)
+          const { versionsFile, versionsDir } = locations(context, options)
+          const versions = parseVersions(versionsFile)
+          const redirects = { ...versions.redirects }
+          if (
+            !versions.active.includes(version) &&
+            !versions.archived.includes(version) &&
+            !redirects[version]
+          )
+            throw new Error(
+              `Version "${version}" does not exist in ${versionsFile}.`
+            )
+
+          const removed = [version]
+          for (const [from, to] of Object.entries(redirects)) {
+            if (to === version) removed.push(from)
+            if (to === version || from === version) delete redirects[from]
+          }
+          deleteSnapshots(
+            context.rootDir,
+            versionsDir,
+            versionsFile,
+            removed,
+            () => {
+              writeVersions(versionsFile, {
+                active: versions.active.filter((entry) => entry !== version),
+                archived: versions.archived.filter(
+                  (entry) => entry !== version
+                ),
+                ...(Object.keys(redirects).length ? { redirects } : {}),
+              })
+            }
+          )
+          console.log(`RDX documentation deleted: ${removed.join(', ')}.`)
+        },
+      },
+    ]),
   }
 }
 

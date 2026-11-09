@@ -187,6 +187,35 @@ contents and URLs. Repeating a command for a version already in that state
 leaves the manifest unchanged. You can also move entries manually between the
 two arrays in `versions.json`.
 
+## Delete a version
+
+Use the exact version label to permanently remove its documentation snapshot.
+
+:::tabs
+
+### pnpm
+
+pnpm rdx delete 1.1.0
+
+### npm
+
+npm exec -- rdx delete 1.1.0
+
+### yarn
+
+yarn rdx delete 1.1.0
+
+:::
+
+Deleting an active or archived edition also removes its older redirect labels
+and any retained snapshots under those labels. To remove only a superseded
+version, pass its exact label. For example, if `1.0.0` redirects to `1.1.0`,
+deleting `1.0.0` preserves the `1.1.0` edition.
+
+RDX removes the corresponding frozen translations and updates `versions.json`.
+The live `docs/` and `locale/<folder>/docs/` trees stay available. Commit the
+changes and redeploy to remove the deleted routes from the published site.
+
 ## Assets and deployment
 
 Snapshots contain documentation, not copies of `public/`. Use distinct asset
