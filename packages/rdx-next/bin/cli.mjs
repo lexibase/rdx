@@ -68,6 +68,9 @@ export async function runRdxCli({ templateDir } = {}) {
         '  rdx add i18n [--locales en,es-ES] [--package-manager npm|pnpm|yarn]'
       )
       console.log(
+        '  rdx i18n sync: add missing phrases to homepage translation catalogs'
+      )
+      console.log(
         'Plugin commands are registered through plugins in rdx.config.ts.'
       )
       return
@@ -84,6 +87,18 @@ export async function runRdxCli({ templateDir } = {}) {
         return
       }
       if (commandArgs.length) throw new Error('Usage: rdx check')
+    }
+
+    const syncHomepage = command === 'i18n' && commandArgs[0] === 'sync'
+    if (
+      syncHomepage &&
+      commandArgs.length === 2 &&
+      ['--help', '-h'].includes(commandArgs[1])
+    ) {
+      console.log(
+        'Usage: rdx i18n sync\nAdd missing homepage phrases to the configured languages’ home.json files.'
+      )
+      return
     }
 
     if (command === 'add') {
@@ -145,6 +160,16 @@ export async function runRdxCli({ templateDir } = {}) {
       rootDir: projectRoot,
       command,
     })
+    if (
+      syncHomepage &&
+      !project.commands.some((entry) => entry.name === 'i18n')
+    ) {
+      if (commandArgs.length !== 1) throw new Error('Usage: rdx i18n sync')
+      const { syncHomepageTranslations } =
+        await import('./homepage-translations.mjs')
+      await syncHomepageTranslations(project)
+      return
+    }
     let homepageTranslations
     if (
       project.config.homepage?.enabled &&
