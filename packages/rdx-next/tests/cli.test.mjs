@@ -29,6 +29,68 @@ function run(cwd, ...args) {
   return spawnSync(process.execPath, [cli, ...args], { cwd, encoding: 'utf8' })
 }
 
+test('i18n sync adds missing homepage phrases, preserves catalogs and validates before writing', async (t) => {
+  const plugin = new URL('../../rdx-plugin-i18n/dist/index.js', import.meta.url)
+    .href
+  const rootDir = await fixture(
+    t,
+    `import { i18n } from '${plugin}'; export default {
+    metadata: { applicationName: 'Docs' }, lang: 'en', homepage: { enabled: true, translations: true },
+    plugins: [i18n({ locales: [{ code: 'en', label: 'English' }, { code: 'pt-BR', label: 'Português', folder: 'ptbr' }, { code: 'fr-FR', label: 'Français' }] })]
+  }`
+  )
+  await mkdir(path.join(rootDir, 'components'))
+  for (const folder of ['ptbr', 'fr-fr'])
+    await mkdir(path.join(rootDir, 'locale', folder, 'docs'), {
+      recursive: true,
+    })
+  await writeFile(
+    path.join(rootDir, 'components/home.tsx'),
+    `export default function Home({ t, label }) { return [t('Welcome'), t('Read the docs'), t('__proto__'), t('Welcome'), t(label)] }`
+  )
+  const portuguese = path.join(rootDir, 'locale/ptbr/home.json')
+  const french = path.join(rootDir, 'locale/fr-fr/home.json')
+  const existing = {
+    Welcome: 'Bem-vindo',
+    Old: 'Antigo',
+    $metadata: { title: 'Atlas' },
+  }
+  const before = JSON.stringify(existing)
+  await writeFile(portuguese, before)
+  await writeFile(french, '[]')
+  const rejected = run(rootDir, 'i18n', 'sync')
+  assert.equal(rejected.status, 1)
+  assert.match(rejected.stderr, /Cannot sync locale\/fr-fr\/home\.json/)
+  assert.equal(await readFile(portuguese, 'utf8'), before)
+  assert.equal(await readFile(french, 'utf8'), '[]')
+  await rm(french)
+
+  const synced = run(rootDir, 'i18n', 'sync')
+  assert.equal(synced.status, 0, synced.stderr)
+  assert.match(synced.stdout, /locale\/ptbr\/home\.json: added 2 phrases/)
+  assert.match(synced.stdout, /locale\/fr-fr\/home\.json: added 3 phrases/)
+  assert.match(
+    synced.stderr,
+    /components\/home\.tsx:1: t\(\) needs a literal phrase/
+  )
+  const after = await readFile(portuguese, 'utf8')
+  assert.deepEqual(JSON.parse(after), {
+    ...existing,
+    'Read the docs': '',
+    ['__proto__']: '',
+  })
+  assert.deepEqual(JSON.parse(await readFile(french, 'utf8')), {
+    Welcome: '',
+    'Read the docs': '',
+    ['__proto__']: '',
+  })
+  const repeated = run(rootDir, 'i18n', 'sync')
+  assert.equal(repeated.status, 0, repeated.stderr)
+  assert.match(repeated.stdout, /Homepage catalogs are up to date/)
+  assert.equal(await readFile(portuguese, 'utf8'), after)
+  await assert.rejects(access(path.join(rootDir, '.rdx')))
+})
+
 async function nextProbe(rootDir) {
   const directory = path.join(rootDir, 'node_modules/next/dist/bin')
   await mkdir(directory, { recursive: true })

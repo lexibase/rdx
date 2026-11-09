@@ -1,4 +1,12 @@
-import { readFile, writeFile } from 'node:fs/promises'
+import { randomUUID } from 'node:crypto'
+import {
+  lstat,
+  readFile,
+  realpath,
+  rename,
+  rm,
+  writeFile,
+} from 'node:fs/promises'
 import path from 'node:path'
 
 const sourceFile = 'components/home.tsx'
@@ -16,7 +24,7 @@ async function readOptional(file) {
   }
 }
 
-async function sourcePhrases(rootDir) {
+async function sourcePhrases(rootDir, report) {
   const source = await readOptional(path.join(rootDir, sourceFile))
   if (source === undefined)
     throw new Error(`Create ${sourceFile} to use homepage.translations.`)
@@ -99,7 +107,110 @@ async function sourcePhrases(rootDir) {
     ts.forEachChild(node, visit)
   }
   visit(file)
+  if (report) {
+    for (const { line, message } of warnings.sort((a, b) => a.line - b.line))
+      console.warn(`[RDX] ${sourceFile}:${line}: ${message}`)
+  }
+  phrases.delete(metadataKey)
   return { phrases, warnings }
+}
+
+function parseCatalog(raw) {
+  const parsed = JSON.parse(raw)
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
+    throw new Error('Expected a JSON object.')
+  return parsed
+}
+
+export async function syncHomepageTranslations(project) {
+  const { rootDir, config } = project
+  const locales = project.sources.find((source) => source.id === 'current')
+    ?.localization?.locales
+  if (!locales)
+    throw new Error('Enable the i18n plugin before running rdx i18n sync.')
+  if (!config.homepage?.enabled || !config.homepage.translations)
+    throw new Error(
+      'Set homepage.enabled and homepage.translations to true before running rdx i18n sync.'
+    )
+
+  const { phrases } = await sourcePhrases(rootDir, true)
+  if (!phrases.size) {
+    console.log(`[RDX] No literal homepage phrases found in ${sourceFile}.`)
+    return
+  }
+  const root = await realpath(rootDir)
+  const updates = []
+  for (const { folder } of locales) {
+    if (!folder) continue
+    const file = `locale/${folder}/home.json`
+    const directory = await realpath(path.join(root, 'locale', folder))
+    const relative = path.relative(root, directory)
+    if (
+      !relative ||
+      relative === '..' ||
+      relative.startsWith(`..${path.sep}`) ||
+      path.isAbsolute(relative)
+    )
+      throw new Error(`${file} must remain inside the project.`)
+    const target = path.join(directory, 'home.json')
+    const info = await lstat(target).catch((error) => {
+      if (!missingFile(error)) throw error
+    })
+    if (info && !info.isFile())
+      throw new Error(`${file} must be a regular file.`)
+    const raw = info ? await readFile(target, 'utf8') : undefined
+    let messages = {}
+    if (raw !== undefined) {
+      try {
+        messages = parseCatalog(raw)
+      } catch {
+        throw new Error(
+          `Cannot sync ${file}: expected a JSON object of homepage phrases.`
+        )
+      }
+    }
+    const missing = [...phrases].filter(
+      (phrase) => !Object.hasOwn(messages, phrase)
+    )
+    if (missing.length)
+      updates.push({
+        file,
+        target,
+        info,
+        raw,
+        count: missing.length,
+        messages: Object.fromEntries([
+          ...Object.entries(messages),
+          ...missing.map((phrase) => [phrase, '']),
+        ]),
+      })
+  }
+
+  for (const { file, target, info, raw, count, messages } of updates) {
+    const content = JSON.stringify(messages, null, 2) + '\n'
+    if (raw === undefined) {
+      await writeFile(target, content, { flag: 'wx' })
+    } else {
+      const temporary = `${target}.${randomUUID()}.tmp`
+      try {
+        await writeFile(temporary, content, { flag: 'wx', mode: info.mode })
+        if (
+          !(await lstat(target)).isFile() ||
+          (await readFile(target, 'utf8')) !== raw
+        )
+          throw new Error(
+            `${file} changed during sync. Run rdx i18n sync again.`
+          )
+        await rename(temporary, target)
+      } finally {
+        await rm(temporary, { force: true })
+      }
+    }
+    console.log(
+      `[RDX] ${file}: added ${count} ${count === 1 ? 'phrase' : 'phrases'}.`
+    )
+  }
+  if (!updates.length) console.log('[RDX] Homepage catalogs are up to date.')
 }
 
 export async function readHomepageTranslations(
@@ -107,12 +218,7 @@ export async function readHomepageTranslations(
   { report = false } = {}
 ) {
   const { rootDir, localization } = project
-  const { phrases, warnings } = await sourcePhrases(rootDir)
-  if (report) {
-    for (const { line, message } of warnings.sort((a, b) => a.line - b.line))
-      console.warn(`[RDX] ${sourceFile}:${line}: ${message}`)
-  }
-  phrases.delete(metadataKey)
+  const { phrases, warnings } = await sourcePhrases(rootDir, report)
   const catalogs = []
   for (const locale of localization?.locales ?? []) {
     if (!locale.folder) continue
@@ -121,10 +227,7 @@ export async function readHomepageTranslations(
     let messages = {}
     if (raw !== undefined) {
       try {
-        const parsed = JSON.parse(raw)
-        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
-          throw new Error('Expected a JSON object.')
-        messages = parsed
+        messages = parseCatalog(raw)
         catalogs.push({ file, locale: locale.path })
       } catch {
         console.warn(

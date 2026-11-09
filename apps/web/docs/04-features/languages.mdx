@@ -174,17 +174,39 @@ export default function AtlasHome({ docsHref, t }: RdxTranslatedHomepageProps) {
 }
 ```
 
-Create `home.json` beside each translated `docs/` directory. Use the original
-phrase as the key. With the `ptbr` folder alias, the Portuguese file is:
+Run `rdx i18n sync` to create or update `home.json` beside the `docs/` directory
+of each configured additional language:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx i18n sync
+
+### npm
+
+npm exec -- rdx i18n sync
+
+### yarn
+
+yarn rdx i18n sync
+
+:::
+
+The command adds new literal phrases as keys with empty values and preserves
+existing translations and metadata. Run it again whenever the homepage adds
+phrases. Fill in the values you want to translate. With the `ptbr` folder alias,
+the Portuguese file looks like this after translating the first phrase:
 
 ```json title="locale/ptbr/home.json"
 {
-  "Welcome to Atlas": "Bem-vindo ao Atlas"
+  "Welcome to Atlas": "Bem-vindo ao Atlas",
+  "Read the docs": ""
 }
 ```
 
-The missing `Read the docs` entry falls back to the original phrase. An empty
-translation also falls back, and `docsHref` still points to `/pt-br/docs`.
+The empty `Read the docs` entry falls back to the original phrase, and
+`docsHref` still points to `/pt-br/docs`.
 `rdx check` and `rdx build` warn about missing translations and keys that no
 longer match a `t('literal phrase')` call in `components/home.tsx`. These
 warnings allow partial translations to ship.
