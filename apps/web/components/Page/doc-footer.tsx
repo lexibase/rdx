@@ -81,7 +81,7 @@ export async function DocFooter({
         name={config.metadata.applicationName}
         since={config.metadata.since}
       >
-        {`. ${messages.developedBy} `}
+        {` · ${messages.developedBy} `}
         <Button
           variant="link"
           size="link"

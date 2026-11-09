@@ -26,9 +26,9 @@ export function FooterCredit({
     <section className="flex items-center justify-center w-full py-5">
       <p className="text-sm text-muted-foreground text-center">
         &copy; {years} <strong>{name}</strong>
-        {children}
+        {children}{' '}
         <span className="inline-block">
-          {` · ${messages.poweredBy} `}
+          {`· ${messages.poweredBy} `}
           <Button
             variant="link"
             size="link"
