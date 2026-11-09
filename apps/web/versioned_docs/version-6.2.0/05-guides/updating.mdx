@@ -1,0 +1,115 @@
+---
+title: Updating RDX
+description: Update the framework and validate your documentation.
+order: 4
+---
+
+## Update the framework
+
+Review the release notes, then stop the development server and update the main
+package from the project root:
+
+:::tabs
+
+### pnpm
+
+pnpm add @lexibase/rdx@latest
+
+### npm
+
+npm install @lexibase/rdx@latest
+
+### yarn
+
+yarn add @lexibase/rdx@latest
+
+:::
+
+The main package selects compatible runtime and UI versions. You do not need to
+manage its internal packages individually. Your documents, public files,
+configuration and custom components are not replaced by this operation.
+
+Check the release notes for migrations and any required Next.js, React or Node.js
+updates. Those requirements are separate from updating RDX itself.
+
+## Newly published releases with pnpm
+
+pnpm can apply a minimum release age when installing updates and checking the
+lockfile before `pnpm dev`. If an update is blocked with
+`ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION`, follow
+[Release-age policies](./troubleshooting.mdx#a-release-age-policy-blocks-installation)
+to wait for the configured period or approve the exact versions you reviewed.
+The error can name internal RDX dependencies as well as the main framework package.
+
+Apply approvals in the `pnpm-workspace.yaml` that governs the project. In a
+monorepo, this is usually the workspace-root file, shared by its applications.
+
+## Optional plugins
+
+Plugins remain separate dependencies. Update installed plugins alongside the framework when their release
+notes recommend a compatible update.
+
+### Versioning
+
+:::tabs
+
+### pnpm
+
+pnpm add @lexibase/rdx-versioning@latest
+
+### npm
+
+npm install @lexibase/rdx-versioning@latest
+
+### yarn
+
+yarn add @lexibase/rdx-versioning@latest
+
+:::
+
+### Languages
+
+For projects with the i18n plugin installed:
+
+:::tabs
+
+### pnpm
+
+pnpm add @lexibase/rdx-i18n@latest
+
+### npm
+
+npm install @lexibase/rdx-i18n@latest
+
+### yarn
+
+yarn add @lexibase/rdx-i18n@latest
+
+:::
+
+## Validate and deploy
+
+Restart the development server to check your documentation. For production:
+
+:::tabs
+
+### pnpm
+
+pnpm build\
+pnpm start
+
+### npm
+
+npm run build\
+npm run start
+
+### yarn
+
+yarn build\
+yarn start
+
+:::
+
+Check documents, relative links, components, assets, search and snapshots before
+redeploying. Keep customizations in project-owned files; RDX refreshes generated
+runtime files.
