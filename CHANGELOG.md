@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 6.3.0 — Prepared
+
+- Support hosting RDX sites under an optional `basePath`. Generated links, assets,
+  search, Markdown exports, and metadata follow the deployment prefix, including
+  sites that use language and version selectors. Document how to route multiple
+  RDX projects from one domain on Vercel.
+
 ## 6.2.0 — Prepared
 
 - Add rdx i18n sync to create and update homepage translation catalogs without overwriting existing translations. Improve spacing between footer credits.

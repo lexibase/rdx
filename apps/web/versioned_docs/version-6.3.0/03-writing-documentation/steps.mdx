@@ -1,0 +1,86 @@
+---
+title: Steps
+description: Guide readers through a procedure one step at a time.
+order: 13
+---
+
+Use Steps for a procedure readers follow in order. The card shows one step at a
+time, with progress bars across the top. Select **Next** or **Previous** to move
+through the procedure.
+
+## Example
+
+:::steps
+
+### Create a page
+
+Add a Markdown file to a category in `docs/`.
+
+### Preview your changes
+
+Open the new page in your browser while the development server is running.
+
+### Check the links
+
+Follow the [relative links](./document-links.mdx) on the page to verify that
+they lead to the intended documents.
+
+:::
+
+## Markdown syntax
+
+In an `.md` or `.mdx` file, open the block with `:::steps` and close it with
+`:::`. Start each step with `###` and a title. Its content continues until the
+next step title or the closing fence.
+
+```md
+:::steps
+
+### Create a page
+
+Add a Markdown file to a category in `docs/`.
+
+### Preview your changes
+
+Open the new page in your browser while the development server is running.
+
+### Check the links
+
+Follow the [relative links](./document-links.mdx) on the page to verify that
+they lead to the intended documents.
+
+:::
+```
+
+## Nest other components
+
+Steps can contain paragraphs, lists, links, code blocks, and other Markdown
+components. To nest [Tabs](./tabs.mdx), use four colons for the outer
+`::::steps` fence and three for the inner `:::tabs` fence. Close each block with
+the same number of colons you used to open it.
+
+::::steps
+
+### Start the development server
+
+:::tabs
+
+### pnpm
+
+pnpm dev
+
+### npm
+
+npm run dev
+
+### yarn
+
+yarn dev
+
+:::
+
+### Open the preview
+
+Visit the local URL printed in the terminal.
+
+::::
