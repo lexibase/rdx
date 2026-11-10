@@ -10,6 +10,8 @@ export interface DocumentLinkOptions {
   virtualPaths?: boolean
   documents: readonly { sourcePath: string; slug: string }[]
   documentHref?: (slug: string) => string
+  /** Map resolved links and root-relative assets to their public URLs. */
+  publicHref?: (href: string) => string
 }
 
 export class RdxDocumentLinkError extends Error {
@@ -118,6 +120,7 @@ function record(value: unknown): value is Record<string, unknown> {
 export function remarkDocumentLinks(options?: DocumentLinkOptions) {
   if (!options) return
   const resolve = createDocumentLinkResolver(options)
+  const publicHref = options.publicHref ?? ((href: string) => href)
   return (tree: unknown) => {
     const definitions = new Map<string, Record<string, unknown>>()
     const identifier = (value: string) =>
@@ -139,7 +142,7 @@ export function remarkDocumentLinks(options?: DocumentLinkOptions) {
     })
     visit(tree, (node) => {
       if (node.type === 'link' && typeof node.url === 'string')
-        node.url = resolve(node.url)
+        node.url = publicHref(resolve(node.url))
       if (
         node.type === 'linkReference' &&
         typeof node.identifier === 'string'
@@ -147,7 +150,7 @@ export function remarkDocumentLinks(options?: DocumentLinkOptions) {
         const definition = definitions.get(identifier(node.identifier))
         if (typeof definition?.url === 'string') {
           node.type = 'link'
-          node.url = resolve(definition.url)
+          node.url = publicHref(resolve(definition.url))
           node.title = definition.title ?? null
           delete node.identifier
           delete node.referenceType
@@ -157,19 +160,35 @@ export function remarkDocumentLinks(options?: DocumentLinkOptions) {
       if (
         (node.type === 'mdxJsxFlowElement' ||
           node.type === 'mdxJsxTextElement') &&
-        node.name === 'a' &&
         Array.isArray(node.attributes)
       ) {
         for (const attribute of node.attributes) {
           if (
             record(attribute) &&
             attribute.type === 'mdxJsxAttribute' &&
-            attribute.name === 'href' &&
             typeof attribute.value === 'string'
-          )
-            attribute.value = resolve(attribute.value)
+          ) {
+            if (node.name === 'a' && attribute.name === 'href')
+              attribute.value = publicHref(resolve(attribute.value))
+            else if (
+              (attribute.name === 'src' &&
+                ['img', 'video', 'audio', 'source', 'track', 'iframe'].includes(
+                  String(node.name)
+                )) ||
+              (attribute.name === 'poster' && node.name === 'video')
+            )
+              attribute.value = publicHref(attribute.value)
+          }
         }
       }
     })
+    if (options.publicHref)
+      visit(tree, (node) => {
+        if (
+          (node.type === 'image' || node.type === 'definition') &&
+          typeof node.url === 'string'
+        )
+          node.url = publicHref(node.url)
+      })
   }
 }

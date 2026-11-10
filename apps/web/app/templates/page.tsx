@@ -13,6 +13,7 @@ import { HighlightDot } from '@lexibase/rdx-ui/components/highlight-dot'
 import { TemplatePreviewDialog } from '@/components/templates/template-preview-dialog'
 import VideoFirst from '@/components/templates/video-first'
 import { VideoFirstThumbnail } from '@/components/templates/video-first-thumbnail'
+import { basePath } from '@/rdx.config'
 
 const description =
   'Explore landing page templates and make one your own in RDX.'
@@ -68,11 +69,11 @@ export default async function TemplatesPage() {
               <li key={id}>
                 <Card className="relative h-full gap-0 overflow-visible bg-muted/50 py-0 focus-within:ring-foreground/25 hover:shadow-lg hover:ring-foreground/25 motion-safe:transition-[translate,box-shadow] motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:-translate-y-1">
                   <div className="relative overflow-hidden rounded-t-xl">
-                    <Thumbnail />
+                    <Thumbnail basePath={basePath} />
                     <div className="absolute inset-x-2 bottom-3 flex justify-center motion-safe:transition-opacity motion-safe:duration-200 [@media(hover:hover)_and_(pointer:fine)]:opacity-0 group-hover/card:opacity-100 focus-within:opacity-100">
                       <div className="flex flex-wrap items-center justify-center gap-2 rounded-lg border border-border bg-background p-1.5 shadow-sm">
                         <TemplatePreviewDialog title={title} source={source}>
-                          <Demo />
+                          <Demo basePath={basePath} />
                         </TemplatePreviewDialog>
                         <CodeBlockCopyButton
                           size="sm"

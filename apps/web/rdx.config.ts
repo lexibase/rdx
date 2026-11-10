@@ -92,4 +92,5 @@ const config = {
 
 defineConfig(config)
 
+export const { basePath }: RDXConfig = config
 export default config

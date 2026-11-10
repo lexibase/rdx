@@ -13,7 +13,7 @@ export function LocalizedNotFound({
   brand,
   homepage,
 }: {
-  locales: { code: string; path: string; label: string }[]
+  locales: { code: string; path: string; label: string; href?: string }[]
   defaultLocale: string
   brand: Pick<
     ComponentProps<typeof Navbar>,
@@ -39,7 +39,7 @@ export function LocalizedNotFound({
             current={selected.code}
             options={locales.map((locale) => ({
               ...locale,
-              href: `/${locale.path}/docs`,
+              href: locale.href ?? `/${locale.path}/docs`,
             }))}
           />
         }

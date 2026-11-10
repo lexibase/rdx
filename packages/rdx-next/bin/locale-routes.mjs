@@ -92,17 +92,19 @@ export async function prepareLocaleRoutes(project, runtime, template) {
     'app/(rdx-default)/[...notFound]/page.tsx',
     `import { notFound } from 'next/navigation'\nexport default function Missing() { notFound() }\n`
   )
+  // Let missing docs reach the locale's not-found boundary under a base path.
+  const prefixed = Boolean(project.config.basePath)
   await emit(
     'app/(rdx-locales)/[locale]/layout.tsx',
     `import { RdxLayout, getRdxMetadata, getLocalizedProject } from '${provider}'
-import { getProject } from '../../../rdx-project'
+${prefixed ? "import { notFound } from 'next/navigation'\n" : ''}import { getProject } from '../../../rdx-project'
 import '../../globals.css'
 export async function generateStaticParams() { return (await getProject()).localization!.locales.map(locale => ({ locale: locale.path })) }
-export const dynamicParams = false
-async function configuration(params: Promise<{ locale: string }>) {
+${prefixed ? '' : 'export const dynamicParams = false\n'}async function configuration(params: Promise<{ locale: string }>) {
   const project = await getProject()
   const { locale } = await params
-  return project.localization!.locales.some(entry => entry.path === locale) ? getLocalizedProject(project, locale).config : project.config
+  if (project.localization!.locales.some(entry => entry.path === locale)) return getLocalizedProject(project, locale).config
+  return ${prefixed ? 'notFound()' : 'project.config'}
 }
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) { return getRdxMetadata(await configuration(params)) }
 export default async function Layout({ children, params }: { children: React.ReactNode, params: Promise<{ locale: string }> }) {

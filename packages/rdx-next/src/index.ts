@@ -1,4 +1,5 @@
 export { defineConfig } from '@lexibase/rdx-core/config'
+export { withBasePath } from '@lexibase/rdx-core'
 export type {
   RDXConfig,
   RdxHomepage,

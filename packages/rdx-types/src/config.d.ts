@@ -15,6 +15,8 @@ import type { RdxPlugin } from './plugins'
  * })
  */
 export type RDXConfig = {
+  /** Deployment subpath, such as '/my-tool'. Omit when serving from the domain root. */
+  basePath?: string
   /**
    * Enable local documentation search in the navbar.
    * Search uses the project's content sources; no external service is required.
@@ -117,6 +119,8 @@ export type RDXConfig = {
 
 /** Values available to a project-owned homepage. */
 export type RdxHomepageProps = {
+  /** Deployment prefix for native asset URLs. Use docsHref directly with Next links. */
+  basePath?: string
   /** Active language tag, such as 'en' or 'pt-BR'. */
   lang: string
   /** Documentation entry point for the active language. */

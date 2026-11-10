@@ -1,11 +1,14 @@
 import { compileMDX } from 'next-mdx-remote/rsc'
 import remarkGfm from 'remark-gfm'
+import { withBasePath } from '@lexibase/rdx-core'
 import {
   remarkDocumentLinks,
   remarkDocumentationComponents,
   rehypeDocumentationHeadings,
   rehypeDocumentationCode,
 } from '@lexibase/rdx-core/mdx'
+
+import { basePath } from '@/rdx.config'
 
 import { getDocumentation } from './docs'
 
@@ -37,6 +40,9 @@ export async function compileDocument(
               sourcePath: document.sourcePath,
               routePrefix: version,
               documents: docs.pages(version),
+              ...(basePath
+                ? { publicHref: (href: string) => withBasePath(href, basePath) }
+                : {}),
             },
           ],
         ],

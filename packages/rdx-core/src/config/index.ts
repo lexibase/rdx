@@ -91,6 +91,7 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
     config,
     [
       'description',
+      'basePath',
       'metadata',
       'lang',
       'theme',
@@ -104,6 +105,17 @@ export function resolveConfig(input: unknown): ResolvedRdxConfig {
     ],
     ''
   )
+  if (
+    config.basePath !== undefined &&
+    (typeof config.basePath !== 'string' ||
+      !/^(?:\/[A-Za-z0-9._~-]+)+$/.test(config.basePath) ||
+      config.basePath
+        .split('/')
+        .some((segment) => segment === '.' || segment === '..'))
+  )
+    throw new RdxConfigError(
+      'basePath must start with / and contain URL-safe path segments without a trailing slash.'
+    )
   if (config.search !== undefined && typeof config.search !== 'boolean')
     throw new RdxConfigError('search must be a boolean.')
   if (config.TOC !== undefined && typeof config.TOC !== 'boolean')

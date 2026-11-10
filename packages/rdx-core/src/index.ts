@@ -1,4 +1,5 @@
 export { getDocument, getDocsIndex, getDocsPaths } from './content/index'
+export { withBasePath } from './content/base-path'
 export {
   getLocalizedProject,
   getContentSources,

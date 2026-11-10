@@ -6,6 +6,7 @@ export function getRdxTracingConfig(options: {
   rootDir: string
   appDir?: string
 }): Promise<{
+  basePath?: string
   outputFileTracingIncludes: Record<string, string[]>
   redirects?: () => Promise<
     { source: string; destination: string; permanent: boolean }[]
