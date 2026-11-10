@@ -139,6 +139,10 @@ metadata: {
 
 This is the `metadata` portion of a `defineConfig` call, not a complete file.
 Place the referenced images, icons, and web app manifest in `public/`.
+For deployment under a subpath, set `basePath` in `rdx.config.ts` and keep
+`metadata.metadataBase` set to the public origin. See
+[Deploy under a subpath](../05-guides/deployment.mdx#deploy-under-a-subpath).
+
 `metadataBase` must be your absolute public HTTP(S) URL. RDX uses it for sitemap
 entries and relative social image URLs.
 

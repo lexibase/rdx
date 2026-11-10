@@ -74,6 +74,7 @@ Live documentation lives in the project's `docs/` folder.
 | `metadata.applicationName` | Required non-empty string; the single site name for browser titles, social defaults and branding                                 |
 | `metadata.since`           | Optional positive starting year, no later than the current year; the footer shows equal years once and earlier years as a range  |
 | `description`              | String; padrão `''`                                                                                                              |
+| `basePath`                 | Optional URL prefix such as `/my-tool`. Omit it to serve the site at the domain root.                                            |
 | `lang`                     | Non-empty string; defaults to `'en'`; selects HTML language and interface translations (`en` and `pt-BR`, with English fallback) |
 | `TOC`, `search`            | Booleanos, ambos `false` por padrão; preservar a grafia `TOC`                                                                    |
 | `theme.defaultTheme`       | `'system'`, `'light'` ou `'dark'`; padrão `'system'`                                                                             |
@@ -135,6 +136,7 @@ exato das mensagens, logs do Next.js ou localização dos caches como API estáv
   types, and supplying the `rdx` command. `/runtime`, `/config`, `/styles.css` and
   `/postcss.config` provide adapter integration. `/ui/components/*`, `/ui/lib/*`,
   `/ui/providers/*`, `/ui/hooks/*` and `/ui/globals.css` expose the shared UI without bundling it.
+  `withBasePath(href, basePath)` prefixes root-relative URLs for native elements.
   The package selects compatible internal releases; optional plugins remain separate.
 
 - `@lexibase/rdx-next`: `defineConfig` e os tipos públicos reexportados para
@@ -147,6 +149,7 @@ exato das mensagens, logs do Next.js ou localização dos caches como API estáv
 - `@lexibase/rdx-next/config`: `getRdxTracingConfig({ rootDir, appDir? })`, para
   aplicações Next nativas usando o core. Carrega `rdx.config.ts` e retorna
   `outputFileTracingIncludes` com os arquivos de conteúdo e runtime necessários.
+  The returned configuration includes `basePath` when set in `rdx.config.ts`.
   Fontes com `redirectTo` também geram regras nativas `redirects` do Next.js;
   aplique o objeto retornado inteiro no `next.config` para preservar URLs antigas.
   `appDir` é a pasta do `next.config`, por padrão igual a `rootDir`. O runtime

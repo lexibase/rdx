@@ -48,6 +48,63 @@ The generated scripts call
 Do not deploy the development server. Test your pages, assets, navigation,
 search, and a nonexistent URL before making a deployment public.
 
+## Deploy under a subpath
+
+Set `basePath` in `rdx.config.ts` to serve the whole site from a path such as
+`/scs-intellisense`. Use a leading slash and URL-safe segments. Leave
+`metadataBase` set to the public origin.
+
+```ts title="rdx.config.ts"
+import { defineConfig } from '@lexibase/rdx'
+
+export default defineConfig({
+  basePath: '/scs-intellisense',
+  metadata: {
+    applicationName: 'SCS IntelliSense',
+    metadataBase: 'https://docs.example.com',
+  },
+})
+```
+
+Write Markdown and configuration paths as usual, such as `/images/logo.png`
+and `/docs/guides/installation`. RDX adds the prefix when it renders them.
+Rebuild the project after changing `basePath`. To preview the build locally,
+open `/scs-intellisense` on the development host or `/scs-intellisense/docs`
+when the homepage is disabled.
+
+In a custom homepage, use `docsHref` with RDX's `Button` or Next's `Link`.
+For native elements such as `<video>` and `<img>`, import `withBasePath` from
+`@lexibase/rdx` and pass the `basePath` prop to it, for example
+`withBasePath('/videos/walkthrough.webm', basePath)`.
+
+### Route multiple Vercel projects from one domain
+
+Give each RDX project a unique `basePath` and deploy it independently. In the
+project that owns the public domain, configure an external rewrite for each
+zone. Keep the prefix on both sides so page, asset and API requests reach the
+same zone.
+
+```json title="vercel.json"
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/scs-intellisense/:path*",
+      "destination": "https://scs-intellisense.vercel.app/scs-intellisense/:path*"
+    },
+    {
+      "source": "/sightline/:path*",
+      "destination": "https://sightline.vercel.app/sightline/:path*"
+    }
+  ]
+}
+```
+
+Serve `/robots.txt` from the router at the domain root. Crawlers look for the
+file there. Have it reference a sitemap index served by the router, and list
+each zone's sitemap in that index, such as `/scs-intellisense/sitemap.xml` and
+`/sightline/sitemap.xml`.
+
 ## Keep the source
 
 Your build environment needs `docs/`, `public/`, `rdx.config.ts`, the package

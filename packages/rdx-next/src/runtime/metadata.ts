@@ -7,10 +7,36 @@ import {
   isFallbackPage,
   getDocument,
   getSourceOptions,
+  withBasePath,
 } from '@lexibase/rdx-core'
 import { notFound } from 'next/navigation'
 
 import { getSourceRobots } from './indexing'
+
+function openGraphAssets(
+  social: RDXConfig['metadata']['openGraph'],
+  basePath?: string
+) {
+  if (!basePath || !social?.images) return social
+  return {
+    ...social,
+    images: social.images.map((image) => ({
+      ...image,
+      url: withBasePath(image.url, basePath),
+    })),
+  }
+}
+
+function twitterAssets(
+  social: RDXConfig['metadata']['twitter'],
+  basePath?: string
+) {
+  if (!basePath || !social?.images) return social
+  return {
+    ...social,
+    images: social.images.map((image) => withBasePath(image, basePath)),
+  }
+}
 
 export function getHomepageMetadata({
   project,
@@ -24,13 +50,16 @@ export function getHomepageMetadata({
   metadata?: unknown
 }): Metadata {
   const { config, localization } = project
-  if (!config.homepage?.enabled || !localization) return {}
-  const selected = localization.locales.find((entry) => entry.path === locale)
-  if (locale && (!selected || selected.code === localization.defaultLocale))
+  if (!config.homepage?.enabled || (!localization && !config.basePath))
+    return {}
+  const selected = localization?.locales.find((entry) => entry.path === locale)
+  if (locale && (!selected || selected.code === localization?.defaultLocale))
     return {}
 
   const base = config.metadata.metadataBase
-  const primaryUrl = base ? new URL('/', base).href : undefined
+  const primaryUrl = base
+    ? new URL(withBasePath('/', config.basePath), base).href
+    : undefined
   if (locale && !translatedLocales?.has(locale)) {
     // A legacy custom component can translate its own content using lang.
     if (config.homepage.component) return {}
@@ -40,7 +69,10 @@ export function getHomepageMetadata({
     }
   }
 
-  const url = base && new URL(locale ? `/${locale}` : '/', base).href
+  const url =
+    base &&
+    new URL(withBasePath(locale ? `/${locale}` : '/', config.basePath), base)
+      .href
   const site = getRdxMetadata(config)
   const fields = metadata && typeof metadata === 'object' ? metadata : {}
   const title =
@@ -61,7 +93,7 @@ export function getHomepageMetadata({
   }
   return {
     ...social,
-    ...(site.openGraph || title || description
+    ...(site.openGraph || title || description || (config.basePath && url)
       ? {
           openGraph: {
             ...defaults,
@@ -78,18 +110,25 @@ export function getHomepageMetadata({
       ? {
           alternates: {
             canonical: url,
-            languages: {
-              [localization.defaultLocale]: primaryUrl,
-              'x-default': primaryUrl,
-              ...Object.fromEntries(
-                localization.locales
-                  .filter((entry) => translatedLocales?.has(entry.path))
-                  .map((entry) => [
-                    entry.code,
-                    new URL(`/${entry.path}`, base).href,
-                  ])
-              ),
-            },
+            ...(localization
+              ? {
+                  languages: {
+                    [localization.defaultLocale]: primaryUrl,
+                    'x-default': primaryUrl,
+                    ...Object.fromEntries(
+                      localization.locales
+                        .filter((entry) => translatedLocales?.has(entry.path))
+                        .map((entry) => [
+                          entry.code,
+                          new URL(
+                            withBasePath(`/${entry.path}`, config.basePath),
+                            base
+                          ).href,
+                        ])
+                    ),
+                  },
+                }
+              : {}),
           },
         }
       : {}),
@@ -124,6 +163,7 @@ export function getDocumentMetadata({
     ? getLocalizedProject(project, primary!.path)
     : project
   const base = project.config.metadata.metadataBase
+  const prefix = project.config.basePath
   const languages =
     project.localization && base
       ? Object.fromEntries(
@@ -139,7 +179,13 @@ export function getDocumentMetadata({
               ? [
                   [
                     locale.code,
-                    new URL(getDocsHref(view, source, page.slug), base).href,
+                    new URL(
+                      withBasePath(
+                        getDocsHref(view, source, page.slug),
+                        prefix
+                      ),
+                      base
+                    ).href,
                   ],
                 ]
               : []
@@ -147,20 +193,27 @@ export function getDocumentMetadata({
         )
       : undefined
   return {
-    ...getPageMetadata(project.config, page),
+    ...getPageMetadata(
+      project.config,
+      page,
+      getDocsHref(project, route.source, page.slug)
+    ),
     robots: fallback
       ? { index: false, follow: true }
       : getSourceRobots(project, route.source),
-    ...(project.localization && base
+    ...((project.localization || prefix) && base
       ? {
           alternates: {
             canonical: new URL(
-              getDocsHref(
-                canonicalProject,
-                canonicalProject.sources.find(
-                  (entry) => entry.id === route.source.id
+              withBasePath(
+                getDocsHref(
+                  canonicalProject,
+                  canonicalProject.sources.find(
+                    (entry) => entry.id === route.source.id
+                  ),
+                  page.slug
                 ),
-                page.slug
+                prefix
               ),
               base
             ).href,
@@ -174,15 +227,33 @@ export function getDocumentMetadata({
 /** Keep page previews in sync while retaining the site's social images and options. */
 export function getPageMetadata(
   config: RDXConfig,
-  page: Pick<RdxDocPage, 'title' | 'description'>
+  page: Pick<RdxDocPage, 'title' | 'description'>,
+  href?: string
 ): Metadata {
   const title = page.title
   const description = page.description || config.description
+  const url =
+    config.basePath && config.metadata.metadataBase && href
+      ? new URL(
+          withBasePath(href, config.basePath),
+          config.metadata.metadataBase
+        ).href
+      : undefined
   return {
     title,
     description,
-    openGraph: { ...config.metadata.openGraph, title, description },
-    twitter: { ...config.metadata.twitter, title, description },
+    ...(url ? { alternates: { canonical: url } } : {}),
+    openGraph: {
+      ...openGraphAssets(config.metadata.openGraph, config.basePath),
+      title,
+      description,
+      ...(url ? { url } : {}),
+    },
+    twitter: {
+      ...twitterAssets(config.metadata.twitter, config.basePath),
+      title,
+      description,
+    },
   }
 }
 
@@ -191,10 +262,31 @@ export function getRdxMetadata(config: RDXConfig): Metadata {
   const { metadataBase, ...metadata } = config.metadata
   delete metadata.since
   const name = metadata.applicationName
+  const prefix = config.basePath
+  const asset = (value?: string) =>
+    value === undefined ? undefined : withBasePath(value, prefix)
+  const icons = metadata.icons
   return {
     title: { default: name, template: `%s | ${name}` },
     description: config.description,
     ...metadata,
+    ...(prefix && icons
+      ? {
+          icons: {
+            icon: Array.isArray(icons.icon)
+              ? icons.icon.map((icon) => ({
+                  ...icon,
+                  url: withBasePath(icon.url, prefix),
+                }))
+              : asset(icons.icon),
+            shortcut: asset(icons.shortcut),
+            apple: asset(icons.apple),
+          },
+        }
+      : {}),
+    ...(prefix && metadata.manifest
+      ? { manifest: asset(metadata.manifest) }
+      : {}),
     robots: { index: true, follow: true },
     ...(metadataBase ? { metadataBase: new URL(metadataBase) } : {}),
     ...(metadata.openGraph
@@ -202,7 +294,7 @@ export function getRdxMetadata(config: RDXConfig): Metadata {
           openGraph: {
             title: name,
             description: config.description,
-            ...metadata.openGraph,
+            ...openGraphAssets(metadata.openGraph, prefix),
           },
         }
       : {}),
@@ -211,7 +303,7 @@ export function getRdxMetadata(config: RDXConfig): Metadata {
           twitter: {
             title: name,
             description: config.description,
-            ...metadata.twitter,
+            ...twitterAssets(metadata.twitter, prefix),
           },
         }
       : {}),

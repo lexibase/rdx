@@ -1,4 +1,5 @@
 import type { RdxTranslatedHomepageProps } from '@lexibase/rdx'
+import { withBasePath } from '@lexibase/rdx'
 import { Button } from '@lexibase/rdx/ui/components/button'
 import {
   Card,
@@ -38,6 +39,7 @@ function AtlasMark({ className }: { className: string }) {
 }
 
 export default function VideoFirst({
+  basePath,
   docsHref = '/docs',
   t = (phrase) => phrase,
 }: Partial<RdxTranslatedHomepageProps>) {
@@ -156,8 +158,8 @@ export default function VideoFirst({
             controls
             playsInline
             preload="none"
-            src={project.video}
-            poster={project.poster}
+            src={withBasePath(project.video, basePath)}
+            poster={withBasePath(project.poster, basePath)}
           />
         </div>
       </HomeSection>

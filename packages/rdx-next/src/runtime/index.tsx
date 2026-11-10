@@ -10,6 +10,7 @@ import {
   getDocsHref,
   getLanguageLinks,
   isFallbackPage,
+  withBasePath,
 } from '@lexibase/rdx-core'
 import { getEditPageHref } from '@lexibase/rdx-core/config'
 import type {
@@ -104,6 +105,13 @@ function homepageHref(project: RdxProject, locale: RdxLocale | undefined) {
     : '/'
 }
 
+function logoSource(config: RDXConfig) {
+  const source = config.navbar?.logo
+  return typeof source === 'string'
+    ? withBasePath(source, config.basePath)
+    : source
+}
+
 function RdxHeader({
   project,
   slug,
@@ -146,7 +154,10 @@ function RdxHeader({
       search={
         config.search ? (
           <DocsSearch
-            indexUrl={`${project.locale ? `/${project.locale.path}` : ''}/rdx-search/${encodeURIComponent(source.routePrefix || '_')}`}
+            indexUrl={withBasePath(
+              `${project.locale ? `/${project.locale.path}` : ''}/rdx-search/${encodeURIComponent(source.routePrefix || '_')}`,
+              config.basePath
+            )}
             version={
               source.id === 'current'
                 ? messages.current
@@ -156,7 +167,7 @@ function RdxHeader({
         ) : undefined
       }
       siteTitle={config.metadata.applicationName}
-      logo={<BrandLogo source={config.navbar?.logo} className="size-5" />}
+      logo={<BrandLogo source={logoSource(config)} className="size-5" />}
       homeHref={
         config.homepage?.enabled
           ? homepageHref(project, project.locale)
@@ -168,15 +179,17 @@ function RdxHeader({
           <LanguageDropdown
             lang={config.lang}
             current={project.locale?.code ?? project.localization.defaultLocale}
-            options={
-              onHomepage
-                ? project.localization.locales.map((locale) => ({
-                    code: locale.code,
-                    label: locale.label,
-                    href: homepageHref(project, locale),
-                  }))
-                : getLanguageLinks(project, source, currentSlug)
-            }
+            options={(onHomepage
+              ? project.localization.locales.map((locale) => ({
+                  code: locale.code,
+                  label: locale.label,
+                  href: homepageHref(project, locale),
+                }))
+              : getLanguageLinks(project, source, currentSlug)
+            ).map((option) => ({
+              ...option,
+              href: withBasePath(option.href, config.basePath),
+            }))}
             contributionUrl={project.localization.contributionUrl}
           />
         ) : undefined
@@ -222,11 +235,16 @@ export function HomePage({
         className="relative flex-1 min-h-0 overflow-y-auto"
       >
         {CustomHome ? (
-          <CustomHome lang={config.lang} docsHref={docsHref} />
+          <CustomHome
+            lang={config.lang}
+            docsHref={docsHref}
+            basePath={config.basePath}
+          />
         ) : TranslatedHome ? (
           <TranslatedHome
             lang={config.lang}
             docsHref={docsHref}
+            basePath={config.basePath}
             t={(text) => {
               const translation =
                 messages && Object.hasOwn(messages, text)
@@ -240,7 +258,7 @@ export function HomePage({
         ) : (
           <Home
             title={homepage.title ?? config.metadata.applicationName}
-            logo={<BrandLogo source={config.navbar?.logo} className="size-5" />}
+            logo={<BrandLogo source={logoSource(config)} className="size-5" />}
             description={homepage.description ?? config.description}
             buttons={
               homepage.buttons?.map((button) => ({
@@ -297,7 +315,10 @@ export function NotFoundPage({ project }: { project: RdxProject }) {
     const { config, localization } = project
     return (
       <LocalizedNotFound
-        locales={localization.locales}
+        locales={localization.locales.map((locale) => ({
+          ...locale,
+          href: withBasePath(`/${locale.path}/docs`, config.basePath),
+        }))}
         defaultLocale={localization.defaultLocale}
         homepage={!!config.homepage?.enabled}
         brand={{
@@ -305,7 +326,7 @@ export function NotFoundPage({ project }: { project: RdxProject }) {
           siteTitle: config.metadata.applicationName,
           github: config.navbar?.actions?.github,
           showToggleMode: config.navbar?.actions?.showToggleMode,
-          logo: <BrandLogo source={config.navbar?.logo} className="size-5" />,
+          logo: <BrandLogo source={logoSource(config)} className="size-5" />,
         }}
       />
     )
@@ -384,6 +405,12 @@ export async function DocsPage({
       sourcePath: document.sourcePath,
       routePrefix: source.routePrefix,
       basePath: contentSource.basePath,
+      ...(project.config.basePath
+        ? {
+            publicHref: (href: string) =>
+              withBasePath(href, project.config.basePath),
+          }
+        : {}),
       virtualPaths: !!contentOptions.fallbackDocsDir,
       documents: contentCategories.flatMap((category) => category.pages),
     },
@@ -397,7 +424,10 @@ export async function DocsPage({
   const hrefFor = (pageSlug: string) => getDocsHref(project, source, pageSlug)
   const markdownHref = fallback
     ? undefined
-    : getMarkdownHref(hrefFor(currentSlug))
+    : withBasePath(
+        getMarkdownHref(hrefFor(currentSlug)),
+        project.config.basePath
+      )
   const sidebarCategories = categories.map((category) => ({
     title: category.title,
     links: category.pages.map((page) => ({
@@ -459,10 +489,13 @@ export async function DocsPage({
                         nativeButton={false}
                         render={
                           <a
-                            href={getDocsHref(
-                              originalProject,
-                              contentSource,
-                              currentSlug
+                            href={withBasePath(
+                              getDocsHref(
+                                originalProject,
+                                contentSource,
+                                currentSlug
+                              ),
+                              project.config.basePath
                             )}
                             hrefLang={contentLanguage}
                           />

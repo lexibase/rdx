@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 
 import { useVersion } from '@/hooks/use-version'
 
-export function NavbarSearch() {
+export function NavbarSearch({ indexBase }: { indexBase: string }) {
   const messages = useMessages()
   const pathname = usePathname()
   const { editions } = useVersion()
@@ -19,7 +19,7 @@ export function NavbarSearch() {
   return (
     <DocsSearch
       key={version}
-      indexUrl={`/rdx-search/${encodeURIComponent(version)}`}
+      indexUrl={`${indexBase}/${encodeURIComponent(version)}`}
       version={
         version === 'canary'
           ? 'Canary'

@@ -6,6 +6,7 @@ import {
   getLocalizedProject,
   getSourceOptions,
   isFallbackPage,
+  withBasePath,
 } from '@lexibase/rdx-core'
 import { exportMarkdownBody } from '@lexibase/rdx-core/mdx'
 import {
@@ -25,7 +26,8 @@ type DocumentPath = (
 
 function publicUrl(project: RdxProject, path: string) {
   const base = project.config.metadata.metadataBase
-  return base ? new URL(path, base).href : path
+  const href = withBasePath(path, project.config.basePath)
+  return base ? new URL(href, base).href : href
 }
 
 function indexPath(project: RdxProject) {
@@ -166,11 +168,10 @@ export function getDocumentMarkdownResponse(
     return markdownNotFound()
   const pages = getDocsIndex(options).flatMap((category) => category.pages)
   const bySlug = new Map(pages.map((page) => [page.slug, page]))
+  const route = (page: Pick<RdxDocPage, 'slug' | 'sourcePath'>) =>
+    documentPath?.(source, page) ?? getDocsHref(project, source, page.slug)
   const href = (page: Pick<RdxDocPage, 'slug' | 'sourcePath'>) =>
-    publicUrl(
-      project,
-      documentPath?.(source, page) ?? getDocsHref(project, source, page.slug)
-    )
+    publicUrl(project, route(page))
   const page = bySlug.get(document.slug)!
   const lastUpdated = source.version
     ? getSnapshotDocumentDate(options.docsDir, document.sourcePath)
@@ -190,7 +191,18 @@ export function getDocumentMarkdownResponse(
     sourcePath: document.sourcePath,
     virtualPaths: !!options.fallbackDocsDir,
     documents: pages,
-    documentHref: (slug) => href(bySlug.get(slug)!),
+    documentHref: (slug) =>
+      project.config.basePath
+        ? route(bySlug.get(slug)!)
+        : href(bySlug.get(slug)!),
+    ...(project.config.basePath
+      ? {
+          publicHref: (value: string) =>
+            value.startsWith('/') && !value.startsWith('//')
+              ? publicUrl(project, value)
+              : value,
+        }
+      : {}),
   })
   return response(`---\n${fields.join('\n')}\n---\n\n${body}`, 'text/markdown')
 }

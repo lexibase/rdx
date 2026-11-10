@@ -87,7 +87,7 @@ test(
     )
     await write(
       'locale/ptbr/docs/guides/intro.mdx',
-      '---\ntitle: Introdução\n---\n\n## Olá\n\nTranslatedIntroMarker\n\n[Instalar](./install.mdx#requirements)'
+      '---\ntitle: Introdução\n---\n\n## Olá\n\nTranslatedIntroMarker\n\n[Instalar](./install.mdx#requirements)\n\n![Logo](/logo.svg)'
     )
     await mkdir(path.join(root, 'locale/es-es/docs'), { recursive: true })
     await mkdir(path.join(root, 'locale/fr-fr/docs'), { recursive: true })
@@ -357,6 +357,11 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       configFile,
       "import { versioning } from '@lexibase/rdx-versioning'\n" +
         config
+          .replace("lang: 'en'", "basePath: '/minha-tool', lang: 'en'")
+          .replace(
+            "applicationName: 'Locale Docs'",
+            "applicationName: 'Locale Docs', icons: { icon: '/logo.svg' }, twitter: { images: ['/brand.png'] }"
+          )
           .replace('plugins: [', 'plugins: [versioning(), ')
           .replace("import Logo from './components/logo'", '')
           .replace('navbar: { logo: Logo }', "navbar: { logo: '/brand.png' }")
@@ -436,6 +441,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
     )
 
     const verifyVersions = async (base) => {
+      base += '/minha-tool'
       const html = async (url) => {
         const response = await fetch(base + url)
         assert.equal(response.status, 200, url)
@@ -443,8 +449,14 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       }
       const home = await html('/')
       assert.match(home, /data-rdx-home/)
-      assert.equal((home.match(/src="\/brand\.png"/g) ?? []).length, 2)
-      const missingPage = await fetch(base + '/pt-br/docs/no-page')
+      assert.equal(
+        (home.match(/src="\/minha-tool\/brand\.png"/g) ?? []).length,
+        2
+      )
+      assert.match(home, /href="\/minha-tool\/logo.svg"/)
+      const missingPage = await fetch(base + '/pt-br/docs/no-page', {
+        headers: { accept: 'text/html' },
+      })
       assert.equal(missingPage.status, 404)
       // Next may stream the not-found boundary as Flight data before hydration.
       const missingHtml = await missingPage.text()
@@ -456,12 +468,20 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         .map((chunk) => chunk[1])
         .join('')
       assert.match(flight, /LocalizedNotFound/)
-      assert.match(flight, /"logo":\["\$","img",null,\{"src":"\/brand\.png"/)
+      assert.match(flight, /"href":"\/minha-tool\/pt-br\/docs"/)
+      assert.match(
+        flight,
+        /"logo":\["\$","img",null,\{"src":"\/minha-tool\/brand\.png"/
+      )
       const image = await fetch(base + '/brand.png')
       assert.equal(image.status, 200)
       assert.deepEqual(Buffer.from(await image.arrayBuffer()), brandPng)
       const archived = await html('/pt-br/docs/1.1.0/guides/intro')
-      assert.match(archived, /<nav[\s\S]*?<img[^>]*src="\/brand\.png"/)
+      assert.match(
+        archived,
+        /<nav[\s\S]*?<img[^>]*src="\/minha-tool\/brand\.png"/
+      )
+      assert.match(archived, /src="\/minha-tool\/logo\.svg"/)
       assert.match(archived, /<html[^>]*lang="pt-BR"/)
       assert.match(archived, /UpdatedPortugueseMarker/)
       assert.doesNotMatch(archived, /UnreleasedPortugueseMarker/)
@@ -474,7 +494,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       assert.doesNotMatch(missing, /PortugueseInstallLiveMarker/)
       assert.match(
         missing,
-        /https:\/\/docs.example.test\/en\/docs\/1.1.0\/guides\/install/
+        /https:\/\/docs.example.test\/minha-tool\/en\/docs\/1.1.0\/guides\/install/
       )
       const live = await html('/pt-br/docs/guides/install')
       assert.match(live, /PortugueseInstallLiveMarker/)
@@ -486,7 +506,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       assert.equal(previous.status, 308)
       assert.match(
         previous.headers.get('location'),
-        /\/pt-br\/docs\/1.1.0\/guides\/intro\?ref=old$/
+        /^\/minha-tool\/pt-br\/docs\/1.1.0\/guides\/intro\?ref=old$/
       )
       const search = await html('/pt-br/rdx-search/1.1.0')
       assert.match(search, /UpdatedPortugueseMarker/)
@@ -499,20 +519,177 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         /data-rdx-translation-fallback/
       )
       const sitemap = await html('/sitemap.xml')
-      assert.match(sitemap, /\/pt-br\/docs\/2.0.0\/guides\/intro/)
+      assert.match(sitemap, /\/minha-tool\/pt-br\/docs\/2.0.0\/guides\/intro/)
       assert.doesNotMatch(
         sitemap,
         /\/docs\/1.1.0\/|\/docs\/1.0.0\/|\/es-es\/docs/
       )
+      const translated = await html('/pt-br/docs/2.0.0/guides/intro')
+      assert.match(
+        translated,
+        /rel="canonical" href="https:\/\/docs.example.test\/minha-tool\/pt-br\/docs\/2.0.0\/guides\/intro"/
+      )
+      assert.match(
+        translated,
+        /hreflang="en" href="https:\/\/docs.example.test\/minha-tool\/en\/docs\/2.0.0\/guides\/intro"/i
+      )
+      assert.match(
+        translated,
+        /property="og:url" content="https:\/\/docs.example.test\/minha-tool\/pt-br\/docs\/2.0.0\/guides\/intro"/
+      )
+      assert.match(
+        translated,
+        /property="og:image" content="https:\/\/docs.example.test\/minha-tool\/brand.png"/
+      )
+      assert.match(
+        translated,
+        /name="twitter:image" content="https:\/\/docs.example.test\/minha-tool\/brand.png"/
+      )
+      assert.match(
+        translated,
+        /href="\/minha-tool\/pt-br\/docs\/2.0.0\/guides\/install#requirements"/
+      )
+      assert.match(translated, /\/minha-tool\/pt-br\/rdx-search\/2\.0\.0/)
+      assert.match(
+        translated,
+        /\/minha-tool\/rdx-markdown\/pt-br\/docs\/2\.0\.0\/guides\/intro\.md/
+      )
+      assert.doesNotMatch(
+        translated,
+        /(?:src|href)="\/(?!\/|minha-tool(?:[/#?]|"))/
+      )
+      const origin = new URL(base).origin
+      for (const [, asset] of translated.matchAll(
+        /(?:src|href)="(\/minha-tool\/(?:_next\/static\/[^" ]+|logo\.svg|brand\.png))"/g
+      )) {
+        assert.equal((await fetch(origin + asset)).status, 200, asset)
+      }
+      const markdown = await html(
+        '/rdx-markdown/pt-br/docs/2.0.0/guides/intro.md'
+      )
+      assert.match(
+        markdown,
+        /https:\/\/docs.example.test\/minha-tool\/pt-br\/docs\/llms.txt/
+      )
+      assert.match(
+        markdown.replaceAll('\\:', ':'),
+        /https:\/\/docs.example.test\/minha-tool\/logo.svg/
+      )
+      assert.match(
+        await html('/pt-br/docs/llms.txt'),
+        /\/minha-tool\/rdx-markdown\/pt-br\/docs\/2.0.0\/guides\/intro\.md/
+      )
+      assert.match(
+        await html('/robots.txt'),
+        /Sitemap: https:\/\/docs.example.test\/minha-tool\/sitemap.xml/
+      )
+      assert.equal(
+        (
+          await fetch(origin + '/pt-br/docs/2.0.0/guides/intro', {
+            redirect: 'manual',
+          })
+        ).status,
+        404
+      )
     }
-    await withProductionServer(cli, root, verifyVersions, {
-      readyPath: '/pt-br/docs/2.0.0/guides/intro',
-    })
+    await withProductionServer(
+      cli,
+      root,
+      async (upstream) => {
+        await verifyVersions(upstream)
+        await write(
+          'router/app/layout.jsx',
+          'export default function Layout({ children }) { return <html><body>{children}</body></html> }'
+        )
+        await write(
+          'router/app/page.jsx',
+          'export default function RouterHome() { return <main>RouterHomepageMarker</main> }'
+        )
+        await write(
+          'router/next.config.mjs',
+          `export default {
+  agentRules: false,
+  turbopack: { root: ${JSON.stringify(path.resolve(packageRoot, '../..'))} },
+  async rewrites() {
+    return [{ source: '/minha-tool/:path*', destination: '${upstream}/minha-tool/:path*' }]
+  }
+}`
+        )
+        await withProductionServer(
+          require.resolve('next/dist/bin/next'),
+          path.join(root, 'router'),
+          async (router) => {
+            assert.match(
+              await (await fetch(router)).text(),
+              /RouterHomepageMarker/
+            )
+            await verifyVersions(router)
+            if (!process.env.RDX_PLAYWRIGHT_MODULE) return
+
+            const { chromium } = require(process.env.RDX_PLAYWRIGHT_MODULE)
+            const browser = await chromium.launch({
+              executablePath: process.env.RDX_BROWSER_EXECUTABLE,
+            })
+            try {
+              const page = await browser.newPage({
+                permissions: ['clipboard-read', 'clipboard-write'],
+              })
+              const unexpected = []
+              page.on('request', (request) => {
+                const { origin, pathname } = new URL(request.url())
+                if (
+                  origin === router &&
+                  pathname !== '/minha-tool' &&
+                  !pathname.startsWith('/minha-tool/')
+                )
+                  unexpected.push(pathname)
+              })
+              const doc = '/minha-tool/en/docs/2.0.0/guides/intro'
+              await page.goto(router + doc)
+              const markdown = page.waitForResponse((response) =>
+                new URL(response.url()).pathname.startsWith(
+                  '/minha-tool/rdx-markdown/'
+                )
+              )
+              await page.getByRole('button', { name: 'Copy this page' }).click()
+              assert.equal((await markdown).status(), 200)
+
+              const search = page.waitForResponse((response) =>
+                new URL(response.url()).pathname.startsWith(
+                  '/minha-tool/en/rdx-search/'
+                )
+              )
+              await page.keyboard.press('Control+k')
+              assert.equal((await search).status(), 200)
+              await page.keyboard.press('Escape')
+
+              await page.locator('[data-rdx-language-trigger]').click()
+              await page.locator('a[hreflang="pt-BR"]').click()
+              await page.waitForURL(
+                '**/minha-tool/pt-br/docs/2.0.0/guides/intro'
+              )
+              await page.locator('[data-rdx-version-trigger]').click()
+              await page.getByRole('menuitem', { name: /1\.1\.0/ }).click()
+              await page.waitForURL(
+                '**/minha-tool/pt-br/docs/1.1.0/guides/intro'
+              )
+              assert.deepEqual(unexpected, [])
+            } finally {
+              await browser.close()
+            }
+          },
+          { mode: 'dev', readyPath: '/' }
+        )
+      },
+      {
+        readyPath: '/minha-tool/pt-br/docs/2.0.0/guides/intro',
+      }
+    )
     await withProductionServer(
       require.resolve('next/dist/bin/next'),
       path.join(root, '.rdx'),
       verifyVersions,
-      { readyPath: '/pt-br/docs/2.0.0/guides/intro' }
+      { readyPath: '/minha-tool/pt-br/docs/2.0.0/guides/intro' }
     )
     const frozenTrace = JSON.parse(
       await readFile(

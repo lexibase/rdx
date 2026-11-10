@@ -132,6 +132,7 @@ export async function getRdxTracingConfig({ rootDir, appDir = rootDir }) {
     })
   }
   return {
+    ...(project.config.basePath ? { basePath: project.config.basePath } : {}),
     ...(redirects.length ? { redirects: async () => redirects } : {}),
     outputFileTracingIncludes: {
       '/*': [

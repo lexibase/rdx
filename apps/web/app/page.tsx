@@ -2,7 +2,7 @@ import { Home } from '@lexibase/rdx-ui/components/home'
 import type { RdxHomepage } from '@lexibase/rdx-types'
 import { redirect } from 'next/navigation'
 
-import config from '@/rdx.config'
+import config, { basePath } from '@/rdx.config'
 
 export default function HomePage() {
   const homepage: RdxHomepage = config.homepage
@@ -15,7 +15,7 @@ export default function HomePage() {
       className="flex min-h-0 flex-1 flex-col outline-none"
     >
       {CustomHome ? (
-        <CustomHome lang={config.lang} docsHref="/docs" />
+        <CustomHome lang={config.lang} docsHref="/docs" basePath={basePath} />
       ) : (
         <Home
           title={homepage.title ?? config.metadata.applicationName}

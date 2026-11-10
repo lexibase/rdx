@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
+import { withBasePath } from '@lexibase/rdx-core'
 import { getMarkdownHref, getPageMetadata } from '@lexibase/rdx-next/runtime'
 import { getMdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
 import { DocsPageTransition } from '@lexibase/rdx-ui/components/docs-page-transition'
 import { notFound, redirect, permanentRedirect } from 'next/navigation'
 
-import config from '@/rdx.config'
+import config, { basePath } from '@/rdx.config'
 import { VersionBanner } from '@/components/Page/version-banner'
 import { DocHeader } from '@/components/Page/doc-header'
 import { DocFooter } from '@/components/Page/doc-footer'
@@ -27,7 +28,11 @@ export async function generateMetadata({
     .pages(version)
     .find((entry) => entry.sourcePath === document.sourcePath)!
   return {
-    ...getPageMetadata(config, page),
+    ...getPageMetadata(
+      config,
+      page,
+      `/docs/${encodeURIComponent(version)}/${page.slug.split('/').map(encodeURIComponent).join('/')}`
+    ),
     robots: documentation.robots(version),
   }
 }
@@ -96,8 +101,11 @@ export default async function DocPage({
                 version={version}
                 filename={filename}
                 title={page.title}
-                markdownHref={getMarkdownHref(
-                  `/docs/${encodeURIComponent(version)}/${filename.split('/').map(encodeURIComponent).join('/')}`
+                markdownHref={withBasePath(
+                  getMarkdownHref(
+                    `/docs/${encodeURIComponent(version)}/${filename.split('/').map(encodeURIComponent).join('/')}`
+                  ),
+                  basePath
                 )}
               />
             </header>

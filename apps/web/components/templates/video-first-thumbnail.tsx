@@ -1,7 +1,8 @@
+import { withBasePath } from '@lexibase/rdx-core'
 import { Play } from 'lucide-react'
 import Image from 'next/image'
 
-export function VideoFirstThumbnail() {
+export function VideoFirstThumbnail({ basePath }: { basePath?: string }) {
   return (
     <div
       aria-hidden="true"
@@ -20,7 +21,10 @@ export function VideoFirstThumbnail() {
         </p>
         <div className="relative mx-auto w-full max-w-44 overflow-hidden rounded-md border border-border bg-muted">
           <Image
-            src="/videos/atlas-walkthrough-poster.webp"
+            src={withBasePath(
+              '/videos/atlas-walkthrough-poster.webp',
+              basePath
+            )}
             alt=""
             width={640}
             height={360}

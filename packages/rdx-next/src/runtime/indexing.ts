@@ -10,6 +10,7 @@ import {
   getSourceOptions,
   getContentSources,
   isFallbackPage,
+  withBasePath,
 } from '@lexibase/rdx-core'
 
 /** Published editions replace live development content in search results. */
@@ -35,7 +36,12 @@ export function getRdxRobots(config: RDXConfig): MetadataRoute.Robots {
     // Do not disallow noindex pages: crawlers must read their HTML directive.
     rules: { userAgent: '*', allow: '/' },
     ...(config.metadata.metadataBase
-      ? { sitemap: new URL('/sitemap.xml', config.metadata.metadataBase).href }
+      ? {
+          sitemap: new URL(
+            withBasePath('/sitemap.xml', config.basePath),
+            config.metadata.metadataBase
+          ).href,
+        }
       : {}),
   }
 }
@@ -59,13 +65,15 @@ export function getRdxSitemap(
   const base = project.config.metadata.metadataBase
   if (!base) return []
   const urls = new Set<string>()
-  if (project.config.homepage?.enabled) urls.add(new URL('/', base).href)
+  const url = (path: string) =>
+    new URL(withBasePath(path, project.config.basePath), base).href
+  if (project.config.homepage?.enabled) urls.add(url('/'))
   for (const source of getContentSources(project)) {
     if (!getSourceRobots(project, source).index) continue
     for (const category of getDocsIndex(getSourceOptions(project, source))) {
       for (const page of category.pages) {
         if (isFallbackPage(project, source, page.sourcePath)) continue
-        urls.add(new URL(documentPath(source, page), base).href)
+        urls.add(url(documentPath(source, page)))
       }
     }
   }
