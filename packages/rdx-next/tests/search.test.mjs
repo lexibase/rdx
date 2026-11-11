@@ -88,6 +88,21 @@ test('search bounds results and excerpts, validates its payload and rejects exte
     )
 })
 
+test('search accepts results within the configured locale and keeps app-relative destinations', () => {
+  const docsRoot = '/pt-br/docs'
+  const href = '/pt-br/docs/2.0.0/guides/installation#requirements'
+  const index = {
+    schemaVersion: 1,
+    entries: [entry('Instalação', 'Requisitos', 'Versão atual', href)],
+  }
+  assert.equal(
+    searchDocumentation(prepareSearch(index, docsRoot), 'instalacao')[0].href,
+    href
+  )
+  assert.throws(() => prepareSearch(index, '/en/docs'), /Invalid search entry/)
+  assert.throws(() => prepareSearch(index), /Invalid search entry/)
+})
+
 test('disabled search and unknown sources return 404 without indexing or touching nonexistent docs', () => {
   const project = {
     config: { search: false },

@@ -154,6 +154,7 @@ function RdxHeader({
       search={
         config.search ? (
           <DocsSearch
+            docsRoot={getDocsHref(project)}
             indexUrl={withBasePath(
               `${project.locale ? `/${project.locale.path}` : ''}/rdx-search/${encodeURIComponent(source.routePrefix || '_')}`,
               config.basePath

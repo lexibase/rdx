@@ -645,6 +645,27 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
                   unexpected.push(pathname)
               })
               const doc = '/minha-tool/en/docs/2.0.0/guides/intro'
+              const home = '/minha-tool'
+              const localizedHome = `${home}/pt-br`
+              await page.goto(router + home)
+              const logo = page.getByRole('link', { name: 'Locale Docs' })
+              const languages = page.locator('[data-rdx-language-trigger]')
+              const english = page.locator('a[hreflang="en"]')
+              const portuguese = page.locator('a[hreflang="pt-BR"]')
+              for (const [current, target, option] of [
+                [home, localizedHome, portuguese],
+                [localizedHome, home, english],
+              ]) {
+                assert.equal(await logo.getAttribute('href'), current)
+                await languages.click()
+                assert.equal(await english.getAttribute('href'), home)
+                assert.equal(
+                  await portuguese.getAttribute('href'),
+                  localizedHome
+                )
+                await option.click()
+                await page.waitForURL(router + target)
+              }
               await page.goto(router + doc)
               const markdown = page.waitForResponse((response) =>
                 new URL(response.url()).pathname.startsWith(
@@ -661,7 +682,15 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
               )
               await page.keyboard.press('Control+k')
               assert.equal((await search).status(), 200)
-              await page.keyboard.press('Escape')
+              await page.getByRole('combobox').fill('Installation')
+              await page
+                .getByRole('option', { name: /Installation/ })
+                .first()
+                .click()
+              await page.waitForURL(
+                '**/minha-tool/en/docs/2.0.0/guides/install'
+              )
+              await page.goto(router + doc)
 
               await page.locator('[data-rdx-language-trigger]').click()
               await page.locator('a[hreflang="pt-BR"]').click()

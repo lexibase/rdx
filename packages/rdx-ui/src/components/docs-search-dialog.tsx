@@ -33,12 +33,14 @@ const cache = new Map<string, PreparedSearch>()
 
 export function DocsSearchDialog({
   indexUrl,
+  docsRoot = '/docs',
   version,
   open,
   onOpenChange,
   triggerRef,
 }: {
   indexUrl: string
+  docsRoot?: string
   version: string
   open: boolean
   onOpenChange: (value: boolean) => void
@@ -57,11 +59,12 @@ export function DocsSearchDialog({
   useEffect(() => {
     if (!open) return
     const controller = new AbortController()
+    const cacheKey = `${docsRoot}:${indexUrl}`
     async function load() {
       try {
         const cached =
           process.env.NODE_ENV === 'production'
-            ? cache.get(indexUrl)
+            ? cache.get(cacheKey)
             : undefined
         let entries = cached
         if (!entries) {
@@ -70,10 +73,13 @@ export function DocsSearchDialog({
             cache: 'no-store',
           })
           if (!response.ok) throw new Error('Search unavailable')
-          entries = prepareSearch((await response.json()) as RdxSearchIndex)
+          entries = prepareSearch(
+            (await response.json()) as RdxSearchIndex,
+            docsRoot
+          )
           if (process.env.NODE_ENV === 'production') {
             if (cache.size >= 3) cache.delete(cache.keys().next().value!)
-            cache.set(indexUrl, entries)
+            cache.set(cacheKey, entries)
           }
         }
         if (!controller.signal.aborted) setState({ entries })
@@ -83,7 +89,7 @@ export function DocsSearchDialog({
     }
     void load()
     return () => controller.abort()
-  }, [open, indexUrl, retry])
+  }, [open, indexUrl, docsRoot, retry])
   const results = useMemo(
     () => searchDocumentation(state.entries ?? [], deferred),
     [state.entries, deferred]
