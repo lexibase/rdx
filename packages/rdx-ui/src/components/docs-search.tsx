@@ -17,9 +17,11 @@ const SearchDialog = dynamic(
 /** Only the small trigger/shortcut is loaded until the first search opens. */
 export function DocsSearch({
   indexUrl,
+  docsRoot = '/docs',
   version,
 }: {
   indexUrl: string
+  docsRoot?: string
   version: string
 }) {
   const messages = useMessages()
@@ -71,8 +73,9 @@ export function DocsSearch({
       </Button>
       {activated && (
         <SearchDialog
-          key={indexUrl}
+          key={`${docsRoot}:${indexUrl}`}
           indexUrl={indexUrl}
+          docsRoot={docsRoot}
           version={version}
           open={open}
           onOpenChange={setOpen}

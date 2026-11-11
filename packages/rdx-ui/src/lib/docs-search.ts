@@ -4,7 +4,7 @@ export function normalizeSearch(value: string) {
   return value.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
 }
 
-export function prepareSearch(index: RdxSearchIndex) {
+export function prepareSearch(index: RdxSearchIndex, docsRoot = '/docs') {
   if (index.schemaVersion !== 1 || !Array.isArray(index.entries))
     throw new Error('Invalid search index')
   return index.entries.map((entry) => {
@@ -12,7 +12,7 @@ export function prepareSearch(index: RdxSearchIndex) {
       !['href', 'title', 'category', 'section', 'text'].every(
         (field) => typeof entry[field as keyof RdxSearchEntry] === 'string'
       ) ||
-      !/^\/docs(?:\/|$)/.test(entry.href)
+      (entry.href !== docsRoot && !entry.href.startsWith(`${docsRoot}/`))
     )
       throw new Error('Invalid search entry')
     return {
