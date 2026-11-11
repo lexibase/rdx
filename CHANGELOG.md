@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 6.3.1 — Prepared
+
+- Fix documentation search for sites that use i18n. The search index accepts
+  routes in the active language, and selecting a result opens it under the
+  configured deployment base path.
+
 ## 6.3.0 — Prepared
 
 - Support hosting RDX sites under an optional `basePath`. Generated links, assets,
