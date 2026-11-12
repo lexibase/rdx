@@ -32,6 +32,7 @@ test('showcase validation waits for compiled workspace exports in a fresh checko
     const task = graph.tasks.find((task) => task.taskId === id)
     assert.ok(task, id)
     for (const name of [
+      'rdx-changelog',
       'rdx-core',
       'rdx-next',
       'rdx-types',

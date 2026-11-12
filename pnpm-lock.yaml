@@ -38,6 +38,9 @@ importers:
       '@lexibase/rdx':
         specifier: workspace:*
         version: link:../../packages/rdx
+      '@lexibase/rdx-changelog':
+        specifier: workspace:*
+        version: link:../../packages/rdx-plugin-changelog
       '@lexibase/rdx-core':
         specifier: workspace:*
         version: link:../../packages/rdx-core

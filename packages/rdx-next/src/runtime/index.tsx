@@ -215,7 +215,13 @@ function RdxHeader({
   )
 }
 
-export async function ChangelogPage({ project }: { project: RdxProject }) {
+export async function ChangelogPage({
+  project,
+  showHeader = true,
+}: {
+  project: RdxProject
+  showHeader?: boolean
+}) {
   const { config } = project
   if (!config.plugins.some(({ name }) => name === changelogPluginName))
     notFound()
@@ -245,7 +251,7 @@ export async function ChangelogPage({ project }: { project: RdxProject }) {
 
   return (
     <>
-      <RdxHeader project={project} />
+      {showHeader && <RdxHeader project={project} />}
       <main
         id="rdx-main"
         tabIndex={-1}

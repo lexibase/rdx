@@ -281,7 +281,14 @@ export async function prepareRelease(
     )
     await run(
       'pnpm',
-      ['exec', 'turbo', 'run', 'build', '--filter=@lexibase/rdx-versioning...'],
+      [
+        'exec',
+        'turbo',
+        'run',
+        'build',
+        '--filter=@lexibase/rdx-versioning...',
+        '--filter=@lexibase/rdx-changelog...',
+      ],
       root
     )
     await run('pnpm', ['--filter', 'web', 'docs:version', version], root)
