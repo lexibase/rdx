@@ -22,6 +22,7 @@ export const releaseOrder = [
   'rdx-ui',
   'rdx-plugin-versioning',
   'rdx-plugin-i18n',
+  'rdx-plugin-changelog',
   'rdx-next',
   'rdx',
   'create-rdx',

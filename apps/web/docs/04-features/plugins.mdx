@@ -10,8 +10,9 @@ RDX only executes plugins listed in `rdx.config.ts`. Merely installing a package
 does not turn it on or create version files.
 
 The official plugins include `@lexibase/rdx-versioning` for snapshots and
-`@lexibase/rdx-i18n` for [multiple content languages](./languages.mdx). Search, TOC, and
-built-in MDX components do not need plugins.
+`@lexibase/rdx-i18n` for [multiple content languages](./languages.mdx), and
+`@lexibase/rdx-changelog` for [release notes](#publish-release-notes).
+Search, TOC, and built-in MDX components are part of RDX itself.
 
 ## Assisted installation
 
@@ -41,6 +42,45 @@ development server after activation.
 Use `rdx add i18n` to activate multilingual documentation. It uses the existing
 `lang` setting, asks for additional language tags and prepares their translation
 folders. See [Languages](./languages.mdx) for configuration and authoring.
+
+## Publish release notes
+
+Install the changelog plugin from your documentation project root.
+
+:::tabs
+
+### pnpm
+
+pnpm rdx add changelog
+
+### npm
+
+npm exec -- rdx add changelog
+
+### yarn
+
+yarn rdx add changelog
+
+:::
+
+Create `changelog/` beside `docs/`. Add one `.md` or `.mdx` file per release.
+
+```md title="changelog/1.2.0.md"
+---
+version: '1.2.0'
+date: '2026-11-12'
+title: Search improvements
+---
+
+Search now opens results in the selected language.
+```
+
+The **Changelog** link follows **Docs** in the navigation. The page lists
+releases newest first and gives each version a shareable link, such as
+`/changelog#v1.2.0`. Write the body in Markdown and use the same components
+as in your docs. Use site paths such as `/docs/getting-started` for docs links.
+Projects with `basePath` serve the page under that prefix. Projects with i18n
+share one changelog written in the primary language.
 
 ## Manual installation
 

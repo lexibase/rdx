@@ -14,6 +14,7 @@ const directories = [
   'rdx',
   'rdx-plugin-versioning',
   'rdx-plugin-i18n',
+  'rdx-plugin-changelog',
   'create-rdx',
 ]
 const manifest = async (filename) =>

@@ -59,6 +59,7 @@ test(
       ['rdx-types', 'rdx-types'],
       ['rdx-ui', 'rdx-ui'],
       ['rdx-i18n', 'rdx-plugin-i18n'],
+      ['rdx-changelog', 'rdx-plugin-changelog'],
       ['rdx-versioning', 'rdx-plugin-versioning'],
     ])
       await link(
@@ -75,6 +76,7 @@ test(
         name: 'rdx-localization-fixture',
         private: true,
         type: 'module',
+        dependencies: { '@lexibase/rdx-changelog': '*' },
       })
     )
     await write(
@@ -181,6 +183,8 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         return response.text()
       }
       const translated = await html('/pt-br/docs/guides/intro')
+      assert.doesNotMatch(translated, /href="\/changelog"/)
+      assert.equal((await fetch(base + '/changelog')).status, 404)
       assert.match(await html('/en/docs'), /OriginalIntroMarker/)
       assert.match(await html('/pt-br/docs'), /TranslatedIntroMarker/)
       assert.match(translated, /<html[^>]*lang="pt-BR"/)
@@ -353,6 +357,14 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
     await mkdir(path.join(root, 'locale/es-es/docs'), { recursive: true })
     const configFile = path.join(root, 'rdx.config.ts')
     const config = await readFile(configFile, 'utf8')
+    await write(
+      'changelog/old.md',
+      "---\nversion: '1.0.0'\ndate: '2025-01-01'\ntitle: First release\n---\n\nFirstReleaseMarker"
+    )
+    await write(
+      'changelog/new.mdx',
+      "---\nversion: '2.0.0'\ndate: '2026-01-01'\ntitle: New release\n---\n\n> [!NOTE]\n> LatestReleaseMarker\n\n![Logo](/logo.svg)"
+    )
     await writeFile(
       configFile,
       "import { versioning } from '@lexibase/rdx-versioning'\n" +
@@ -384,6 +396,8 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       )
       return result.stdout
     }
+    assert.match(command('add', 'changelog'), /Changelog activated/)
+    assert.match(command('add', 'changelog'), /Changelog is already configured/)
     command('version', '1.0.0')
     const frozenMetadata = await readFile(
       path.join(root, 'versioned_docs/version-1.0.0/.rdx-locales.json'),
@@ -449,6 +463,15 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       }
       const home = await html('/')
       assert.match(home, /data-rdx-home/)
+      assert.match(home, /href="\/minha-tool\/changelog"[^>]*>Changelog</)
+      const changes = await html('/changelog')
+      assert.match(changes, /id="v2\.0\.0"[\s\S]*id="v1\.0\.0"/)
+      assert.match(changes, /href="#v2\.0\.0"/)
+      assert.match(changes, /datetime="2026-01-01"/i)
+      assert.match(changes, /LatestReleaseMarker/)
+      assert.match(changes, /data-rdx-callout="note"/)
+      assert.match(changes, /FirstReleaseMarker/)
+      assert.match(changes, /src="\/minha-tool\/logo.svg"/)
       assert.equal(
         (home.match(/src="\/minha-tool\/brand\.png"/g) ?? []).length,
         2
@@ -729,6 +752,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         'utf8'
       )
     ).files.map((file) => file.replaceAll('\\', '/'))
+    assert.ok(frozenTrace.some((file) => file.endsWith('changelog/new.mdx')))
     assert.ok(
       frozenTrace.some((file) =>
         file.endsWith(

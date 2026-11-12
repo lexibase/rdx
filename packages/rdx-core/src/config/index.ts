@@ -19,6 +19,11 @@ import type {
 } from '@lexibase/rdx-types'
 
 export { RdxConfigError } from './error.js'
+export {
+  changelogPluginName,
+  getChangelogFiles,
+  readChangelog,
+} from './changelog'
 export { resolveProjectPath } from './paths'
 export { normalizeLocalization } from './localization'
 export { collectSnapshotContributions } from './snapshots'

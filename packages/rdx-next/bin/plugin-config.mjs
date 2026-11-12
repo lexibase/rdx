@@ -1,7 +1,9 @@
 import ts from 'typescript'
+import { changelogPluginName as changelogPackage } from '@lexibase/rdx-core/config'
 
 export const versioningPackage = '@lexibase/rdx-versioning'
 export const i18nPackage = '@lexibase/rdx-i18n'
+export { changelogPackage }
 const versioning = {
   packageName: versioningPackage,
   name: 'versioning',
@@ -11,6 +13,14 @@ const localization = { packageName: i18nPackage, name: 'i18n', label: 'i18n' }
 
 export function activateVersioning(source) {
   return editPluginConfig(source, versioning)
+}
+
+export function activateChangelog(source) {
+  return editPluginConfig(source, {
+    packageName: changelogPackage,
+    name: 'changelog',
+    label: 'Changelog',
+  })
 }
 
 export function inspectI18n(source) {

@@ -1,0 +1,36 @@
+{
+  "name": "@lexibase/rdx-changelog",
+  "version": "0.0.0",
+  "description": "Optional release notes for RDX documentation sites.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": "^22.18.0 || ^24.11.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean --external @lexibase/rdx-core --external @lexibase/rdx-types",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@lexibase/rdx-core": "workspace:*",
+    "@lexibase/rdx-types": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lexibase/rdx.git",
+    "directory": "packages/rdx-plugin-changelog"
+  }
+}

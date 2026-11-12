@@ -17,6 +17,7 @@ export function Navbar({
   leadingLinks,
   docsHref = '/docs',
   docsLink,
+  changelogHref,
   versionMenu,
   languageMenu,
   search,
@@ -31,6 +32,7 @@ export function Navbar({
   leadingLinks?: ReactNode
   docsHref?: string
   docsLink?: ReactNode
+  changelogHref?: string
   versionMenu?: ReactNode
   languageMenu?: ReactNode
   search?: ReactNode
@@ -64,6 +66,11 @@ export function Navbar({
         {docsLink ?? (
           <Button variant="link" size="sm" href={docsHref}>
             {messages.docs}
+          </Button>
+        )}
+        {changelogHref && (
+          <Button variant="link" size="sm" href={changelogHref}>
+            {messages.changelog}
           </Button>
         )}
         {github?.visible && github.url && (

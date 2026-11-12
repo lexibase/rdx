@@ -12,7 +12,11 @@ import {
   isFallbackPage,
   withBasePath,
 } from '@lexibase/rdx-core'
-import { getEditPageHref } from '@lexibase/rdx-core/config'
+import {
+  changelogPluginName,
+  getEditPageHref,
+  readChangelog,
+} from '@lexibase/rdx-core/config'
 import type {
   RdxLocale,
   RdxProject,
@@ -175,6 +179,11 @@ function RdxHeader({
           : getDocsHref(project)
       }
       docsHref={getDocsHref(project, source)}
+      changelogHref={
+        config.plugins.some(({ name }) => name === changelogPluginName)
+          ? '/changelog'
+          : undefined
+      }
       languageMenu={
         project.localization ? (
           <LanguageDropdown
@@ -203,6 +212,73 @@ function RdxHeader({
       github={config.navbar?.actions?.github}
       showToggleMode={config.navbar?.actions?.showToggleMode}
     />
+  )
+}
+
+export async function ChangelogPage({ project }: { project: RdxProject }) {
+  const { config } = project
+  if (!config.plugins.some(({ name }) => name === changelogPluginName))
+    notFound()
+
+  const messages = getMessages(config.lang)
+  const formatDate = new Intl.DateTimeFormat(config.lang, {
+    dateStyle: 'long',
+    timeZone: 'UTC',
+  })
+  const entries = await Promise.all(
+    readChangelog(project.rootDir).map(async (entry) => ({
+      ...entry,
+      rendered: await compileDocumentation(
+        entry.content,
+        getMdxComponents(config.lang),
+        {
+          sourceRoot: project.rootDir,
+          sourcePath: entry.sourcePath,
+          documents: [],
+          publicHref: (href) => withBasePath(href, config.basePath),
+        },
+        project.syntaxGrammars,
+        config.syntaxHighlighting?.themes
+      ),
+    }))
+  )
+
+  return (
+    <>
+      <RdxHeader project={project} />
+      <main
+        id="rdx-main"
+        tabIndex={-1}
+        className="min-h-0 flex-1 overflow-y-auto outline-none"
+      >
+        <div className="mx-auto max-w-3xl px-6 py-10 sm:py-14">
+          <h1 className="mb-8 text-3xl font-semibold tracking-tight">
+            {messages.changelog}
+          </h1>
+          {entries.length === 0 && (
+            <p className="text-muted-foreground">{messages.changelogEmpty}</p>
+          )}
+          {entries.map(({ version, date, title, rendered }) => (
+            <article
+              key={version}
+              id={`v${version}`}
+              className="scroll-mt-6 border-t py-7"
+            >
+              <div className="mb-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                <time dateTime={date}>{formatDate.format(new Date(date))}</time>
+                <a href={`#v${version}`} className="font-mono hover:underline">
+                  v{version}
+                </a>
+              </div>
+              <h2 className="mb-4 text-xl font-semibold">{title}</h2>
+              <div className="flex min-w-0 flex-col gap-4">
+                {rendered.content}
+              </div>
+            </article>
+          ))}
+        </div>
+      </main>
+    </>
   )
 }
 

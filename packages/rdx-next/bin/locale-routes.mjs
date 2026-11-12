@@ -1,6 +1,8 @@
 import { lstat, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import { changelogPluginName } from '@lexibase/rdx-core/config'
 
+const changelogFile = 'changelog/page.tsx'
 const defaultFiles = [
   'layout.tsx',
   'page.tsx',
@@ -9,6 +11,7 @@ const defaultFiles = [
 ]
 const generated = [
   ...defaultFiles.map((file) => `app/(rdx-default)/${file}`),
+  `app/(rdx-default)/${changelogFile}`,
   'app/(rdx-default)/[...notFound]/page.tsx',
   'app/(rdx-locales)/[locale]/layout.tsx',
   'app/(rdx-locales)/[locale]/page.tsx',
@@ -55,6 +58,17 @@ export async function prepareLocaleRoutes(project, runtime, template) {
   } catch (error) {
     if (error.code !== 'ENOENT') throw error
   }
+  const changelog = project.config.plugins.some(
+    ({ name }) => name === changelogPluginName
+  )
+  const rootFiles = changelog ? [...defaultFiles, changelogFile] : defaultFiles
+  if (!changelog) {
+    await rm(await safe(`app/${changelogFile}`), { force: true })
+    if (owned)
+      await rm(await safe(`app/(rdx-default)/${changelogFile}`), {
+        force: true,
+      })
+  }
   if (!project.localization) {
     if (owned) {
       for (const file of generated) await rm(await safe(file), { force: true })
@@ -79,7 +93,7 @@ export async function prepareLocaleRoutes(project, runtime, template) {
   }
   const layout = await readFile(path.join(template, 'app/layout.tsx'), 'utf8')
   const provider = layout.match(/from '([^']+\/runtime)'/)[1]
-  for (const file of defaultFiles) {
+  for (const file of rootFiles) {
     const text = await readFile(path.join(template, 'app', file), 'utf8')
     await emit(
       `app/(rdx-default)/${file}`,
@@ -190,6 +204,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ loc
 `
   )
   await writeFile(marker, JSON.stringify({ version: 1 }) + '\n')
-  for (const file of defaultFiles)
+  for (const file of rootFiles)
     await rm(await safe(`app/${file}`), { force: true })
 }
