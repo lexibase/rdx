@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import { mkdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { setTimeout } from 'node:timers/promises'
@@ -104,7 +104,7 @@ async function readVersion(spec) {
 }
 
 function publishArchive(archive) {
-  execFileSync(
+  const result = spawnSync(
     'npm',
     [
       'publish',
@@ -114,10 +114,19 @@ function publishArchive(archive) {
       '--access',
       'public',
       '--ignore-scripts',
+      '--color=false',
       `--registry=${registry}`,
     ],
-    { stdio: 'inherit' }
+    { stdio: ['inherit', 'inherit', 'pipe'], encoding: 'utf8' }
   )
+  if (result.stderr) process.stderr.write(result.stderr)
+  if (result.error) throw result.error
+  if (result.status !== 0) {
+    throw Object.assign(
+      new Error(`npm publish exited with ${result.signal ?? result.status}`),
+      { stderr: result.stderr }
+    )
+  }
 }
 
 export async function publishPackages(
@@ -129,6 +138,7 @@ export async function publishPackages(
     now = Date.now,
     log = console.log,
     dryRun = true,
+    runId = process.env.GITHUB_RUN_ID,
   } = {}
 ) {
   async function waitForVersion(name, version) {
@@ -198,7 +208,22 @@ export async function publishPackages(
   for (const { name, version, archive } of pending) {
     const spec = `${name}@${version}`
     log(`Publishing ${spec}`)
-    await publish(archive)
+    try {
+      await publish(archive)
+    } catch (error) {
+      if (!/^npm (?:error|ERR!) code E404\s*$/m.test(error?.stderr ?? ''))
+        throw error
+      const run = runId || '<run-id>'
+      throw new Error(
+        [
+          `npm returned E404 while publishing ${spec}. The package already exists on npm.`,
+          `Check its Trusted Publisher: npm trust list ${name}`,
+          'Expected GitHub repository lexibase/rdx, workflow publish.yml, no environment, and permission to publish.',
+          `After correcting the configuration, resume: gh run rerun ${run} --failed`,
+          `Watch the retry: gh run watch ${run} --exit-status`,
+        ].join('\n')
+      )
+    }
     await waitForVersion(name, version)
   }
 }

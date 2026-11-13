@@ -112,3 +112,45 @@ test('publication stops on registry errors and never downgrades latest', async (
     /Registry unavailable/
   )
 })
+
+test('npm publish E404 identifies the package and explains how to resume the run', async () => {
+  const published = []
+  const options = {
+    dryRun: false,
+    lookup: (spec) => (spec.endsWith('@latest') ? '1.0.0' : undefined),
+    log: () => {},
+    runId: '43474532837',
+  }
+  await assert.rejects(
+    publishPackages(packages, {
+      ...options,
+      publish: (archive) => {
+        published.push(archive)
+        throw Object.assign(new Error('npm publish failed'), {
+          stderr: 'npm error code E404\r\nnpm error 404 Not Found - PUT\r\n',
+        })
+      },
+    }),
+    ({ message }) => {
+      assert.match(message, /E404 while publishing @lexibase\/core@2\.0\.0/)
+      assert.match(message, /npm trust list @lexibase\/core/)
+      assert.match(message, /gh run rerun 43474532837 --failed/)
+      assert.match(message, /gh run watch 43474532837 --exit-status/)
+      return true
+    }
+  )
+  assert.deepEqual(published, ['core.tgz'])
+
+  const forbidden = Object.assign(new Error('npm publish failed'), {
+    stderr: 'npm error code E403\n',
+  })
+  await assert.rejects(
+    publishPackages(packages, {
+      ...options,
+      publish: () => {
+        throw forbidden
+      },
+    }),
+    (error) => error === forbidden
+  )
+})
