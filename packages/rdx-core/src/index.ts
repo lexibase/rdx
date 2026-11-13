@@ -1,5 +1,6 @@
 export { getDocument, getDocsIndex, getDocsPaths } from './content/index'
 export { withBasePath } from './content/base-path'
+export { collectPageRedirects } from './content/page-redirects'
 export {
   getLocalizedProject,
   getContentSources,

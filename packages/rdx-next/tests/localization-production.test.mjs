@@ -81,7 +81,7 @@ test(
     )
     await write(
       'docs/guides/intro.mdx',
-      '---\ntitle: Introduction\nlink_position: 1\n---\n\n## Hello\n\nOriginalIntroMarker\n\n[Install](./install.mdx#requirements)\n\n![Logo](/logo.svg)'
+      '---\ntitle: Introduction\nlink_position: 1\nredirectFrom: [/docs/old-intro]\n---\n\n## Hello\n\nOriginalIntroMarker\n\n[Install](./install.mdx#requirements)\n\n![Logo](/logo.svg)'
     )
     await write(
       'docs/guides/install.mdx',
@@ -89,7 +89,7 @@ test(
     )
     await write(
       'locale/ptbr/docs/guides/intro.mdx',
-      '---\ntitle: Introdução\n---\n\n## Olá\n\nTranslatedIntroMarker\n\n[Instalar](./install.mdx#requirements)\n\n![Logo](/logo.svg)'
+      '---\ntitle: Introdução\nredirectFrom: [/docs/introducao-antiga]\n---\n\n## Olá\n\nTranslatedIntroMarker\n\n[Instalar](./install.mdx#requirements)\n\n![Logo](/logo.svg)'
     )
     await mkdir(path.join(root, 'locale/es-es/docs'), { recursive: true })
     await mkdir(path.join(root, 'locale/fr-fr/docs'), { recursive: true })
@@ -623,6 +623,22 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         /^\/minha-tool\/pt-br\/docs\/1.1.0\/guides\/intro\?ref=old$/
       )
       const search = await html('/pt-br/rdx-search/1.1.0')
+      for (const [former, destination] of [
+        [
+          '/pt-br/docs/2.0.0/introducao-antiga',
+          '/pt-br/docs/2.0.0/guides/intro',
+        ],
+        ['/es-es/docs/2.0.0/old-intro', '/es-es/docs/2.0.0/guides/intro'],
+      ]) {
+        const alias = await fetch(`${base}${former}?ref=old`, {
+          redirect: 'manual',
+        })
+        assert.equal(alias.status, 308, former)
+        assert.equal(
+          alias.headers.get('location'),
+          `/minha-tool${destination}?ref=old`
+        )
+      }
       assert.match(search, /UpdatedPortugueseMarker/)
       assert.doesNotMatch(
         search,

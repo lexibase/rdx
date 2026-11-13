@@ -3,6 +3,7 @@ import path from 'node:path'
 
 import matter from 'gray-matter'
 import { parseStaticDocument } from './static-source'
+import { readRedirectFrom } from './page-redirects'
 import {
   DEFAULT_POSITION,
   documentExtension,
@@ -200,10 +201,12 @@ export function getDocsIndex(
     }
 
     let frontmatter: Record<string, unknown> = {}
+    let redirectFrom: string[] = []
     try {
       const raw = fs.readFileSync(/* turbopackIgnore: true */ filePath, 'utf8')
       const parsed = onError ? parseStaticDocument(raw) : matter(raw)
       frontmatter = isRecord(parsed.data) ? parsed.data : {}
+      redirectFrom = readRedirectFrom(frontmatter.redirectFrom)
     } catch (error) {
       if (!onError) throw error
       onError(error, filePath)
@@ -217,6 +220,7 @@ export function getDocsIndex(
 
     category.pages.push({
       slug,
+      ...(redirectFrom.length ? { redirectFrom } : {}),
       title: stringValue(frontmatter.title, fallbackTitle),
       ...(navTitle ? { navTitle } : {}),
       ...(highlighting === 'important' || highlighting === 'new'
