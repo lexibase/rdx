@@ -51,12 +51,13 @@ type Parsed = {
 }
 type Document = {
   page: RdxDocPage
+  sourcePath: string
   source: RdxContentSource
   href: string
   parsed?: Parsed
   lineOffset: number
 }
-type RouteTarget = { sourcePath: string; parsed?: Parsed }
+type RouteTarget = Document | { sourcePath: string; parsed?: Parsed }
 
 export type DocumentationDiagnostic = {
   file: string
@@ -68,6 +69,7 @@ export type DocumentationDiagnostic = {
 export type DocumentationCheck = {
   checkedPages: number
   diagnostics: DocumentationDiagnostic[]
+  warnings?: (Omit<DocumentationDiagnostic, 'code'> & { code: 'unlinked' })[]
 }
 
 /** Host adapters can describe aliases without changing the project's authoring API. */
@@ -175,6 +177,8 @@ export function checkDocumentation(
 ): DocumentationCheck {
   const diagnostics: DocumentationDiagnostic[] = []
   const documents: Document[] = []
+  const entryPages = new Set<Document>()
+  const referencedPages = new Set<Document>()
   const routes = new Map<string, RouteTarget>()
   const coreRoutes = new Map<string, RouteTarget>()
   const roots = new Set<string>(['/robots.txt', '/sitemap.xml'])
@@ -307,7 +311,7 @@ export function checkDocumentation(
         documentRoute(source, page),
       ]
       redirectSource.pages.push({ page, hrefs })
-      const document: Document & RouteTarget = {
+      const document: Document = {
         sourcePath: page.sourcePath,
         page,
         source,
@@ -318,6 +322,7 @@ export function checkDocumentation(
       for (const href of hrefs) routes.set(key(href), document)
       coreRoutes.set(key(documentRoute(source, page)), document)
       if (page === pages[0]) {
+        entryPages.add(document)
         routes.set(key(rootFor(source)), document)
         if (source === project.sources[0]) routes.set('/docs', document)
       }
@@ -458,6 +463,8 @@ export function checkDocumentation(
                 `Section "#${anchor}" does not exist in ${relativeFile(target.sourcePath)}.`
               )
           }
+          if ('page' in target && target.sourcePath !== sourcePath)
+            referencedPages.add(target)
           continue
         }
         if (!reference.image && roots.has(pathname)) continue
@@ -552,11 +559,32 @@ export function checkDocumentation(
       diagnostics.map((diagnostic) => [JSON.stringify(diagnostic), diagnostic])
     ).values(),
   ]
+  const warnings = documents
+    .filter(
+      (document) =>
+        document.parsed &&
+        document.source.badge !== 'Archived' &&
+        !entryPages.has(document) &&
+        !referencedPages.has(document) &&
+        !isFallbackPage(project, document.source, document.page.sourcePath)
+    )
+    .map(({ page, href }) => ({
+      file: relativeFile(page.sourcePath),
+      line: 1,
+      column: 1,
+      code: 'unlinked' as const,
+      message: `No inbound content links to ${href}. Link to this page from a relevant document or release note.`,
+    }))
+    .sort(
+      (a, b) =>
+        a.file.localeCompare(b.file) || a.message.localeCompare(b.message)
+    )
   return {
     checkedPages:
       new Set(documents.map((document) => document.page.sourcePath)).size +
       releases.length,
     diagnostics: unique,
+    ...(warnings.length ? { warnings } : {}),
   }
 }
 
@@ -565,8 +593,13 @@ export function formatDocumentationCheck(report: DocumentationCheck): string {
     (entry) =>
       `${entry.file}:${entry.line}:${entry.column} [${entry.code}] ${entry.message}`
   )
+  for (const warning of report.warnings ?? [])
+    lines.push(
+      `${warning.file}:${warning.line}:${warning.column} [warning: ${warning.code}] ${warning.message}`
+    )
+  const warningCount = report.warnings?.length ?? 0
   lines.push(
-    `RDX check ${report.diagnostics.length ? 'failed' : 'passed'}: ${report.checkedPages} ${report.checkedPages === 1 ? 'page' : 'pages'} checked, ${report.diagnostics.length} ${report.diagnostics.length === 1 ? 'problem' : 'problems'}.`
+    `RDX check ${report.diagnostics.length ? 'failed' : 'passed'}: ${report.checkedPages} ${report.checkedPages === 1 ? 'page' : 'pages'} checked, ${report.diagnostics.length} ${report.diagnostics.length === 1 ? 'problem' : 'problems'}${warningCount ? `, ${warningCount} ${warningCount === 1 ? 'warning' : 'warnings'}` : ''}.`
   )
   return lines.join('\n')
 }
