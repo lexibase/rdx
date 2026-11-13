@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 6.5.1 — Prepared
+
+- Reject executable frontmatter when indexing or loading Markdown and MDX documentation.
+
 ## 6.5.0 — Prepared
 
 - Add page prerequisites and related links, show the last updated date on documentation pages, and support redirects from former document URLs.
