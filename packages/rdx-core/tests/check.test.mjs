@@ -9,7 +9,7 @@ import {
   formatDocumentationCheck,
 } from '../dist/check/index.js'
 
-async function fixture(t, files, sources = []) {
+async function fixture(t, files, sources = [], plugins = []) {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rdx-check-'))
   t.after(() => fs.rmSync(rootDir, { recursive: true, force: true }))
   for (const [file, content] of Object.entries(files)) {
@@ -24,13 +24,65 @@ async function fixture(t, files, sources = []) {
       },
       homepage: { enabled: true },
       search: true,
-      plugins: sources.length
-        ? [{ name: 'fixtures', apiVersion: 1, setup: () => ({ sources }) }]
-        : [],
+      plugins: [
+        ...plugins,
+        ...(sources.length
+          ? [{ name: 'fixtures', apiVersion: 1, setup: () => ({ sources }) }]
+          : []),
+      ],
     },
     { rootDir, command: 'check' }
   )
 }
+
+test('checks release links, anchors and public assets when changelog is active', async (t) => {
+  const project = await fixture(
+    t,
+    {
+      'docs/guides/install.md': '## Setup\n\n[Release](/changelog#v1.0.0)\n',
+      'public/downloads/setup.zip': '',
+      'changelog/1.0.0.mdx': [
+        '---',
+        "version: '1.0.0'",
+        "date: '2026-11-13'",
+        'title: First release',
+        'links:',
+        '  - label: Guide',
+        '    href: /docs/guides/install#setup',
+        '  - label: Missing guide',
+        '    href: /docs/guides/missing',
+        '---',
+        '',
+        '## Changes',
+        '[This note](#changes) [Release](#v1.0.0)',
+        '[Download](/downloads/setup.zip) [Feed](/changelog/rss.xml)',
+        '[External](https://example.com/not-checked)',
+        '[Section](/docs/guides/install#missing)',
+        '![Image](/images/missing.png)',
+        '[Release](#v2.0.0)',
+      ].join('\n'),
+      'changelog/broken.md': '---\ntitle: Incomplete\n---\n',
+    },
+    [],
+    [{ name: '@lexibase/rdx-changelog', apiVersion: 1 }]
+  )
+  const report = checkDocumentation(project)
+  assert.equal(report.checkedPages, 2)
+  assert.deepEqual(
+    report.diagnostics.map(({ file, line, code }) => [file, line, code]),
+    [
+      ['changelog/1.0.0.mdx', 1, 'page'],
+      ['changelog/1.0.0.mdx', 16, 'anchor'],
+      ['changelog/1.0.0.mdx', 17, 'asset'],
+      ['changelog/1.0.0.mdx', 18, 'anchor'],
+      ['changelog/broken.md', 1, 'syntax'],
+    ]
+  )
+  assert.match(
+    report.diagnostics[0].message,
+    /links\[1\]\.href.*\/docs\/guides\/missing/
+  )
+})
 
 test('valid static links, exact heading IDs, literal anchors and assets pass without requests, rendering or writes', async (t) => {
   const project = await fixture(t, {

@@ -449,7 +449,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       await rmdir(
         path.join(root, `locale/es-es/versioned_docs/version-${version}`)
       )
-    assert.match(command('build'), /10 pages checked, 0 problems/)
+    assert.match(command('build'), /13 pages checked, 0 problems/)
     await rmdir(path.join(root, 'locale/es-es/docs'))
     assert.equal(
       await readFile(

@@ -66,6 +66,13 @@ not checked again.
 
 ## Static content
 
+With the [changelog plugin](../04-features/plugins.mdx#publish-release-notes),
+RDX checks links in each note's `links` frontmatter and Markdown body. This
+includes documentation pages, section anchors, links to other releases, and
+local images and downloads. Use paths from the site root, such as
+`/docs/installation` or `/downloads/example.zip`. Frontmatter diagnostics identify
+the field, such as `links[0].href`.
+
 Frontmatter is read as YAML or JSON data. RDX does not request external URLs or execute document imports, expressions or
 React components. Absolute links to the configured `metadata.metadataBase`
 origin are checked as local URLs.
