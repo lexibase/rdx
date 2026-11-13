@@ -45,7 +45,9 @@ export function readRelatedDocuments(value: unknown): string[] {
 
 export function getRelatedDocumentLinks(
   value: unknown,
-  options: DocumentLinkOptions & { documents: readonly RdxDocPage[] },
+  options: Omit<DocumentLinkOptions, 'documents'> & {
+    documents: readonly RdxDocPage[]
+  },
   currentSlug: string,
   hrefFor: (page: RdxDocPage) => string
 ) {
