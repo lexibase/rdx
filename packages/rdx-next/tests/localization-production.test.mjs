@@ -359,7 +359,8 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
     const config = await readFile(configFile, 'utf8')
     await write(
       'changelog/new.mdx',
-      "---\nversion: '2.0.0'\ndate: '2026-01-01'\ntitle: New release\n---\n\n> [!NOTE]\n> LatestReleaseMarker\n\n![Logo](/logo.svg)"
+      "---\nversion: '2.0.0'\ndate: '2026-01-01'\ntitle: New release\n---\n\n> [!NOTE]\n> LatestReleaseMarker\n\n![Logo](/logo.svg)" +
+        '\n\nDetails about the latest release.'.repeat(30)
     )
     await writeFile(
       configFile,
@@ -474,6 +475,8 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       const changes = await html('/changelog')
       assert.match(changes, /id="v2\.0\.0"[\s\S]*id="v1\.0\.0"/)
       assert.match(changes, /href="#v2\.0\.0"/)
+      assert.match(changes, /href="#v2\.0\.0" aria-current="location"/)
+      assert.match(changes, /aria-label="Copy link to release v1\.0\.0"/)
       assert.match(changes, /datetime="2026-01-01"/i)
       assert.match(changes, /LatestReleaseMarker/)
       assert.match(changes, /data-rdx-callout="note"/)
@@ -732,6 +735,33 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
               await page.waitForURL(
                 '**/minha-tool/pt-br/docs/1.1.0/guides/intro'
               )
+
+              const changelog = `${router}/minha-tool/changelog`
+              await page.goto(changelog)
+              const versions = page.getByRole('navigation', {
+                name: 'Versions',
+              })
+              const activeVersion = versions.locator(
+                '[aria-current="location"]'
+              )
+              await activeVersion.filter({ hasText: 'v2.0.0' }).waitFor()
+              await page.locator('#rdx-main').evaluate((main) => {
+                main.scrollTop = main.scrollHeight
+              })
+              await activeVersion.filter({ hasText: 'v1.0.0' }).waitFor()
+              await page
+                .getByRole('button', { name: 'Copy link to release v1.0.0' })
+                .click()
+              await page
+                .getByText('Release link copied.', { exact: true })
+                .waitFor()
+              assert.equal(
+                await page.evaluate(() => navigator.clipboard.readText()),
+                `${changelog}#v1.0.0`
+              )
+              await versions.getByRole('link', { name: 'v2.0.0' }).click()
+              await page.waitForURL(`${changelog}#v2.0.0`)
+              await activeVersion.filter({ hasText: 'v2.0.0' }).waitFor()
               assert.deepEqual(unexpected, [])
             } finally {
               await browser.close()

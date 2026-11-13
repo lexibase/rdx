@@ -32,7 +32,10 @@ import { DocsPageTransition } from '@lexibase/rdx-ui/components/docs-page-transi
 import { DocsSearch } from '@lexibase/rdx-ui/components/docs-search'
 import { Home, HomeSection } from '@lexibase/rdx-ui/components/home'
 import { SkipLink } from '@lexibase/rdx-ui/components/skip-link'
-import { Separator } from '@lexibase/rdx-ui/components/separator'
+import {
+  ChangelogVersions,
+  CopyReleaseLink,
+} from '@lexibase/rdx-ui/components/changelog-navigation'
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
 import { EditPageLink } from '@lexibase/rdx-ui/components/edit-page-link'
 import { CopyPage } from '@lexibase/rdx-ui/components/copy-page'
@@ -263,27 +266,9 @@ export async function ChangelogPage({
             {messages.changelog}
           </h1>
           {entries.length > 0 && (
-            <nav
-              aria-label={messages.changelogVersions}
-              className="mb-8 self-start md:sticky md:top-6 md:col-start-1 md:row-span-2 md:row-start-1 md:mb-0 md:max-h-[calc(100dvh-7rem)] md:overflow-y-auto"
-            >
-              <p className="text-sm font-medium md:mb-3 md:flex md:h-14 md:items-end">
-                {messages.changelogVersions}
-              </p>
-              <Separator className="my-3 md:mt-0" />
-              <ul className="flex flex-wrap gap-x-4 gap-y-2 md:flex-col">
-                {entries.map(({ version }) => (
-                  <li key={version}>
-                    <a
-                      href={`#v${version}`}
-                      className="block rounded-sm font-mono text-sm text-muted-foreground hover:text-foreground hover:underline"
-                    >
-                      v{version}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+            <ChangelogVersions
+              versions={entries.map(({ version }) => version)}
+            />
           )}
           <div className="min-w-0 md:col-start-2 md:row-start-2">
             {entries.length === 0 && (
@@ -305,6 +290,7 @@ export async function ChangelogPage({
                   >
                     v{version}
                   </a>
+                  <CopyReleaseLink version={version} />
                 </div>
                 <h2 className="mb-4 text-xl font-semibold">{title}</h2>
                 <div className="flex min-w-0 flex-col gap-4">
