@@ -9,6 +9,8 @@ import { releaseOrder } from './prepare-release.mjs'
 
 const registry = 'https://registry.npmjs.org/'
 const stable = /^\d+\.\d+\.\d+$/
+const propagationTimeout = 10 * 60_000
+const pollInterval = 10_000
 const json = async (filename) => JSON.parse(await readFile(filename, 'utf8'))
 
 export async function loadRelease(root, version) {
@@ -85,10 +87,13 @@ async function readVersion(spec) {
     cache: 'no-cache',
   })
   if (response.status === 404) return undefined
-  if (!response.ok)
-    throw new Error(
+  if (!response.ok) {
+    const error = new Error(
       `Could not check ${spec}: npm returned HTTP ${response.status}`
     )
+    error.retryable = [408, 429, 500, 502, 503, 504].includes(response.status)
+    throw error
+  }
   const { version } = await response.json()
   assert.equal(
     typeof version,
@@ -121,20 +126,47 @@ export async function publishPackages(
     lookup = readVersion,
     publish = publishArchive,
     wait = setTimeout,
+    now = Date.now,
     log = console.log,
     dryRun = true,
   } = {}
 ) {
+  async function waitForVersion(name, version) {
+    const spec = `${name}@${version}`
+    const deadline = now() + propagationTimeout
+    let waiting = false
+    while (true) {
+      try {
+        const latest = await lookup(`${name}@latest`)
+        if (latest === version && (await lookup(spec)) === version) return
+        if (latest !== undefined && compareVersions(latest, version) > 0)
+          throw new Error(
+            `${name}@latest already points to newer version ${latest}`
+          )
+      } catch (error) {
+        if (
+          !error.retryable &&
+          !['TimeoutError', 'TypeError'].includes(error.name)
+        )
+          throw error
+      }
+      const remaining = deadline - now()
+      if (remaining <= 0)
+        throw new Error(
+          `npm did not expose ${spec} with the latest tag within 10 minutes. Check the registry before resuming this release.`
+        )
+      if (!waiting) log(`Waiting for npm to expose ${spec} with the latest tag`)
+      waiting = true
+      await wait(Math.min(remaining, pollInterval))
+    }
+  }
+
+  const pending = []
   for (const { name, version, archive } of packages) {
     const spec = `${name}@${version}`
     const existing = await lookup(spec)
     if (existing === version) {
-      if (!dryRun)
-        assert.equal(
-          await lookup(`${name}@latest`),
-          version,
-          `${spec} already exists but does not have the latest tag`
-        )
+      if (!dryRun) await waitForVersion(name, version)
       log(`Already on npm: ${spec}`)
       continue
     }
@@ -143,42 +175,39 @@ export async function publishPackages(
       undefined,
       `Unexpected registry response for ${spec}`
     )
-    if (dryRun) {
-      log(`Would publish: ${spec}`)
+    const latest = await lookup(`${name}@latest`)
+    if (!dryRun && latest === version) {
+      await waitForVersion(name, version)
+      log(`Already on npm: ${spec}`)
       continue
     }
-
-    // A retry of an older workflow must not move latest backwards.
-    const latest = await lookup(`${name}@latest`)
-    if (latest !== undefined) {
-      assert.match(
-        latest,
-        stable,
-        `${name}@latest must point to a stable release`
-      )
-      const [major, minor, patch] = latest.split('.').map(Number)
-      const [nextMajor, nextMinor, nextPatch] = version.split('.').map(Number)
-      assert.ok(
-        (nextMajor - major || nextMinor - minor || nextPatch - patch) > 0,
-        `Refusing to move ${name}@latest backwards from ${latest}`
-      )
+    if (latest === undefined) {
+      const message = `First publication required for ${spec}. Publish its verified archive with npm authentication, then rerun the workflow.`
+      if (!dryRun) throw new Error(message)
+      log(message)
+    } else if (dryRun) {
+      log(`Would publish: ${spec}`)
     }
-
-    log(`Publishing ${spec}`)
-    publish(archive)
-    for (let attempt = 0; ; attempt++) {
-      if (
-        (await lookup(spec)) === version &&
-        (await lookup(`${name}@latest`)) === version
-      )
-        break
-      if (attempt === 36)
-        throw new Error(
-          `${spec} is not visible with the latest tag yet. Check npm and retry the workflow.`
-        )
-      await wait(5000)
-    }
+    if (dryRun) continue
+    assert.ok(
+      compareVersions(latest, version) < 0,
+      `Refusing to move ${name}@latest backwards from ${latest}`
+    )
+    pending.push({ name, version, archive })
   }
+  for (const { name, version, archive } of pending) {
+    const spec = `${name}@${version}`
+    log(`Publishing ${spec}`)
+    await publish(archive)
+    await waitForVersion(name, version)
+  }
+}
+
+function compareVersions(left, right) {
+  assert.match(left, stable, 'npm latest must point to a stable release')
+  const [major, minor, patch] = left.split('.').map(Number)
+  const [nextMajor, nextMinor, nextPatch] = right.split('.').map(Number)
+  return major - nextMajor || minor - nextMinor || patch - nextPatch
 }
 
 async function main() {
