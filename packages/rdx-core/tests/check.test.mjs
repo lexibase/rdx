@@ -5,6 +5,7 @@ import path from 'node:path'
 import test from 'node:test'
 import {
   createRdxProject,
+  getDocument,
   getDocsIndex,
   getRelatedDocumentLinks,
 } from '../dist/index.js'
@@ -346,6 +347,23 @@ test('repeated checks retain frontmatter errors with YAML locations and never ru
   assert.match(first.diagnostics[1].message, /YAML or JSON/)
   assert.deepEqual(checkDocumentation(project), first)
   assert.equal(globalThis.__rdxCheckExecuted, undefined)
+})
+
+test('the documentation index and page loader reject executable frontmatter', async (t) => {
+  const project = await fixture(t, {
+    'docs/executable.mdx':
+      '\uFEFF---JaVaScRiPt\r\n(() => { globalThis.__rdxFrontmatterExecuted = true; return {} })()\r\n---\r\nText',
+  })
+  t.after(() => {
+    delete globalThis.__rdxFrontmatterExecuted
+  })
+  const options = { docsDir: path.join(project.rootDir, 'docs') }
+  assert.throws(() => getDocsIndex(options), /YAML or JSON frontmatter/)
+  assert.throws(
+    () => getDocument('executable', options),
+    /YAML or JSON frontmatter/
+  )
+  assert.equal(globalThis.__rdxFrontmatterExecuted, undefined)
 })
 
 test('JSON frontmatter and BOM/CRLF files preserve static parsing and original line numbers', async (t) => {
