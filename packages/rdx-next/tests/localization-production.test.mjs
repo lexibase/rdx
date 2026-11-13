@@ -360,7 +360,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
     const config = await readFile(configFile, 'utf8')
     await write(
       'changelog/new.mdx',
-      "---\nversion: '2.0.0'\ndate: '2026-01-01'\ntitle: New release\nbadge: breaking, security, deprecated\n---\n\n> [!NOTE]\n> LatestReleaseMarker\n\n![Logo](/logo.svg)" +
+      "---\nversion: '2.0.0'\ndate: '2026-01-01'\ntitle: New release\nbadge: breaking, security, deprecated\nlinks:\n  - label: Migration guide\n    href: /en/docs/2.0.0/guides/intro\n  - label: Security advisory\n    href: https://example.com/advisory\n---\n\n> [!NOTE]\n> LatestReleaseMarker\n\n![Logo](/logo.svg)" +
         '\n\nDetails about the latest release.'.repeat(30)
     )
     await writeFile(
@@ -508,6 +508,15 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         /data-slot="badge"[^>]*>Breaking changes<.*data-slot="badge"[^>]*>Security<.*data-slot="badge"[^>]*>Deprecated</s
       )
       assert.doesNotMatch(firstRelease, /<span[^>]*data-slot="badge"/)
+      assert.match(
+        latestRelease,
+        /href="\/minha-tool\/en\/docs\/2\.0\.0\/guides\/intro"[^>]*>Migration guide</
+      )
+      assert.match(
+        latestRelease,
+        /href="https:\/\/example\.com\/advisory"[^>]*>Security advisory</
+      )
+      assert.doesNotMatch(firstRelease, /Migration guide|Security advisory/)
       assert.match(changes, /LatestReleaseMarker/)
       assert.match(changes, /data-rdx-callout="note"/)
       assert.match(changes, /FirstReleaseMarker/)
@@ -521,8 +530,15 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       const releaseMarkdown = await releaseExport.text()
       assert.match(
         releaseMarkdown,
-        /^---\ntitle: "New release"\nversion: "2\.0\.0"\ndate: "2026-01-01"\nbadge: "breaking, security, deprecated"\nurl: "[^"]+\/minha-tool\/changelog#v2\.0\.0"\n---/
+        /^---\ntitle: "New release"\nversion: "2\.0\.0"\ndate: "2026-01-01"\nbadge: "breaking, security, deprecated"\nlinks: .+\nurl: "[^"]+\/minha-tool\/changelog#v2\.0\.0"\n---/
       )
+      assert.deepEqual(JSON.parse(releaseMarkdown.match(/^links: (.+)$/m)[1]), [
+        {
+          label: 'Migration guide',
+          href: 'https://docs.example.test/minha-tool/en/docs/2.0.0/guides/intro',
+        },
+        { label: 'Security advisory', href: 'https://example.com/advisory' },
+      ])
       assert.match(releaseMarkdown, /LatestReleaseMarker/)
       assert.match(releaseMarkdown, /\/minha-tool\/logo\.svg/)
       assert.doesNotMatch(releaseMarkdown, /FirstReleaseMarker/)

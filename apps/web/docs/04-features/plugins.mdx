@@ -103,6 +103,18 @@ date. Separate multiple values with commas, as in `badge: breaking, deprecated`.
 - `security` marks a security update.
 - `deprecated` marks a feature that still works and has a recommended replacement.
 
+Add optional `links` to display actions below the release title. Use a path
+from the site root or a full HTTP(S) URL. RDX applies your `basePath` to site
+paths.
+
+```yaml
+links:
+  - label: Migration guide
+    href: /docs/migrating-to-v7
+  - label: Release notes on GitHub
+    href: https://github.com/example/project/releases/tag/v7.0.0
+```
+
 The **Changelog** link follows **Docs** in the navigation. The **Versions**
 list highlights the release you are reading. Use the copy icon beside a
 release date to share a direct link such as `/changelog#v1.2.0`.

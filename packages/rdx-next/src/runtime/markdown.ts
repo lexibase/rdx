@@ -177,7 +177,7 @@ export function getChangelogMarkdownResponse(
   )
   if (!entry) return markdownNotFound()
 
-  const { title, version, date, badges, content, sourcePath } = entry
+  const { title, version, date, badges, links, content, sourcePath } = entry
   const body = exportMarkdownBody(content, {
     sourceRoot: project.rootDir,
     sourcePath,
@@ -193,13 +193,24 @@ export function getChangelogMarkdownResponse(
       version,
       date,
       ...(badges.length ? { badge: badges.join(', ') } : {}),
+      ...(links.length
+        ? {
+            links: links.map(({ label, href }) => ({
+              label,
+              href: href.startsWith('/') ? publicUrl(project, href) : href,
+            })),
+          }
+        : {}),
       url: publicUrl(project, `/changelog#v${encodeURIComponent(version)}`),
     },
     body
   )
 }
 
-function markdownResponse(frontmatter: Record<string, string>, body: string) {
+function markdownResponse(
+  frontmatter: Record<string, string | { label: string; href: string }[]>,
+  body: string
+) {
   const fields = Object.entries(frontmatter).map(
     ([key, value]) => `${key}: ${JSON.stringify(value)}`
   )

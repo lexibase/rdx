@@ -283,43 +283,64 @@ export async function ChangelogPage({
             {entries.length === 0 && (
               <p className="text-muted-foreground">{messages.changelogEmpty}</p>
             )}
-            {entries.map(({ version, date, title, badges, rendered }) => (
-              <article
-                key={version}
-                id={`v${version}`}
-                className="scroll-mt-6 border-t py-7"
-              >
-                <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <time dateTime={date}>
-                      {formatDate.format(new Date(date))}
-                    </time>
-                    <a
-                      href={`#v${version}`}
-                      className="font-mono hover:underline"
-                    >
-                      v{version}
-                    </a>
-                    <CopyReleaseLink version={version} />
+            {entries.map(
+              ({ version, date, title, badges, links, rendered }) => (
+                <article
+                  key={version}
+                  id={`v${version}`}
+                  className="scroll-mt-6 border-t py-7"
+                >
+                  <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <time dateTime={date}>
+                        {formatDate.format(new Date(date))}
+                      </time>
+                      <a
+                        href={`#v${version}`}
+                        className="font-mono hover:underline"
+                      >
+                        v{version}
+                      </a>
+                      <CopyReleaseLink version={version} />
+                    </div>
+                    <div className="ms-auto flex flex-wrap items-center justify-end gap-2">
+                      <ChangelogBadges badges={badges} />
+                      <CopyPage
+                        href={withBasePath(
+                          getMarkdownHref(
+                            `/changelog/${encodeURIComponent(version)}`
+                          ),
+                          config.basePath
+                        )}
+                      />
+                    </div>
                   </div>
-                  <div className="ms-auto flex flex-wrap items-center justify-end gap-2">
-                    <ChangelogBadges badges={badges} />
-                    <CopyPage
-                      href={withBasePath(
-                        getMarkdownHref(
-                          `/changelog/${encodeURIComponent(version)}`
-                        ),
-                        config.basePath
-                      )}
-                    />
+                  <div className="mb-4">
+                    <h2 className="text-xl font-semibold">{title}</h2>
+                    {links.length > 0 && (
+                      <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                        {links.map(({ label, href }, index) => (
+                          <li key={index} className="min-w-0">
+                            <Button
+                              variant="link"
+                              size="sm"
+                              className="h-auto px-0 text-rdx-selected whitespace-normal wrap-anywhere"
+                              href={href}
+                              prefetch={false}
+                            >
+                              {label}
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
-                </div>
-                <h2 className="mb-4 text-xl font-semibold">{title}</h2>
-                <div className="flex min-w-0 flex-col gap-4">
-                  {rendered.content}
-                </div>
-              </article>
-            ))}
+                  <div className="flex min-w-0 flex-col gap-4">
+                    {rendered.content}
+                  </div>
+                </article>
+              )
+            )}
           </div>
         </div>
       </main>

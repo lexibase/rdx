@@ -6,6 +6,30 @@ import { boundedProjectPath } from './paths'
 
 export const changelogPluginName = '@lexibase/rdx-changelog'
 
+function readLinks(value: unknown) {
+  if (value === undefined) return []
+  if (!Array.isArray(value)) throw new Error('links must be a list')
+
+  return value.map((link, index) => {
+    const field = `links[${index}]`
+    if (!link || typeof link !== 'object' || Array.isArray(link))
+      throw new Error(`${field} must have a label and an href`)
+    const { label, href } = link
+    if (typeof label !== 'string' || !label.trim())
+      throw new Error(`${field}.label must be a non-empty string`)
+    if (
+      typeof href !== 'string' ||
+      /[\s\\]/.test(href) ||
+      !/^(?:\/(?!\/)|https?:\/\/)/i.test(href) ||
+      !URL.canParse(href, 'https://rdx.invalid')
+    )
+      throw new Error(
+        `${field}.href must be a root-relative path or HTTP(S) URL`
+      )
+    return { label: label.trim(), href }
+  })
+}
+
 function readBadges(value: unknown) {
   if (value === undefined) return []
   const invalidBadge =
@@ -87,6 +111,7 @@ export function readChangelog(rootDir: string) {
           version,
           date,
           badges: readBadges(data.badge),
+          links: readLinks(data.links),
           content,
           filename,
           sourcePath,
