@@ -16,7 +16,7 @@ export function DocumentLastUpdated({
   }).format(value)
 
   return (
-    <p className="my-4 w-full text-sm text-muted-foreground md:mx-auto md:max-w-[860px]">
+    <p className="mb-4 w-full text-sm text-muted-foreground md:mx-auto md:max-w-[860px]">
       <time dateTime={date}>
         {formatMessage(getMessages(lang).lastUpdated, { date: formatted })}
       </time>

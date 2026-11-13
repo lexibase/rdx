@@ -37,9 +37,13 @@ export async function DocFooter({
 
   return (
     <footer className="flex flex-col gap-6 pt-3">
-      {editHref && <EditPageLink href={editHref} lang={config.lang} />}
       <RelatedDocuments links={relatedLinks} lang={config.lang} />
-      <DocumentLastUpdated date={lastUpdated} lang={config.lang} />
+      {(editHref || lastUpdated) && (
+        <div className="flex flex-col gap-2 not-first:mt-4">
+          {editHref && <EditPageLink href={editHref} lang={config.lang} />}
+          <DocumentLastUpdated date={lastUpdated} lang={config.lang} />
+        </div>
+      )}
       <section className="mt-4 mb-10 flex w-full items-center justify-between md:mx-auto md:max-w-[860px]">
         {prevLink ? (
           <Button

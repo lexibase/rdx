@@ -528,6 +528,11 @@ export async function DocsPage({
     ? resolveDocsRoute(originalProject, slug).categories
     : categories
   const contentLanguage = fallback ? primaryLocale!.code : project.config.lang
+  const lastUpdated = getDocumentLastUpdated(
+    originalProject,
+    contentSource,
+    document.sourcePath
+  )
   const documentLinks = {
     sourceRoot: contentOptions.docsDir,
     sourcePath: document.sourcePath,
@@ -691,21 +696,24 @@ export async function DocsPage({
                 </div>
               </main>
               <footer className="flex flex-col gap-6 pt-3">
-                {editHref && (
-                  <EditPageLink href={editHref} lang={project.config.lang} />
-                )}
                 <RelatedDocuments
                   links={relatedLinks}
                   lang={project.config.lang}
                 />
-                <DocumentLastUpdated
-                  date={getDocumentLastUpdated(
-                    originalProject,
-                    contentSource,
-                    document.sourcePath
-                  )}
-                  lang={project.config.lang}
-                />
+                {(editHref || lastUpdated) && (
+                  <div className="flex flex-col gap-2 not-first:mt-4">
+                    {editHref && (
+                      <EditPageLink
+                        href={editHref}
+                        lang={project.config.lang}
+                      />
+                    )}
+                    <DocumentLastUpdated
+                      date={lastUpdated}
+                      lang={project.config.lang}
+                    />
+                  </div>
+                )}
                 <section className="mt-4 mb-10 flex w-full items-center justify-between md:mx-auto md:max-w-[860px]">
                   {previous ? (
                     <Button
