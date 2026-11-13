@@ -28,7 +28,7 @@
     "prettier": "^3.9.10",
     "tsup": "^9.0.0",
     "turbo": "^2.11.10",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   },
   "packageManager": "pnpm@9.0.0",
   "pnpm": {
