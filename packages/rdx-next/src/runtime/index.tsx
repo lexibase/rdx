@@ -12,7 +12,11 @@ import {
   isFallbackPage,
   withBasePath,
 } from '@lexibase/rdx-core'
-import { getEditPageHref } from '@lexibase/rdx-core/config'
+import {
+  changelogPluginName,
+  getEditPageHref,
+  readChangelog,
+} from '@lexibase/rdx-core/config'
 import type {
   RdxLocale,
   RdxProject,
@@ -28,6 +32,11 @@ import { DocsPageTransition } from '@lexibase/rdx-ui/components/docs-page-transi
 import { DocsSearch } from '@lexibase/rdx-ui/components/docs-search'
 import { Home, HomeSection } from '@lexibase/rdx-ui/components/home'
 import { SkipLink } from '@lexibase/rdx-ui/components/skip-link'
+import {
+  ChangelogBadges,
+  ChangelogContent,
+  CopyReleaseLink,
+} from '@lexibase/rdx-ui/components/changelog-navigation'
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
 import { EditPageLink } from '@lexibase/rdx-ui/components/edit-page-link'
 import { CopyPage } from '@lexibase/rdx-ui/components/copy-page'
@@ -54,11 +63,13 @@ export {
   getLocalizedProject,
 } from '@lexibase/rdx-core'
 export { getSearchResponse, getSearchSources } from './search'
+export { getChangelogFeedResponse } from './changelog-feed'
 export { getSourceRobots, getRdxRobots, getRdxSitemap } from './indexing'
 export {
   getLlmIndexResponse,
   getMarkdownHref,
   getMarkdownPaths,
+  getChangelogMarkdownResponse,
   getMarkdownResponse,
   getDocumentMarkdownResponse,
   parseMarkdownPath,
@@ -175,6 +186,11 @@ function RdxHeader({
           : getDocsHref(project)
       }
       docsHref={getDocsHref(project, source)}
+      changelogHref={
+        config.plugins.some(({ name }) => name === changelogPluginName)
+          ? '/changelog'
+          : undefined
+      }
       languageMenu={
         project.localization ? (
           <LanguageDropdown
@@ -203,6 +219,113 @@ function RdxHeader({
       github={config.navbar?.actions?.github}
       showToggleMode={config.navbar?.actions?.showToggleMode}
     />
+  )
+}
+
+export async function ChangelogPage({
+  project,
+  showHeader = true,
+}: {
+  project: RdxProject
+  showHeader?: boolean
+}) {
+  const { config } = project
+  if (!config.plugins.some(({ name }) => name === changelogPluginName))
+    notFound()
+
+  const formatDate = new Intl.DateTimeFormat(config.lang, {
+    dateStyle: 'long',
+    timeZone: 'UTC',
+  })
+  const entries = await Promise.all(
+    readChangelog(project.rootDir).map(async (entry) => ({
+      ...entry,
+      rendered: await compileDocumentation(
+        entry.content,
+        getMdxComponents(config.lang),
+        {
+          sourceRoot: project.rootDir,
+          sourcePath: entry.sourcePath,
+          documents: [],
+          publicHref: (href) => withBasePath(href, config.basePath),
+        },
+        project.syntaxGrammars,
+        config.syntaxHighlighting?.themes
+      ),
+    }))
+  )
+
+  return (
+    <>
+      {showHeader && <RdxHeader project={project} />}
+      <main
+        id="rdx-main"
+        tabIndex={-1}
+        className="min-h-0 flex-1 overflow-y-auto outline-none"
+      >
+        <ChangelogContent
+          feedHref={withBasePath('/changelog/rss.xml', config.basePath)}
+          releases={entries.map(
+            ({ version, date, title, badges, links, rendered }) => ({
+              version,
+              badges,
+              note: (
+                <>
+                  <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <time dateTime={date}>
+                        {formatDate.format(new Date(date))}
+                      </time>
+                      <a
+                        href={`#v${version}`}
+                        className="font-mono hover:underline"
+                      >
+                        v{version}
+                      </a>
+                      <CopyReleaseLink version={version} />
+                    </div>
+                    <div className="ms-auto flex flex-wrap items-center justify-end gap-2">
+                      <ChangelogBadges badges={badges} />
+                      <CopyPage
+                        href={withBasePath(
+                          getMarkdownHref(
+                            `/changelog/${encodeURIComponent(version)}`
+                          ),
+                          config.basePath
+                        )}
+                      />
+                    </div>
+                  </div>
+                  <div className="mb-4">
+                    <h2 className="text-xl font-semibold">{title}</h2>
+                    {links.length > 0 && (
+                      <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                        {links.map(({ label, href }, index) => (
+                          <li key={index} className="min-w-0">
+                            <Button
+                              variant="link"
+                              size="sm"
+                              className="h-auto px-0 text-rdx-selected whitespace-normal wrap-anywhere"
+                              href={href}
+                              prefetch={false}
+                            >
+                              {label}
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  <div className="flex min-w-0 flex-col gap-4">
+                    {rendered.content}
+                  </div>
+                </>
+              ),
+            })
+          )}
+        />
+      </main>
+    </>
   )
 }
 

@@ -10,8 +10,10 @@ import {
 } from '@lexibase/rdx-core'
 import { exportMarkdownBody } from '@lexibase/rdx-core/mdx'
 import {
+  changelogPluginName,
   createDocumentDateReader,
   getSnapshotDocumentDate,
+  readChangelog,
 } from '@lexibase/rdx-core/config'
 import type {
   RdxContentSource,
@@ -52,6 +54,12 @@ function text(value: string) {
 
 export function getMarkdownHref(htmlPath: string) {
   return `/rdx-markdown${htmlPath}.md`
+}
+
+function changelogEntries(project: RdxProject) {
+  return project.config.plugins.some(({ name }) => name === changelogPluginName)
+    ? readChangelog(project.rootDir)
+    : []
 }
 
 function response(body: string | null, type: string, status = 200) {
@@ -105,6 +113,9 @@ export function getMarkdownPaths(
   documentPath?: DocumentPath
 ) {
   const paths = new Set<string>()
+  for (const { version } of changelogEntries(project)) {
+    paths.add(`changelog/${encodeURIComponent(version)}.md`)
+  }
   for (const source of getContentSources(project)) {
     if (source.redirectTo !== undefined) continue
     for (const category of getDocsIndex(getSourceOptions(project, source))) {
@@ -132,6 +143,8 @@ export function parseMarkdownPath(path: string[]) {
 export function getMarkdownResponse(project: RdxProject, path: string[]) {
   const segments = parseMarkdownPath(path)
   if (!segments) return markdownNotFound()
+  if (segments[0] === 'changelog')
+    return getChangelogMarkdownResponse(project, segments.slice(1))
   if (project.localization) {
     const locale = segments.shift()
     if (!project.localization.locales.some((entry) => entry.path === locale))
@@ -152,6 +165,56 @@ export function getMarkdownResponse(project: RdxProject, path: string[]) {
 
 export function markdownNotFound() {
   return response(null, 'text/markdown', 404)
+}
+
+export function getChangelogMarkdownResponse(
+  project: RdxProject,
+  segments: string[]
+) {
+  if (segments.length !== 1) return markdownNotFound()
+  const entry = changelogEntries(project).find(
+    ({ version }) => version === segments[0]
+  )
+  if (!entry) return markdownNotFound()
+
+  const { title, version, date, badges, links, content, sourcePath } = entry
+  const body = exportMarkdownBody(content, {
+    sourceRoot: project.rootDir,
+    sourcePath,
+    documents: [],
+    publicHref: (value) =>
+      value.startsWith('/') && !value.startsWith('//')
+        ? publicUrl(project, value)
+        : value,
+  })
+  return markdownResponse(
+    {
+      title,
+      version,
+      date,
+      ...(badges.length ? { badge: badges.join(', ') } : {}),
+      ...(links.length
+        ? {
+            links: links.map(({ label, href }) => ({
+              label,
+              href: href.startsWith('/') ? publicUrl(project, href) : href,
+            })),
+          }
+        : {}),
+      url: publicUrl(project, `/changelog#v${encodeURIComponent(version)}`),
+    },
+    body
+  )
+}
+
+function markdownResponse(
+  frontmatter: Record<string, string | { label: string; href: string }[]>,
+  body: string
+) {
+  const fields = Object.entries(frontmatter).map(
+    ([key, value]) => `${key}: ${JSON.stringify(value)}`
+  )
+  return response(`---\n${fields.join('\n')}\n---\n\n${body}`, 'text/markdown')
 }
 
 export function getDocumentMarkdownResponse(
@@ -183,9 +246,6 @@ export function getDocumentMarkdownResponse(
     docs_index: publicUrl(project, indexPath(project)),
     ...(lastUpdated ? { lastUpdated } : {}),
   }
-  const fields = Object.entries(frontmatter).map(
-    ([key, value]) => `${key}: ${JSON.stringify(value)}`
-  )
   const body = exportMarkdownBody(document.content, {
     sourceRoot: options.docsDir,
     sourcePath: document.sourcePath,
@@ -204,5 +264,5 @@ export function getDocumentMarkdownResponse(
         }
       : {}),
   })
-  return response(`---\n${fields.join('\n')}\n---\n\n${body}`, 'text/markdown')
+  return markdownResponse(frontmatter, body)
 }

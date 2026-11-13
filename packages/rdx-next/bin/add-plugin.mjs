@@ -14,6 +14,8 @@ import {
   activateI18n,
   inspectI18n,
   i18nPackage,
+  activateChangelog,
+  changelogPackage,
 } from './plugin-config.mjs'
 import {
   askI18nLanguages,
@@ -72,8 +74,9 @@ function pluginInstallRequest(version, declared, packageName) {
 export function parseAddArguments(args) {
   const [plugin, ...rest] = args
   const usage =
-    'Usage: rdx add versioning|i18n [--package-manager npm|pnpm|yarn]. i18n also accepts --locales en,es-ES.'
-  if (!['versioning', 'i18n'].includes(plugin)) throw new Error(usage)
+    'Usage: rdx add versioning|i18n|changelog [--package-manager npm|pnpm|yarn]. i18n also accepts --locales en,es-ES.'
+  if (!['versioning', 'i18n', 'changelog'].includes(plugin))
+    throw new Error(usage)
   const options = {}
   for (let index = 0; index < rest.length; index += 2) {
     const flag = rest[index]
@@ -204,7 +207,8 @@ async function validateCandidate(filename, packageName) {
       plugins: config.plugins.map((plugin) => ({
         ...plugin,
         setup:
-          packageName === i18nPackage && plugin.name === i18nPackage
+          [i18nPackage, changelogPackage].includes(packageName) &&
+          plugin.name === packageName
             ? plugin.setup
             : undefined,
       })),
@@ -225,6 +229,14 @@ export async function addVersioning(rootDir, options = {}) {
     packageName: versioningPackage,
     label: 'Versioning',
     activate: activateVersioning,
+  })
+}
+
+export async function addChangelog(rootDir, options = {}) {
+  return addPlugin(rootDir, options, {
+    packageName: changelogPackage,
+    label: 'Changelog',
+    activate: activateChangelog,
   })
 }
 

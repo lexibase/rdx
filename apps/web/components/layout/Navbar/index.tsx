@@ -31,6 +31,7 @@ export function Navbar() {
       leadingLinks={<NavbarTemplatesLink />}
       versionMenu={<DropdownVersion />}
       docsLink={<NavbarLinks />}
+      changelogHref="/changelog"
       github={config.navbar.actions?.github}
       showToggleMode={config.navbar.actions?.showToggleMode}
     />

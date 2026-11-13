@@ -59,6 +59,7 @@ test(
       ['rdx-types', 'rdx-types'],
       ['rdx-ui', 'rdx-ui'],
       ['rdx-i18n', 'rdx-plugin-i18n'],
+      ['rdx-changelog', 'rdx-plugin-changelog'],
       ['rdx-versioning', 'rdx-plugin-versioning'],
     ])
       await link(
@@ -75,6 +76,7 @@ test(
         name: 'rdx-localization-fixture',
         private: true,
         type: 'module',
+        dependencies: { '@lexibase/rdx-changelog': '*' },
       })
     )
     await write(
@@ -181,6 +183,9 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         return response.text()
       }
       const translated = await html('/pt-br/docs/guides/intro')
+      assert.doesNotMatch(translated, /href="\/changelog"/)
+      assert.equal((await fetch(base + '/changelog')).status, 404)
+      assert.equal((await fetch(base + '/changelog/rss.xml')).status, 404)
       assert.match(await html('/en/docs'), /OriginalIntroMarker/)
       assert.match(await html('/pt-br/docs'), /TranslatedIntroMarker/)
       assert.match(translated, /<html[^>]*lang="pt-BR"/)
@@ -353,6 +358,11 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
     await mkdir(path.join(root, 'locale/es-es/docs'), { recursive: true })
     const configFile = path.join(root, 'rdx.config.ts')
     const config = await readFile(configFile, 'utf8')
+    await write(
+      'changelog/new.mdx',
+      "---\nversion: '2.0.0'\ndate: '2026-01-01'\ntitle: New release\nbadge: breaking, security, deprecated\nlinks:\n  - label: Migration guide\n    href: /en/docs/2.0.0/guides/intro\n  - label: Security advisory\n    href: https://example.com/advisory\n---\n\n> [!NOTE]\n> LatestReleaseMarker\n\n![Logo](/logo.svg)" +
+        '\n\nDetails about the latest release.'.repeat(30)
+    )
     await writeFile(
       configFile,
       "import { versioning } from '@lexibase/rdx-versioning'\n" +
@@ -384,6 +394,25 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       )
       return result.stdout
     }
+    assert.match(command('add', 'changelog'), /Changelog activated/)
+    assert.match(command('add', 'changelog'), /Changelog is already configured/)
+    assert.match(
+      command('changelog', 'new', '1.0.0'),
+      /Created changelog\/1\.0\.0\.md/
+    )
+    const draft = await readFile(path.join(root, 'changelog/1.0.0.md'), 'utf8')
+    await write(
+      'changelog/1.5.0.md',
+      "---\nversion: '1.5.0'\ndate: '2025-06-01'\ntitle: Maintenance release\nbadge: security\n---\n\nMaintenance notes."
+    )
+    assert.match(draft, /version: '1\.0\.0'/)
+    await write(
+      'changelog/1.0.0.md',
+      draft
+        .replace(/date: '[^']+'/, "date: '2025-01-01'")
+        .replace(/^title: .+$/m, 'title: "Setup & <tools>"') +
+        'FirstReleaseMarker\n'
+    )
     command('version', '1.0.0')
     const frozenMetadata = await readFile(
       path.join(root, 'versioned_docs/version-1.0.0/.rdx-locales.json'),
@@ -449,6 +478,78 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       }
       const home = await html('/')
       assert.match(home, /data-rdx-home/)
+      assert.match(home, /href="\/minha-tool\/changelog"[^>]*>Changelog</)
+      const changes = await html('/changelog')
+      assert.match(changes, /href="\/minha-tool\/changelog\/rss\.xml"/)
+      const feed = await fetch(base + '/changelog/rss.xml')
+      assert.equal(feed.status, 200)
+      assert.match(feed.headers.get('content-type'), /^application\/rss\+xml/)
+      const rss = await feed.text()
+      assert.match(rss, /<rss version="2\.0"/)
+      assert.match(
+        rss,
+        /<atom:link href="https:\/\/docs\.example\.test\/minha-tool\/changelog\/rss\.xml"/
+      )
+      assert.match(
+        rss,
+        /<title>v2\.0\.0 · New release<\/title>[\s\S]*<title>v1\.0\.0 · Setup &amp; &lt;tools&gt;<\/title>/
+      )
+      assert.match(
+        rss,
+        /<guid isPermaLink="true">https:\/\/docs\.example\.test\/minha-tool\/changelog#v2\.0\.0<\/guid>/
+      )
+      assert.match(rss, /<pubDate>Thu, 01 Jan 2026 00:00:00 GMT<\/pubDate>/)
+      assert.match(changes, /id="v2\.0\.0"[\s\S]*id="v1\.0\.0"/)
+      assert.match(changes, /href="#v2\.0\.0"/)
+      assert.match(changes, /href="#v2\.0\.0" aria-current="location"/)
+      assert.match(changes, /aria-label="Copy link to release v1\.0\.0"/)
+      assert.match(changes, /datetime="2026-01-01"/i)
+      const [latestRelease, , firstRelease] = changes.match(
+        /<article\b[^>]*>[\s\S]*?<\/article>/g
+      )
+      assert.match(
+        latestRelease,
+        /data-slot="badge"[^>]*>Breaking changes<.*data-slot="badge"[^>]*>Security<.*data-slot="badge"[^>]*>Deprecated</s
+      )
+      assert.doesNotMatch(firstRelease, /<span[^>]*data-slot="badge"/)
+      assert.match(
+        latestRelease,
+        /href="\/minha-tool\/en\/docs\/2\.0\.0\/guides\/intro"[^>]*>Migration guide</
+      )
+      assert.match(
+        latestRelease,
+        /href="https:\/\/example\.com\/advisory"[^>]*>Security advisory</
+      )
+      assert.doesNotMatch(firstRelease, /Migration guide|Security advisory/)
+      assert.match(changes, /LatestReleaseMarker/)
+      assert.match(changes, /data-rdx-callout="note"/)
+      assert.match(changes, /FirstReleaseMarker/)
+      assert.match(changes, /src="\/minha-tool\/logo.svg"/)
+      const releaseExport = await fetch(
+        base + '/rdx-markdown/changelog/2.0.0.md'
+      )
+      assert.equal(releaseExport.status, 200)
+      assert.match(releaseExport.headers.get('content-type'), /^text\/markdown/)
+      assert.equal(releaseExport.headers.get('x-robots-tag'), 'noindex, follow')
+      const releaseMarkdown = await releaseExport.text()
+      assert.match(
+        releaseMarkdown,
+        /^---\ntitle: "New release"\nversion: "2\.0\.0"\ndate: "2026-01-01"\nbadge: "breaking, security, deprecated"\nlinks: .+\nurl: "[^"]+\/minha-tool\/changelog#v2\.0\.0"\n---/
+      )
+      assert.deepEqual(JSON.parse(releaseMarkdown.match(/^links: (.+)$/m)[1]), [
+        {
+          label: 'Migration guide',
+          href: 'https://docs.example.test/minha-tool/en/docs/2.0.0/guides/intro',
+        },
+        { label: 'Security advisory', href: 'https://example.com/advisory' },
+      ])
+      assert.match(releaseMarkdown, /LatestReleaseMarker/)
+      assert.match(releaseMarkdown, /\/minha-tool\/logo\.svg/)
+      assert.doesNotMatch(releaseMarkdown, /FirstReleaseMarker/)
+      assert.equal(
+        (await fetch(base + '/rdx-markdown/changelog/9.9.9.md')).status,
+        404
+      )
       assert.equal(
         (home.match(/src="\/minha-tool\/brand\.png"/g) ?? []).length,
         2
@@ -702,6 +803,144 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
               await page.waitForURL(
                 '**/minha-tool/pt-br/docs/1.1.0/guides/intro'
               )
+
+              const changelog = `${router}/minha-tool/changelog`
+              await page.goto(changelog)
+              const rssLink = page.getByRole('link', {
+                name: 'Changelog RSS feed',
+              })
+              await page.waitForLoadState('networkidle')
+              await rssLink.hover()
+              await page
+                .getByRole('tooltip')
+                .filter({ hasText: 'Changelog RSS feed' })
+                .waitFor()
+              const latestNote = page.locator('[id="v2.0.0"]')
+              const dateBox = await latestNote.locator('time').boundingBox()
+              const badgeBox = await latestNote
+                .getByText('Breaking changes', { exact: true })
+                .boundingBox()
+              assert.ok(
+                dateBox && badgeBox && badgeBox.x > dateBox.x + dateBox.width
+              )
+              assert.ok(Math.abs(dateBox.y - badgeBox.y) <= 2)
+              const lastBadgeBox = await latestNote
+                .getByText('Deprecated', { exact: true })
+                .boundingBox()
+              const copyBox = await latestNote
+                .getByRole('button', { name: 'Copy this page' })
+                .boundingBox()
+              assert.ok(
+                lastBadgeBox &&
+                  copyBox &&
+                  copyBox.x >= lastBadgeBox.x + lastBadgeBox.width
+              )
+              assert.ok(
+                Math.abs(
+                  lastBadgeBox.y +
+                    lastBadgeBox.height / 2 -
+                    (copyBox.y + copyBox.height / 2)
+                ) <= 2
+              )
+              const versions = page.getByRole('navigation', {
+                name: 'Versions',
+              })
+              const activeVersion = versions.locator(
+                '[aria-current="location"]'
+              )
+              await activeVersion.filter({ hasText: 'v2.0.0' }).waitFor()
+              await page.locator('#rdx-main').evaluate((main) => {
+                main.scrollTop = main.scrollHeight
+              })
+              await activeVersion.filter({ hasText: 'v1.0.0' }).waitFor()
+              const copyReleaseLink = page.getByRole('button', {
+                name: 'Copy link to release v1.0.0',
+              })
+              await copyReleaseLink.hover()
+              await page
+                .getByRole('tooltip')
+                .filter({ hasText: 'Copy link to release' })
+                .waitFor()
+              await copyReleaseLink.click()
+              await page
+                .getByText('Release link copied.', { exact: true })
+                .waitFor()
+              assert.equal(
+                await page.evaluate(() => navigator.clipboard.readText()),
+                `${changelog}#v1.0.0`
+              )
+              await versions.getByRole('link', { name: 'v2.0.0' }).click()
+              await page.waitForURL(`${changelog}#v2.0.0`)
+              await activeVersion.filter({ hasText: 'v2.0.0' }).waitFor()
+              const olderNote = page.locator('[id="v1.0.0"]')
+              await olderNote
+                .getByRole('button', { name: 'Copy this page' })
+                .click()
+              await olderNote
+                .getByText('Page Markdown copied to clipboard.', {
+                  exact: true,
+                })
+                .waitFor()
+              const clipboard = await page.evaluate(() =>
+                navigator.clipboard.readText()
+              )
+              assert.match(clipboard, /FirstReleaseMarker/)
+              assert.doesNotMatch(clipboard, /LatestReleaseMarker/)
+              await olderNote
+                .getByRole('button', { name: 'Page copy options' })
+                .click()
+              const viewMarkdown = page.getByRole('menuitem', {
+                name: /View Markdown/,
+              })
+              assert.equal(
+                await viewMarkdown.getAttribute('href'),
+                '/minha-tool/rdx-markdown/changelog/1.0.0.md'
+              )
+              assert.equal(await viewMarkdown.getAttribute('target'), '_blank')
+              await page.keyboard.press('Escape')
+              const filter = page.getByRole('button', { name: /^Filter/ })
+              const filterBox = await filter.boundingBox()
+              const rssBox = await rssLink.boundingBox()
+              assert.ok(
+                filterBox &&
+                  rssBox &&
+                  filterBox.x > rssBox.x + rssBox.width + 24
+              )
+              const breaking = page.getByRole('menuitemcheckbox', {
+                name: 'Breaking changes',
+              })
+              const security = page.getByRole('menuitemcheckbox', {
+                name: 'Security',
+              })
+              const middleNote = page.locator('[id="v1.5.0"]')
+              const clearFilters = page.getByRole('menuitem', {
+                name: 'Clear filters',
+              })
+              await filter.click()
+              await breaking.click()
+              await middleNote.waitFor({ state: 'hidden' })
+              await security.click()
+              assert.equal(await security.getAttribute('aria-checked'), 'true')
+              await clearFilters.click()
+              await olderNote.waitFor()
+
+              await page.setViewportSize({ width: 375, height: 812 })
+              await filter.click()
+              await breaking.click()
+              await security.click()
+              await page.keyboard.press('Escape')
+              await latestNote.waitFor()
+              await middleNote.waitFor()
+              await olderNote.waitFor({ state: 'hidden' })
+              assert.deepEqual(
+                await versions.getByRole('link').allTextContents(),
+                ['v2.0.0', 'v1.5.0']
+              )
+              await page.evaluate(() => {
+                window.location.hash = 'v1.0.0'
+              })
+              await olderNote.waitFor()
+              await versions.getByRole('link', { name: 'v1.0.0' }).waitFor()
               assert.deepEqual(unexpected, [])
             } finally {
               await browser.close()
@@ -729,6 +968,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         'utf8'
       )
     ).files.map((file) => file.replaceAll('\\', '/'))
+    assert.ok(frozenTrace.some((file) => file.endsWith('changelog/new.mdx')))
     assert.ok(
       frozenTrace.some((file) =>
         file.endsWith(

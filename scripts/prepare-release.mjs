@@ -22,6 +22,7 @@ export const releaseOrder = [
   'rdx-ui',
   'rdx-plugin-versioning',
   'rdx-plugin-i18n',
+  'rdx-plugin-changelog',
   'rdx-next',
   'rdx',
   'create-rdx',
@@ -280,7 +281,14 @@ export async function prepareRelease(
     )
     await run(
       'pnpm',
-      ['exec', 'turbo', 'run', 'build', '--filter=@lexibase/rdx-versioning...'],
+      [
+        'exec',
+        'turbo',
+        'run',
+        'build',
+        '--filter=@lexibase/rdx-versioning...',
+        '--filter=@lexibase/rdx-changelog...',
+      ],
       root
     )
     await run('pnpm', ['--filter', 'web', 'docs:version', version], root)

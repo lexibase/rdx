@@ -34,6 +34,7 @@
         "build",
         "@lexibase/rdx-versioning#build",
         "@lexibase/rdx-i18n#build",
+        "@lexibase/rdx-changelog#build",
         "@lexibase/rdx#build"
       ],
       "inputs": [

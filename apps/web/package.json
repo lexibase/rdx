@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@lexibase/rdx": "workspace:*",
+    "@lexibase/rdx-changelog": "workspace:*",
     "@lexibase/rdx-next": "workspace:*",
     "@lexibase/rdx-core": "workspace:*",
     "@lexibase/rdx-versioning": "workspace:*",

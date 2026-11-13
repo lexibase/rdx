@@ -60,6 +60,7 @@ export function developmentPlan() {
           'build',
           '--filter=@lexibase/rdx-next...',
           '--filter=@lexibase/rdx-versioning...',
+          '--filter=@lexibase/rdx-changelog...',
           '--ui=stream',
         ],
       },

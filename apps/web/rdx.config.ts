@@ -1,4 +1,5 @@
 import { defineConfig } from '@lexibase/rdx-core/config'
+import { changelog } from '@lexibase/rdx-changelog'
 import type { RDXConfig } from '@lexibase/rdx-types'
 import { versioning } from '@lexibase/rdx-versioning'
 import { Logo } from '@lexibase/rdx-ui/components/logo'
@@ -57,7 +58,7 @@ const config = {
   // When disabled, '/' redirects to '/docs'. A custom component can be provided.
   homepage: { enabled: true, component: Home },
   // Installed plugins only become active when registered here.
-  plugins: [versioning()],
+  plugins: [versioning(), changelog()],
   // Floating heading navigation; shown only on pages with enough sections.
   TOC: true,
   // Local documentation search in the navbar; no external search service needed.

@@ -40,7 +40,8 @@ test('reader guides and starter examples describe available features without dev
 test('documentation licensing distinguishes official prose from MIT code and user-owned content', async () => {
   const notice = await read('LICENSE-docs')
   assert.match(notice, /apps\/web\/docs\/\*\*\/\*\.mdx/)
-  assert.match(notice, /repository-root Markdown documentation/)
+  assert.match(notice, /repository-root\s+Markdown documentation/)
+  assert.match(notice, /apps\/web\/changelog\/\*\.md/)
   assert.match(
     notice,
     /https:\/\/creativecommons\.org\/licenses\/by\/4\.0\/legalcode/

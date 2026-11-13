@@ -12,12 +12,14 @@ test('production traces contain configured content without copying the showcase 
   const tracing = await getRdxTracingConfig({ rootDir: root })
   const expected = tracing.outputFileTracingIncludes['/*']
   assert.ok(expected.includes('versions.json'))
+  assert.ok(expected.includes('changelog/6.3.1.md'))
   assert.ok(expected.some((file) => file.startsWith('docs/')))
   assert.equal(
     expected.some((file) => file.startsWith('versioned_docs/')),
     true
   )
   for (const route of [
+    'changelog/page.js',
     'docs/[version]/page.js',
     'docs/[version]/[...doc]/page.js',
   ]) {

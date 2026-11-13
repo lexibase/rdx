@@ -45,6 +45,7 @@ const directories = [
   'rdx',
   'rdx-plugin-versioning',
   'rdx-plugin-i18n',
+  'rdx-plugin-changelog',
   'create-rdx',
 ]
 const required = {
@@ -80,6 +81,7 @@ const required = {
     'dist/templates/app/docs/llms.txt/route.ts',
     'dist/templates/app/rdx-markdown/[...path]/route.ts',
     'dist/templates/app/sitemap.ts',
+    'dist/templates/app/changelog/page.tsx',
     'dist/templates/app/robots.ts',
   ],
   'rdx-types': ['dist/index.d.ts', 'dist/config.d.ts', 'dist/search.d.ts'],
@@ -147,6 +149,7 @@ const required = {
     'templates/runtime/app/rdx-markdown/[...path]/route.ts',
     'templates/runtime/app/not-found.tsx',
     'templates/runtime/app/sitemap.ts',
+    'templates/runtime/app/changelog/page.tsx',
     'templates/runtime/app/robots.ts',
     'templates/runtime/rdx-project.ts',
     'src/runtime/styles.css',
@@ -154,6 +157,7 @@ const required = {
   ],
   'rdx-plugin-versioning': ['dist/index.js', 'dist/index.d.ts'],
   'rdx-plugin-i18n': ['dist/index.js', 'dist/index.d.ts'],
+  'rdx-plugin-changelog': ['dist/index.js', 'dist/index.d.ts'],
   'create-rdx': [
     'bin/index.js',
     'bin/options.mjs',

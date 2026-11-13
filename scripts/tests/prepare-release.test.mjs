@@ -32,6 +32,7 @@ const fixtureVersions = {
   'rdx-ui': '3.4.0',
   'rdx-plugin-versioning': '1.3.1',
   'rdx-plugin-i18n': '1.0.1',
+  'rdx-plugin-changelog': '0.1.0',
   'rdx-next': '4.2.0',
   rdx: '4.2.0',
   'create-rdx': '4.2.0',
