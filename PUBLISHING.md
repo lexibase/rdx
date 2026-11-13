@@ -32,6 +32,14 @@ are advanced once, rather than once per terminal experiment.
 
 ## Automated preparation
 
+Accumulate compatible fixes and features for the next grouped release. Write one
+public release note in `apps/web/changelog/<version>.md` for each published RDX
+version. In that note, group changes by what readers can use or what they need to
+do. A patch release that addresses an urgent or user-visible problem can have a
+short note. Routine CI and repository maintenance can stay in the commit history.
+Include the release note with the version updates and documentation snapshot in
+the release PR.
+
 Use Changesets to record package changes and the RDX command to prepare a grouped
 release. Tooling is a workspace development dependency; generated projects do not
 install it. Run these commands from the repository root:
