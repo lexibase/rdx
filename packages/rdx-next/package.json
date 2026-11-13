@@ -61,7 +61,7 @@
     "prompts": "^2.4.2",
     "next-mdx-remote": "^6.0.0",
     "remark-gfm": "^4",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   },
   "peerDependencies": {
     "@lexibase/rdx-ui": "^3.5.0",
