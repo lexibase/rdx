@@ -903,7 +903,44 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
                 await page.evaluate(() => navigator.clipboard.readText()),
                 `${changelog}#v1.0.0`
               )
+              const animatedScroll = changelogScroll.evaluate((main) => {
+                const start = main.scrollTop
+                const target = document.getElementById('v2.0.0')
+                const margin = Number.parseFloat(
+                  getComputedStyle(target).scrollMarginTop
+                )
+                const destination =
+                  start +
+                  target.getBoundingClientRect().top -
+                  main.getBoundingClientRect().top -
+                  margin
+                return new Promise((resolve) => {
+                  let intermediate = false
+                  function track() {
+                    if (
+                      main.scrollTop < start - 2 &&
+                      main.scrollTop > destination + 2
+                    )
+                      intermediate = true
+                    if (main.scrollTop <= destination + 1) {
+                      clearTimeout(timer)
+                      main.removeEventListener('scroll', track)
+                      resolve(intermediate)
+                    }
+                  }
+                  const timer = setTimeout(() => {
+                    main.removeEventListener('scroll', track)
+                    resolve(false)
+                  }, 4000)
+                  main.addEventListener('scroll', track)
+                })
+              })
               await versions.getByRole('link', { name: 'v2.0.0' }).click()
+              assert.equal(
+                await animatedScroll,
+                true,
+                'release navigation crosses intermediate scroll positions'
+              )
               await page.waitForURL(`${changelog}#v2.0.0`)
               await activeVersion.filter({ hasText: 'v2.0.0' }).waitFor()
               const olderNote = page.locator('[id="v1.0.0"]')

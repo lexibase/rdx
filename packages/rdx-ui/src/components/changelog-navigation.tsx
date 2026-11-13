@@ -1,7 +1,14 @@
 'use client'
 
 import { Check, Link2, ListFilter, Rss } from 'lucide-react'
-import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  type MouseEvent,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 
 import { cn } from '../lib/utils'
 import { useMessages } from '../providers/locale-provider'
@@ -172,6 +179,7 @@ export function ChangelogContent({
           <article
             key={version}
             id={`v${version}`}
+            tabIndex={-1}
             hidden={!visibleVersions.has(version)}
             className="scroll-mt-6 border-t py-7"
           >
@@ -206,6 +214,42 @@ function ChangelogVersions({ versions }: { versions: string[] }) {
   const messages = useMessages()
   const navigation = useRef<HTMLElement>(null)
   const [active, setActive] = useState(versions[0])
+
+  function goToRelease(event: MouseEvent<HTMLAnchorElement>, version: string) {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    )
+      return
+
+    const scroller = navigation.current?.closest('main')
+    const target = document.getElementById(`v${version}`)
+    if (!scroller || !target) return
+
+    event.preventDefault()
+    const hash = `#v${encodeURIComponent(version)}`
+    if (window.location.hash !== hash) window.history.pushState(null, '', hash)
+    if (event.detail === 0) target.focus({ preventScroll: true })
+
+    const margin =
+      Number.parseFloat(getComputedStyle(target).scrollMarginTop) || 0
+    const top =
+      scroller.scrollTop +
+      target.getBoundingClientRect().top -
+      scroller.getBoundingClientRect().top -
+      scroller.clientTop -
+      margin
+    scroller.scrollTo({
+      top,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'instant'
+        : 'smooth',
+    })
+  }
 
   useEffect(() => {
     const main = navigation.current?.closest('main')
@@ -283,6 +327,7 @@ function ChangelogVersions({ versions }: { versions: string[] }) {
           <li key={version}>
             <a
               href={`#v${version}`}
+              onClick={(event) => goToRelease(event, version)}
               aria-current={active === version ? 'location' : undefined}
               className={cn(
                 'block rounded-md px-2 py-1 font-mono text-sm break-all text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-ring',
