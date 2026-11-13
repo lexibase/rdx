@@ -34,6 +34,7 @@ import { Home, HomeSection } from '@lexibase/rdx-ui/components/home'
 import { SkipLink } from '@lexibase/rdx-ui/components/skip-link'
 import {
   ChangelogBadges,
+  ChangelogFeedLink,
   ChangelogVersions,
   CopyReleaseLink,
 } from '@lexibase/rdx-ui/components/changelog-navigation'
@@ -63,6 +64,7 @@ export {
   getLocalizedProject,
 } from '@lexibase/rdx-core'
 export { getSearchResponse, getSearchSources } from './search'
+export { getChangelogFeedResponse } from './changelog-feed'
 export { getSourceRobots, getRdxRobots, getRdxSitemap } from './indexing'
 export {
   getLlmIndexResponse,
@@ -264,9 +266,14 @@ export async function ChangelogPage({
         className="min-h-0 flex-1 overflow-y-auto outline-none"
       >
         <div className="mx-auto grid max-w-5xl gap-x-10 px-6 py-10 sm:py-14 md:grid-cols-[10rem_minmax(0,1fr)]">
-          <h1 className="mb-8 text-3xl font-semibold tracking-tight md:col-start-2 md:row-start-1">
-            {messages.changelog}
-          </h1>
+          <div className="mb-8 flex items-center gap-2 md:col-start-2 md:row-start-1">
+            <h1 className="text-3xl font-semibold tracking-tight">
+              {messages.changelog}
+            </h1>
+            <ChangelogFeedLink
+              href={withBasePath('/changelog/rss.xml', config.basePath)}
+            />
+          </div>
           {entries.length > 0 && (
             <ChangelogVersions
               versions={entries.map(({ version }) => version)}

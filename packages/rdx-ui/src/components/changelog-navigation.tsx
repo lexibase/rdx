@@ -1,13 +1,41 @@
 'use client'
 
-import { Check, Link2 } from 'lucide-react'
+import { Check, Link2, Rss } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 import { cn } from '../lib/utils'
 import { useMessages } from '../providers/locale-provider'
 import { Badge } from './badge'
-import { Button } from './button'
+import { Button, buttonVariants } from './button'
 import { Separator } from './separator'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from './tooltip'
+
+export function ChangelogFeedLink({ href }: { href: string }) {
+  const { changelogFeed } = useMessages()
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <a
+              href={href}
+              className={buttonVariants({ variant: 'ghost', size: 'icon-sm' })}
+              aria-label={changelogFeed}
+            />
+          }
+        >
+          <Rss aria-hidden="true" />
+        </TooltipTrigger>
+        <TooltipContent role="tooltip">{changelogFeed}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
 
 const changelogBadgeStyles = {
   breaking: 'bg-amber-500/10 text-amber-800 dark:text-amber-300',
@@ -164,16 +192,20 @@ export function CopyReleaseLink({ version }: { version: string }) {
   const Icon = status === 'copied' ? Check : Link2
   return (
     <>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-xs"
-        aria-label={`${messages.changelogCopyLink} v${version}`}
-        title={messages.changelogCopyLink}
-        onClick={copy}
-      >
-        <Icon aria-hidden="true" />
-      </Button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger
+            render={<Button type="button" variant="ghost" size="icon-xs" />}
+            aria-label={`${messages.changelogCopyLink} v${version}`}
+            onClick={copy}
+          >
+            <Icon aria-hidden="true" />
+          </TooltipTrigger>
+          <TooltipContent role="tooltip">
+            {messages.changelogCopyLink}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       <span role="status" className="sr-only">
         {status === 'copied'
           ? messages.changelogLinkCopied

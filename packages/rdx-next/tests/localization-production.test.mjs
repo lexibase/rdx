@@ -185,6 +185,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       const translated = await html('/pt-br/docs/guides/intro')
       assert.doesNotMatch(translated, /href="\/changelog"/)
       assert.equal((await fetch(base + '/changelog')).status, 404)
+      assert.equal((await fetch(base + '/changelog/rss.xml')).status, 404)
       assert.match(await html('/en/docs'), /OriginalIntroMarker/)
       assert.match(await html('/pt-br/docs'), /TranslatedIntroMarker/)
       assert.match(translated, /<html[^>]*lang="pt-BR"/)
@@ -403,7 +404,9 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
     assert.match(draft, /version: '1\.0\.0'/)
     await write(
       'changelog/1.0.0.md',
-      draft.replace(/date: '[^']+'/, "date: '2025-01-01'") +
+      draft
+        .replace(/date: '[^']+'/, "date: '2025-01-01'")
+        .replace(/^title: .+$/m, 'title: "Setup & <tools>"') +
         'FirstReleaseMarker\n'
     )
     command('version', '1.0.0')
@@ -473,6 +476,25 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       assert.match(home, /data-rdx-home/)
       assert.match(home, /href="\/minha-tool\/changelog"[^>]*>Changelog</)
       const changes = await html('/changelog')
+      assert.match(changes, /href="\/minha-tool\/changelog\/rss\.xml"/)
+      const feed = await fetch(base + '/changelog/rss.xml')
+      assert.equal(feed.status, 200)
+      assert.match(feed.headers.get('content-type'), /^application\/rss\+xml/)
+      const rss = await feed.text()
+      assert.match(rss, /<rss version="2\.0"/)
+      assert.match(
+        rss,
+        /<atom:link href="https:\/\/docs\.example\.test\/minha-tool\/changelog\/rss\.xml"/
+      )
+      assert.match(
+        rss,
+        /<title>v2\.0\.0 · New release<\/title>[\s\S]*<title>v1\.0\.0 · Setup &amp; &lt;tools&gt;<\/title>/
+      )
+      assert.match(
+        rss,
+        /<guid isPermaLink="true">https:\/\/docs\.example\.test\/minha-tool\/changelog#v2\.0\.0<\/guid>/
+      )
+      assert.match(rss, /<pubDate>Thu, 01 Jan 2026 00:00:00 GMT<\/pubDate>/)
       assert.match(changes, /id="v2\.0\.0"[\s\S]*id="v1\.0\.0"/)
       assert.match(changes, /href="#v2\.0\.0"/)
       assert.match(changes, /href="#v2\.0\.0" aria-current="location"/)
@@ -764,6 +786,15 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
 
               const changelog = `${router}/minha-tool/changelog`
               await page.goto(changelog)
+              const rssLink = page.getByRole('link', {
+                name: 'Changelog RSS feed',
+              })
+              await page.waitForLoadState('networkidle')
+              await rssLink.hover()
+              await page
+                .getByRole('tooltip')
+                .filter({ hasText: 'Changelog RSS feed' })
+                .waitFor()
               const latestNote = page.locator('[id="v2.0.0"]')
               const dateBox = await latestNote.locator('time').boundingBox()
               const badgeBox = await latestNote
@@ -802,9 +833,15 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
                 main.scrollTop = main.scrollHeight
               })
               await activeVersion.filter({ hasText: 'v1.0.0' }).waitFor()
+              const copyReleaseLink = page.getByRole('button', {
+                name: 'Copy link to release v1.0.0',
+              })
+              await copyReleaseLink.hover()
               await page
-                .getByRole('button', { name: 'Copy link to release v1.0.0' })
-                .click()
+                .getByRole('tooltip')
+                .filter({ hasText: 'Copy link to release' })
+                .waitFor()
+              await copyReleaseLink.click()
               await page
                 .getByText('Release link copied.', { exact: true })
                 .waitFor()
