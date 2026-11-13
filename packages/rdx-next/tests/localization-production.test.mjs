@@ -153,6 +153,37 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       /locale\/ptbr\/home\.json: missing translation for "PrimaryOnlyMarker"/
     )
     assert.doesNotMatch(checked.stderr, /orphaned translation for "\$metadata"/)
+    for (const args of [
+      ['init', '--quiet'],
+      [
+        'add',
+        '--',
+        'docs/guides/intro.mdx',
+        'locale/ptbr/docs/guides/intro.mdx',
+      ],
+      [
+        '-c',
+        'user.name=RDX Test',
+        '-c',
+        'user.email=rdx@example.test',
+        '-c',
+        'commit.gpgSign=false',
+        'commit',
+        '-m',
+        'Add documentation',
+      ],
+    ]) {
+      const git = spawnSync('git', args, {
+        cwd: root,
+        encoding: 'utf8',
+        env: {
+          ...process.env,
+          GIT_AUTHOR_DATE: '2026-08-25T12:00:00Z',
+          GIT_COMMITTER_DATE: '2026-08-25T12:00:00Z',
+        },
+      })
+      assert.equal(git.status, 0, git.stdout + git.stderr)
+    }
     const built = spawnSync(process.execPath, [cli, 'build'], {
       cwd: root,
       encoding: 'utf8',
@@ -160,6 +191,12 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       maxBuffer: 5 * 1024 * 1024,
     })
     assert.equal(built.status, 0, built.stdout + built.stderr)
+    const dates = JSON.parse(
+      await readFile(path.join(root, '.rdx/.rdx-document-dates.json'), 'utf8')
+    )
+    assert.equal(dates['docs/guides/intro.mdx'], '2026-08-25')
+    assert.equal(dates['locale/ptbr/docs/guides/intro.mdx'], '2026-08-25')
+    await rm(path.join(root, '.git'), { recursive: true, force: true })
     assert.match(built.stdout, /3 pages checked, 0 problems/)
     assert.match(built.stderr, /orphaned translation for "Obsolete phrase"/)
     const clientOutput = path.join(root, '.rdx/.next/static')
@@ -183,6 +220,14 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         return response.text()
       }
       const translated = await html('/pt-br/docs/guides/intro')
+      assert.match(
+        translated,
+        /<time dateTime="2026-08-25">Última atualização em 25 de agosto de 2026<\/time>/i
+      )
+      assert.match(
+        await html('/en/docs/guides/intro'),
+        /<time dateTime="2026-08-25">Last updated August 25, 2026<\/time>/i
+      )
       assert.doesNotMatch(translated, /href="\/changelog"/)
       assert.equal((await fetch(base + '/changelog')).status, 404)
       assert.equal((await fetch(base + '/changelog/rss.xml')).status, 404)
@@ -350,6 +395,11 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
     assert.ok(
       JSON.parse(trace).files.some((file) =>
         file.replaceAll('\\', '/').endsWith('locale/ptbr/docs/guides/intro.mdx')
+      )
+    )
+    assert.ok(
+      JSON.parse(trace).files.some((file) =>
+        file.endsWith('.rdx-document-dates.json')
       )
     )
     await access(path.join(root, 'locale/ptbr/docs/guides/intro.mdx'))

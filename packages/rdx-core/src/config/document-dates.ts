@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 export const snapshotDatesFilename = '_rdx-last-updated.json'
+export const builtDocumentDatesFilename = '.rdx-document-dates.json'
 const datePattern = /^\d{4}-\d{2}-\d{2}$/
 
 function relativeFile(root: string, file: string) {
@@ -37,7 +38,6 @@ export function createDocumentDateReader(root: string) {
     const relative = relativeFile(root, file)
     if (!relative) return
     try {
-      git('ls-files', '--error-unmatch', '--', relative)
       git('diff', '--quiet', '--no-ext-diff', 'HEAD', '--', relative)
       const [date, parents] = git(
         'log',
@@ -79,10 +79,21 @@ export function collectSnapshotDocumentDates(
 }
 
 export function getSnapshotDocumentDate(directory: string, file: string) {
+  return readDocumentDate(
+    directory,
+    file,
+    path.join(directory, snapshotDatesFilename)
+  )
+}
+
+export function readDocumentDate(
+  directory: string,
+  file: string,
+  filename: string
+) {
   const relative = relativeFile(directory, file)
   if (!relative) return
   try {
-    const filename = path.join(directory, snapshotDatesFilename)
     const dates = JSON.parse(
       fs.readFileSync(/* turbopackIgnore: true */ filename, 'utf8')
     )

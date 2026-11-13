@@ -2,6 +2,7 @@ import { getMessages } from '@lexibase/rdx-ui/lib/i18n'
 import { Button } from '@lexibase/rdx-ui/components/button'
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
 import { EditPageLink } from '@lexibase/rdx-ui/components/edit-page-link'
+import { DocumentLastUpdated } from '@lexibase/rdx-ui/components/document-last-updated'
 
 import { docsIndexer } from '@/lib/docs'
 import config from '@/rdx.config'
@@ -10,10 +11,12 @@ export async function DocFooter({
   version,
   filename,
   editHref,
+  lastUpdated,
 }: {
   version: string
   filename: string
   editHref?: string
+  lastUpdated?: string
 }) {
   const messages = getMessages(config.lang)
   const sidebarLinks = await docsIndexer(version)
@@ -32,6 +35,7 @@ export async function DocFooter({
   return (
     <footer className="flex flex-col">
       {editHref && <EditPageLink href={editHref} lang={config.lang} />}
+      <DocumentLastUpdated date={lastUpdated} lang={config.lang} />
       <section className="flex items-center justify-between">
         {prevLink ? (
           <Button

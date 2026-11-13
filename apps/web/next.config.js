@@ -8,10 +8,11 @@ import {
   shortDocumentRoutes,
 } from './lib/documentation-routes.mjs'
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+/** @type {(phase: string) => Promise<import('next').NextConfig>} */
+const nextConfig = async (phase) => ({
   ...(await getRdxTracingConfig({
     rootDir: fileURLToPath(new URL('.', import.meta.url)),
+    captureDocumentDates: phase === 'phase-production-build',
     pageRoutes(source, pages) {
       const root = officialDocsRoot(source)
       const shortRoutes = shortDocumentRoutes(pages)
@@ -33,6 +34,6 @@ const nextConfig = {
   // Browser integration scripts are development tools, never server assets.
   outputFileTracingExcludes: { '/*': ['./tests/**/*'] },
   transpilePackages: ['@lexibase/rdx-ui', 'next-mdx-remote'],
-}
+})
 
 export default nextConfig

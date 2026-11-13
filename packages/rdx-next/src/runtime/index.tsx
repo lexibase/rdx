@@ -39,6 +39,7 @@ import {
 } from '@lexibase/rdx-ui/components/changelog-navigation'
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
 import { EditPageLink } from '@lexibase/rdx-ui/components/edit-page-link'
+import { DocumentLastUpdated } from '@lexibase/rdx-ui/components/document-last-updated'
 import { CopyPage } from '@lexibase/rdx-ui/components/copy-page'
 import { BrandLogo } from '@lexibase/rdx-ui/components/brand-logo'
 import { getMdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
@@ -56,6 +57,9 @@ import { notFound, redirect, permanentRedirect } from 'next/navigation'
 
 import { compileDocumentation } from './mdx'
 import { getMarkdownHref } from './markdown'
+import { getDocumentLastUpdated } from './document-date'
+
+export { getDocumentLastUpdated } from './document-date'
 
 export {
   createRdxProject,
@@ -679,6 +683,14 @@ export async function DocsPage({
                 {editHref && (
                   <EditPageLink href={editHref} lang={project.config.lang} />
                 )}
+                <DocumentLastUpdated
+                  date={getDocumentLastUpdated(
+                    originalProject,
+                    contentSource,
+                    document.sourcePath
+                  )}
+                  lang={project.config.lang}
+                />
                 <section className="flex items-center justify-between">
                   {previous ? (
                     <Button

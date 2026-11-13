@@ -7,6 +7,7 @@ export function getRdxBuildRoot(rootDir: string): Promise<string>
 export function getRdxTracingConfig(options: {
   rootDir: string
   appDir?: string
+  captureDocumentDates?: boolean
   pageRoutes?: (
     source: RdxContentSource,
     pages: RdxDocPage[]
