@@ -1,6 +1,6 @@
 {
   "name": "@lexibase/rdx-i18n",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Optional multilingual documentation for RDX.",
   "license": "MIT",
   "type": "module",
