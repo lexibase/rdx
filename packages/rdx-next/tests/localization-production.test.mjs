@@ -449,7 +449,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       await rmdir(
         path.join(root, `locale/es-es/versioned_docs/version-${version}`)
       )
-    assert.match(command('build'), /10 pages checked, 0 problems/)
+    assert.match(command('build'), /13 pages checked, 0 problems/)
     await rmdir(path.join(root, 'locale/es-es/docs'))
     assert.equal(
       await readFile(
@@ -479,7 +479,20 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       const home = await html('/')
       assert.match(home, /data-rdx-home/)
       assert.match(home, /href="\/minha-tool\/changelog"[^>]*>Changelog</)
+      assert.doesNotMatch(
+        home.match(/<nav\b[^>]*data-rdx-navbar[\s\S]*?<\/nav>/)[0],
+        /aria-current=/
+      )
       const changes = await html('/changelog')
+      assert.match(
+        changes,
+        /<a\b(?=[^>]*href="\/minha-tool\/changelog")(?=[^>]*aria-current="page")[^>]*>Changelog<\/a>/
+      )
+      const localizedDocs = await html('/pt-br/docs/2.0.0/guides/intro')
+      assert.match(
+        localizedDocs,
+        /<a\b(?=[^>]*href="\/minha-tool\/pt-br\/docs\/2\.0\.0")(?=[^>]*aria-current="true")[^>]*>Docs<\/a>/
+      )
       assert.match(changes, /href="\/minha-tool\/changelog\/rss\.xml"/)
       const feed = await fetch(base + '/changelog/rss.xml')
       assert.equal(feed.status, 200)

@@ -186,6 +186,7 @@ function RdxHeader({
           : getDocsHref(project)
       }
       docsHref={getDocsHref(project, source)}
+      docsSection={getDocsHref(project)}
       changelogHref={
         config.plugins.some(({ name }) => name === changelogPluginName)
           ? '/changelog'

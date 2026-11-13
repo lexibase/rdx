@@ -12,6 +12,7 @@ import type {
 } from '@lexibase/rdx-types'
 import { getDocsIndex } from '../content/index'
 import { parseStaticDocument } from '../content/static-source'
+import { changelogPluginName, readChangelog } from '../config/changelog'
 import {
   createDocumentLinkResolver,
   RdxDocumentLinkError,
@@ -32,7 +33,12 @@ type Node = {
   position?: Position
   attributes?: { name?: string; value?: unknown }[]
 }
-type Reference = { href: string; image: boolean; position?: Position }
+type Reference = {
+  href: string
+  image: boolean
+  position?: Position
+  field?: string
+}
 type Parsed = {
   anchors: Set<string>
   references: Reference[]
@@ -45,6 +51,7 @@ type Document = {
   parsed?: Parsed
   lineOffset: number
 }
+type RouteTarget = { sourcePath: string; parsed?: Parsed }
 
 export type DocumentationDiagnostic = {
   file: string
@@ -163,8 +170,8 @@ export function checkDocumentation(
 ): DocumentationCheck {
   const diagnostics: DocumentationDiagnostic[] = []
   const documents: Document[] = []
-  const routes = new Map<string, Document>()
-  const coreRoutes = new Map<string, Document>()
+  const routes = new Map<string, RouteTarget>()
+  const coreRoutes = new Map<string, RouteTarget>()
   const roots = new Set<string>(['/robots.txt', '/sitemap.xml'])
   const prefixes: [string, string][] = []
   const redirects = new Map(Object.entries(options.redirects ?? {}))
@@ -286,7 +293,8 @@ export function checkDocumentation(
       const hrefs = options.documentRoutes?.(source, page, pages) ?? [
         documentRoute(source, page),
       ]
-      const document: Document = {
+      const document: Document & RouteTarget = {
+        sourcePath: page.sourcePath,
         page,
         source,
         href: hrefs[0]!,
@@ -303,6 +311,36 @@ export function checkDocumentation(
   }
   if (project.config.homepage?.enabled) roots.add('/')
   else redirects.set('/', '/docs')
+  const changelog = project.config.plugins.some(
+    ({ name }) => name === changelogPluginName
+  )
+  const releases = changelog ? readChangelog(project.rootDir, syntax) : []
+  const changelogAnchors = new Set<string>()
+  let changelogHasUnknownAnchors = false
+  const releaseChecks = releases.flatMap((release) => {
+    changelogAnchors.add(`v${release.version}`)
+    try {
+      const parsed = parse(release.content, release.sourcePath.endsWith('.md'))
+      for (const anchor of parsed.anchors) changelogAnchors.add(anchor)
+      changelogHasUnknownAnchors ||= parsed.dynamicIds
+      return [{ release, parsed }]
+    } catch (error) {
+      changelogHasUnknownAnchors = true
+      syntax(error, release.sourcePath, release.lineOffset)
+      return []
+    }
+  })
+  if (changelog) {
+    routes.set('/changelog', {
+      sourcePath: path.join(project.rootDir, 'changelog'),
+      parsed: {
+        anchors: changelogAnchors,
+        references: [],
+        dynamicIds: changelogHasUnknownAnchors,
+      },
+    })
+    roots.add('/changelog/rss.xml')
+  }
   for (const document of documents) {
     if (failed.has(document.page.sourcePath)) continue
     try {
@@ -334,40 +372,19 @@ export function checkDocumentation(
     }
     throw new Error('The destination contains a redirect loop.')
   }
-  for (const document of documents) {
-    const parsed = document.parsed
-    if (!parsed) continue
-    const contentSource = isFallbackPage(
-      project,
-      document.source,
-      document.page.sourcePath
-    )
-      ? sources.find(
-          (source) =>
-            source.id === document.source.id &&
-            source.docsDir === document.source.fallbackDocsDir &&
-            !source.fallbackDocsDir
-        )!
-      : document.source
-    const resolve = createDocumentLinkResolver({
-      sourceRoot: getSourceOptions(project, contentSource).docsDir,
-      sourcePath: document.page.sourcePath,
-      routePrefix: contentSource.routePrefix,
-      basePath: contentSource.basePath,
-      virtualPaths: !!contentSource.fallbackDocsDir,
-      documents: documents
-        .filter((entry) => entry.source === contentSource)
-        .map((entry) => entry.page),
-    })
-    for (const reference of parsed.references) {
+  function checkReferences(
+    references: Reference[],
+    sourcePath: string,
+    href: string,
+    lineOffset: number,
+    resolve: ReturnType<typeof createDocumentLinkResolver>
+  ) {
+    for (const reference of references) {
       let code: DocumentationDiagnostic['code'] = reference.image
         ? 'asset'
         : 'page'
       try {
-        const url = new URL(
-          reference.href,
-          `${origin}${contentSource === document.source ? document.href : documentRoute(contentSource, document.page)}`
-        )
+        const url = new URL(reference.href, `${origin}${href}`)
         if (!['http:', 'https:'].includes(url.protocol)) continue
         if (url.origin !== origin) continue
         // Absolute links are local only when a real public domain was configured.
@@ -376,7 +393,7 @@ export function checkDocumentation(
           /^(?:[a-z][\w+.-]*:|\/\/)/i.test(reference.href)
         )
           continue
-        let target: Document | undefined
+        let target: RouteTarget | undefined
         let pathname: string
         const explicitDocument =
           !reference.image &&
@@ -387,7 +404,15 @@ export function checkDocumentation(
           pathname = key(resolved)
           target = coreRoutes.get(pathname)
         } else {
-          pathname = redirectRoute(key(url.href))
+          pathname = key(url.href)
+          const basePath = project.config.basePath
+          if (
+            basePath &&
+            /^(?:https?:|\/\/)/i.test(reference.href) &&
+            (pathname === basePath || pathname.startsWith(`${basePath}/`))
+          )
+            pathname = pathname.slice(basePath.length) || '/'
+          pathname = redirectRoute(pathname)
           if (!reference.image) target = routes.get(pathname)
         }
         if (target) {
@@ -400,7 +425,7 @@ export function checkDocumentation(
               !target.parsed.anchors.has(anchor)
             )
               throw new Error(
-                `Section "#${anchor}" does not exist in ${relativeFile(target.page.sourcePath)}.`
+                `Section "#${anchor}" does not exist in ${relativeFile(target.sourcePath)}.`
               )
           }
           continue
@@ -424,14 +449,69 @@ export function checkDocumentation(
               ? error.message
               : String(error)
         diagnostics.push({
-          file: relativeFile(document.page.sourcePath),
-          line: (reference.position?.start.line ?? 1) + document.lineOffset,
+          file: relativeFile(sourcePath),
+          line:
+            (reference.position?.start.line ?? 1) +
+            (reference.field ? 0 : lineOffset),
           column: reference.position?.start.column ?? 1,
           code,
-          message: `"${reference.href}": ${value}`,
+          message: `${reference.field ? `${reference.field} ` : ''}"${reference.href}": ${value}`,
         })
       }
     }
+  }
+  for (const document of documents) {
+    if (!document.parsed) continue
+    const contentSource = isFallbackPage(
+      project,
+      document.source,
+      document.page.sourcePath
+    )
+      ? sources.find(
+          (source) =>
+            source.id === document.source.id &&
+            source.docsDir === document.source.fallbackDocsDir &&
+            !source.fallbackDocsDir
+        )!
+      : document.source
+    checkReferences(
+      document.parsed.references,
+      document.page.sourcePath,
+      contentSource === document.source
+        ? document.href
+        : documentRoute(contentSource, document.page),
+      document.lineOffset,
+      createDocumentLinkResolver({
+        sourceRoot: getSourceOptions(project, contentSource).docsDir,
+        sourcePath: document.page.sourcePath,
+        routePrefix: contentSource.routePrefix,
+        basePath: contentSource.basePath,
+        virtualPaths: !!contentSource.fallbackDocsDir,
+        documents: documents
+          .filter((entry) => entry.source === contentSource)
+          .map((entry) => entry.page),
+      })
+    )
+  }
+  for (const { release, parsed } of releaseChecks) {
+    checkReferences(
+      [
+        ...release.links.map(({ href }, index) => ({
+          href,
+          image: false,
+          field: `links[${index}].href`,
+        })),
+        ...parsed.references,
+      ],
+      release.sourcePath,
+      '/changelog',
+      release.lineOffset,
+      createDocumentLinkResolver({
+        sourceRoot: project.rootDir,
+        sourcePath: release.sourcePath,
+        documents: [],
+      })
+    )
   }
   diagnostics.sort(
     (a, b) =>
@@ -443,8 +523,9 @@ export function checkDocumentation(
     ).values(),
   ]
   return {
-    checkedPages: new Set(documents.map((document) => document.page.sourcePath))
-      .size,
+    checkedPages:
+      new Set(documents.map((document) => document.page.sourcePath)).size +
+      releases.length,
     diagnostics: unique,
   }
 }

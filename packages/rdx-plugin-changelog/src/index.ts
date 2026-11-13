@@ -68,11 +68,8 @@ export function changelog(): RdxPlugin {
         run: ({ rootDir, args }) => newEntry(rootDir, args),
       },
     ],
-    setup: ({ rootDir, command }) => {
-      const files =
-        command === 'check'
-          ? readChangelog(rootDir)
-          : getChangelogFiles(rootDir)
+    setup: ({ rootDir }) => {
+      const files = getChangelogFiles(rootDir)
       return { runtimeFiles: files.map(({ filename }) => filename) }
     },
   }

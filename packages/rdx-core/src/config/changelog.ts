@@ -79,14 +79,19 @@ export function getChangelogFiles(rootDir: string) {
     }))
 }
 
-export function readChangelog(rootDir: string) {
+export function readChangelog(
+  rootDir: string,
+  onError?: (error: unknown, sourcePath: string) => void
+) {
   const versions = new Set<string>()
   return getChangelogFiles(rootDir)
-    .map(({ filename, sourcePath }) => {
+    .flatMap(({ filename, sourcePath }) => {
       try {
-        const { content, data } = parseStaticDocument(
-          fs.readFileSync(/* turbopackIgnore: true */ sourcePath, 'utf8')
+        const raw = fs.readFileSync(
+          /* turbopackIgnore: true */ sourcePath,
+          'utf8'
         )
+        const { content, data } = parseStaticDocument(raw)
         const { title, version } = data
         const date =
           data.date instanceof Date
@@ -105,18 +110,26 @@ export function readChangelog(rootDir: string) {
           throw new Error('date must be a valid date in YYYY-MM-DD format')
         if (versions.has(version))
           throw new Error(`duplicate version ${version}`)
-        versions.add(version)
-        return {
+        const entry = {
           title: title.trim(),
           version,
           date,
           badges: readBadges(data.badge),
           links: readLinks(data.links),
           content,
+          lineOffset: (
+            raw.slice(0, raw.length - content.length).match(/\n/g) ?? []
+          ).length,
           filename,
           sourcePath,
         }
+        versions.add(version)
+        return [entry]
       } catch (error) {
+        if (onError) {
+          onError(error, sourcePath)
+          return []
+        }
         throw new Error(`${filename}: ${(error as Error).message}`, {
           cause: error,
         })
