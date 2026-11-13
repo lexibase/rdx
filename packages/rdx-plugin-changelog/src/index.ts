@@ -35,10 +35,15 @@ async function newEntry(rootDir: string, args: string[]) {
     .map((part) => String(part).padStart(2, '0'))
     .join('-')
   const filename = `changelog/${version}.md`
-  await mkdir(getChangelogDirectory(rootDir), { recursive: true })
+  await mkdir(/* turbopackIgnore: true */ getChangelogDirectory(rootDir), {
+    recursive: true,
+  })
   try {
     await writeFile(
-      path.join(getChangelogDirectory(rootDir), `${version}.md`),
+      /* turbopackIgnore: true */ path.join(
+        /* turbopackIgnore: true */ getChangelogDirectory(rootDir),
+        `${version}.md`
+      ),
       `---\nversion: '${version}'\ndate: '${date}'\ntitle: 'Release ${version}'\n---\n\n`,
       { flag: 'wx' }
     )

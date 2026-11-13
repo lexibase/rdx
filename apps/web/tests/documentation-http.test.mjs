@@ -38,7 +38,10 @@ test(
         )
         assert.match(changelog, /<title>Changelog \| RDX<\/title>/)
         assert.match(changelog, /id="v6\.3\.1"/)
-        assert.match(changelog, /href="#v6\.3\.1"/)
+        assert.match(
+          changelog,
+          /<nav[^>]*aria-label="Versions"[^>]*>[\s\S]*?data-slot="separator"[\s\S]*?href="#v6\.3\.1"[^>]*>v(?:<!-- -->)?6\.3\.1<\/a>[\s\S]*?<\/nav>/
+        )
 
         const sitemapResponse = await fetch(`${base}/sitemap.xml`)
         assert.equal(sitemapResponse.status, 200)

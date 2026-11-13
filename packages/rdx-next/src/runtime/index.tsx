@@ -32,6 +32,7 @@ import { DocsPageTransition } from '@lexibase/rdx-ui/components/docs-page-transi
 import { DocsSearch } from '@lexibase/rdx-ui/components/docs-search'
 import { Home, HomeSection } from '@lexibase/rdx-ui/components/home'
 import { SkipLink } from '@lexibase/rdx-ui/components/skip-link'
+import { Separator } from '@lexibase/rdx-ui/components/separator'
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
 import { EditPageLink } from '@lexibase/rdx-ui/components/edit-page-link'
 import { CopyPage } from '@lexibase/rdx-ui/components/copy-page'
@@ -257,31 +258,61 @@ export async function ChangelogPage({
         tabIndex={-1}
         className="min-h-0 flex-1 overflow-y-auto outline-none"
       >
-        <div className="mx-auto max-w-3xl px-6 py-10 sm:py-14">
-          <h1 className="mb-8 text-3xl font-semibold tracking-tight">
+        <div className="mx-auto grid max-w-5xl gap-x-10 px-6 py-10 sm:py-14 md:grid-cols-[10rem_minmax(0,1fr)]">
+          <h1 className="mb-8 text-3xl font-semibold tracking-tight md:col-start-2 md:row-start-1">
             {messages.changelog}
           </h1>
-          {entries.length === 0 && (
-            <p className="text-muted-foreground">{messages.changelogEmpty}</p>
-          )}
-          {entries.map(({ version, date, title, rendered }) => (
-            <article
-              key={version}
-              id={`v${version}`}
-              className="scroll-mt-6 border-t py-7"
+          {entries.length > 0 && (
+            <nav
+              aria-label={messages.changelogVersions}
+              className="mb-8 self-start md:sticky md:top-6 md:col-start-1 md:row-span-2 md:row-start-1 md:mb-0 md:max-h-[calc(100dvh-7rem)] md:overflow-y-auto"
             >
-              <div className="mb-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                <time dateTime={date}>{formatDate.format(new Date(date))}</time>
-                <a href={`#v${version}`} className="font-mono hover:underline">
-                  v{version}
-                </a>
-              </div>
-              <h2 className="mb-4 text-xl font-semibold">{title}</h2>
-              <div className="flex min-w-0 flex-col gap-4">
-                {rendered.content}
-              </div>
-            </article>
-          ))}
+              <p className="text-sm font-medium md:mb-3 md:flex md:h-14 md:items-end">
+                {messages.changelogVersions}
+              </p>
+              <Separator className="my-3 md:mt-0" />
+              <ul className="flex flex-wrap gap-x-4 gap-y-2 md:flex-col">
+                {entries.map(({ version }) => (
+                  <li key={version}>
+                    <a
+                      href={`#v${version}`}
+                      className="block rounded-sm font-mono text-sm text-muted-foreground hover:text-foreground hover:underline"
+                    >
+                      v{version}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
+          <div className="min-w-0 md:col-start-2 md:row-start-2">
+            {entries.length === 0 && (
+              <p className="text-muted-foreground">{messages.changelogEmpty}</p>
+            )}
+            {entries.map(({ version, date, title, rendered }) => (
+              <article
+                key={version}
+                id={`v${version}`}
+                className="scroll-mt-6 border-t py-7"
+              >
+                <div className="mb-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                  <time dateTime={date}>
+                    {formatDate.format(new Date(date))}
+                  </time>
+                  <a
+                    href={`#v${version}`}
+                    className="font-mono hover:underline"
+                  >
+                    v{version}
+                  </a>
+                </div>
+                <h2 className="mb-4 text-xl font-semibold">{title}</h2>
+                <div className="flex min-w-0 flex-col gap-4">
+                  {rendered.content}
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </main>
     </>
