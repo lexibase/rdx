@@ -31,6 +31,11 @@
     "typescript": "6.0.3"
   },
   "packageManager": "pnpm@9.0.0",
+  "pnpm": {
+    "overrides": {
+      "@typescript-eslint/typescript-estree>minimatch": "11.0.1"
+    }
+  },
   "engines": {
     "node": "^22.18.0 || ^24.11.0"
   }
