@@ -1,0 +1,284 @@
+---
+title: Configuration
+description: Reference for every rdx.config.ts option, including accepted values, defaults, and links to detailed guides.
+order: 2
+prerequisites:
+  - ./installation.mdx
+---
+
+## Minimal configuration
+
+Edit `rdx.config.ts` at your project root:
+
+```ts
+import { defineConfig } from '@lexibase/rdx'
+
+export default defineConfig({
+  metadata: {
+    applicationName: 'My documentation',
+  },
+})
+```
+
+Only `metadata.applicationName` is required. It provides the default browser
+title, the page-title suffix, social preview defaults, footer branding, and the
+built-in homepage name. For example, a page named Installation appears in the
+browser as **Installation | My documentation**.
+
+Use `navbar.title` for optional text beside the navbar logo.
+
+## Footer
+
+The footer shows the site name and a **Powered by RDX** link to the framework's
+GitHub repository. Set `metadata.since` to the project's or organization's starting
+year. The CLI fills this with the year the project is created; you can edit it:
+
+```ts
+metadata: {
+  applicationName: 'My documentation',
+  since: 2004,
+},
+```
+
+An earlier starting year produces a range, such as **2004–2026**. Equal years are
+shown once. Omitting `since` shows only the current year. Use a positive whole
+year no later than the current year.
+
+## Common options
+
+The defaults below apply when you omit a field. The starter created by the CLI
+sets some fields explicitly, including the theme toggle and the GitHub action.
+
+| Option             | Accepted value                                                                  | Default                               | What it controls                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `metadata`         | Object with `applicationName`                                                   | Required                              | [Site identity and metadata](#seo-and-social-previews)                                                     |
+| `description`      | String                                                                          | `''`                                  | Default site description for metadata and the built-in homepage                                            |
+| `lang`             | Language tag string, such as `en` or `pt-BR`                                    | `en`                                  | HTML language and built-in labels. See [Languages](../04-features/languages.mdx).                          |
+| `basePath`         | URL-safe path beginning with `/` and with no trailing slash, such as `/my-tool` | Domain root                           | [Deploy under a subpath](../05-guides/deployment.mdx#deploy-under-a-subpath).                              |
+| `search`           | Boolean                                                                         | `false`                               | [Local documentation search](../04-features/search.mdx) in the navbar                                      |
+| `TOC`              | Boolean                                                                         | `false`                               | [Floating table of contents](../04-features/toc.mdx) on pages with enough headings                         |
+| `editPage`         | `false` or an object with `baseUrl`                                             | `false`                               | Show an [Edit this page](../03-writing-documentation/document-links.mdx#edit-this-page) link on live docs. |
+| `editPage.baseUrl` | Absolute HTTP(S) URL without credentials, query, or fragment                    | Required when `editPage` is an object | Source editor URL through the branch and, in a monorepo, the project folder                                |
+
+### Example
+
+```ts
+import { defineConfig } from '@lexibase/rdx'
+
+export default defineConfig({
+  description: 'Guides and reference for my project.',
+  metadata: {
+    applicationName: 'My documentation',
+    metadataBase: 'https://docs.example.com',
+  },
+  lang: 'en',
+  search: true,
+  TOC: true,
+  homepage: { enabled: false },
+  theme: { defaultTheme: 'system' },
+  navbar: {
+    title: '',
+    actions: {
+      github: {
+        visible: true,
+        url: 'https://github.com/example/project',
+      },
+      showToggleMode: true,
+    },
+  },
+})
+```
+
+Replace the GitHub action's `#` placeholder with your own repository URL.
+
+`lang` sets the HTML language and translates built-in interface labels:
+
+```ts
+lang: 'pt-BR',
+```
+
+Use `en` for English or `pt-BR` for Brazilian Portuguese. Portuguese locale
+variants, including `pt`, use Brazilian Portuguese labels. Other languages keep
+their configured HTML language and use English interface labels.
+
+This includes search, the table of contents, copy buttons, navigation, version
+notices, and footer credits. Your MDX content, page titles, category names, and
+custom component text remain as written. Rebuild and redeploy after changing
+`lang` in production.
+
+## SEO and social previews
+
+Use paths such as `/icon.svg` for files in `public/`. Icon, manifest, and
+social image fields also accept absolute HTTP(S) URLs.
+
+| Option                     | Accepted value                                                          | Default                    | What it controls                                                     |
+| -------------------------- | ----------------------------------------------------------------------- | -------------------------- | -------------------------------------------------------------------- |
+| `metadata.applicationName` | Non-empty string                                                        | Required                   | Site name, browser title suffix, and branding                        |
+| `metadata.metadataBase`    | Absolute HTTP(S) URL                                                    | Unset                      | Public origin used to resolve canonical, sitemap, and social URLs    |
+| `metadata.since`           | Positive whole year up to the current year                              | Current year in the footer | [Copyright start year](#footer)                                      |
+| `metadata.authors`         | Array of `{ name: string, url?: string }`                               | Unset                      | Author names and optional absolute HTTP(S) profile URLs              |
+| `metadata.keywords`        | Array of strings                                                        | Unset                      | Metadata keywords                                                    |
+| `metadata.icons`           | Object                                                                  | Unset                      | Browser and device icons                                             |
+| `metadata.icons.icon`      | URL string or array of `{ url: string, sizes?: string, type?: string }` | Unset                      | Tab icons with optional sizes such as `96x96` or `any` and MIME type |
+| `metadata.icons.shortcut`  | URL string                                                              | Unset                      | Shortcut icon for browser compatibility                              |
+| `metadata.icons.apple`     | URL string                                                              | Unset                      | Apple home screen icon                                               |
+| `metadata.manifest`        | URL string                                                              | Unset                      | Link to an existing web app manifest                                 |
+
+### Open Graph
+
+Set `metadata.openGraph` to an object to configure site-wide Open Graph previews.
+It is optional. The title and description defaults below apply when the object
+is configured. Documentation pages use their own title and description.
+
+| Field in `metadata.openGraph` | Accepted value                                                            | Default                    | What it controls                                                                |
+| ----------------------------- | ------------------------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------- |
+| `title`                       | String                                                                    | `metadata.applicationName` | Site preview title                                                              |
+| `description`                 | String                                                                    | Site `description`         | Site preview description                                                        |
+| `siteName`                    | String                                                                    | Unset                      | Site name shown by platforms that support it                                    |
+| `locale`                      | String, such as `pt_BR`                                                   | Unset                      | Preview language and region                                                     |
+| `type`                        | `website`                                                                 | Unset                      | Open Graph content type                                                         |
+| `images`                      | Array of `{ url: string, width?: number, height?: number, alt?: string }` | Unset                      | Preview images with optional positive integer dimensions in pixels and alt text |
+
+### Twitter and X
+
+Set `metadata.twitter` to an optional object for Twitter/X card settings.
+
+| Field in `metadata.twitter` | Accepted value                     | Default                                                          | What it controls                 |
+| --------------------------- | ---------------------------------- | ---------------------------------------------------------------- | -------------------------------- |
+| `card`                      | `summary` or `summary_large_image` | `summary_large_image` with a resolved image, otherwise `summary` | Card layout                      |
+| `title`                     | String                             | `metadata.applicationName`                                       | Site card title                  |
+| `description`               | String                             | Site `description`                                               | Site card description            |
+| `site`                      | String, usually `@account`         | Unset                                                            | Account associated with the site |
+| `creator`                   | String, usually `@account`         | Unset                                                            | Account credited as creator      |
+| `images`                    | Array of URL strings               | Unset                                                            | Card images                      |
+
+### Metadata example
+
+```ts
+metadata: {
+  applicationName: 'My documentation',
+  metadataBase: 'https://docs.example.com',
+  authors: [{ name: 'Your team', url: 'https://example.com' }],
+  keywords: ['documentation', 'my-project'],
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon.png', sizes: '96x96', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/site.webmanifest',
+  openGraph: {
+    type: 'website',
+    images: [{
+      url: '/social-preview.png',
+      width: 1200,
+      height: 630,
+      alt: 'My documentation',
+    }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: ['/social-preview.png'],
+  },
+}
+```
+
+This is the `metadata` portion of a `defineConfig` call, not a complete file.
+Place the referenced images, icons, and web app manifest in `public/`.
+For deployment under a subpath, set `basePath` in `rdx.config.ts` and keep
+`metadata.metadataBase` set to the public origin. See
+[Deploy under a subpath](../05-guides/deployment.mdx#deploy-under-a-subpath).
+
+`metadataBase` must be your absolute public HTTP(S) URL. RDX uses it for sitemap
+entries and relative social image URLs.
+
+Documentation pages use their frontmatter `title` and `description` for browser
+metadata and Open Graph/Twitter link previews. When a page has no description,
+the site's `description` is used. Social images, locale, and card settings come
+from `metadata.openGraph` and `metadata.twitter`.
+
+## Search engine indexing
+
+Set `metadata.metadataBase` to the public URL of your documentation:
+
+```ts
+metadata: {
+  applicationName: 'My documentation',
+  metadataBase: 'https://docs.example.com',
+}
+```
+
+RDX generates `/sitemap.xml` with the homepage when enabled and each indexable
+document. `/robots.txt` points search engines to this sitemap. Without a public
+URL, the sitemap contains no entries and robots.txt omits the sitemap address.
+
+| Content                                                 | Included in the sitemap and eligible for search results |
+| ------------------------------------------------------- | ------------------------------------------------------- |
+| Current documentation without versioning                | Yes                                                     |
+| Enabled homepage                                        | Yes                                                     |
+| Published editions, including previous majors           | Yes                                                     |
+| Live Current/Canary with a published edition            | No                                                      |
+| Live Current/Canary without a published edition         | Yes                                                     |
+| Archived editions                                       | No                                                      |
+| Historical redirect URLs, internal search and 404 pages | No                                                      |
+
+The HTML directives follow the same edition policy automatically. Archiving,
+restoring or publishing an edition updates that policy on the next build and
+deployment. All documents within an edition follow its indexing policy.
+
+Excluded documentation remains accessible. RDX allows crawlers to read its
+`noindex` directive and follow its links. These directives are not access control;
+search engines decide whether and when to include a page in their results.
+
+## Navbar and homepage
+
+| Option                          | Accepted value                                                                           | Default                        | What it controls                                                                                                                                        |
+| ------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `navbar`                        | Object                                                                                   | RDX logo and Docs link         | Branding and actions in the shared navbar                                                                                                               |
+| `navbar.title`                  | String                                                                                   | `''`                           | Text beside the logo                                                                                                                                    |
+| `navbar.logo`                   | Root-relative image URL from `public/` or imported React component accepting `className` | RDX logo                       | [Custom logo](../04-features/custom-logo.mdx)                                                                                                           |
+| `navbar.actions`                | Object                                                                                   | Optional actions hidden        | GitHub action and theme toggle                                                                                                                          |
+| `navbar.actions.showToggleMode` | Boolean                                                                                  | `false`                        | Show the theme toggle. The CLI starter sets it to `true`.                                                                                               |
+| `navbar.actions.github`         | Object with `visible` and `url`                                                          | Unset                          | GitHub link in the navbar                                                                                                                               |
+| `navbar.actions.github.visible` | Boolean                                                                                  | Required when `github` is set  | Show the GitHub action                                                                                                                                  |
+| `navbar.actions.github.url`     | Absolute HTTP(S) URL or `'#'`                                                            | Required when `github` is set  | Repository destination. `'#'` is a placeholder.                                                                                                         |
+| `homepage`                      | Object                                                                                   | Homepage disabled              | Configure the [homepage](../04-features/homepage.mdx).                                                                                                  |
+| `homepage.enabled`              | Boolean                                                                                  | `false`                        | Show a homepage at `/`. When disabled, `/` redirects to the docs.                                                                                       |
+| `homepage.component`            | Imported React component                                                                 | Built-in homepage when enabled | Render your own `components/home.tsx`.                                                                                                                  |
+| `homepage.translations`         | Boolean                                                                                  | `false`                        | Load `components/home.tsx` with [translation catalogs](../04-features/languages.mdx#localize-your-homepage). Use this in place of `homepage.component`. |
+| `homepage.title`                | Non-empty string                                                                         | `metadata.applicationName`     | Heading on the built-in homepage                                                                                                                        |
+| `homepage.description`          | String                                                                                   | Site `description`             | Text below the built-in heading                                                                                                                         |
+| `homepage.buttons`              | Array of `{ label: string, href: string }`                                               | One Docs button                | Hero actions on the built-in homepage. The first is primary. Use `[]` to hide the buttons.                                                              |
+
+For `homepage.buttons`, each `label` is a non-empty string and each `href`
+is a root-relative path or absolute HTTP(S) URL.
+
+## Theme and code blocks
+
+| Option                            | Accepted value                                                                             | Default                              | What it controls                                                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `theme`                           | Object                                                                                     | System preference                    | Initial theme for the shared interface                                                                             |
+| `theme.defaultTheme`              | `system`, `light`, or `dark`                                                               | `system`                             | Theme before the visitor saves a preference                                                                        |
+| `syntaxHighlighting`              | Object                                                                                     | Built-in languages and GitHub themes | Syntax highlighting in Markdown code blocks                                                                        |
+| `syntaxHighlighting.languages`    | Object mapping lowercase, non-reserved fence names to project-relative TextMate JSON files | No custom grammars                   | [Highlight a custom language](../03-writing-documentation/code-blocks.mdx#highlight-a-custom-language).            |
+| `syntaxHighlighting.themes`       | Object                                                                                     | GitHub themes                        | [Choose syntax themes](../03-writing-documentation/code-blocks.mdx#choose-syntax-themes) for each site appearance. |
+| `syntaxHighlighting.themes.light` | Bundled Shiki theme name                                                                   | `github-light`                       | Code colors in light mode                                                                                          |
+| `syntaxHighlighting.themes.dark`  | Bundled Shiki theme name                                                                   | `github-dark`                        | Code colors in dark mode                                                                                           |
+
+Use [rdx.css](../04-features/appearance.mdx) to customize the interface highlight
+color for light and dark themes.
+
+## Plugins and configuration changes
+
+| Option    | Accepted value                                            | Default | What it controls                      |
+| --------- | --------------------------------------------------------- | ------- | ------------------------------------- |
+| `plugins` | Array of `RdxPlugin` objects returned by plugin factories | `[]`    | Active plugins, in the order they run |
+
+See [Plugins](../04-features/plugins.mdx) for activation commands and
+plugin-specific configuration.
+
+Write your documentation in `docs/`.
+Do not edit files inside `.rdx/`. Restart development after changing configuration,
+and rebuild/redeploy for production.

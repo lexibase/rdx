@@ -1,6 +1,6 @@
 {
   "name": "@lexibase/rdx-changelog",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Optional release notes for RDX documentation sites.",
   "license": "MIT",
   "type": "module",
