@@ -89,7 +89,7 @@ test(
     )
     await write(
       'locale/ptbr/docs/guides/intro.mdx',
-      '---\ntitle: Introdução\nredirectFrom: [/docs/introducao-antiga]\n---\n\n## Olá\n\nTranslatedIntroMarker\n\n[Instalar](./install.mdx#requirements)\n\n![Logo](/logo.svg)'
+      '---\ntitle: Introdução\nredirectFrom: [/docs/introducao-antiga]\nrelated: [./install.mdx]\n---\n\n## Olá\n\nTranslatedIntroMarker\n\n[Instalar](./install.mdx#requirements)\n\n![Logo](/logo.svg)'
     )
     await mkdir(path.join(root, 'locale/es-es/docs'), { recursive: true })
     await mkdir(path.join(root, 'locale/fr-fr/docs'), { recursive: true })
@@ -220,6 +220,10 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         return response.text()
       }
       const translated = await html('/pt-br/docs/guides/intro')
+      assert.match(
+        translated,
+        /<nav aria-label="Relacionados"[^>]*>.*?href="\/pt-br\/docs\/guides\/install".*?Installation.*?<\/nav>.*?<time/s
+      )
       assert.match(
         translated,
         /<time dateTime="2026-08-25">Última atualização em 25 de agosto de 2026<\/time>/i

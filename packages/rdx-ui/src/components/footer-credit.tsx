@@ -23,7 +23,7 @@ export function FooterCredit({
       : currentYear
 
   return (
-    <section className="flex items-center justify-center w-full py-5">
+    <section className="flex items-center justify-center w-full pb-5">
       <p className="text-sm text-muted-foreground text-center">
         &copy; {years} <strong>{name}</strong>
         {children}{' '}

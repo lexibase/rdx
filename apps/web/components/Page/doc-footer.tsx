@@ -3,6 +3,7 @@ import { Button } from '@lexibase/rdx-ui/components/button'
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
 import { EditPageLink } from '@lexibase/rdx-ui/components/edit-page-link'
 import { DocumentLastUpdated } from '@lexibase/rdx-ui/components/document-last-updated'
+import { RelatedDocuments } from '@lexibase/rdx-ui/components/related-documents'
 
 import { docsIndexer } from '@/lib/docs'
 import config from '@/rdx.config'
@@ -12,11 +13,13 @@ export async function DocFooter({
   filename,
   editHref,
   lastUpdated,
+  relatedLinks,
 }: {
   version: string
   filename: string
   editHref?: string
   lastUpdated?: string
+  relatedLinks: { href: string; label: string }[]
 }) {
   const messages = getMessages(config.lang)
   const sidebarLinks = await docsIndexer(version)
@@ -33,10 +36,15 @@ export async function DocFooter({
       : null
 
   return (
-    <footer className="flex flex-col">
-      {editHref && <EditPageLink href={editHref} lang={config.lang} />}
-      <DocumentLastUpdated date={lastUpdated} lang={config.lang} />
-      <section className="flex items-center justify-between">
+    <footer className="flex flex-col gap-6 pt-3">
+      <RelatedDocuments links={relatedLinks} lang={config.lang} />
+      {(editHref || lastUpdated) && (
+        <div className="flex flex-col gap-2 not-first:mt-4">
+          {editHref && <EditPageLink href={editHref} lang={config.lang} />}
+          <DocumentLastUpdated date={lastUpdated} lang={config.lang} />
+        </div>
+      )}
+      <section className="mt-4 mb-10 flex w-full items-center justify-between md:mx-auto md:max-w-[860px]">
         {prevLink ? (
           <Button
             variant="outline"

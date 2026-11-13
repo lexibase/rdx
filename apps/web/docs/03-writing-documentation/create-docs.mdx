@@ -3,6 +3,9 @@ title: Writing documentation pages
 navTitle: Writing pages
 description: Add categories, order pages, and write your first document.
 order: 2
+related:
+  - ./docs.mdx
+  - ./checking.mdx
 ---
 
 ## Create a category
@@ -51,9 +54,24 @@ the sidebar.
 | `navTitle`     | String               | Sidebar label. Defaults to the document title.                  |
 | `highlighting` | `important` or `new` | Highlights the page with a dot in the sidebar.                  |
 | `redirectFrom` | Array of strings     | Former `/docs/` paths that redirect to this page.               |
+| `related`      | Array of strings     | Related pages to show below the document.                       |
 
 Existing pages can migrate `link_position` to `order` using the
 [sidebar migration guide](../05-guides/migrating-sidebar.mdx).
+
+### Add related pages
+
+List relative `.md` or `.mdx` file paths in `related`. RDX uses each page's
+`navTitle` or title as the link text and opens it in the current documentation
+edition and language.
+
+```yaml
+related:
+  - ./docs.mdx
+  - ./checking.mdx
+```
+
+The links at the end of this page use this example.
 
 ### Keep links to a moved page working
 

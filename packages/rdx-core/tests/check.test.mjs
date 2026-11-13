@@ -3,7 +3,11 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
-import { createRdxProject } from '../dist/index.js'
+import {
+  createRdxProject,
+  getDocsIndex,
+  getRelatedDocumentLinks,
+} from '../dist/index.js'
 import {
   checkDocumentation,
   formatDocumentationCheck,
@@ -54,6 +58,35 @@ test('page redirects resolve links and reject duplicate, occupied, and invalid a
   assert.ok(
     diagnostics.some(({ message }) => /redirectFrom\[0\] must be/.test(message))
   )
+})
+
+test('related documents reuse relative link resolution and report broken destinations', async (t) => {
+  const project = await fixture(t, {
+    'docs/intro.mdx':
+      '---\nrelated: [./01-guides/install.md, ./missing.md]\n---\n',
+    'docs/01-guides/install.md':
+      '---\ntitle: Installation\nnavTitle: Install\n---\n',
+    'docs/invalid.md': '---\nrelated: [/docs/intro]\n---\n',
+  })
+  const docsDir = path.join(project.rootDir, 'docs')
+  const pages = getDocsIndex({ docsDir }).flatMap(({ pages }) => pages)
+  assert.deepEqual(
+    getRelatedDocumentLinks(
+      ['./01-guides/install.md', './intro.mdx', './01-guides/install.md'],
+      {
+        sourceRoot: docsDir,
+        sourcePath: path.join(docsDir, 'intro.mdx'),
+        documents: pages,
+      },
+      'intro',
+      (page) => `/pt-br/docs/1.0.0/${page.slug}`
+    ),
+    [{ href: '/pt-br/docs/1.0.0/guides/install', label: 'Install' }]
+  )
+  const { diagnostics } = checkDocumentation(project)
+  assert.equal(diagnostics.length, 2)
+  assert.match(diagnostics[0].message, /related\[1\].*missing\.md/)
+  assert.match(diagnostics[1].message, /related\[0\].*relative/)
 })
 
 test('checks release links, anchors and public assets when changelog is active', async (t) => {
