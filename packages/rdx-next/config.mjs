@@ -1,4 +1,4 @@
-import { readdir, realpath, stat } from 'node:fs/promises'
+import { readdir, realpath, stat, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 
@@ -7,6 +7,8 @@ import {
   resolveProjectPath,
   getContentSources,
   snapshotDatesFilename,
+  builtDocumentDatesFilename,
+  createDocumentDateReader,
 } from '@lexibase/rdx-core/config'
 import { createJiti } from 'jiti'
 import {
@@ -80,6 +82,7 @@ export async function getRdxTracingConfig({
   rootDir,
   appDir = rootDir,
   pageRoutes,
+  captureDocumentDates = false,
 }) {
   rootDir = path.resolve(rootDir)
   appDir = path.resolve(appDir)
@@ -93,21 +96,35 @@ export async function getRdxTracingConfig({
   })
   const project = await createRdxProject(input, { rootDir })
   const sources = getContentSources(project)
-  const files = (
-    await Promise.all(
-      sources
-        .filter((source) => source.redirectTo === undefined)
-        .map((source) =>
-          contentFiles(
-            resolveProjectPath(
-              rootDir,
-              source.docsDir,
-              'content source docsDir'
-            )
-          )
-        )
+  const content = await Promise.all(
+    sources
+      .filter((source) => source.redirectTo === undefined)
+      .map(async (source) => ({
+        versioned: source.version !== undefined,
+        files: await contentFiles(
+          resolveProjectPath(rootDir, source.docsDir, 'content source docsDir')
+        ),
+      }))
+  )
+  const files = content.flatMap((entry) => entry.files)
+  if (captureDocumentDates) {
+    const dateFor = createDocumentDateReader(rootDir)
+    const dates = Object.create(null)
+    const liveFiles = new Set(
+      content
+        .filter(({ versioned }) => !versioned)
+        .flatMap((entry) => entry.files)
     )
-  ).flat()
+    for (const filename of liveFiles) {
+      if (!/\.mdx?$/.test(filename)) continue
+      const date = dateFor(filename)
+      if (date)
+        dates[path.relative(rootDir, filename).split(path.sep).join('/')] = date
+    }
+    const filename = path.join(appDir, builtDocumentDatesFilename)
+    await writeFile(filename, JSON.stringify(dates) + '\n')
+    files.push(filename)
+  }
   for (const filename of project.runtimeFiles) {
     const resolved = resolveProjectPath(
       rootDir,

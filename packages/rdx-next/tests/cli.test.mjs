@@ -312,14 +312,19 @@ test('prepare loads typed config with defineConfig without loading a Next server
     path.join(rootDir, 'node_modules/next/package.json'),
     '{"name":"next","version":"16.4.3"}'
   )
-  const nextConfig = (
+  const loadNextConfig = (
     await import(pathToFileURL(path.join(rootDir, '.rdx/next.config.mjs')).href)
   ).default
+  const nextConfig = await loadNextConfig('phase-development-server')
   const canonicalRoot = await realpath(rootDir)
   assert.equal(path.resolve(nextConfig.turbopack.root), canonicalRoot)
   assert.equal(nextConfig.outputFileTracingRoot, canonicalRoot)
   assert.equal(nextConfig.agentRules, false)
   assert.equal(nextConfig.experimental?.externalDir, undefined)
+  await assert.rejects(
+    access(path.join(rootDir, '.rdx/.rdx-document-dates.json')),
+    { code: 'ENOENT' }
+  )
   await access(path.join(rootDir, '.rdx/app/globals.d.css.ts'))
   assert.ok(config.exclude.includes('public'))
 })

@@ -17,6 +17,7 @@ coverage
 .runtime-test-*/
 .rdx-theme-preview/
 .rdx-package-smoke/
+.rdx-document-dates.json
 
 # Turbo
 .turbo

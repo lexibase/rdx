@@ -6,9 +6,13 @@ const rootDir = fileURLToPath(new URL('..', import.meta.url))
 const appDir = fileURLToPath(new URL('.', import.meta.url))
 const buildRoot = await getRdxBuildRoot(rootDir)
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  ...(await getRdxTracingConfig({ rootDir, appDir })),
+/** @type {(phase: string) => Promise<import('next').NextConfig>} */
+const nextConfig = async (phase) => ({
+  ...(await getRdxTracingConfig({
+    rootDir,
+    appDir,
+    captureDocumentDates: phase === 'phase-production-build',
+  })),
   outputFileTracingRoot: buildRoot,
   agentRules: false,
   turbopack: {
@@ -20,6 +24,6 @@ const nextConfig = {
     '@lexibase/rdx-ui',
     'next-mdx-remote',
   ],
-}
+})
 
 export default nextConfig

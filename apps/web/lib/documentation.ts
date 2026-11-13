@@ -12,6 +12,7 @@ import {
   getMarkdownPaths,
   getChangelogMarkdownResponse,
   getDocumentMarkdownResponse,
+  getDocumentLastUpdated,
   parseMarkdownPath,
   markdownNotFound,
 } from '@lexibase/rdx-next/runtime'
@@ -198,6 +199,12 @@ export function createDocumentation(project: RdxProject) {
     source,
     editPageHref(version: string, sourcePath: string) {
       return getEditPageHref(project, contentSource(version), sourcePath)
+    },
+    lastUpdated(version: string, sourcePath: string) {
+      const entry = contentSource(version)
+      return entry
+        ? getDocumentLastUpdated(project, entry, sourcePath)
+        : undefined
     },
     index,
     pages: routePages,

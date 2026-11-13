@@ -115,6 +115,10 @@ export default async function DocPage({
             version={version}
             filename={filename}
             editHref={documentation.editPageHref(version, document.sourcePath)}
+            lastUpdated={documentation.lastUpdated(
+              version,
+              document.sourcePath
+            )}
           />
         </section>
       </DocsPageTransition>

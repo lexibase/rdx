@@ -9,12 +9,8 @@ import {
   withBasePath,
 } from '@lexibase/rdx-core'
 import { exportMarkdownBody } from '@lexibase/rdx-core/mdx'
-import {
-  changelogPluginName,
-  createDocumentDateReader,
-  getSnapshotDocumentDate,
-  readChangelog,
-} from '@lexibase/rdx-core/config'
+import { changelogPluginName, readChangelog } from '@lexibase/rdx-core/config'
+import { getDocumentLastUpdated } from './document-date'
 import type {
   RdxContentSource,
   RdxDocPage,
@@ -236,9 +232,11 @@ export function getDocumentMarkdownResponse(
   const href = (page: Pick<RdxDocPage, 'slug' | 'sourcePath'>) =>
     publicUrl(project, route(page))
   const page = bySlug.get(document.slug)!
-  const lastUpdated = source.version
-    ? getSnapshotDocumentDate(options.docsDir, document.sourcePath)
-    : createDocumentDateReader(project.rootDir)(document.sourcePath)
+  const lastUpdated = getDocumentLastUpdated(
+    project,
+    source,
+    document.sourcePath
+  )
   const frontmatter = {
     title: page.title,
     ...(page.description ? { description: page.description } : {}),

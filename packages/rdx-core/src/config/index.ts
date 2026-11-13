@@ -33,6 +33,8 @@ export { getContentSources } from '../project/localization'
 export { getEditPageHref } from './edit-page'
 export {
   createDocumentDateReader,
+  builtDocumentDatesFilename,
+  readDocumentDate,
   collectSnapshotDocumentDates,
   getSnapshotDocumentDate,
   snapshotDatesFilename,
