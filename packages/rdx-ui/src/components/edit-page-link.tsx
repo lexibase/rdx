@@ -12,7 +12,7 @@ export function EditPageLink({ href, lang }: { href: string; lang?: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="mb-4 self-start text-sm text-muted-foreground hover:text-foreground"
+      className="self-start text-sm text-muted-foreground hover:text-foreground"
     >
       <Pencil aria-hidden="true" className="me-1.5 inline size-3.5" />
       {messages.editThisPage}

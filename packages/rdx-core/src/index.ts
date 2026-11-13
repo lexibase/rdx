@@ -10,6 +10,7 @@ export {
 } from './project/localization'
 export {
   createDocumentLinkResolver,
+  getRelatedDocumentLinks,
   RdxDocumentLinkError,
   type DocumentLinkOptions,
 } from './content/document-links'

@@ -4,6 +4,7 @@ import {
   getDocument,
   getDocsIndex,
   getDocsPaths,
+  getRelatedDocumentLinks,
   getSourceOptions,
   resolveDocsRoute,
   getLocalizedProject,
@@ -40,6 +41,7 @@ import {
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
 import { EditPageLink } from '@lexibase/rdx-ui/components/edit-page-link'
 import { DocumentLastUpdated } from '@lexibase/rdx-ui/components/document-last-updated'
+import { RelatedDocuments } from '@lexibase/rdx-ui/components/related-documents'
 import { CopyPage } from '@lexibase/rdx-ui/components/copy-page'
 import { BrandLogo } from '@lexibase/rdx-ui/components/brand-logo'
 import { getMdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
@@ -526,22 +528,25 @@ export async function DocsPage({
     ? resolveDocsRoute(originalProject, slug).categories
     : categories
   const contentLanguage = fallback ? primaryLocale!.code : project.config.lang
+  const documentLinks = {
+    sourceRoot: contentOptions.docsDir,
+    sourcePath: document.sourcePath,
+    routePrefix: source.routePrefix,
+    basePath: contentSource.basePath,
+    virtualPaths: !!contentOptions.fallbackDocsDir,
+    documents: contentCategories.flatMap((category) => category.pages),
+  }
   const { content } = await compileDocumentation(
     document.content,
     getMdxComponents(project.config.lang),
     {
-      sourceRoot: contentOptions.docsDir,
-      sourcePath: document.sourcePath,
-      routePrefix: source.routePrefix,
-      basePath: contentSource.basePath,
+      ...documentLinks,
       ...(project.config.basePath
         ? {
             publicHref: (href: string) =>
               withBasePath(href, project.config.basePath),
           }
         : {}),
-      virtualPaths: !!contentOptions.fallbackDocsDir,
-      documents: contentCategories.flatMap((category) => category.pages),
     },
     originalProject.syntaxGrammars,
     originalProject.config.syntaxHighlighting?.themes
@@ -551,6 +556,12 @@ export async function DocsPage({
       ? document.frontmatter.description
       : null
   const hrefFor = (pageSlug: string) => getDocsHref(project, source, pageSlug)
+  const relatedLinks = getRelatedDocumentLinks(
+    document.frontmatter.related,
+    documentLinks,
+    currentSlug,
+    (page) => hrefFor(page.slug)
+  )
   const markdownHref = fallback
     ? undefined
     : withBasePath(
@@ -679,10 +690,14 @@ export async function DocsPage({
                   {content}
                 </div>
               </main>
-              <footer className="flex flex-col">
+              <footer className="flex flex-col gap-6 pt-3">
                 {editHref && (
                   <EditPageLink href={editHref} lang={project.config.lang} />
                 )}
+                <RelatedDocuments
+                  links={relatedLinks}
+                  lang={project.config.lang}
+                />
                 <DocumentLastUpdated
                   date={getDocumentLastUpdated(
                     originalProject,

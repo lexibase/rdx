@@ -1,4 +1,5 @@
 import path from 'node:path'
+import type { RdxDocPage } from '@lexibase/rdx-types'
 import { slugFromRelativePath } from './filenames'
 
 export interface DocumentLinkOptions {
@@ -23,6 +24,44 @@ export class RdxDocumentLinkError extends Error {
     super(`[RDX] Invalid document link "${href}" in ${sourcePath}: ${reason}`)
     this.name = 'RdxDocumentLinkError'
   }
+}
+
+export function readRelatedDocuments(value: unknown): string[] {
+  if (value === undefined) return []
+  if (!Array.isArray(value))
+    throw new Error('related must be an array of relative Markdown file paths.')
+  return value.map((entry, index) => {
+    if (
+      typeof entry !== 'string' ||
+      /^(?:[a-z][a-z\d+.-]*:|\/)/i.test(entry.trim()) ||
+      !/^[^?#\\]+\.mdx?$/.test(entry.trim())
+    )
+      throw new Error(
+        `related[${index}] must be a relative .md or .mdx file path.`
+      )
+    return entry.trim()
+  })
+}
+
+export function getRelatedDocumentLinks(
+  value: unknown,
+  options: DocumentLinkOptions & { documents: readonly RdxDocPage[] },
+  currentSlug: string,
+  hrefFor: (page: RdxDocPage) => string
+) {
+  const paths = readRelatedDocuments(value)
+  if (!paths.length) return []
+  const resolve = createDocumentLinkResolver({
+    ...options,
+    documentHref: (slug) => slug,
+  })
+  const pages = new Map(options.documents.map((page) => [page.slug, page]))
+  return [...new Set(paths.map(resolve))].flatMap((slug) => {
+    const page = pages.get(slug)
+    return page && page.slug !== currentSlug
+      ? [{ href: hrefFor(page), label: page.navTitle ?? page.title }]
+      : []
+  })
 }
 
 /** Resolve only explicit relative Markdown links within the current content source. */

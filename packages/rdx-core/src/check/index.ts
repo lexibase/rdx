@@ -19,6 +19,7 @@ import { parseStaticDocument } from '../content/static-source'
 import { changelogPluginName, readChangelog } from '../config/changelog'
 import {
   createDocumentLinkResolver,
+  readRelatedDocuments,
   RdxDocumentLinkError,
 } from '../content/document-links'
 import { getSourceOptions } from '../project/index'
@@ -361,11 +362,22 @@ export function checkDocumentation(
     if (failed.has(document.page.sourcePath)) continue
     try {
       const raw = fs.readFileSync(document.page.sourcePath, 'utf8')
-      const content = parseStaticDocument(raw).content
+      const { content, data } = parseStaticDocument(raw)
       document.lineOffset = (
         raw.slice(0, raw.length - content.length).match(/\n/g) ?? []
       ).length
       document.parsed = parse(content, document.page.sourcePath.endsWith('.md'))
+      try {
+        document.parsed.references.push(
+          ...readRelatedDocuments(data.related).map((href, index) => ({
+            href,
+            image: false,
+            field: `related[${index}]`,
+          }))
+        )
+      } catch (error) {
+        syntax(error, document.page.sourcePath)
+      }
     } catch (error) {
       syntax(error, document.page.sourcePath, document.lineOffset)
     }

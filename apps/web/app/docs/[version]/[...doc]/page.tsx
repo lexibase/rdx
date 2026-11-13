@@ -115,6 +115,7 @@ export default async function DocPage({
             version={version}
             filename={filename}
             editHref={documentation.editPageHref(version, document.sourcePath)}
+            relatedLinks={documentation.relatedLinks(version, document)}
             lastUpdated={documentation.lastUpdated(
               version,
               document.sourcePath

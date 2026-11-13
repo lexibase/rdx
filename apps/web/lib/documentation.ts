@@ -1,9 +1,14 @@
 import path from 'node:path'
 
 import { getMessages, formatMessage } from '@lexibase/rdx-ui/lib/i18n'
-import { getDocument, getDocsIndex, getSourceOptions } from '@lexibase/rdx-core'
+import {
+  getDocument,
+  getDocsIndex,
+  getRelatedDocumentLinks,
+  getSourceOptions,
+} from '@lexibase/rdx-core'
 import { getEditPageHref } from '@lexibase/rdx-core/config'
-import type { RdxProject } from '@lexibase/rdx-types'
+import type { RdxDocument, RdxProject } from '@lexibase/rdx-types'
 import type { DocumentationCheckOptions } from '@lexibase/rdx-core/check'
 import {
   getSourceRobots,
@@ -199,6 +204,24 @@ export function createDocumentation(project: RdxProject) {
     source,
     editPageHref(version: string, sourcePath: string) {
       return getEditPageHref(project, contentSource(version), sourcePath)
+    },
+    relatedLinks(version: string, document: RdxDocument) {
+      if (!document.frontmatter.related) return []
+      const entries = pages(version)
+      const routes = new Map(
+        routePages(version, entries).map((page) => [page.sourcePath, page.slug])
+      )
+      return getRelatedDocumentLinks(
+        document.frontmatter.related,
+        {
+          sourceRoot: source(version)!.docsDir,
+          sourcePath: document.sourcePath,
+          documents: entries,
+        },
+        document.slug,
+        (page) =>
+          `/docs/${version}/${routes.get(page.sourcePath)!.split('/').map(encodeURIComponent).join('/')}`
+      )
     },
     lastUpdated(version: string, sourcePath: string) {
       const entry = contentSource(version)
