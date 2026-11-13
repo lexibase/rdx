@@ -12,7 +12,11 @@ const packages = [
 test('a dry run only reports missing versions and refuses a mismatched release version', async () => {
   const log = []
   await publishPackages(packages, {
-    lookup: (spec) => (spec === '@lexibase/core@2.0.0' ? '2.0.0' : undefined),
+    lookup: (spec) =>
+      ({
+        '@lexibase/core@2.0.0': '2.0.0',
+        '@lexibase/consumer@latest': '1.0.0',
+      })[spec],
     publish: () => assert.fail('dry run cannot publish'),
     log: (message) => log.push(message),
   })
@@ -34,19 +38,57 @@ test('a retry skips published archives and waits for the remaining package and t
   ])
   const published = []
   let polls = 0
+  let time = 0
+  const unavailable = Object.assign(new Error('npm returned HTTP 503'), {
+    retryable: true,
+  })
   await publishPackages(packages, {
     dryRun: false,
-    lookup: (spec) => registry.get(spec),
+    lookup: (spec) => {
+      if (published.length && !polls) throw unavailable
+      return registry.get(spec)
+    },
     publish: (archive) => published.push(archive),
-    wait: () => {
-      if (++polls < 13) return
+    now: () => time,
+    wait: (duration) => {
+      time += duration
+      if (++polls < 25) return
       registry.set('@lexibase/consumer@2.0.0', '2.0.0')
       registry.set('@lexibase/consumer@latest', '2.0.0')
     },
     log: () => {},
   })
   assert.deepEqual(published, ['consumer.tgz'])
-  assert.equal(polls, 13)
+  assert.equal(polls, 25)
+  assert.equal(time, 250_000)
+})
+
+test('a new package is reported before any archive is published', async () => {
+  const lookup = (spec) =>
+    spec === '@lexibase/core@latest' ? '1.0.0' : undefined
+  await assert.rejects(
+    publishPackages(packages, {
+      dryRun: false,
+      lookup,
+      publish: () => assert.fail('preflight must finish before publishing'),
+    }),
+    /First publication required for @lexibase\/consumer@2\.0\.0/
+  )
+})
+
+test('a retry waits for latest after the exact version is already visible', async () => {
+  let time = 0
+  await publishPackages(packages.slice(0, 1), {
+    dryRun: false,
+    lookup: (spec) => (spec.endsWith('@latest') && !time ? '1.0.0' : '2.0.0'),
+    now: () => time,
+    wait: (duration) => {
+      time += duration
+    },
+    publish: () => assert.fail('an existing version must not be republished'),
+    log: () => {},
+  })
+  assert.equal(time, 10_000)
 })
 
 test('publication stops on registry errors and never downgrades latest', async () => {

@@ -32,6 +32,14 @@ are advanced once, rather than once per terminal experiment.
 
 ## Automated preparation
 
+Accumulate compatible fixes and features for the next grouped release. Write one
+public release note in `apps/web/changelog/<version>.md` for each published RDX
+version. In that note, group changes by what readers can use or what they need to
+do. A patch release that addresses an urgent or user-visible problem can have a
+short note. Routine CI and repository maintenance can stay in the commit history.
+Include the release note with the version updates and documentation snapshot in
+the release PR.
+
 Use Changesets to record package changes and the RDX command to prepare a grouped
 release. Tooling is a workspace development dependency; generated projects do not
 install it. Run these commands from the repository root:
@@ -143,10 +151,19 @@ filename `publish.yml`, no environment name, and allow `npm publish`. Configure
 this near the first publish because unused configurations expire after two days.
 The workflow requests short-lived OIDC credentials in its publish job.
 
+For a package debut, run a dry run first to get the verified archive and see
+which package needs an initial authenticated publish. Trusted Publishing is
+configured on an existing npm package. If the new package depends on unpublished
+versions from the same release, publish those verified dependency archives in
+dependency order before publishing the new package. After its `latest` tag is
+visible, run the workflow to publish the remaining archives.
+
 After the release PR merges, run the workflow with **publish** checked. It waits
 up to 35 minutes for push CI on that exact `main` commit and prints the CI run
 link if CI fails or the wait expires. After CI passes, it publishes the verified archives in dependency order,
-waiting for each new version and its `latest` tag before continuing. If a run
+waiting up to 10 minutes for each new version and its `latest` tag before
+continuing. The publish job checks the entire release for missing packages and
+version conflicts before uploading any archive. If a run
 stops partway through, rerun it for the same version. Existing versions with the
 correct tag are skipped. If a version already exists under a different tag,
 inspect it on npm before retrying.
