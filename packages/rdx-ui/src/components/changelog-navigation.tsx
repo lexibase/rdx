@@ -1,12 +1,20 @@
 'use client'
 
-import { Check, Link2, Rss } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { Check, Link2, ListFilter, Rss } from 'lucide-react'
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 
 import { cn } from '../lib/utils'
 import { useMessages } from '../providers/locale-provider'
 import { Badge } from './badge'
 import { Button, buttonVariants } from './button'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './dropdown-menu'
 import { Separator } from './separator'
 import {
   Tooltip,
@@ -43,19 +51,141 @@ const changelogBadgeStyles = {
   deprecated: 'bg-violet-500/10 text-violet-800 dark:text-violet-300',
 }
 
-export function ChangelogBadges({
-  badges,
+type ChangelogBadge = keyof typeof changelogBadgeStyles
+
+const changelogBadgeLabels = {
+  breaking: 'changelogBreakingBadge',
+  security: 'changelogSecurityBadge',
+  deprecated: 'changelogDeprecatedBadge',
+} as const
+
+type ChangelogRelease = {
+  version: string
+  badges: ChangelogBadge[]
+  note: ReactNode
+}
+
+export function ChangelogContent({
+  feedHref,
+  releases,
 }: {
-  badges: (keyof typeof changelogBadgeStyles)[]
+  feedHref: string
+  releases: ChangelogRelease[]
 }) {
   const messages = useMessages()
-  if (badges.length === 0) return null
+  const [selected, setSelected] = useState<ChangelogBadge[]>([])
+  const pendingAnchor = useRef<string | null>(null)
+  const options = [...new Set(releases.flatMap(({ badges }) => badges))]
+  const versions = useMemo(
+    () =>
+      releases
+        .filter(
+          ({ badges }) =>
+            !selected.length || selected.some((badge) => badges.includes(badge))
+        )
+        .map(({ version }) => version),
+    [releases, selected]
+  )
+  const visibleVersions = useMemo(() => new Set(versions), [versions])
 
-  const labels = {
-    breaking: messages.changelogBreakingBadge,
-    security: messages.changelogSecurityBadge,
-    deprecated: messages.changelogDeprecatedBadge,
-  }
+  useEffect(() => {
+    function revealLinkedRelease() {
+      const hash = window.location.hash
+      const linked = releases.find(
+        ({ version }) =>
+          hash === `#v${version}` || hash === `#v${encodeURIComponent(version)}`
+      )
+      if (linked && !visibleVersions.has(linked.version)) {
+        pendingAnchor.current = `v${linked.version}`
+        setSelected([])
+      }
+    }
+    window.addEventListener('hashchange', revealLinkedRelease)
+    return () => window.removeEventListener('hashchange', revealLinkedRelease)
+  }, [releases, visibleVersions])
+
+  useEffect(() => {
+    if (pendingAnchor.current && !selected.length) {
+      document.getElementById(pendingAnchor.current)?.scrollIntoView()
+      pendingAnchor.current = null
+    }
+  }, [selected])
+
+  return (
+    <div className="mx-auto grid max-w-5xl gap-x-10 px-6 py-10 sm:py-14 md:grid-cols-[10rem_minmax(0,1fr)]">
+      <div className="mb-8 flex flex-wrap items-center gap-2 md:col-start-2 md:row-start-1">
+        <div className="flex items-center gap-2">
+          <h1 className="text-3xl font-semibold tracking-tight">
+            {messages.changelog}
+          </h1>
+          <ChangelogFeedLink href={feedHref} />
+        </div>
+        {options.length > 0 && (
+          <div className="ms-auto">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={<Button variant="outline" size="sm" />}
+              >
+                <ListFilter aria-hidden="true" />
+                {messages.changelogFilter}
+                {selected.length > 0 && (
+                  <span className="text-muted-foreground">
+                    ({selected.length})
+                  </span>
+                )}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {options.map((badge) => (
+                  <DropdownMenuCheckboxItem
+                    key={badge}
+                    checked={selected.includes(badge)}
+                    closeOnClick={false}
+                    onCheckedChange={(checked) =>
+                      setSelected((current) =>
+                        checked
+                          ? [...current, badge]
+                          : current.filter((value) => value !== badge)
+                      )
+                    }
+                  >
+                    {messages[changelogBadgeLabels[badge]]}
+                  </DropdownMenuCheckboxItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  disabled={!selected.length}
+                  onClick={() => setSelected([])}
+                >
+                  {messages.changelogClearFilters}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
+      </div>
+      {versions.length > 0 && <ChangelogVersions versions={versions} />}
+      <div className="min-w-0 md:col-start-2 md:row-start-2">
+        {releases.length === 0 && (
+          <p className="text-muted-foreground">{messages.changelogEmpty}</p>
+        )}
+        {releases.map(({ version, note }) => (
+          <article
+            key={version}
+            id={`v${version}`}
+            hidden={!visibleVersions.has(version)}
+            className="scroll-mt-6 border-t py-7"
+          >
+            {note}
+          </article>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export function ChangelogBadges({ badges }: { badges: ChangelogBadge[] }) {
+  const messages = useMessages()
+  if (badges.length === 0) return null
 
   return (
     <div className="flex flex-wrap justify-end gap-2">
@@ -65,14 +195,14 @@ export function ChangelogBadges({
           variant="secondary"
           className={changelogBadgeStyles[badge]}
         >
-          {labels[badge]}
+          {messages[changelogBadgeLabels[badge]]}
         </Badge>
       ))}
     </div>
   )
 }
 
-export function ChangelogVersions({ versions }: { versions: string[] }) {
+function ChangelogVersions({ versions }: { versions: string[] }) {
   const messages = useMessages()
   const navigation = useRef<HTMLElement>(null)
   const [active, setActive] = useState(versions[0])

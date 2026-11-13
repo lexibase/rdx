@@ -34,8 +34,7 @@ import { Home, HomeSection } from '@lexibase/rdx-ui/components/home'
 import { SkipLink } from '@lexibase/rdx-ui/components/skip-link'
 import {
   ChangelogBadges,
-  ChangelogFeedLink,
-  ChangelogVersions,
+  ChangelogContent,
   CopyReleaseLink,
 } from '@lexibase/rdx-ui/components/changelog-navigation'
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
@@ -234,7 +233,6 @@ export async function ChangelogPage({
   if (!config.plugins.some(({ name }) => name === changelogPluginName))
     notFound()
 
-  const messages = getMessages(config.lang)
   const formatDate = new Intl.DateTimeFormat(config.lang, {
     dateStyle: 'long',
     timeZone: 'UTC',
@@ -265,31 +263,14 @@ export async function ChangelogPage({
         tabIndex={-1}
         className="min-h-0 flex-1 overflow-y-auto outline-none"
       >
-        <div className="mx-auto grid max-w-5xl gap-x-10 px-6 py-10 sm:py-14 md:grid-cols-[10rem_minmax(0,1fr)]">
-          <div className="mb-8 flex items-center gap-2 md:col-start-2 md:row-start-1">
-            <h1 className="text-3xl font-semibold tracking-tight">
-              {messages.changelog}
-            </h1>
-            <ChangelogFeedLink
-              href={withBasePath('/changelog/rss.xml', config.basePath)}
-            />
-          </div>
-          {entries.length > 0 && (
-            <ChangelogVersions
-              versions={entries.map(({ version }) => version)}
-            />
-          )}
-          <div className="min-w-0 md:col-start-2 md:row-start-2">
-            {entries.length === 0 && (
-              <p className="text-muted-foreground">{messages.changelogEmpty}</p>
-            )}
-            {entries.map(
-              ({ version, date, title, badges, links, rendered }) => (
-                <article
-                  key={version}
-                  id={`v${version}`}
-                  className="scroll-mt-6 border-t py-7"
-                >
+        <ChangelogContent
+          feedHref={withBasePath('/changelog/rss.xml', config.basePath)}
+          releases={entries.map(
+            ({ version, date, title, badges, links, rendered }) => ({
+              version,
+              badges,
+              note: (
+                <>
                   <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                       <time dateTime={date}>
@@ -338,11 +319,11 @@ export async function ChangelogPage({
                   <div className="flex min-w-0 flex-col gap-4">
                     {rendered.content}
                   </div>
-                </article>
-              )
-            )}
-          </div>
-        </div>
+                </>
+              ),
+            })
+          )}
+        />
       </main>
     </>
   )

@@ -401,6 +401,10 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       /Created changelog\/1\.0\.0\.md/
     )
     const draft = await readFile(path.join(root, 'changelog/1.0.0.md'), 'utf8')
+    await write(
+      'changelog/1.5.0.md',
+      "---\nversion: '1.5.0'\ndate: '2025-06-01'\ntitle: Maintenance release\nbadge: security\n---\n\nMaintenance notes."
+    )
     assert.match(draft, /version: '1\.0\.0'/)
     await write(
       'changelog/1.0.0.md',
@@ -500,7 +504,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       assert.match(changes, /href="#v2\.0\.0" aria-current="location"/)
       assert.match(changes, /aria-label="Copy link to release v1\.0\.0"/)
       assert.match(changes, /datetime="2026-01-01"/i)
-      const [latestRelease, firstRelease] = changes.match(
+      const [latestRelease, , firstRelease] = changes.match(
         /<article\b[^>]*>[\s\S]*?<\/article>/g
       )
       assert.match(
@@ -893,6 +897,50 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
                 '/minha-tool/rdx-markdown/changelog/1.0.0.md'
               )
               assert.equal(await viewMarkdown.getAttribute('target'), '_blank')
+              await page.keyboard.press('Escape')
+              const filter = page.getByRole('button', { name: /^Filter/ })
+              const filterBox = await filter.boundingBox()
+              const rssBox = await rssLink.boundingBox()
+              assert.ok(
+                filterBox &&
+                  rssBox &&
+                  filterBox.x > rssBox.x + rssBox.width + 24
+              )
+              const breaking = page.getByRole('menuitemcheckbox', {
+                name: 'Breaking changes',
+              })
+              const security = page.getByRole('menuitemcheckbox', {
+                name: 'Security',
+              })
+              const middleNote = page.locator('[id="v1.5.0"]')
+              const clearFilters = page.getByRole('menuitem', {
+                name: 'Clear filters',
+              })
+              await filter.click()
+              await breaking.click()
+              await middleNote.waitFor({ state: 'hidden' })
+              await security.click()
+              assert.equal(await security.getAttribute('aria-checked'), 'true')
+              await clearFilters.click()
+              await olderNote.waitFor()
+
+              await page.setViewportSize({ width: 375, height: 812 })
+              await filter.click()
+              await breaking.click()
+              await security.click()
+              await page.keyboard.press('Escape')
+              await latestNote.waitFor()
+              await middleNote.waitFor()
+              await olderNote.waitFor({ state: 'hidden' })
+              assert.deepEqual(
+                await versions.getByRole('link').allTextContents(),
+                ['v2.0.0', 'v1.5.0']
+              )
+              await page.evaluate(() => {
+                window.location.hash = 'v1.0.0'
+              })
+              await olderNote.waitFor()
+              await versions.getByRole('link', { name: 'v1.0.0' }).waitFor()
               assert.deepEqual(unexpected, [])
             } finally {
               await browser.close()
