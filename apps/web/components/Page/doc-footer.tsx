@@ -40,7 +40,7 @@ export async function DocFooter({
       {editHref && <EditPageLink href={editHref} lang={config.lang} />}
       <RelatedDocuments links={relatedLinks} lang={config.lang} />
       <DocumentLastUpdated date={lastUpdated} lang={config.lang} />
-      <section className="flex w-full items-center justify-between md:mx-auto md:max-w-[860px]">
+      <section className="mt-4 mb-10 flex w-full items-center justify-between md:mx-auto md:max-w-[860px]">
         {prevLink ? (
           <Button
             variant="outline"

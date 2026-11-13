@@ -706,7 +706,7 @@ export async function DocsPage({
                   )}
                   lang={project.config.lang}
                 />
-                <section className="flex w-full items-center justify-between md:mx-auto md:max-w-[860px]">
+                <section className="mt-4 mb-10 flex w-full items-center justify-between md:mx-auto md:max-w-[860px]">
                   {previous ? (
                     <Button
                       variant="outline"
