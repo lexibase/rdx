@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 6.4.0 — Prepared
+
+- Add an optional changelog plugin for publishing Markdown release notes. Readers can filter by badge, copy a release link or its Markdown, and follow new releases through RSS. RDX validates release note links and local assets during checks and builds. The navbar underlines the current section.
+
 ## 6.3.1 — Prepared
 
 - Fix documentation search for sites that use i18n. The search index accepts
