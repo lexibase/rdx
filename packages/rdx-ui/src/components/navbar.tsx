@@ -6,6 +6,7 @@ import { Button } from './button'
 import { Logo } from './logo'
 import { Separator } from './separator'
 import { ModeToggle } from './mode-toggle'
+import { NavbarLink } from './navbar-link'
 
 /** Shared composition extracted from apps/web/components/layout/Navbar. */
 export function Navbar({
@@ -16,6 +17,7 @@ export function Navbar({
   homeHref = '/',
   leadingLinks,
   docsHref = '/docs',
+  docsSection,
   docsLink,
   changelogHref,
   versionMenu,
@@ -31,6 +33,7 @@ export function Navbar({
   homeHref?: string
   leadingLinks?: ReactNode
   docsHref?: string
+  docsSection?: string
   docsLink?: ReactNode
   changelogHref?: string
   versionMenu?: ReactNode
@@ -64,14 +67,12 @@ export function Navbar({
         {versionMenu}
         {languageMenu}
         {docsLink ?? (
-          <Button variant="link" size="sm" href={docsHref}>
+          <NavbarLink href={docsHref} section={docsSection}>
             {messages.docs}
-          </Button>
+          </NavbarLink>
         )}
         {changelogHref && (
-          <Button variant="link" size="sm" href={changelogHref}>
-            {messages.changelog}
-          </Button>
+          <NavbarLink href={changelogHref}>{messages.changelog}</NavbarLink>
         )}
         {github?.visible && github.url && (
           <>

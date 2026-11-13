@@ -2,8 +2,7 @@
 
 import { useMessages } from '@lexibase/rdx-ui/providers/locale-provider'
 import { Badge } from '@lexibase/rdx-ui/components/badge'
-import { Button } from '@lexibase/rdx-ui/components/button'
-import { usePathname } from 'next/navigation'
+import { NavbarLink } from '@lexibase/rdx-ui/components/navbar-link'
 
 import { useVersion } from '@/hooks/use-version'
 
@@ -13,24 +12,15 @@ export function NavbarLinks() {
   const href = `/docs/${version}`
 
   return (
-    <>
-      <Button key={href} variant="link" size="sm" href={href}>
-        {messages.docs}
-      </Button>
-    </>
+    <NavbarLink key={href} href={href} section="/docs">
+      {messages.docs}
+    </NavbarLink>
   )
 }
 
 export function NavbarTemplatesLink() {
-  const pathname = usePathname()
-
   return (
-    <Button
-      variant="link"
-      size="sm"
-      href="/templates"
-      aria-current={pathname === '/templates' ? 'page' : undefined}
-    >
+    <NavbarLink href="/templates">
       <span className="relative">
         Templates
         <Badge
@@ -40,6 +30,6 @@ export function NavbarTemplatesLink() {
           Beta
         </Badge>
       </span>
-    </Button>
+    </NavbarLink>
   )
 }

@@ -37,6 +37,15 @@ test(
           />Docs<\/a>[\s\S]*href="\/changelog"[^>]*>Changelog<\/a>/
         )
         assert.match(changelog, /<title>Changelog \| RDX<\/title>/)
+        assert.match(
+          changelog,
+          /<a\b(?=[^>]*href="\/changelog")(?=[^>]*aria-current="page")[^>]*>Changelog<\/a>/
+        )
+        const templates = await (await fetch(`${base}/templates`)).text()
+        assert.match(
+          templates,
+          /<a\b(?=[^>]*href="\/templates")(?=[^>]*aria-current="page")[^>]*><span[^>]*>Templates/
+        )
         assert.match(changelog, /id="v6\.3\.1"/)
         assert.match(
           changelog,
@@ -61,6 +70,10 @@ test(
           const response = await fetch(`${base}/docs/${version}/intro`)
           assert.equal(response.status, 200, version)
           const introHtml = await response.text()
+          assert.match(
+            introHtml,
+            /<a\b(?=[^>]*href="\/docs\/[^"/]+")(?=[^>]*aria-current="true")[^>]*>Docs<\/a>/
+          )
           assert.ok(
             introHtml.includes(
               `<meta name="robots" content="${docs.robots(version).index ? 'index' : 'noindex'}, follow"`
