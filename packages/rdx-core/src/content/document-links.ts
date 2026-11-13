@@ -26,10 +26,15 @@ export class RdxDocumentLinkError extends Error {
   }
 }
 
-export function readRelatedDocuments(value: unknown): string[] {
+export function readDocumentLinkField(
+  value: unknown,
+  field: 'related' | 'prerequisites'
+): string[] {
   if (value === undefined) return []
   if (!Array.isArray(value))
-    throw new Error('related must be an array of relative Markdown file paths.')
+    throw new Error(
+      `${field} must be an array of relative Markdown file paths.`
+    )
   return value.map((entry, index) => {
     if (
       typeof entry !== 'string' ||
@@ -37,7 +42,7 @@ export function readRelatedDocuments(value: unknown): string[] {
       !/^[^?#\\]+\.mdx?$/.test(entry.trim())
     )
       throw new Error(
-        `related[${index}] must be a relative .md or .mdx file path.`
+        `${field}[${index}] must be a relative .md or .mdx file path.`
       )
     return entry.trim()
   })
@@ -49,9 +54,10 @@ export function getRelatedDocumentLinks(
     documents: readonly RdxDocPage[]
   },
   currentSlug: string,
-  hrefFor: (page: RdxDocPage) => string
+  hrefFor: (page: RdxDocPage) => string,
+  field: 'related' | 'prerequisites' = 'related'
 ) {
-  const paths = readRelatedDocuments(value)
+  const paths = readDocumentLinkField(value, field)
   if (!paths.length) return []
   const resolve = createDocumentLinkResolver({
     ...options,

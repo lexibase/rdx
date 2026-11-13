@@ -3,6 +3,7 @@ import { withBasePath } from '@lexibase/rdx-core'
 import { getMarkdownHref, getPageMetadata } from '@lexibase/rdx-next/runtime'
 import { getMdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
 import { DocsToc } from '@lexibase/rdx-ui/components/docs-toc'
+import { DocumentPrerequisites } from '@lexibase/rdx-ui/components/related-documents'
 import { DocsPageTransition } from '@lexibase/rdx-ui/components/docs-page-transition'
 import { notFound, redirect, permanentRedirect } from 'next/navigation'
 
@@ -108,6 +109,14 @@ export default async function DocPage({
                   basePath
                 )}
               />
+              <DocumentPrerequisites
+                links={documentation.documentLinks(
+                  version,
+                  document,
+                  'prerequisites'
+                )}
+                lang={config.lang}
+              />
             </header>
             <div className="h-full w-full flex-1 max-w-[960px]">{content}</div>
           </main>
@@ -115,7 +124,11 @@ export default async function DocPage({
             version={version}
             filename={filename}
             editHref={documentation.editPageHref(version, document.sourcePath)}
-            relatedLinks={documentation.relatedLinks(version, document)}
+            relatedLinks={documentation.documentLinks(
+              version,
+              document,
+              'related'
+            )}
             lastUpdated={documentation.lastUpdated(
               version,
               document.sourcePath

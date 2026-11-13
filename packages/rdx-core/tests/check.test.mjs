@@ -60,13 +60,15 @@ test('page redirects resolve links and reject duplicate, occupied, and invalid a
   )
 })
 
-test('related documents reuse relative link resolution and report broken destinations', async (t) => {
+test('related documents and prerequisites use relative links and report broken destinations', async (t) => {
   const project = await fixture(t, {
     'docs/intro.mdx':
       '---\nrelated: [./01-guides/install.md, ./missing.md]\n---\n',
     'docs/01-guides/install.md':
       '---\ntitle: Installation\nnavTitle: Install\n---\n',
     'docs/invalid.md': '---\nrelated: [/docs/intro]\n---\n',
+    'docs/prerequisites.md':
+      '---\nprerequisites: [./01-guides/install.md, ./missing.md]\n---\n',
   })
   const docsDir = path.join(project.rootDir, 'docs')
   const pages = getDocsIndex({ docsDir }).flatMap(({ pages }) => pages)
@@ -84,9 +86,10 @@ test('related documents reuse relative link resolution and report broken destina
     [{ href: '/pt-br/docs/1.0.0/guides/install', label: 'Install' }]
   )
   const { diagnostics } = checkDocumentation(project)
-  assert.equal(diagnostics.length, 2)
+  assert.equal(diagnostics.length, 3)
   assert.match(diagnostics[0].message, /related\[1\].*missing\.md/)
   assert.match(diagnostics[1].message, /related\[0\].*relative/)
+  assert.match(diagnostics[2].message, /prerequisites\[1\].*missing\.md/)
 })
 
 test('checks release links, anchors and public assets when changelog is active', async (t) => {

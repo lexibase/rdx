@@ -19,7 +19,7 @@ import { parseStaticDocument } from '../content/static-source'
 import { changelogPluginName, readChangelog } from '../config/changelog'
 import {
   createDocumentLinkResolver,
-  readRelatedDocuments,
+  readDocumentLinkField,
   RdxDocumentLinkError,
 } from '../content/document-links'
 import { getSourceOptions } from '../project/index'
@@ -367,16 +367,18 @@ export function checkDocumentation(
         raw.slice(0, raw.length - content.length).match(/\n/g) ?? []
       ).length
       document.parsed = parse(content, document.page.sourcePath.endsWith('.md'))
-      try {
-        document.parsed.references.push(
-          ...readRelatedDocuments(data.related).map((href, index) => ({
-            href,
-            image: false,
-            field: `related[${index}]`,
-          }))
-        )
-      } catch (error) {
-        syntax(error, document.page.sourcePath)
+      for (const field of ['related', 'prerequisites'] as const) {
+        try {
+          document.parsed.references.push(
+            ...readDocumentLinkField(data[field], field).map((href, index) => ({
+              href,
+              image: false,
+              field: `${field}[${index}]`,
+            }))
+          )
+        } catch (error) {
+          syntax(error, document.page.sourcePath)
+        }
       }
     } catch (error) {
       syntax(error, document.page.sourcePath, document.lineOffset)
