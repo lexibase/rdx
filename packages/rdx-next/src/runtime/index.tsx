@@ -41,7 +41,10 @@ import {
 import { FooterCredit } from '@lexibase/rdx-ui/components/footer-credit'
 import { EditPageLink } from '@lexibase/rdx-ui/components/edit-page-link'
 import { DocumentLastUpdated } from '@lexibase/rdx-ui/components/document-last-updated'
-import { RelatedDocuments } from '@lexibase/rdx-ui/components/related-documents'
+import {
+  DocumentPrerequisites,
+  RelatedDocuments,
+} from '@lexibase/rdx-ui/components/related-documents'
 import { CopyPage } from '@lexibase/rdx-ui/components/copy-page'
 import { BrandLogo } from '@lexibase/rdx-ui/components/brand-logo'
 import { getMdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
@@ -561,6 +564,13 @@ export async function DocsPage({
       ? document.frontmatter.description
       : null
   const hrefFor = (pageSlug: string) => getDocsHref(project, source, pageSlug)
+  const prerequisites = getRelatedDocumentLinks(
+    document.frontmatter.prerequisites,
+    documentLinks,
+    currentSlug,
+    (page) => hrefFor(page.slug),
+    'prerequisites'
+  )
   const relatedLinks = getRelatedDocumentLinks(
     document.frontmatter.related,
     documentLinks,
@@ -690,6 +700,10 @@ export async function DocsPage({
                       {description}
                     </p>
                   )}
+                  <DocumentPrerequisites
+                    links={prerequisites}
+                    lang={project.config.lang}
+                  />
                 </header>
                 <div className="h-full w-full flex-1 max-w-[960px]">
                   {content}

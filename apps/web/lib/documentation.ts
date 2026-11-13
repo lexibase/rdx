@@ -205,14 +205,18 @@ export function createDocumentation(project: RdxProject) {
     editPageHref(version: string, sourcePath: string) {
       return getEditPageHref(project, contentSource(version), sourcePath)
     },
-    relatedLinks(version: string, document: RdxDocument) {
-      if (!document.frontmatter.related) return []
+    documentLinks(
+      version: string,
+      document: RdxDocument,
+      field: 'related' | 'prerequisites'
+    ) {
+      if (document.frontmatter[field] === undefined) return []
       const entries = pages(version)
       const routes = new Map(
         routePages(version, entries).map((page) => [page.sourcePath, page.slug])
       )
       return getRelatedDocumentLinks(
-        document.frontmatter.related,
+        document.frontmatter[field],
         {
           sourceRoot: source(version)!.docsDir,
           sourcePath: document.sourcePath,
@@ -220,7 +224,8 @@ export function createDocumentation(project: RdxProject) {
         },
         document.slug,
         (page) =>
-          `/docs/${version}/${routes.get(page.sourcePath)!.split('/').map(encodeURIComponent).join('/')}`
+          `/docs/${version}/${routes.get(page.sourcePath)!.split('/').map(encodeURIComponent).join('/')}`,
+        field
       )
     },
     lastUpdated(version: string, sourcePath: string) {

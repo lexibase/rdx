@@ -7,6 +7,8 @@ export type RdxDocFrontmatter = {
   navTitle?: string
   /** Relative Markdown file paths to related pages in this documentation source. */
   related?: string[]
+  /** Relative Markdown file paths to read before starting this page. */
+  prerequisites?: string[]
   /** Former documentation paths, written from /docs within the current edition and language. */
   redirectFrom?: string[]
   /** Show a semantic highlight next to the page in the sidebar. */
