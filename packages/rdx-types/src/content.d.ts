@@ -5,6 +5,8 @@ export type RdxDocFrontmatter = {
   description?: string
   order?: number
   navTitle?: string
+  /** Former documentation paths, written from /docs within the current edition and language. */
+  redirectFrom?: string[]
   /** Show a semantic highlight next to the page in the sidebar. */
   highlighting?: RdxPageHighlight
   /** @deprecated Use order. */
@@ -16,6 +18,7 @@ export type RdxDocPage = {
   slug: string
   title: string
   navTitle?: string
+  redirectFrom?: string[]
   highlighting?: RdxPageHighlight
   description: string
   position: number

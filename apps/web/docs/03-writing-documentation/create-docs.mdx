@@ -46,21 +46,45 @@ the sidebar.
 | `order`        | Number               | Sidebar position within the category. Lower numbers come first. |
 | `navTitle`     | String               | Sidebar label. Defaults to the document title.                  |
 | `highlighting` | `important` or `new` | Highlights the page with a dot in the sidebar.                  |
+| `redirectFrom` | Array of strings     | Former `/docs/` paths that redirect to this page.               |
 
 Existing pages can migrate `link_position` to `order` using the
 [sidebar migration guide](../05-guides/migrating-sidebar.mdx).
 
+### Keep links to a moved page working
+
+If you move `docs/installation.mdx` to `docs/getting-started/installation.mdx`,
+add the old path to the moved page's frontmatter.
+
+```yaml
+---
+title: Installation
+redirectFrom:
+  - /docs/installation
+---
+```
+
+RDX redirects the old path permanently to the page's new address. List paths
+from `/docs/`, using letters, digits, hyphens, underscores, dots, or tildes in
+each segment. Leave out the deployment prefix, language, and edition. RDX
+applies them from the page's source. Add a locale-specific alias in that
+translation's frontmatter. A fallback page uses the original page's aliases.
+
+Each old path can belong to one page per language and edition. `rdx check`
+reports conflicts with existing pages and checks links through the redirect.
+Restart `rdx dev` after editing aliases so Next.js reloads its routing rules.
+
 ### Highlight a page in the sidebar
 
 Set `highlighting: important` for an amber dot beside an important page, such
-as a [migration guide](../05-guides/migrating-sidebar.mdx). Set
+as a guide for a breaking change. Set
 `highlighting: new` for a blue dot beside a new guide or feature. Omit the field
 for a regular sidebar entry.
 
 ```yaml
 ---
-title: Migrating from version 4 to 5
-navTitle: Migrating to v5
+title: Required changes before upgrading
+navTitle: Upgrade guide
 highlighting: important
 ---
 ```

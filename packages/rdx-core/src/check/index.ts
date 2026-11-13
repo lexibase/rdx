@@ -11,6 +11,10 @@ import type {
   RdxProject,
 } from '@lexibase/rdx-types'
 import { getDocsIndex } from '../content/index'
+import {
+  collectPageRedirects,
+  type PageRedirectSource,
+} from '../content/page-redirects'
 import { parseStaticDocument } from '../content/static-source'
 import { changelogPluginName, readChangelog } from '../config/changelog'
 import {
@@ -176,6 +180,7 @@ export function checkDocumentation(
   const prefixes: [string, string][] = []
   const redirects = new Map(Object.entries(options.redirects ?? {}))
   const failed = new Set<string>()
+  const redirectSources: PageRedirectSource[] = []
   const origin = project.config.metadata.metadataBase
     ? new URL(project.config.metadata.metadataBase).origin
     : 'https://rdx.invalid'
@@ -246,6 +251,7 @@ export function checkDocumentation(
   }
   for (const source of sources) {
     if (source.redirectTo !== undefined) {
+      redirectSources.push({ source, root: rootFor(source), pages: [] })
       const destination = sources.find(
         (entry) =>
           entry.routePrefix === source.redirectTo &&
@@ -287,12 +293,19 @@ export function checkDocumentation(
       continue
     }
     roots.add(key(rootFor(source)))
+    const redirectSource: PageRedirectSource = {
+      source,
+      root: rootFor(source),
+      pages: [],
+    }
+    redirectSources.push(redirectSource)
     if (project.config.search)
       roots.add(`/rdx-search/${source.routePrefix || '_'}`)
     for (const page of pages) {
       const hrefs = options.documentRoutes?.(source, page, pages) ?? [
         documentRoute(source, page),
       ]
+      redirectSource.pages.push({ page, hrefs })
       const document: Document & RouteTarget = {
         sourcePath: page.sourcePath,
         page,
@@ -308,6 +321,9 @@ export function checkDocumentation(
         if (source === project.sources[0]) routes.set('/docs', document)
       }
     }
+  }
+  for (const redirect of collectPageRedirects(redirectSources, syntax)) {
+    redirects.set(key(redirect.source), redirect.destination)
   }
   if (project.config.homepage?.enabled) roots.add('/')
   else redirects.set('/', '/docs')

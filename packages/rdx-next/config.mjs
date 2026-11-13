@@ -9,6 +9,12 @@ import {
   snapshotDatesFilename,
 } from '@lexibase/rdx-core/config'
 import { createJiti } from 'jiti'
+import {
+  collectPageRedirects,
+  getDocsHref,
+  getDocsIndex,
+  getSourceOptions,
+} from '@lexibase/rdx-core'
 
 /** Include the project and the real Next.js installation in Turbopack's root. */
 export async function getRdxBuildRoot(rootDir) {
@@ -70,7 +76,11 @@ function literalPattern(filename) {
 }
 
 /** Next.js tracing and historical route redirects, independent of plugin names. */
-export async function getRdxTracingConfig({ rootDir, appDir = rootDir }) {
+export async function getRdxTracingConfig({
+  rootDir,
+  appDir = rootDir,
+  pageRoutes,
+}) {
   rootDir = path.resolve(rootDir)
   appDir = path.resolve(appDir)
   const jiti = createJiti(import.meta.url, {
@@ -82,9 +92,10 @@ export async function getRdxTracingConfig({ rootDir, appDir = rootDir }) {
     default: true,
   })
   const project = await createRdxProject(input, { rootDir })
+  const sources = getContentSources(project)
   const files = (
     await Promise.all(
-      getContentSources(project)
+      sources
         .filter((source) => source.redirectTo === undefined)
         .map((source) =>
           contentFiles(
@@ -107,6 +118,27 @@ export async function getRdxTracingConfig({ rootDir, appDir = rootDir }) {
       throw new Error(`Plugin runtimeFiles must name a file: ${filename}`)
     files.push(resolved)
   }
+  const aliases = collectPageRedirects(
+    sources.map((source) => {
+      const root = getDocsHref(project, source)
+      const pages =
+        source.redirectTo === undefined
+          ? getDocsIndex(getSourceOptions(project, source)).flatMap(
+              ({ pages }) => pages
+            )
+          : []
+      return (
+        pageRoutes?.(source, pages) ?? {
+          source,
+          root,
+          pages: pages.map((page) => ({
+            page,
+            hrefs: [getDocsHref(project, source, page.slug)],
+          })),
+        }
+      )
+    })
+  )
   const redirects = project.sources
     .filter((source) => source.redirectTo !== undefined)
     .flatMap((source) =>
@@ -133,7 +165,9 @@ export async function getRdxTracingConfig({ rootDir, appDir = rootDir }) {
   }
   return {
     ...(project.config.basePath ? { basePath: project.config.basePath } : {}),
-    ...(redirects.length ? { redirects: async () => redirects } : {}),
+    ...(aliases.length || redirects.length
+      ? { redirects: async () => [...aliases, ...redirects] }
+      : {}),
     outputFileTracingIncludes: {
       '/*': [
         ...new Set(

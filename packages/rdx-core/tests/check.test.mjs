@@ -35,6 +35,27 @@ async function fixture(t, files, sources = [], plugins = []) {
   )
 }
 
+test('page redirects resolve links and reject duplicate, occupied, and invalid aliases', async (t) => {
+  const project = await fixture(t, {
+    'docs/install.md':
+      '---\nredirectFrom: [/docs/old, /docs/other]\n---\n## Setup\n',
+    'docs/other.md': '[Old setup](/docs/old#setup)',
+    'docs/z-duplicate.md': '---\nredirectFrom: [/docs/old]\n---\n',
+    'docs/invalid.md': '---\nredirectFrom: [https://example.com]\n---\n',
+  })
+  const { diagnostics } = checkDocumentation(project)
+  assert.equal(diagnostics.length, 3)
+  assert.ok(
+    diagnostics.some(({ message }) => /\/docs\/old.*conflicts/.test(message))
+  )
+  assert.ok(
+    diagnostics.some(({ message }) => /\/docs\/other.*conflicts/.test(message))
+  )
+  assert.ok(
+    diagnostics.some(({ message }) => /redirectFrom\[0\] must be/.test(message))
+  )
+})
+
 test('checks release links, anchors and public assets when changelog is active', async (t) => {
   const project = await fixture(
     t,

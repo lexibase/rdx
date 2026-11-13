@@ -16,13 +16,12 @@ import {
   markdownNotFound,
 } from '@lexibase/rdx-next/runtime'
 
-const canaryCategoryAliases = new Map([
-  ['cat-01', 'documentation'],
-  ['cat-02', 'getting-started'],
-  ['cat-03', 'writing-documentation'],
-  ['cat-04', 'features'],
-  ['cat-05', 'guides'],
-])
+import {
+  canaryCategoryAliases,
+  officialDocsRoot,
+  officialDocumentHrefs,
+  shortDocumentRoutes,
+} from './documentation-routes.mjs'
 
 /** Only the official site's historical URL aliases differ from installed sites. */
 export function createDocumentation(project: RdxProject) {
@@ -72,16 +71,7 @@ export function createDocumentation(project: RdxProject) {
   }
 
   function routePages(version: string, entries = pages(version)) {
-    const counts = new Map<string, number>()
-    for (const page of entries) {
-      const name = path.posix.basename(page.slug)
-      counts.set(name, (counts.get(name) ?? 0) + 1)
-    }
-    return entries.map((page) => {
-      const name = path.posix.basename(page.slug)
-      // Existing short URLs remain stable; duplicate names use the full path.
-      return { ...page, slug: counts.get(name) === 1 ? name : page.slug }
-    })
+    return shortDocumentRoutes(entries)
   }
 
   function document(version: string, slug: string) {
@@ -145,8 +135,7 @@ export function createDocumentation(project: RdxProject) {
         editions.find((edition) => edition.kind === 'version') ?? editions[0]!
       const routes = new Map<string, Map<string, string>>()
       return {
-        sourceRoute: (entry) =>
-          `/docs/${entry.id === 'current' ? 'canary' : entry.routePrefix}`,
+        sourceRoute: officialDocsRoot,
         documentRoutes(entry, page, entries) {
           const version = entry.id === 'current' ? 'canary' : entry.routePrefix
           if (!routes.has(version))
@@ -159,17 +148,10 @@ export function createDocumentation(project: RdxProject) {
                 ])
               )
             )
-          const slugs = [routes.get(version)!.get(page.sourcePath)!, page.slug]
-          if (version === 'canary') {
-            const [category, ...segments] = page.slug.split('/')
-            for (const [alias, current] of canaryCategoryAliases) {
-              if (category === current && segments.length)
-                slugs.push([alias, ...segments].join('/'))
-            }
-          }
-          return slugs.map(
-            (slug) =>
-              `/docs/${version}/${slug.split('/').map(encodeURIComponent).join('/')}`
+          return officialDocumentHrefs(
+            officialDocsRoot(entry),
+            page.slug,
+            routes.get(version)!.get(page.sourcePath)!
           )
         },
         redirects: { '/docs': published.href },
