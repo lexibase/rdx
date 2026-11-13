@@ -490,6 +490,24 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       assert.match(changes, /data-rdx-callout="note"/)
       assert.match(changes, /FirstReleaseMarker/)
       assert.match(changes, /src="\/minha-tool\/logo.svg"/)
+      const releaseExport = await fetch(
+        base + '/rdx-markdown/changelog/2.0.0.md'
+      )
+      assert.equal(releaseExport.status, 200)
+      assert.match(releaseExport.headers.get('content-type'), /^text\/markdown/)
+      assert.equal(releaseExport.headers.get('x-robots-tag'), 'noindex, follow')
+      const releaseMarkdown = await releaseExport.text()
+      assert.match(
+        releaseMarkdown,
+        /^---\ntitle: "New release"\nversion: "2\.0\.0"\ndate: "2026-01-01"\nbadge: "breaking, security, deprecated"\nurl: "[^"]+\/minha-tool\/changelog#v2\.0\.0"\n---/
+      )
+      assert.match(releaseMarkdown, /LatestReleaseMarker/)
+      assert.match(releaseMarkdown, /\/minha-tool\/logo\.svg/)
+      assert.doesNotMatch(releaseMarkdown, /FirstReleaseMarker/)
+      assert.equal(
+        (await fetch(base + '/rdx-markdown/changelog/9.9.9.md')).status,
+        404
+      )
       assert.equal(
         (home.match(/src="\/minha-tool\/brand\.png"/g) ?? []).length,
         2
@@ -755,6 +773,24 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
                 dateBox && badgeBox && badgeBox.x > dateBox.x + dateBox.width
               )
               assert.ok(Math.abs(dateBox.y - badgeBox.y) <= 2)
+              const lastBadgeBox = await latestNote
+                .getByText('Deprecated', { exact: true })
+                .boundingBox()
+              const copyBox = await latestNote
+                .getByRole('button', { name: 'Copy this page' })
+                .boundingBox()
+              assert.ok(
+                lastBadgeBox &&
+                  copyBox &&
+                  copyBox.x >= lastBadgeBox.x + lastBadgeBox.width
+              )
+              assert.ok(
+                Math.abs(
+                  lastBadgeBox.y +
+                    lastBadgeBox.height / 2 -
+                    (copyBox.y + copyBox.height / 2)
+                ) <= 2
+              )
               const versions = page.getByRole('navigation', {
                 name: 'Versions',
               })
@@ -779,6 +815,31 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
               await versions.getByRole('link', { name: 'v2.0.0' }).click()
               await page.waitForURL(`${changelog}#v2.0.0`)
               await activeVersion.filter({ hasText: 'v2.0.0' }).waitFor()
+              const olderNote = page.locator('[id="v1.0.0"]')
+              await olderNote
+                .getByRole('button', { name: 'Copy this page' })
+                .click()
+              await olderNote
+                .getByText('Page Markdown copied to clipboard.', {
+                  exact: true,
+                })
+                .waitFor()
+              const clipboard = await page.evaluate(() =>
+                navigator.clipboard.readText()
+              )
+              assert.match(clipboard, /FirstReleaseMarker/)
+              assert.doesNotMatch(clipboard, /LatestReleaseMarker/)
+              await olderNote
+                .getByRole('button', { name: 'Page copy options' })
+                .click()
+              const viewMarkdown = page.getByRole('menuitem', {
+                name: /View Markdown/,
+              })
+              assert.equal(
+                await viewMarkdown.getAttribute('href'),
+                '/minha-tool/rdx-markdown/changelog/1.0.0.md'
+              )
+              assert.equal(await viewMarkdown.getAttribute('target'), '_blank')
               assert.deepEqual(unexpected, [])
             } finally {
               await browser.close()

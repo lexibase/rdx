@@ -30,7 +30,7 @@ export function ChangelogBadges({
   }
 
   return (
-    <div className="ms-auto flex flex-wrap justify-end gap-2">
+    <div className="flex flex-wrap justify-end gap-2">
       {badges.map((badge) => (
         <Badge
           key={badge}

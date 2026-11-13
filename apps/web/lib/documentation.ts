@@ -10,6 +10,7 @@ import {
   getRdxSitemap,
   getLlmIndexResponse,
   getMarkdownPaths,
+  getChangelogMarkdownResponse,
   getDocumentMarkdownResponse,
   parseMarkdownPath,
   markdownNotFound,
@@ -191,6 +192,8 @@ export function createDocumentation(project: RdxProject) {
     },
     markdownResponse(path: string[]) {
       const segments = parseMarkdownPath(path)
+      if (segments?.[0] === 'changelog')
+        return getChangelogMarkdownResponse(project, segments.slice(1))
       if (!segments || segments[0] !== 'docs' || segments.length < 3)
         return markdownNotFound()
       const [, version, ...slug] = segments

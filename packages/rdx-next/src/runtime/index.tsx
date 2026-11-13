@@ -68,6 +68,7 @@ export {
   getLlmIndexResponse,
   getMarkdownHref,
   getMarkdownPaths,
+  getChangelogMarkdownResponse,
   getMarkdownResponse,
   getDocumentMarkdownResponse,
   parseMarkdownPath,
@@ -294,7 +295,17 @@ export async function ChangelogPage({
                     </a>
                     <CopyReleaseLink version={version} />
                   </div>
-                  <ChangelogBadges badges={badges} />
+                  <div className="ms-auto flex flex-wrap items-center justify-end gap-2">
+                    <ChangelogBadges badges={badges} />
+                    <CopyPage
+                      href={withBasePath(
+                        getMarkdownHref(
+                          `/changelog/${encodeURIComponent(version)}`
+                        ),
+                        config.basePath
+                      )}
+                    />
+                  </div>
                 </div>
                 <h2 className="mb-4 text-xl font-semibold">{title}</h2>
                 <div className="flex min-w-0 flex-col gap-4">
