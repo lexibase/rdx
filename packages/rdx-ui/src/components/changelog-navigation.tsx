@@ -5,8 +5,44 @@ import { useEffect, useRef, useState } from 'react'
 
 import { cn } from '../lib/utils'
 import { useMessages } from '../providers/locale-provider'
+import { Badge } from './badge'
 import { Button } from './button'
 import { Separator } from './separator'
+
+const changelogBadgeStyles = {
+  breaking: 'bg-amber-500/10 text-amber-800 dark:text-amber-300',
+  security: 'bg-red-500/10 text-red-800 dark:text-red-300',
+  deprecated: 'bg-violet-500/10 text-violet-800 dark:text-violet-300',
+}
+
+export function ChangelogBadges({
+  badges,
+}: {
+  badges: (keyof typeof changelogBadgeStyles)[]
+}) {
+  const messages = useMessages()
+  if (badges.length === 0) return null
+
+  const labels = {
+    breaking: messages.changelogBreakingBadge,
+    security: messages.changelogSecurityBadge,
+    deprecated: messages.changelogDeprecatedBadge,
+  }
+
+  return (
+    <div className="ms-auto flex flex-wrap justify-end gap-2">
+      {badges.map((badge) => (
+        <Badge
+          key={badge}
+          variant="secondary"
+          className={changelogBadgeStyles[badge]}
+        >
+          {labels[badge]}
+        </Badge>
+      ))}
+    </div>
+  )
+}
 
 export function ChangelogVersions({ versions }: { versions: string[] }) {
   const messages = useMessages()

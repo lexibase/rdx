@@ -359,7 +359,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
     const config = await readFile(configFile, 'utf8')
     await write(
       'changelog/new.mdx',
-      "---\nversion: '2.0.0'\ndate: '2026-01-01'\ntitle: New release\n---\n\n> [!NOTE]\n> LatestReleaseMarker\n\n![Logo](/logo.svg)" +
+      "---\nversion: '2.0.0'\ndate: '2026-01-01'\ntitle: New release\nbadge: breaking, security, deprecated\n---\n\n> [!NOTE]\n> LatestReleaseMarker\n\n![Logo](/logo.svg)" +
         '\n\nDetails about the latest release.'.repeat(30)
     )
     await writeFile(
@@ -478,6 +478,14 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       assert.match(changes, /href="#v2\.0\.0" aria-current="location"/)
       assert.match(changes, /aria-label="Copy link to release v1\.0\.0"/)
       assert.match(changes, /datetime="2026-01-01"/i)
+      const [latestRelease, firstRelease] = changes.match(
+        /<article\b[^>]*>[\s\S]*?<\/article>/g
+      )
+      assert.match(
+        latestRelease,
+        /data-slot="badge"[^>]*>Breaking changes<.*data-slot="badge"[^>]*>Security<.*data-slot="badge"[^>]*>Deprecated</s
+      )
+      assert.doesNotMatch(firstRelease, /<span[^>]*data-slot="badge"/)
       assert.match(changes, /LatestReleaseMarker/)
       assert.match(changes, /data-rdx-callout="note"/)
       assert.match(changes, /FirstReleaseMarker/)
@@ -738,6 +746,15 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
 
               const changelog = `${router}/minha-tool/changelog`
               await page.goto(changelog)
+              const latestNote = page.locator('[id="v2.0.0"]')
+              const dateBox = await latestNote.locator('time').boundingBox()
+              const badgeBox = await latestNote
+                .getByText('Breaking changes', { exact: true })
+                .boundingBox()
+              assert.ok(
+                dateBox && badgeBox && badgeBox.x > dateBox.x + dateBox.width
+              )
+              assert.ok(Math.abs(dateBox.y - badgeBox.y) <= 2)
               const versions = page.getByRole('navigation', {
                 name: 'Versions',
               })

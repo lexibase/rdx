@@ -6,6 +6,22 @@ import { boundedProjectPath } from './paths'
 
 export const changelogPluginName = '@lexibase/rdx-changelog'
 
+function readBadges(value: unknown) {
+  if (value === undefined) return []
+  const invalidBadge =
+    'badge must use breaking, security, or deprecated, separated by commas'
+  if (typeof value !== 'string') throw new Error(invalidBadge)
+
+  const badges = new Set<'breaking' | 'security' | 'deprecated'>()
+  for (const item of value.split(',')) {
+    const badge = item.trim()
+    if (badge !== 'breaking' && badge !== 'security' && badge !== 'deprecated')
+      throw new Error(invalidBadge)
+    badges.add(badge)
+  }
+  return [...badges]
+}
+
 export function isChangelogVersion(version: unknown): version is string {
   return (
     typeof version === 'string' &&
@@ -70,6 +86,7 @@ export function readChangelog(rootDir: string) {
           title: title.trim(),
           version,
           date,
+          badges: readBadges(data.badge),
           content,
           filename,
           sourcePath,

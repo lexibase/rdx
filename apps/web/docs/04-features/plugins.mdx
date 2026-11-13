@@ -96,6 +96,13 @@ title: Search improvements
 Search now opens results in the selected language.
 ```
 
+Add the optional `badge` field to show one or more labels beside the release
+date. Separate multiple values with commas, as in `badge: breaking, deprecated`.
+
+- `breaking` marks an incompatible change that may require migration.
+- `security` marks a security update.
+- `deprecated` marks a feature that still works and has a recommended replacement.
+
 The **Changelog** link follows **Docs** in the navigation. The **Versions**
 list highlights the release you are reading. Use the copy icon beside a
 release date to share a direct link such as `/changelog#v1.2.0`.

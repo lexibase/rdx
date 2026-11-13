@@ -42,6 +42,7 @@ test('the changelog command creates a valid draft and preserves existing entries
   assert.equal(draft.version, '1.2.0')
   assert.match(draft.date, /^\d{4}-\d{2}-\d{2}$/)
   assert.equal(draft.content.trim(), '')
+  assert.deepEqual(draft.badges, [])
   const renamed = path.join(rootDir, 'changelog', 'spring-release.mdx')
   const original = await readFile(draft.sourcePath, 'utf8')
   const edited = original + 'My release notes.\n'
@@ -50,6 +51,24 @@ test('the changelog command creates a valid draft and preserves existing entries
   await assert.rejects(run('new', '1.2.0'), /spring-release\.mdx/)
   assert.equal(await readFile(renamed, 'utf8'), edited)
   assert.deepEqual(await readdir(path.dirname(renamed)), ['spring-release.mdx'])
+
+  for (const [value, badges] of [
+    ['breaking', ['breaking']],
+    ['security', ['security']],
+    ['deprecated', ['deprecated']],
+    [
+      'security, deprecated, breaking, security',
+      ['security', 'deprecated', 'breaking'],
+    ],
+  ]) {
+    await writeFile(
+      renamed,
+      edited.replace('\n---\n', `\nbadge: ${value}\n---\n`)
+    )
+    assert.deepEqual(readChangelog(rootDir)[0].badges, badges)
+  }
+  await writeFile(renamed, edited.replace('\n---\n', '\nbadge: typo\n---\n'))
+  assert.throws(() => readChangelog(rootDir), /spring-release\.mdx: badge/)
 })
 
 test('the command rejects a changelog directory linked outside the project', async (t) => {

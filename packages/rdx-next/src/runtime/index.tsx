@@ -33,6 +33,7 @@ import { DocsSearch } from '@lexibase/rdx-ui/components/docs-search'
 import { Home, HomeSection } from '@lexibase/rdx-ui/components/home'
 import { SkipLink } from '@lexibase/rdx-ui/components/skip-link'
 import {
+  ChangelogBadges,
   ChangelogVersions,
   CopyReleaseLink,
 } from '@lexibase/rdx-ui/components/changelog-navigation'
@@ -274,23 +275,26 @@ export async function ChangelogPage({
             {entries.length === 0 && (
               <p className="text-muted-foreground">{messages.changelogEmpty}</p>
             )}
-            {entries.map(({ version, date, title, rendered }) => (
+            {entries.map(({ version, date, title, badges, rendered }) => (
               <article
                 key={version}
                 id={`v${version}`}
                 className="scroll-mt-6 border-t py-7"
               >
-                <div className="mb-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                  <time dateTime={date}>
-                    {formatDate.format(new Date(date))}
-                  </time>
-                  <a
-                    href={`#v${version}`}
-                    className="font-mono hover:underline"
-                  >
-                    v{version}
-                  </a>
-                  <CopyReleaseLink version={version} />
+                <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <time dateTime={date}>
+                      {formatDate.format(new Date(date))}
+                    </time>
+                    <a
+                      href={`#v${version}`}
+                      className="font-mono hover:underline"
+                    >
+                      v{version}
+                    </a>
+                    <CopyReleaseLink version={version} />
+                  </div>
+                  <ChangelogBadges badges={badges} />
                 </div>
                 <h2 className="mb-4 text-xl font-semibold">{title}</h2>
                 <div className="flex min-w-0 flex-col gap-4">
