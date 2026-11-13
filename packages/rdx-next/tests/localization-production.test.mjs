@@ -861,9 +861,30 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
               const activeVersion = versions.locator(
                 '[aria-current="location"]'
               )
+              const changelogScroll = page.locator('#rdx-main')
+              assert.equal(
+                await changelogScroll.evaluate(
+                  (main) => getComputedStyle(main).scrollBehavior
+                ),
+                'smooth'
+              )
+              await page.emulateMedia({ reducedMotion: 'reduce' })
+              assert.equal(
+                await changelogScroll.evaluate(
+                  (main) => getComputedStyle(main).scrollBehavior
+                ),
+                'auto'
+              )
+              await page.emulateMedia({ reducedMotion: 'no-preference' })
+              assert.ok(
+                await page.evaluate(
+                  () =>
+                    document.scrollingElement.scrollHeight <= window.innerHeight
+                )
+              )
               await activeVersion.filter({ hasText: 'v2.0.0' }).waitFor()
-              await page.locator('#rdx-main').evaluate((main) => {
-                main.scrollTop = main.scrollHeight
+              await changelogScroll.evaluate((main) => {
+                main.scrollTo({ top: main.scrollHeight, behavior: 'instant' })
               })
               await activeVersion.filter({ hasText: 'v1.0.0' }).waitFor()
               const copyReleaseLink = page.getByRole('button', {
@@ -938,6 +959,12 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
               await olderNote.waitFor()
 
               await page.setViewportSize({ width: 375, height: 812 })
+              assert.ok(
+                await page.evaluate(
+                  () =>
+                    document.scrollingElement.scrollHeight <= window.innerHeight
+                )
+              )
               await filter.click()
               await breaking.click()
               await security.click()

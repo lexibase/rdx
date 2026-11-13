@@ -262,7 +262,7 @@ export async function ChangelogPage({
       <main
         id="rdx-main"
         tabIndex={-1}
-        className="min-h-0 flex-1 overflow-y-auto outline-none"
+        className="relative min-h-0 flex-1 overflow-y-auto outline-none motion-safe:scroll-smooth"
       >
         <ChangelogContent
           feedHref={withBasePath('/changelog/rss.xml', config.basePath)}
