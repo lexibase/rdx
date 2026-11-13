@@ -63,7 +63,28 @@ yarn rdx add changelog
 
 :::
 
-Create `changelog/` beside `docs/`. Add one `.md` or `.mdx` file per release.
+Create a release note from the project root.
+
+:::tabs
+
+### pnpm
+
+pnpm rdx changelog new 1.2.0
+
+### npm
+
+npm exec -- rdx changelog new 1.2.0
+
+### yarn
+
+yarn rdx changelog new 1.2.0
+
+:::
+
+The command creates `changelog/1.2.0.md` beside `docs/` and fills in the
+version, today's date, and a default title. Edit the title and add your release
+notes before building the site. If that version already has an entry, edit the
+existing file. You can also add `.md` or `.mdx` entries by hand.
 
 ```md title="changelog/1.2.0.md"
 ---
@@ -81,6 +102,10 @@ releases newest first and gives each version a shareable link, such as
 as in your docs. Use site paths such as `/docs/getting-started` for docs links.
 Projects with `basePath` serve the page under that prefix. Projects with i18n
 share one changelog written in the primary language.
+
+If you use the versioning plugin, your release script can run `rdx version`
+and `rdx changelog new` with the same version. Run `rdx build` after the note
+is ready.
 
 ## Manual installation
 

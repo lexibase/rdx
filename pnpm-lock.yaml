@@ -311,6 +311,10 @@ importers:
       '@lexibase/rdx-types':
         specifier: workspace:*
         version: link:../rdx-types
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.3
+        version: 22.15.3
 
   packages/rdx-plugin-i18n:
     dependencies:

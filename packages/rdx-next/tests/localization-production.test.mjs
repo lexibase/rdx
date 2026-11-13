@@ -358,10 +358,6 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
     const configFile = path.join(root, 'rdx.config.ts')
     const config = await readFile(configFile, 'utf8')
     await write(
-      'changelog/old.md',
-      "---\nversion: '1.0.0'\ndate: '2025-01-01'\ntitle: First release\n---\n\nFirstReleaseMarker"
-    )
-    await write(
       'changelog/new.mdx',
       "---\nversion: '2.0.0'\ndate: '2026-01-01'\ntitle: New release\n---\n\n> [!NOTE]\n> LatestReleaseMarker\n\n![Logo](/logo.svg)"
     )
@@ -398,6 +394,17 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
     }
     assert.match(command('add', 'changelog'), /Changelog activated/)
     assert.match(command('add', 'changelog'), /Changelog is already configured/)
+    assert.match(
+      command('changelog', 'new', '1.0.0'),
+      /Created changelog\/1\.0\.0\.md/
+    )
+    const draft = await readFile(path.join(root, 'changelog/1.0.0.md'), 'utf8')
+    assert.match(draft, /version: '1\.0\.0'/)
+    await write(
+      'changelog/1.0.0.md',
+      draft.replace(/date: '[^']+'/, "date: '2025-01-01'") +
+        'FirstReleaseMarker\n'
+    )
     command('version', '1.0.0')
     const frozenMetadata = await readFile(
       path.join(root, 'versioned_docs/version-1.0.0/.rdx-locales.json'),

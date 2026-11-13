@@ -6,8 +6,20 @@ import { boundedProjectPath } from './paths'
 
 export const changelogPluginName = '@lexibase/rdx-changelog'
 
+export function isChangelogVersion(version: unknown): version is string {
+  return (
+    typeof version === 'string' &&
+    /^\d+\.\d+\.\d+(?:-[\da-z.-]+)?(?:\+[\da-z.-]+)?$/i.test(version) &&
+    version === version.trim()
+  )
+}
+
+export function getChangelogDirectory(rootDir: string) {
+  return boundedProjectPath(rootDir, 'changelog', 'changelog/')
+}
+
 export function getChangelogFiles(rootDir: string) {
-  const directory = boundedProjectPath(rootDir, 'changelog', 'changelog/')
+  const directory = getChangelogDirectory(rootDir)
   let files
   try {
     files = fs.readdirSync(/* turbopackIgnore: true */ directory, {
@@ -42,10 +54,7 @@ export function readChangelog(rootDir: string) {
             : data.date
         if (typeof title !== 'string' || !title.trim())
           throw new Error('title must be a non-empty string')
-        if (
-          typeof version !== 'string' ||
-          !/^\d+\.\d+\.\d+(?:-[\da-z.-]+)?(?:\+[\da-z.-]+)?$/i.test(version)
-        )
+        if (!isChangelogVersion(version))
           throw new Error('version must be a release version such as 1.2.0')
         if (
           typeof date !== 'string' ||
