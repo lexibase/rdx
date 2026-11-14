@@ -61,6 +61,27 @@ test('page redirects resolve links and reject duplicate, occupied, and invalid a
   )
 })
 
+test('unlinked pages warn without failing and valid content links count through aliases', async (t) => {
+  const project = await fixture(t, {
+    'docs/start.md':
+      '---\norder: 1\nrelated: [./related.md]\nprerequisites: [./setup.md]\n---\n[Guide](/docs/old-guide)\n',
+    'docs/guide.md': '---\nredirectFrom: [/docs/old-guide]\n---\n',
+    'docs/related.md': '## Related',
+    'docs/setup.md': '## Setup',
+    'docs/alone.md': '## Alone\n\n[This page](./alone.md#alone)',
+  })
+  const report = checkDocumentation(project)
+  assert.deepEqual(report.diagnostics, [])
+  assert.deepEqual(
+    report.warnings.map(({ file, code }) => [file, code]),
+    [['docs/alone.md', 'unlinked']]
+  )
+  assert.match(
+    formatDocumentationCheck(report),
+    /RDX check passed: 5 pages checked, 0 problems, 1 warning\./
+  )
+})
+
 test('related documents and prerequisites use relative links and report broken destinations', async (t) => {
   const project = await fixture(t, {
     'docs/intro.mdx':
@@ -174,7 +195,7 @@ test('valid static links, exact heading IDs, literal anchors and assets pass wit
       '```',
     ].join('\n'),
     'docs/guides/guide.mdx':
-      '## Setup\n\n## Setup\n\n## **Café** and `code` ![alt](/images/logo.svg)\n',
+      '## Setup\n\n## Setup\n\n## **Café** and `code` ![alt](/images/logo.svg)\n\n[Intro](./intro.mdx)\n',
     'public/images/logo.svg': '<svg/>',
     'public/downloads/file name.txt': 'Download',
   })
@@ -254,10 +275,13 @@ test('each edition has its own headings and relative targets; historical redirec
       },
     ]
   )
-  assert.deepEqual(checkDocumentation(project), {
-    checkedPages: 4,
-    diagnostics: [],
-  })
+  const initial = checkDocumentation(project)
+  assert.equal(initial.checkedPages, 4)
+  assert.deepEqual(initial.diagnostics, [])
+  assert.deepEqual(
+    initial.warnings.map(({ file }) => file),
+    ['docs/guides/intro.mdx']
+  )
   fs.appendFileSync(
     path.join(project.rootDir, 'snapshots/guides/intro.mdx'),
     '\n[Wrong edition](guide.mdx#live)'
