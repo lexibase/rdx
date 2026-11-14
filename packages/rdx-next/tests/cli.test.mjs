@@ -231,6 +231,16 @@ test('check aggregates content errors and never prepares runtime, assets or a Ne
   assert.equal(result.status, 0, result.stderr)
   assert.match(result.stdout, /docs\/unlinked.md:1:1 \[warning: unlinked\]/)
   assert.match(result.stdout, /2 pages checked, 0 problems, 1 warning/)
+  await writeFile(
+    path.join(rootDir, 'docs/intro.mdx'),
+    '## Installation\n\n[Section](#installaton)'
+  )
+  result = run(rootDir, 'check')
+  assert.equal(result.status, 1, result.stdout)
+  assert.match(
+    result.stderr,
+    /\[anchor\].*\r?\n {2}Did you mean "#installation"\?/
+  )
   for (const filename of ['.rdx', 'public', 'versions.json'])
     await assert.rejects(access(path.join(rootDir, filename)))
 })

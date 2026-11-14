@@ -43,6 +43,17 @@ Fix the reported references and rerun the command. A successful check exits with
 code `0`; detected problems or invalid configuration exit with code `1`. You can
 run the same command in your CI before building or deploying.
 
+When the checker finds one close match for a broken page link or heading ID,
+it prints a suggestion below the error. File links can match a page that moved
+to another folder in the same edition and language.
+
+```text
+docs/guides/setup.mdx:12:1 [page] "./installation.mdx": "guides/installation.mdx" does not exist in this documentation source.
+  Did you mean "../getting-started/installation.mdx"?
+```
+
+Review the suggested link, edit the source file, and run the check again.
+
 ## What is checked?
 
 - Duplicate page routes, including a `.md` and `.mdx` file with the same path.

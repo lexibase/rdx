@@ -26,6 +26,7 @@ import { getSourceOptions } from '../project/index'
 import { getContentSources, isFallbackPage } from '../project/localization'
 import { headingText } from '../mdx/heading-text'
 import { remarkDocumentationComponents } from '../mdx/markdown-components'
+import { closestMatch } from './suggestions'
 
 type Position = { start: { line: number; column: number } }
 type Node = {
@@ -65,6 +66,7 @@ export type DocumentationDiagnostic = {
   column: number
   code: 'page' | 'anchor' | 'asset' | 'syntax'
   message: string
+  suggestion?: string
 }
 export type DocumentationCheck = {
   checkedPages: number
@@ -407,17 +409,58 @@ export function checkDocumentation(
     }
     throw new Error('The destination contains a redirect loop.')
   }
+  function matchesFragment(document: Document, hash: string) {
+    return (
+      !hash || document.parsed?.anchors.has(decodeURIComponent(hash.slice(1)))
+    )
+  }
+  function suggestFileLink(
+    url: URL,
+    href: string,
+    sourcePath: string,
+    source: RdxContentSource,
+    resolve: ReturnType<typeof createDocumentLinkResolver>
+  ) {
+    const filename = decodeURIComponent(href.split(/[?#]/, 1)[0]!)
+    const target = closestMatch(
+      path.posix.parse(filename).name,
+      documents.filter(
+        (document) => document.source === source && document.parsed
+      ),
+      (document) => path.parse(document.sourcePath).name
+    )
+    if (!target || !matchesFragment(target, url.hash)) return
+    const destination = isFallbackPage(project, source, target.sourcePath)
+      ? path.join(
+          getSourceOptions(project, source).docsDir,
+          target.page.slug + path.extname(target.sourcePath)
+        )
+      : target.sourcePath
+    const relative = path
+      .relative(path.dirname(sourcePath), destination)
+      .split(path.sep)
+      .map(encodeURIComponent)
+      .join('/')
+    const candidate = `${relative.startsWith('../') ? '' : './'}${relative}${url.search}${url.hash}`
+    try {
+      if (coreRoutes.get(key(resolve(candidate))) === target) return candidate
+    } catch (error) {
+      if (!(error instanceof RdxDocumentLinkError)) throw error
+    }
+  }
   function checkReferences(
     references: Reference[],
     sourcePath: string,
     href: string,
     lineOffset: number,
-    resolve: ReturnType<typeof createDocumentLinkResolver>
+    resolve: ReturnType<typeof createDocumentLinkResolver>,
+    contentSource?: RdxContentSource
   ) {
     for (const reference of references) {
       let code: DocumentationDiagnostic['code'] = reference.image
         ? 'asset'
         : 'page'
+      let suggestion: string | undefined
       try {
         const url = new URL(reference.href, `${origin}${href}`)
         if (!['http:', 'https:'].includes(url.protocol)) continue
@@ -435,7 +478,24 @@ export function checkDocumentation(
           !/^(?:[a-z][\w+.-]*:|\/|#|\?)/i.test(reference.href) &&
           /\.mdx?(?:[?#]|$)/.test(decodeURIComponent(reference.href))
         if (explicitDocument) {
-          const resolved = resolve(reference.href)
+          let resolved: string
+          try {
+            resolved = resolve(reference.href)
+          } catch (error) {
+            if (
+              error instanceof RdxDocumentLinkError &&
+              error.missing &&
+              contentSource
+            )
+              suggestion = suggestFileLink(
+                url,
+                reference.href,
+                sourcePath,
+                contentSource,
+                resolve
+              )
+            throw error
+          }
           pathname = key(resolved)
           target = coreRoutes.get(pathname)
         } else {
@@ -458,10 +518,18 @@ export function checkDocumentation(
               target.parsed &&
               !target.parsed.dynamicIds &&
               !target.parsed.anchors.has(anchor)
-            )
+            ) {
+              const match = closestMatch(
+                anchor,
+                target.parsed.anchors,
+                (id) => id
+              )
+              if (match)
+                suggestion = `${reference.href.split('#', 1)[0]}#${encodeURIComponent(match)}`
               throw new Error(
                 `Section "#${anchor}" does not exist in ${relativeFile(target.sourcePath)}.`
               )
+            }
           }
           if ('page' in target && target.sourcePath !== sourcePath)
             referencedPages.add(target)
@@ -472,12 +540,42 @@ export function checkDocumentation(
           reference.image || !/^\/(?:[^/]+\/)?docs(?:\/|$)/.test(pathname)
             ? 'asset'
             : 'page'
-        if (!publicFileExists(pathname))
+        if (!publicFileExists(pathname)) {
+          if (code === 'page') {
+            const edition = redirectSources
+              .filter(({ root }) => pathname.startsWith(`${key(root)}/`))
+              .sort((a, b) => b.root.length - a.root.length)[0]
+            const match =
+              edition &&
+              closestMatch(
+                path.posix.basename(pathname),
+                documents.filter(
+                  (document) =>
+                    document.source === edition.source &&
+                    document.parsed &&
+                    path.posix.dirname(key(document.href)) ===
+                      path.posix.dirname(pathname)
+                ),
+                (document) => path.posix.basename(key(document.href))
+              )
+            if (
+              match &&
+              routes.get(key(match.href)) === match &&
+              (!url.hash ||
+                match.parsed?.anchors.has(
+                  decodeURIComponent(url.hash.slice(1))
+                ))
+            ) {
+              const absolute = /^(?:https?:|\/\/)/i.test(reference.href)
+              suggestion = `${absolute ? origin + (project.config.basePath ?? '') : ''}${match.href}${url.search}${url.hash}`
+            }
+          }
           throw new Error(
             code === 'page'
               ? `Documentation page "${pathname}" does not exist.`
               : `Local file "${pathname}" does not exist in public/.`
           )
+        }
       } catch (error) {
         const value =
           error instanceof RdxDocumentLinkError
@@ -493,6 +591,7 @@ export function checkDocumentation(
           column: reference.position?.start.column ?? 1,
           code,
           message: `${reference.field ? `${reference.field} ` : ''}"${reference.href}": ${value}`,
+          ...(suggestion ? { suggestion } : {}),
         })
       }
     }
@@ -527,7 +626,8 @@ export function checkDocumentation(
         documents: documents
           .filter((entry) => entry.source === contentSource)
           .map((entry) => entry.page),
-      })
+      }),
+      contentSource
     )
   }
   for (const { release, parsed } of releaseChecks) {
@@ -589,10 +689,12 @@ export function checkDocumentation(
 }
 
 export function formatDocumentationCheck(report: DocumentationCheck): string {
-  const lines = report.diagnostics.map(
-    (entry) =>
-      `${entry.file}:${entry.line}:${entry.column} [${entry.code}] ${entry.message}`
-  )
+  const lines = report.diagnostics.flatMap((entry) => [
+    `${entry.file}:${entry.line}:${entry.column} [${entry.code}] ${entry.message}`,
+    ...(entry.suggestion
+      ? [`  Did you mean ${JSON.stringify(entry.suggestion)}?`]
+      : []),
+  ])
   for (const warning of report.warnings ?? [])
     lines.push(
       `${warning.file}:${warning.line}:${warning.column} [warning: ${warning.code}] ${warning.message}`
