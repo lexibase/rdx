@@ -239,7 +239,7 @@ test('check aggregates content errors and never prepares runtime, assets or a Ne
   assert.equal(result.status, 1, result.stdout)
   assert.match(
     result.stderr,
-    /\[anchor\].*\r?\n  Did you mean "#installation"\?/
+    /\[anchor\].*\r?\n {2}Did you mean "#installation"\?/
   )
   for (const filename of ['.rdx', 'public', 'versions.json'])
     await assert.rejects(access(path.join(rootDir, filename)))

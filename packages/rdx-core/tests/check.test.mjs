@@ -110,7 +110,7 @@ test('broken links suggest a unique file, URL or heading in the intended edition
   )
   assert.match(
     formatDocumentationCheck(report),
-    /\n  Did you mean "\.\.\/getting-started\/installation\.mdx\?from=guide#requirements"\?/
+    /\n {2}Did you mean "\.\.\/getting-started\/installation\.mdx\?from=guide#requirements"\?/
   )
 })
 
