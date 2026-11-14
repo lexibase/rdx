@@ -19,7 +19,8 @@ export class RdxDocumentLinkError extends Error {
   constructor(
     sourcePath: string,
     href: string,
-    readonly reason: string
+    readonly reason: string,
+    readonly missing = false
   ) {
     super(`[RDX] Invalid document link "${href}" in ${sourcePath}: ${reason}`)
     this.name = 'RdxDocumentLinkError'
@@ -114,8 +115,8 @@ export function createDocumentLinkResolver(options: DocumentLinkOptions) {
       return href
     }
     if (!/\.mdx?$/.test(decoded)) return href
-    const fail = (reason: string): never => {
-      throw new RdxDocumentLinkError(current, href, reason)
+    const fail = (reason: string, missing = false): never => {
+      throw new RdxDocumentLinkError(current, href, reason, missing)
     }
     if (
       path.isAbsolute(decoded) ||
@@ -142,7 +143,8 @@ export function createDocumentLinkResolver(options: DocumentLinkOptions) {
           )
         : undefined) ??
       fail(
-        `"${relative}" does not exist in this documentation source${options.routePrefix ? ` (${options.routePrefix})` : ''}.`
+        `"${relative}" does not exist in this documentation source${options.routePrefix ? ` (${options.routePrefix})` : ''}.`,
+        true
       )
     if ((routeCounts.get(slug) ?? 0) > 1)
       fail('the destination has an ambiguous documentation route.')

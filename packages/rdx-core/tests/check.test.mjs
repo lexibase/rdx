@@ -82,6 +82,62 @@ test('unlinked pages warn without failing and valid content links count through 
   )
 })
 
+test('broken links suggest a unique file, URL or heading in the intended edition', async (t) => {
+  const project = await fixture(t, {
+    'docs/guides/setup.mdx': [
+      '[Moved](./installation.mdx?from=guide#requirements)',
+      '[URL](/docs/getting-started/instalation)',
+      '[Heading](../getting-started/installation.mdx#requiremens)',
+      '[Ambiguous](./overview.mdx)',
+      '[Escape](../../installation.mdx)',
+      '[Unknown edition](/docs/99.0.0/instalation)',
+    ].join('\n\n'),
+    'docs/getting-started/installation.mdx': '## Requirements',
+    'docs/first/overview.mdx': 'First',
+    'docs/second/overview.md': 'Second',
+  })
+  const report = checkDocumentation(project)
+  assert.deepEqual(
+    report.diagnostics.map(({ suggestion }) => suggestion),
+    [
+      '../getting-started/installation.mdx?from=guide#requirements',
+      '/docs/getting-started/installation',
+      '../getting-started/installation.mdx#requirements',
+      undefined,
+      undefined,
+      undefined,
+    ]
+  )
+  assert.match(
+    formatDocumentationCheck(report),
+    /\n  Did you mean "\.\.\/getting-started\/installation\.mdx\?from=guide#requirements"\?/
+  )
+})
+
+test('suggestions stay in the linked edition even when live content has a closer match', async (t) => {
+  const project = await fixture(
+    t,
+    {
+      'docs/installaton.mdx': 'Live',
+      'docs/intro.mdx': '[Published](/docs/1.0.0/installaton)',
+      'snapshot/installation.mdx': 'Published',
+      'snapshot/intro.mdx': '[Moved](./old/installation.mdx)',
+    },
+    [
+      {
+        id: 'snapshot',
+        label: '1.0.0',
+        routePrefix: '1.0.0',
+        docsDir: 'snapshot',
+      },
+    ]
+  )
+  assert.deepEqual(
+    checkDocumentation(project).diagnostics.map(({ suggestion }) => suggestion),
+    ['/docs/1.0.0/installation', './installation.mdx']
+  )
+})
+
 test('related documents and prerequisites use relative links and report broken destinations', async (t) => {
   const project = await fixture(t, {
     'docs/intro.mdx':
