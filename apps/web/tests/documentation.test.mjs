@@ -10,13 +10,61 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { createRdxProject } from '@lexibase/rdx-core'
 import { versioning } from '@lexibase/rdx-versioning'
 import { checkDocumentation } from '@lexibase/rdx-core/check'
+import { getChangelogFeedResponse } from '@lexibase/rdx-next/runtime'
 
+import { publishedChangelogVersions } from '../lib/changelog-publication.mjs'
 import { createDocumentation } from '../lib/documentation.ts'
 import { compileDocument } from '../lib/compile-documentation.ts'
 import config from '../rdx.config.ts'
 import { runProjectCommand } from '../lib/project-command.ts'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
+
+test('only versions published by both packages are eligible for the production changelog', async () => {
+  const framework = {
+    '6.3.1': {},
+    '6.4.0': {},
+    '6.5.1': {},
+  }
+  const creator = { '6.3.1': {}, '6.5.1': {} }
+  const registry = async (url) =>
+    Response.json({
+      versions: url.endsWith('create-rdx') ? creator : framework,
+    })
+  const notes = ['6.5.1', '6.4.0', '6.3.1']
+  assert.deepEqual(await publishedChangelogVersions(notes, registry), [
+    '6.5.1',
+    '6.3.1',
+  ])
+  await assert.rejects(
+    publishedChangelogVersions(
+      notes,
+      async () => new Response(null, { status: 503 })
+    ),
+    /Could not verify changelog versions/
+  )
+})
+
+test('official changelog publication also limits RSS and direct Markdown exports', async () => {
+  const project = await createRdxProject(config, { rootDir: root })
+  const request = new Request('https://rdx.example.com/changelog/rss.xml')
+  const visible = ['6.3.1']
+  const feed = await getChangelogFeedResponse(project, request, visible).text()
+  assert.match(feed, /#v6\.3\.1/)
+  assert.doesNotMatch(feed, /#v6\.4\.0/)
+  assert.match(
+    await getChangelogFeedResponse(project, request).text(),
+    /#v6\.4\.0/
+  )
+
+  const docs = createDocumentation(project, visible)
+  assert.deepEqual(
+    docs.markdownPaths().filter(({ path }) => path[0] === 'changelog'),
+    [{ path: ['changelog', '6.3.1.md'] }]
+  )
+  assert.equal(docs.markdownResponse(['changelog', '6.4.0.md']).status, 404)
+  assert.equal(docs.markdownResponse(['changelog', '6.3.1.md']).status, 200)
+})
 
 test('documentation checks honor official short and full aliases and aggregate malformed frontmatter', async (t) => {
   const temporary = fs.mkdtempSync(

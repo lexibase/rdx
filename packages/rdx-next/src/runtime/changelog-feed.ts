@@ -18,7 +18,8 @@ function xml(value: string) {
 
 export function getChangelogFeedResponse(
   project: RdxProject,
-  request: Request
+  request: Request,
+  versions?: readonly string[]
 ) {
   const { config } = project
   if (!config.plugins.some(({ name }) => name === changelogPluginName))
@@ -30,8 +31,9 @@ export function getChangelogFeedResponse(
     withBasePath('/changelog/rss.xml', config.basePath),
     origin
   )
-  const items = readChangelog(project.rootDir).map(
-    ({ title, version, date }) => {
+  const items = readChangelog(project.rootDir)
+    .filter((entry) => versions?.includes(entry.version) ?? true)
+    .map(({ title, version, date }) => {
       const release = `${changelog.href}#v${encodeURIComponent(version)}`
       return `    <item>
       <title>${xml(`v${version} · ${title}`)}</title>
@@ -39,8 +41,7 @@ export function getChangelogFeedResponse(
       <guid isPermaLink="true">${xml(release)}</guid>
       <pubDate>${new Date(date).toUTCString()}</pubDate>
     </item>`
-    }
-  )
+    })
 
   return new Response(
     `<?xml version="1.0" encoding="UTF-8"?>
