@@ -23,6 +23,10 @@ and rebuild. Optional plugins are installed and updated separately.
 
 ## Development
 
+Use pnpm 12.21.0, as declared in `package.json`. CI installs that version
+automatically. The workspace leaves version switching to your installer so GitHub
+can read the single-document lockfile for Dependabot security alerts.
+
 Run `pnpm install` and then `pnpm dev` from the repository root. This starts the
 development website with local workspace packages, initial dependency builds and
 automatic recompilation of compiled packages. UI components are consumed directly

@@ -1,4 +1,14 @@
 packages:
-  - "apps/*"
-  - "packages/*"
-  - "config/*"
+  - 'apps/*'
+  - 'packages/*'
+  - 'config/*'
+
+overrides:
+  '@typescript-eslint/typescript-estree>minimatch': 11.0.1
+
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true
+
+# Keep pnpm's bootstrap metadata out of the lockfile so GitHub can parse it.
+pmOnFail: ignore

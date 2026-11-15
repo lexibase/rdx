@@ -14,6 +14,8 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
+import { pnpmInvocation } from './pnpm-invocation.mjs'
+
 const require = createRequire(import.meta.url)
 const frameworkName = '@lexibase/rdx'
 export const releaseOrder = [
@@ -337,15 +339,11 @@ export async function prepareRelease(
 function defaultRun(tool, args, root) {
   if (tool === 'git')
     return execFileSync('git', args, { cwd: root, encoding: 'utf8' })
-  const entry =
+  const [command, commandArgs] =
     tool === 'changeset'
-      ? require.resolve('@changesets/cli/bin.js')
-      : process.env.npm_execpath
-  assert.ok(
-    entry,
-    'Run this command through pnpm release:prepare or pnpm release:plan'
-  )
-  execFileSync(process.execPath, [entry, ...args], {
+      ? [process.execPath, [require.resolve('@changesets/cli/bin.js'), ...args]]
+      : pnpmInvocation(args)
+  execFileSync(command, commandArgs, {
     cwd: root,
     stdio: 'inherit',
   })
