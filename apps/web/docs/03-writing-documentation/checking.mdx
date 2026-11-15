@@ -111,6 +111,65 @@ Combine the limit with `--json` to include `maxWarnings` and
 `warningLimitExceeded` in the report. The limit applies to the warnings in the
 document report. Homepage translation notices are separate.
 
+### Fail only on new warnings
+
+Use a warning baseline when you want to prevent new warnings while fixing the
+existing ones over time. For example, a pull request can fix one unlinked page
+and introduce another. The warning total stays the same, but the baseline check
+reports the new page and fails.
+
+First, save the current warnings and commit the JSON file to your repository.
+The command creates a new file. It leaves existing files intact and exits
+without writing if the check fails.
+
+:::tabs
+
+### pnpm
+
+pnpm exec rdx check --write-baseline rdx-check-baseline.json
+
+### npm
+
+npm exec -- rdx check --write-baseline rdx-check-baseline.json
+
+### yarn
+
+yarn rdx check --write-baseline rdx-check-baseline.json
+
+:::
+
+Use the committed file for local checks or in CI.
+
+:::tabs
+
+### pnpm
+
+pnpm exec rdx check --baseline rdx-check-baseline.json
+
+### npm
+
+npm exec -- rdx check --baseline rdx-check-baseline.json
+
+### yarn
+
+yarn rdx check --baseline rdx-check-baseline.json
+
+:::
+
+The baseline matches warnings by file path, warning code, and message. Moving
+an existing warning to another line in the same file preserves the match.
+Repeated warnings count separately. Warnings that have disappeared are ignored.
+To remove them from the baseline, generate a fresh file at a different path and
+review the diff before replacing the committed file.
+
+Errors still fail the check. You can also use `--max-warnings` with a baseline
+to limit the total number of warnings, including known ones. These flags apply
+to `rdx check`. The automatic check in `rdx build` uses its default behavior.
+
+With `--json`, the report keeps all warnings in `warnings` and adds a
+`baseline` object with `file`, `knownWarningCount`, and `newWarnings`.
+Homepage translation notices are separate from the baseline.
+
 ### Annotate a GitHub pull request
 
 Add this step to a Linux job after checkout and dependency installation. This
@@ -134,7 +193,8 @@ and preserves the check's exit code.
     const escapeData = (text) => text.replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A')
     const escapeProperty = (text) => escapeData(text).replaceAll(':', '%3A').replaceAll(',', '%2C')
 
-    for (const [level, entries] of [['error', report.diagnostics], ['warning', report.warnings]]) {
+    const warnings = report.baseline?.newWarnings ?? report.warnings
+    for (const [level, entries] of [['error', report.diagnostics], ['warning', warnings]]) {
       for (const { file, line, column, message, suggestion } of entries) {
         const detail = suggestion ? `${message}\nDid you mean ${JSON.stringify(suggestion)}?` : message
         console.log(`::${level} file=${escapeProperty(file)},line=${line},col=${column}::${escapeData(detail)}`)
