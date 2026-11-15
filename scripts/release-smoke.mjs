@@ -1094,7 +1094,7 @@ if (checkInstallation) {
     ':root { --rdx-highlighting: #7c3aed; }\n.dark { --rdx-highlighting: #a78bfa; }\n'
   const stylesPath = path.join(project, 'rdx.css')
   await writeFile(stylesPath, projectStyles)
-  pnpm(project, ['exec', 'rdx', 'check'])
+  pnpm(project, ['run', 'check'])
   buildProject(project)
   assert.match(
     await readFile(path.join(project, '.rdx/app/globals.css'), 'utf8'),

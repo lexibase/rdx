@@ -140,6 +140,7 @@ test('folder case is preserved while the package name is lowercase and skip-inst
       await readFile(path.join(root, name, 'package.json'), 'utf8')
     )
     assert.equal(pkg.name, name.toLowerCase())
+    assert.equal(pkg.scripts.check, 'rdx check')
     assert.match(result.stdout, new RegExp(`cd ${name}`))
     assert.match(
       result.stdout,

@@ -38,21 +38,21 @@ for an amber dot. Remove the field when the page no longer needs attention.
 
 ## Validate your content
 
-Run the documentation check before deploying. It reports broken links and
-invalid content with their source locations.
+Run the included check script to find broken links, missing local assets, and
+invalid content before building. The report shows where to make each fix.
 
 :::tabs
 
 ### pnpm
 
-pnpm rdx check
+pnpm check
 
 ### npm
 
-npm exec -- rdx check
+npm run check
 
 ### yarn
 
-yarn rdx check
+yarn run check
 
 :::
