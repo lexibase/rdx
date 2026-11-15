@@ -28,9 +28,21 @@ import {
   officialDocumentHrefs,
   shortDocumentRoutes,
 } from './documentation-routes.mjs'
+import { visibleChangelogVersions } from './changelog-publication.mjs'
 
 /** Only the official site's historical URL aliases differ from installed sites. */
-export function createDocumentation(project: RdxProject) {
+export function createDocumentation(
+  project: RdxProject,
+  changelogVersions = visibleChangelogVersions()
+) {
+  function canExportChangelog(segments: string[] | undefined) {
+    return (
+      segments?.[0] !== 'changelog' ||
+      changelogVersions === undefined ||
+      changelogVersions.includes(segments[1] ?? '')
+    )
+  }
+
   const messages = getMessages(project.config.lang)
   const editions = project.sources
     .filter((source) => source.redirectTo === undefined)
@@ -176,10 +188,13 @@ export function createDocumentation(project: RdxProject) {
       return getLlmIndexResponse(project, documentPaths())
     },
     markdownPaths() {
-      return getMarkdownPaths(project, documentPaths())
+      return getMarkdownPaths(project, documentPaths()).filter(({ path }) =>
+        canExportChangelog(parseMarkdownPath(path))
+      )
     },
     markdownResponse(path: string[]) {
       const segments = parseMarkdownPath(path)
+      if (!canExportChangelog(segments)) return markdownNotFound()
       if (segments?.[0] === 'changelog')
         return getChangelogMarkdownResponse(project, segments.slice(1))
       if (!segments || segments[0] !== 'docs' || segments.length < 3)

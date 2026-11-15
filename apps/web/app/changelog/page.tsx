@@ -1,5 +1,6 @@
 import { ChangelogPage } from '@lexibase/rdx-next/runtime'
 
+import { visibleChangelogVersions } from '@/lib/changelog-publication.mjs'
 import { getProject } from '@/lib/docs'
 
 export const metadata = {
@@ -8,5 +9,11 @@ export const metadata = {
 }
 
 export default async function Page() {
-  return <ChangelogPage project={await getProject()} showHeader={false} />
+  return (
+    <ChangelogPage
+      project={await getProject()}
+      showHeader={false}
+      versions={visibleChangelogVersions()}
+    />
+  )
 }

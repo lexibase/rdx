@@ -235,9 +235,11 @@ function RdxHeader({
 export async function ChangelogPage({
   project,
   showHeader = true,
+  versions,
 }: {
   project: RdxProject
   showHeader?: boolean
+  versions?: readonly string[]
 }) {
   const { config } = project
   if (!config.plugins.some(({ name }) => name === changelogPluginName))
@@ -248,21 +250,23 @@ export async function ChangelogPage({
     timeZone: 'UTC',
   })
   const entries = await Promise.all(
-    readChangelog(project.rootDir).map(async (entry) => ({
-      ...entry,
-      rendered: await compileDocumentation(
-        entry.content,
-        getMdxComponents(config.lang),
-        {
-          sourceRoot: project.rootDir,
-          sourcePath: entry.sourcePath,
-          documents: [],
-          publicHref: (href) => withBasePath(href, config.basePath),
-        },
-        project.syntaxGrammars,
-        config.syntaxHighlighting?.themes
-      ),
-    }))
+    readChangelog(project.rootDir)
+      .filter((entry) => versions?.includes(entry.version) ?? true)
+      .map(async (entry) => ({
+        ...entry,
+        rendered: await compileDocumentation(
+          entry.content,
+          getMdxComponents(config.lang),
+          {
+            sourceRoot: project.rootDir,
+            sourcePath: entry.sourcePath,
+            documents: [],
+            publicHref: (href) => withBasePath(href, config.basePath),
+          },
+          project.syntaxGrammars,
+          config.syntaxHighlighting?.themes
+        ),
+      }))
   )
 
   return (

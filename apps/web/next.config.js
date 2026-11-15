@@ -1,7 +1,9 @@
 import { fileURLToPath } from 'node:url'
 
+import { readChangelog } from '@lexibase/rdx-core/config'
 import { getRdxTracingConfig } from '@lexibase/rdx-next/config'
 
+import { publishedChangelogVersions } from './lib/changelog-publication.mjs'
 import {
   officialDocsRoot,
   officialDocumentHrefs,
@@ -10,6 +12,20 @@ import {
 
 /** @type {(phase: string) => Promise<import('next').NextConfig>} */
 const nextConfig = async (phase) => ({
+  ...(phase === 'phase-production-build' &&
+  process.env.VERCEL_ENV === 'production'
+    ? {
+        env: {
+          RDX_VISIBLE_CHANGELOG_VERSIONS: (
+            await publishedChangelogVersions(
+              readChangelog(fileURLToPath(new URL('.', import.meta.url))).map(
+                ({ version }) => version
+              )
+            )
+          ).join(','),
+        },
+      }
+    : {}),
   ...(await getRdxTracingConfig({
     rootDir: fileURLToPath(new URL('.', import.meta.url)),
     captureDocumentDates: phase === 'phase-production-build',
