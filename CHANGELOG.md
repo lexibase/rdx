@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 6.6.0 — Prepared
+
+- Improve `rdx check` with link suggestions, JSON reports, warning limits, and baselines. Include a check script in new projects.
+
 ## 6.5.1 — Prepared
 
 - Reject executable frontmatter when indexing or loading Markdown and MDX documentation.

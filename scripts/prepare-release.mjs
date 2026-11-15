@@ -288,6 +288,8 @@ export async function prepareRelease(
         'turbo',
         'run',
         'build',
+        '--ui=stream',
+        '--cache=local:r',
         '--filter=@lexibase/rdx-versioning...',
         '--filter=@lexibase/rdx-changelog...',
       ],
