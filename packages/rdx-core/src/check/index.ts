@@ -688,7 +688,10 @@ export function checkDocumentation(
   }
 }
 
-export function formatDocumentationCheck(report: DocumentationCheck): string {
+export function formatDocumentationCheck(
+  report: DocumentationCheck,
+  exceededWarningLimit?: number
+): string {
   const lines = report.diagnostics.flatMap((entry) => [
     `${entry.file}:${entry.line}:${entry.column} [${entry.code}] ${entry.message}`,
     ...(entry.suggestion
@@ -700,8 +703,12 @@ export function formatDocumentationCheck(report: DocumentationCheck): string {
       `${warning.file}:${warning.line}:${warning.column} [warning: ${warning.code}] ${warning.message}`
     )
   const warningCount = report.warnings?.length ?? 0
+  if (exceededWarningLimit !== undefined)
+    lines.push(`Warning limit exceeded (maximum ${exceededWarningLimit}).`)
+  const failed =
+    report.diagnostics.length > 0 || exceededWarningLimit !== undefined
   lines.push(
-    `RDX check ${report.diagnostics.length ? 'failed' : 'passed'}: ${report.checkedPages} ${report.checkedPages === 1 ? 'page' : 'pages'} checked, ${report.diagnostics.length} ${report.diagnostics.length === 1 ? 'problem' : 'problems'}${warningCount ? `, ${warningCount} ${warningCount === 1 ? 'warning' : 'warnings'}` : ''}.`
+    `RDX check ${failed ? 'failed' : 'passed'}: ${report.checkedPages} ${report.checkedPages === 1 ? 'page' : 'pages'} checked, ${report.diagnostics.length} ${report.diagnostics.length === 1 ? 'problem' : 'problems'}${warningCount ? `, ${warningCount} ${warningCount === 1 ? 'warning' : 'warnings'}` : ''}.`
   )
   return lines.join('\n')
 }

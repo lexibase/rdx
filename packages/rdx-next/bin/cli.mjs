@@ -4,6 +4,7 @@ import { access, cp, mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import process from 'node:process'
+import { parseArgs } from 'node:util'
 
 import { createRdxProject } from '@lexibase/rdx-core/config'
 import { createJiti } from 'jiti'
@@ -13,14 +14,37 @@ import { preparePublicAssets } from './public-assets.mjs'
 import { prepareProjectStyles } from './project-styles.mjs'
 import { prepareLocaleRoutes } from './locale-routes.mjs'
 
+const checkUsage = 'Usage: rdx check [--json] [--max-warnings N]'
+
+function parseCheckArguments(args) {
+  let values
+  try {
+    values = parseArgs({
+      args,
+      options: {
+        json: { type: 'boolean' },
+        'max-warnings': { type: 'string' },
+      },
+    }).values
+  } catch (error) {
+    throw new Error(`${error.message}\n${checkUsage}`)
+  }
+  const limit = values['max-warnings']
+  const maxWarnings = limit === undefined ? undefined : Number(limit)
+  if (
+    limit !== undefined &&
+    (!/^\d+$/.test(limit) || !Number.isSafeInteger(maxWarnings))
+  )
+    throw new Error(
+      `--max-warnings requires a non-negative safe integer.\n${checkUsage}`
+    )
+  return { json: values.json, maxWarnings }
+}
+
 export async function runRdxCli({ templateDir } = {}) {
   const supportedCommands = new Set(['dev', 'build', 'start'])
   let command = process.argv[2]
   const commandArgs = process.argv.slice(3)
-  const jsonCheck =
-    command === 'check' &&
-    commandArgs.length === 1 &&
-    commandArgs[0] === '--json'
   const projectRoot = process.cwd()
   const packageRoot = path.resolve(
     path.dirname(fileURLToPath(import.meta.url)),
@@ -60,12 +84,13 @@ export async function runRdxCli({ templateDir } = {}) {
   }
 
   async function main() {
+    let checkOptions = {}
     if (!command || command === 'help' || command === '--help') {
       console.log(
         'Usage: rdx <dev|build|start|prepare|check|add|plugin-command>'
       )
       console.log(
-        '  rdx check [--json]: validate documentation links, sections and local assets'
+        '  rdx check [--json] [--max-warnings N]: validate documentation links, sections and local assets'
       )
       console.log('  rdx add versioning [--package-manager npm|pnpm|yarn]')
       console.log('  rdx add changelog [--package-manager npm|pnpm|yarn]')
@@ -87,12 +112,11 @@ export async function runRdxCli({ templateDir } = {}) {
         ['--help', '-h'].includes(commandArgs[0])
       ) {
         console.log(
-          'Usage: rdx check [--json]\nValidate static Markdown and MDX links, section anchors and local public/ files without building the site.\n  --json  Write the documentation report as JSON to stdout.'
+          `${checkUsage}\nValidate static Markdown and MDX links, section anchors and local public/ files without building the site.\n  --json  Write the documentation report as JSON to stdout.\n  --max-warnings N  Fail when the report contains more than N warnings.`
         )
         return
       }
-      if (commandArgs.length && !jsonCheck)
-        throw new Error('Usage: rdx check [--json]')
+      checkOptions = parseCheckArguments(commandArgs)
     }
 
     const syncHomepage = command === 'i18n' && commandArgs[0] === 'sync'
@@ -197,15 +221,29 @@ export async function runRdxCli({ templateDir } = {}) {
       const { checkDocumentation, formatDocumentationCheck } =
         await import('@lexibase/rdx-core/check')
       const report = checkDocumentation(project)
-      if (jsonCheck) {
+      const { json, maxWarnings } = checkOptions
+      const warnings = report.warnings ?? []
+      const warningLimitExceeded =
+        maxWarnings !== undefined && warnings.length > maxWarnings
+      const failed = report.diagnostics.length > 0 || warningLimitExceeded
+      if (json) {
         console.log(
-          JSON.stringify({ ...report, warnings: report.warnings ?? [] })
+          JSON.stringify({
+            ...report,
+            warnings,
+            ...(maxWarnings === undefined
+              ? {}
+              : { maxWarnings, warningLimitExceeded }),
+          })
         )
-        if (report.diagnostics.length) process.exitCode = 1
+        if (failed) process.exitCode = 1
         return
       }
-      const output = formatDocumentationCheck(report)
-      if (report.diagnostics.length) {
+      const output = formatDocumentationCheck(
+        report,
+        warningLimitExceeded ? maxWarnings : undefined
+      )
+      if (failed) {
         console.error(output)
         process.exitCode = 1
         return
