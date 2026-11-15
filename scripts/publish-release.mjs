@@ -5,6 +5,7 @@ import path from 'node:path'
 import { setTimeout } from 'node:timers/promises'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
+import { pnpmInvocation } from './pnpm-invocation.mjs'
 import { releaseOrder } from './prepare-release.mjs'
 
 const registry = 'https://registry.npmjs.org/'
@@ -247,13 +248,11 @@ async function main() {
   if (command === 'pack') {
     await mkdir(directory, { recursive: true })
     for (const pkg of packages) {
-      const pnpm = process.env.npm_execpath
       const args = ['pack', '--pack-destination', directory]
-      execFileSync(
-        pnpm ? process.execPath : 'pnpm',
-        pnpm ? [pnpm, ...args] : args,
-        { cwd: pkg.cwd, stdio: 'inherit' }
-      )
+      const [executable, packArgs] = process.env.npm_execpath
+        ? pnpmInvocation(args)
+        : ['pnpm', args]
+      execFileSync(executable, packArgs, { cwd: pkg.cwd, stdio: 'inherit' })
     }
     validateArchives(packages, directory)
     return

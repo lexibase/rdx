@@ -14,16 +14,12 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import { withProductionServer } from './production-server.mjs'
+import { pnpmInvocation } from './pnpm-invocation.mjs'
 import { assertCompatibleUi } from './prepare-release.mjs'
+import { withProductionServer } from './production-server.mjs'
 
 // Test the publishable archives, not workspace source links. Nothing publishes.
 const root = fileURLToPath(new URL('../', import.meta.url))
-const pnpmEntry = process.env.npm_execpath
-assert.ok(
-  pnpmEntry && /\.[cm]?js$/i.test(pnpmEntry),
-  'Run this check with pnpm test:release [--install|--i18n].'
-)
 const base = path.join(root, '.rdx-package-smoke')
 await mkdir(base, { recursive: true })
 assert.equal(
@@ -178,17 +174,20 @@ const required = {
 function pnpm(cwd, args, capture = false) {
   const [command] = args
   const installsDependencies = command === 'install' || command === 'add'
+  // The consumer fixtures exercise pnpm 9 and use its package.json overrides.
+  const fixture = path.relative(temporary, cwd).split(path.sep)[0] !== '..'
+  const [executable, commandArgs] = pnpmInvocation([
+    ...(fixture ? ['with', '9.0.0'] : []),
+    ...args,
+    ...(installsDependencies ? ['--prefer-offline'] : []),
+  ])
   const started = performance.now()
   try {
-    return execFileSync(
-      process.execPath,
-      [
-        pnpmEntry,
-        ...args,
-        ...(installsDependencies ? ['--prefer-offline'] : []),
-      ],
-      { cwd, encoding: 'utf8', stdio: capture ? 'pipe' : 'inherit' }
-    )
+    return execFileSync(executable, commandArgs, {
+      cwd,
+      encoding: 'utf8',
+      stdio: capture ? 'pipe' : 'inherit',
+    })
   } finally {
     if (installsDependencies || command === 'build') {
       const seconds = ((performance.now() - started) / 1000).toFixed(1)
@@ -978,23 +977,27 @@ for (const name of ['@lexibase/rdx'])
 
 const checkI18n = process.argv.includes('--i18n')
 const checkInstallation = process.argv.includes('--install')
-const tailwindOverrides = {}
+const toolchainOverrides = {}
 const generatorRoot = path.join(
   temporary,
   checkI18n ? 'i18n-generator' : 'generator'
 )
 const generatorPackage = path.join(generatorRoot, 'package')
 if (checkI18n || checkInstallation) {
-  // Keep the Tailwind toolchain aligned with the workspace lockfile. Fresh
-  // resolution can see a new PostCSS release before its matching Oxide exists.
-  for (const name of ['@tailwindcss/postcss', 'tailwindcss']) {
+  // Test the packed runtime against the same Next and Tailwind versions as
+  // the workspace, including when the fixture uses cached registry metadata.
+  for (const [name, directory] of [
+    ['next', 'apps/web'],
+    ['@tailwindcss/postcss', 'packages/rdx-ui'],
+    ['tailwindcss', 'packages/rdx-ui'],
+  ]) {
     const manifest = JSON.parse(
       await readFile(
-        path.join(root, 'packages/rdx-ui/node_modules', name, 'package.json'),
+        path.join(root, directory, 'node_modules', name, 'package.json'),
         'utf8'
       )
     )
-    tailwindOverrides[name] = manifest.version
+    toolchainOverrides[name] = manifest.version
   }
   await mkdir(generatorRoot)
   execFileSync('tar', ['-xf', generator.archive, '-C', generatorRoot])
@@ -1012,7 +1015,7 @@ if (checkI18n) {
     temporary,
     releases,
     pnpm,
-    tailwindOverrides,
+    toolchainOverrides,
   })
 }
 
@@ -1046,7 +1049,7 @@ if (checkInstallation) {
       `file:${releases.get(name).archive.replaceAll('\\', '/')}`
   overrides['@lexibase/rdx>@lexibase/rdx-ui'] =
     `file:${releases.get('@lexibase/rdx-ui').archive.replaceAll('\\', '/')}`
-  pkg.pnpm = { overrides: { ...tailwindOverrides, ...overrides } }
+  pkg.pnpm = { overrides: { ...toolchainOverrides, ...overrides } }
   await writeFile(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`)
   // Isolate this fixture from the enclosing monorepo workspace.
   await writeFile(

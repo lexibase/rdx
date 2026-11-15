@@ -12,7 +12,7 @@ export async function verifyMultilingualArchives({
   temporary,
   releases,
   pnpm,
-  tailwindOverrides,
+  toolchainOverrides,
   resume = false,
 }) {
   const generator = path.join(temporary, 'i18n-generator', 'package')
@@ -31,7 +31,7 @@ export async function verifyMultilingualArchives({
     )
   )
   overrides['@lexibase/rdx>@lexibase/rdx-ui'] = archives['@lexibase/rdx-ui']
-  Object.assign(overrides, tailwindOverrides)
+  Object.assign(overrides, toolchainOverrides)
   for (const monorepo of [false, true]) {
     const workspace = path.join(
       temporary,
