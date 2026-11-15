@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "rdx dev",
+    "check": "rdx check",
     "build": "rdx build",
     "start": "rdx start"
   },

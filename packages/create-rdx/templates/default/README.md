@@ -18,10 +18,13 @@ Edit files in `docs/` to create your documentation. RDX creates and maintains
 its internal runtime in `.rdx/`.
 
 - Start with `docs/01-getting-started/writing-pages.mdx` for page setup, sidebar ordering,
-  and `rdx check`.
+  and content validation.
 - Browse `docs/02-examples/` for working Markdown components, including Steps.
 - Use **Copy this page** on any document to copy its Markdown, or open
   `/docs/llms.txt` for an index of the published documentation.
+
+Run `pnpm check` (or `npm run check` / `yarn run check`) to find broken links,
+missing local assets, and invalid content before building the site.
 
 Keep custom React components in `components/` and import them from
 `rdx.config.ts` or `components/home.tsx`. The project-root `tsconfig.json` configures JSX

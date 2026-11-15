@@ -70,6 +70,30 @@ yarn run dev
 
 Open `http://localhost:3000/docs`, edit `docs/init/intro.mdx` and save. Keep the development server running to preview content changes. Restart it after editing framework configuration.
 
+## Check your documentation
+
+New projects include a check script that reports broken links, missing local
+assets, and invalid Markdown or MDX without building the site.
+
+:::tabs
+
+### pnpm
+
+pnpm check
+
+### npm
+
+npm run check
+
+### yarn
+
+yarn run check
+
+:::
+
+See [Checking documentation](../03-writing-documentation/checking.mdx) for
+examples of the report and options for CI.
+
 ## Optional CLI arguments
 
 Provide the directory name directly to skip the name prompt:
