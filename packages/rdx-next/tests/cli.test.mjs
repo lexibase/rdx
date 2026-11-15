@@ -319,6 +319,20 @@ test('check --json writes errors, suggestions and warnings to stdout', async (t)
     maxWarnings: 0,
     warningLimitExceeded: false,
   })
+  await writeFile(intro, '[Reference](/docs/old-reference)\n')
+  await writeFile(
+    path.join(docs, 'reference.md'),
+    '---\nredirectFrom: [/docs/old-reference]\n---\n# Reference\n'
+  )
+  const redirected = run(rootDir, 'check', '--json', '--max-warnings', '0')
+  assert.equal(redirected.status, 1, redirected.stderr)
+  const redirectedReport = JSON.parse(redirected.stdout)
+  assert.deepEqual(redirectedReport.diagnostics, [])
+  assert.equal(redirectedReport.warningLimitExceeded, true)
+  assert.deepEqual(
+    redirectedReport.warnings.map(({ code, suggestion }) => [code, suggestion]),
+    [['redirected-link', '/docs/reference']]
+  )
   await assert.rejects(access(path.join(rootDir, '.rdx')))
 })
 

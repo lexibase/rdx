@@ -61,6 +61,42 @@ test('page redirects resolve links and reject duplicate, occupied, and invalid a
   )
 })
 
+test('redirect warnings preserve the query and anchor with the right public path', async (t) => {
+  const project = await fixture(t, {
+    'docs/01-intro.md': [
+      '[Old](/docs/old?from=guide#setup)',
+      '[Absolute](https://docs.example.com/site/docs/old#setup)',
+      '[Broken anchor](/docs/old#missing)',
+      '[Current](/docs/install#setup)',
+      '[External](https://example.com/docs/old#setup)',
+    ].join('\n\n'),
+    'docs/start/install.md': '---\nredirectFrom: [/docs/old]\n---\n## Setup',
+    'docs/install.md': '## Setup',
+  })
+  project.config.basePath = '/site'
+  const report = checkDocumentation(project)
+  assert.deepEqual(
+    report.diagnostics.map(({ code }) => code),
+    ['anchor']
+  )
+  assert.deepEqual(
+    report.warnings.map(({ line, code, suggestion }) => [
+      line,
+      code,
+      suggestion,
+    ]),
+    [
+      [1, 'redirected-link', '/docs/start/install?from=guide#setup'],
+      [
+        3,
+        'redirected-link',
+        'https://docs.example.com/site/docs/start/install#setup',
+      ],
+    ]
+  )
+  assert.match(formatDocumentationCheck(report), /\[warning: redirected-link\]/)
+})
+
 test('unlinked pages warn without failing and valid content links count through aliases', async (t) => {
   const project = await fixture(t, {
     'docs/start.md':
@@ -74,11 +110,14 @@ test('unlinked pages warn without failing and valid content links count through 
   assert.deepEqual(report.diagnostics, [])
   assert.deepEqual(
     report.warnings.map(({ file, code }) => [file, code]),
-    [['docs/alone.md', 'unlinked']]
+    [
+      ['docs/alone.md', 'unlinked'],
+      ['docs/start.md', 'redirected-link'],
+    ]
   )
   assert.match(
     formatDocumentationCheck(report),
-    /RDX check passed: 5 pages checked, 0 problems, 1 warning\./
+    /RDX check passed: 5 pages checked, 0 problems, 2 warnings\./
   )
 })
 
