@@ -68,10 +68,13 @@ export type DocumentationDiagnostic = {
   message: string
   suggestion?: string
 }
+type DocumentationWarning = Omit<DocumentationDiagnostic, 'code'> & {
+  code: 'unlinked' | 'redirected-link'
+}
 export type DocumentationCheck = {
   checkedPages: number
   diagnostics: DocumentationDiagnostic[]
-  warnings?: (Omit<DocumentationDiagnostic, 'code'> & { code: 'unlinked' })[]
+  warnings?: DocumentationWarning[]
 }
 
 /** Host adapters can describe aliases without changing the project's authoring API. */
@@ -178,6 +181,7 @@ export function checkDocumentation(
   options: DocumentationCheckOptions = {}
 ): DocumentationCheck {
   const diagnostics: DocumentationDiagnostic[] = []
+  const warnings: DocumentationWarning[] = []
   const documents: Document[] = []
   const entryPages = new Set<Document>()
   const referencedPages = new Set<Document>()
@@ -186,6 +190,7 @@ export function checkDocumentation(
   const roots = new Set<string>(['/robots.txt', '/sitemap.xml'])
   const prefixes: [string, string][] = []
   const redirects = new Map(Object.entries(options.redirects ?? {}))
+  const pageRedirects = new Set<string>()
   const failed = new Set<string>()
   const redirectSources: PageRedirectSource[] = []
   const origin = project.config.metadata.metadataBase
@@ -331,7 +336,9 @@ export function checkDocumentation(
     }
   }
   for (const redirect of collectPageRedirects(redirectSources, syntax)) {
-    redirects.set(key(redirect.source), redirect.destination)
+    const former = key(redirect.source)
+    pageRedirects.add(former)
+    redirects.set(former, redirect.destination)
   }
   if (project.config.homepage?.enabled) roots.add('/')
   else redirects.set('/', '/docs')
@@ -393,9 +400,11 @@ export function checkDocumentation(
   }
   function redirectRoute(pathname: string) {
     const seen = new Set<string>()
+    let throughPageRedirect = false
     while (!seen.has(pathname)) {
       seen.add(pathname)
       const exact = redirects.get(pathname)
+      throughPageRedirect ||= pageRedirects.has(pathname)
       const prefix = prefixes.find(
         ([from]) => pathname === from || pathname.startsWith(`${from}/`)
       )
@@ -404,7 +413,7 @@ export function checkDocumentation(
         : prefix
           ? prefix[1] + pathname.slice(prefix[0].length)
           : pathname
-      if (next === pathname) return pathname
+      if (next === pathname) return { pathname, throughPageRedirect }
       pathname = next
     }
     throw new Error('The destination contains a redirect loop.')
@@ -457,6 +466,14 @@ export function checkDocumentation(
     contentSource?: RdxContentSource
   ) {
     for (const reference of references) {
+      const location = {
+        file: relativeFile(sourcePath),
+        line:
+          (reference.position?.start.line ?? 1) +
+          (reference.field ? 0 : lineOffset),
+        column: reference.position?.start.column ?? 1,
+      }
+      const label = `${reference.field ? `${reference.field} ` : ''}"${reference.href}"`
       let code: DocumentationDiagnostic['code'] = reference.image
         ? 'asset'
         : 'page'
@@ -473,6 +490,7 @@ export function checkDocumentation(
           continue
         let target: RouteTarget | undefined
         let pathname: string
+        let throughPageRedirect = false
         const explicitDocument =
           !reference.image &&
           !/^(?:[a-z][\w+.-]*:|\/|#|\?)/i.test(reference.href) &&
@@ -507,7 +525,9 @@ export function checkDocumentation(
             (pathname === basePath || pathname.startsWith(`${basePath}/`))
           )
             pathname = pathname.slice(basePath.length) || '/'
-          pathname = redirectRoute(pathname)
+          const redirected = redirectRoute(pathname)
+          pathname = redirected.pathname
+          throughPageRedirect = redirected.throughPageRedirect
           if (!reference.image) target = routes.get(pathname)
         }
         if (target) {
@@ -531,8 +551,19 @@ export function checkDocumentation(
               )
             }
           }
-          if ('page' in target && target.sourcePath !== sourcePath)
-            referencedPages.add(target)
+          if ('page' in target) {
+            if (target.sourcePath !== sourcePath) referencedPages.add(target)
+            if (throughPageRedirect) {
+              const absolute = /^(?:https?:|\/\/)/i.test(reference.href)
+              const destination = `${absolute ? origin + (project.config.basePath ?? '') : ''}${target.href}${url.search}${url.hash}`
+              warnings.push({
+                ...location,
+                code: 'redirected-link',
+                message: `${label} redirects to "${destination}".`,
+                suggestion: destination,
+              })
+            }
+          }
           continue
         }
         if (!reference.image && roots.has(pathname)) continue
@@ -584,13 +615,9 @@ export function checkDocumentation(
               ? error.message
               : String(error)
         diagnostics.push({
-          file: relativeFile(sourcePath),
-          line:
-            (reference.position?.start.line ?? 1) +
-            (reference.field ? 0 : lineOffset),
-          column: reference.position?.start.column ?? 1,
+          ...location,
           code,
-          message: `${reference.field ? `${reference.field} ` : ''}"${reference.href}": ${value}`,
+          message: `${label}: ${value}`,
           ...(suggestion ? { suggestion } : {}),
         })
       }
@@ -659,7 +686,7 @@ export function checkDocumentation(
       diagnostics.map((diagnostic) => [JSON.stringify(diagnostic), diagnostic])
     ).values(),
   ]
-  const warnings = documents
+  const unlinked = documents
     .filter(
       (document) =>
         document.parsed &&
@@ -675,20 +702,33 @@ export function checkDocumentation(
       code: 'unlinked' as const,
       message: `No inbound content links to ${href}. Link to this page from a relevant document or release note.`,
     }))
-    .sort(
-      (a, b) =>
-        a.file.localeCompare(b.file) || a.message.localeCompare(b.message)
-    )
+  const uniqueWarnings = [
+    ...new Map(
+      [...warnings, ...unlinked].map((warning) => [
+        JSON.stringify(warning),
+        warning,
+      ])
+    ).values(),
+  ].sort(
+    (a, b) =>
+      a.file.localeCompare(b.file) ||
+      a.line - b.line ||
+      a.column - b.column ||
+      a.message.localeCompare(b.message)
+  )
   return {
     checkedPages:
       new Set(documents.map((document) => document.page.sourcePath)).size +
       releases.length,
     diagnostics: unique,
-    ...(warnings.length ? { warnings } : {}),
+    ...(uniqueWarnings.length ? { warnings: uniqueWarnings } : {}),
   }
 }
 
-export function formatDocumentationCheck(report: DocumentationCheck): string {
+export function formatDocumentationCheck(
+  report: DocumentationCheck,
+  exceededWarningLimit?: number
+): string {
   const lines = report.diagnostics.flatMap((entry) => [
     `${entry.file}:${entry.line}:${entry.column} [${entry.code}] ${entry.message}`,
     ...(entry.suggestion
@@ -700,8 +740,12 @@ export function formatDocumentationCheck(report: DocumentationCheck): string {
       `${warning.file}:${warning.line}:${warning.column} [warning: ${warning.code}] ${warning.message}`
     )
   const warningCount = report.warnings?.length ?? 0
+  if (exceededWarningLimit !== undefined)
+    lines.push(`Warning limit exceeded (maximum ${exceededWarningLimit}).`)
+  const failed =
+    report.diagnostics.length > 0 || exceededWarningLimit !== undefined
   lines.push(
-    `RDX check ${report.diagnostics.length ? 'failed' : 'passed'}: ${report.checkedPages} ${report.checkedPages === 1 ? 'page' : 'pages'} checked, ${report.diagnostics.length} ${report.diagnostics.length === 1 ? 'problem' : 'problems'}${warningCount ? `, ${warningCount} ${warningCount === 1 ? 'warning' : 'warnings'}` : ''}.`
+    `RDX check ${failed ? 'failed' : 'passed'}: ${report.checkedPages} ${report.checkedPages === 1 ? 'page' : 'pages'} checked, ${report.diagnostics.length} ${report.diagnostics.length === 1 ? 'problem' : 'problems'}${warningCount ? `, ${warningCount} ${warningCount === 1 ? 'warning' : 'warnings'}` : ''}.`
   )
   return lines.join('\n')
 }

@@ -285,6 +285,25 @@ test('check --json writes errors, suggestions and warnings to stdout', async (t)
     diagnostics: [],
   })
 
+  const atLimit = run(rootDir, 'check', '--max-warnings', '1')
+  assert.equal(atLimit.status, 0, atLimit.stderr)
+  assert.match(atLimit.stdout, /RDX check passed/)
+
+  const overLimit = run(rootDir, 'check', '--max-warnings', '0')
+  assert.equal(overLimit.status, 1)
+  assert.match(overLimit.stderr, /Warning limit exceeded \(maximum 0\)/)
+  assert.match(overLimit.stderr, /RDX check failed/)
+
+  const jsonOverLimit = run(rootDir, 'check', '--max-warnings', '0', '--json')
+  assert.equal(jsonOverLimit.status, 1)
+  assert.equal(jsonOverLimit.stderr, '')
+  assert.deepEqual(JSON.parse(jsonOverLimit.stdout), {
+    ...report,
+    diagnostics: [],
+    maxWarnings: 0,
+    warningLimitExceeded: true,
+  })
+
   await writeFile(intro, '[Reference](./reference.md)\n')
   const clean = run(rootDir, 'check', '--json')
   assert.equal(clean.status, 0, clean.stderr)
@@ -293,6 +312,27 @@ test('check --json writes errors, suggestions and warnings to stdout', async (t)
     diagnostics: [],
     warnings: [],
   })
+  const zeroWarnings = run(rootDir, 'check', '--json', '--max-warnings=0')
+  assert.equal(zeroWarnings.status, 0, zeroWarnings.stderr)
+  assert.deepEqual(JSON.parse(zeroWarnings.stdout), {
+    ...JSON.parse(clean.stdout),
+    maxWarnings: 0,
+    warningLimitExceeded: false,
+  })
+  await writeFile(intro, '[Reference](/docs/old-reference)\n')
+  await writeFile(
+    path.join(docs, 'reference.md'),
+    '---\nredirectFrom: [/docs/old-reference]\n---\n# Reference\n'
+  )
+  const redirected = run(rootDir, 'check', '--json', '--max-warnings', '0')
+  assert.equal(redirected.status, 1, redirected.stderr)
+  const redirectedReport = JSON.parse(redirected.stdout)
+  assert.deepEqual(redirectedReport.diagnostics, [])
+  assert.equal(redirectedReport.warningLimitExceeded, true)
+  assert.deepEqual(
+    redirectedReport.warnings.map(({ code, suggestion }) => [code, suggestion]),
+    [['redirected-link', '/docs/reference']]
+  )
   await assert.rejects(access(path.join(rootDir, '.rdx')))
 })
 
@@ -301,6 +341,13 @@ test('check help and invalid arguments are handled before reading configuration'
   const help = run(rootDir, 'check', '--help')
   assert.equal(help.status, 0)
   assert.match(help.stdout, /--json/)
+  assert.match(help.stdout, /--max-warnings/)
+  for (const args of [[], ['-1'], ['1.5'], ['9007199254740992']]) {
+    const invalid = run(rootDir, 'check', '--max-warnings', ...args)
+    assert.equal(invalid.status, 1)
+    assert.match(invalid.stderr, /--max-warnings/)
+    assert.doesNotMatch(invalid.stderr, /Missing .*rdx.config/)
+  }
   const missingConfig = run(rootDir, 'check', '--json')
   assert.equal(missingConfig.status, 1)
   assert.equal(missingConfig.stdout, '')
