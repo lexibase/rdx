@@ -194,6 +194,9 @@ test('a real Changesets preview preserves files and preparation updates only the
   })
   assert.match(await read('PUBLIC_API.md'), /# RDX public API — 4.3/)
   assert.ok(calls.some((call) => call.includes('--offline')))
+  const build = calls.find((call) => call.includes('turbo'))
+  assert.ok(build?.includes('--ui=stream'))
+  assert.ok(build.includes('--cache=local:r'))
   assert.ok(
     calls.some(
       (call) => call.includes('docs:version') && call.at(-1) === '4.3.0'
