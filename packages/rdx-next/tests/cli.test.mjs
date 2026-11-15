@@ -245,9 +245,66 @@ test('check aggregates content errors and never prepares runtime, assets or a Ne
     await assert.rejects(access(path.join(rootDir, filename)))
 })
 
+test('check --json writes errors, suggestions and warnings to stdout', async (t) => {
+  const rootDir = await fixture(
+    t,
+    `export default { metadata: { applicationName: 'Docs' } }`
+  )
+  const docs = path.join(rootDir, 'docs')
+  await mkdir(docs)
+  const intro = path.join(docs, '01-intro.md')
+  await writeFile(intro, '# Installation\n\n[Section](#installaton)\n')
+  await writeFile(path.join(docs, 'reference.md'), '# Reference\n')
+
+  const failed = run(rootDir, 'check', '--json')
+  assert.equal(failed.status, 1, failed.stderr)
+  assert.equal(failed.stderr, '')
+  const report = JSON.parse(failed.stdout)
+  assert.equal(report.checkedPages, 2)
+  assert.deepEqual(report.diagnostics, [
+    {
+      file: 'docs/01-intro.md',
+      line: 3,
+      column: 1,
+      code: 'anchor',
+      message:
+        '"#installaton": Section "#installaton" does not exist in docs/01-intro.md.',
+      suggestion: '#installation',
+    },
+  ])
+  assert.deepEqual(
+    report.warnings.map(({ code }) => code),
+    ['unlinked']
+  )
+
+  await writeFile(intro, '# Installation\n')
+  const warningsOnly = run(rootDir, 'check', '--json')
+  assert.equal(warningsOnly.status, 0, warningsOnly.stderr)
+  assert.deepEqual(JSON.parse(warningsOnly.stdout), {
+    ...report,
+    diagnostics: [],
+  })
+
+  await writeFile(intro, '[Reference](./reference.md)\n')
+  const clean = run(rootDir, 'check', '--json')
+  assert.equal(clean.status, 0, clean.stderr)
+  assert.deepEqual(JSON.parse(clean.stdout), {
+    checkedPages: 2,
+    diagnostics: [],
+    warnings: [],
+  })
+  await assert.rejects(access(path.join(rootDir, '.rdx')))
+})
+
 test('check help and invalid arguments are handled before reading configuration', async (t) => {
   const rootDir = await fixture(t)
-  assert.equal(run(rootDir, 'check', '--help').status, 0)
+  const help = run(rootDir, 'check', '--help')
+  assert.equal(help.status, 0)
+  assert.match(help.stdout, /--json/)
+  const missingConfig = run(rootDir, 'check', '--json')
+  assert.equal(missingConfig.status, 1)
+  assert.equal(missingConfig.stdout, '')
+  assert.match(missingConfig.stderr, /Missing .*rdx.config/)
   const result = run(rootDir, 'check', '--fix')
   assert.equal(result.status, 1)
   assert.match(result.stderr, /Usage: rdx check/)
