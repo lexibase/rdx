@@ -336,12 +336,128 @@ test('check --json writes errors, suggestions and warnings to stdout', async (t)
   await assert.rejects(access(path.join(rootDir, '.rdx')))
 })
 
+test('check baseline ignores line changes but catches a new occurrence at the same warning total', async (t) => {
+  const rootDir = await fixture(
+    t,
+    'export default { metadata: { applicationName: "Docs" } }'
+  )
+  const docs = path.join(rootDir, 'docs')
+  await mkdir(docs)
+  const intro = path.join(docs, '01-intro.md')
+  const oldLink = '[Guide](/docs/old-guide)'
+  await writeFile(intro, `# Intro\n\n${oldLink}\n`)
+  await writeFile(
+    path.join(docs, 'guide.md'),
+    '---\nredirectFrom: [/docs/old-guide]\n---\n# Guide\n'
+  )
+  await writeFile(path.join(docs, 'reference.md'), '# Reference\n')
+  const baseline = 'rdx-check-baseline.json'
+  const created = run(rootDir, 'check', '--write-baseline', baseline)
+  assert.equal(created.status, 0, created.stderr)
+  const baselinePath = path.join(rootDir, baseline)
+  const saved = await readFile(baselinePath, 'utf8')
+  const entries = JSON.parse(saved)
+  assert.equal(entries.version, 1)
+  assert.equal(entries.warnings.length, 2)
+  assert.deepEqual(Object.keys(entries.warnings[0]).sort(), [
+    'code',
+    'file',
+    'message',
+  ])
+
+  const overwrite = run(rootDir, 'check', '--write-baseline', baseline)
+  assert.equal(overwrite.status, 1)
+  assert.match(overwrite.stderr, /already exists/)
+  assert.equal(await readFile(baselinePath, 'utf8'), saved)
+
+  await writeFile(intro, `# Intro\n\nNew paragraph.\n\n${oldLink}\n`)
+  const moved = run(rootDir, 'check', '--baseline', baseline, '--json')
+  assert.equal(moved.status, 0, moved.stderr)
+  assert.deepEqual(JSON.parse(moved.stdout).baseline, {
+    file: baseline,
+    knownWarningCount: 2,
+    newWarnings: [],
+  })
+
+  await writeFile(
+    intro,
+    `# Intro\n\n${oldLink}\n\n${oldLink}\n\n[Reference](./reference.md)\n`
+  )
+  const compare = run(
+    rootDir,
+    'check',
+    '--baseline',
+    baseline,
+    '--max-warnings',
+    '2',
+    '--json'
+  )
+  assert.equal(compare.status, 1)
+  const report = JSON.parse(compare.stdout)
+  assert.deepEqual(report.diagnostics, [])
+  assert.equal(report.warnings.length, 2)
+  assert.equal(report.warningLimitExceeded, false)
+  assert.deepEqual(report.baseline, {
+    file: baseline,
+    knownWarningCount: 1,
+    newWarnings: [{ ...report.warnings[1], code: 'redirected-link', line: 5 }],
+  })
+  const human = run(rootDir, 'check', '--baseline', baseline)
+  assert.equal(human.status, 1)
+  assert.match(human.stderr, /Warning baseline: 1 known, 1 new/)
+  assert.match(human.stderr, /RDX check failed/)
+  assert.doesNotMatch(human.stderr, /01-intro\.md:3:/)
+
+  await writeFile(intro, `# Intro\n\n${oldLink}\n\n[Broken](#missing)\n`)
+  const broken = run(rootDir, 'check', '--baseline', baseline, '--json')
+  assert.equal(broken.status, 1)
+  const brokenReport = JSON.parse(broken.stdout)
+  assert.equal(brokenReport.diagnostics[0].code, 'anchor')
+  assert.deepEqual(brokenReport.baseline.newWarnings, [])
+  const unwritten = run(rootDir, 'check', '--write-baseline', 'unwritten.json')
+  assert.equal(unwritten.status, 1)
+  await assert.rejects(access(path.join(rootDir, 'unwritten.json')))
+  await assert.rejects(access(path.join(rootDir, '.rdx')))
+})
+
+test('check reports missing or invalid baseline files without writing a JSON report', async (t) => {
+  const rootDir = await fixture(
+    t,
+    'export default { metadata: { applicationName: "Docs" } }'
+  )
+  await mkdir(path.join(rootDir, 'docs'))
+  await writeFile(path.join(rootDir, 'docs', 'intro.md'), '# Intro\n')
+  const missing = run(rootDir, 'check', '--baseline', 'missing.json', '--json')
+  assert.equal(missing.status, 1)
+  assert.equal(missing.stdout, '')
+  assert.match(missing.stderr, /Could not read warning baseline "missing.json"/)
+  await writeFile(
+    path.join(rootDir, 'invalid.json'),
+    '{"version":1,"warnings":[{}]}'
+  )
+  const invalid = run(rootDir, 'check', '--baseline', 'invalid.json', '--json')
+  assert.equal(invalid.status, 1)
+  assert.equal(invalid.stdout, '')
+  assert.match(invalid.stderr, /Invalid warning baseline "invalid.json"/)
+})
+
 test('check help and invalid arguments are handled before reading configuration', async (t) => {
   const rootDir = await fixture(t)
   const help = run(rootDir, 'check', '--help')
   assert.equal(help.status, 0)
   assert.match(help.stdout, /--json/)
   assert.match(help.stdout, /--max-warnings/)
+  assert.match(help.stdout, /--write-baseline/)
+  for (const args of [
+    ['--baseline'],
+    ['--write-baseline='],
+    ['--baseline', 'a.json', '--write-baseline', 'b.json'],
+  ]) {
+    const invalid = run(rootDir, 'check', ...args)
+    assert.equal(invalid.status, 1)
+    assert.match(invalid.stderr, /Usage: rdx check/)
+    assert.doesNotMatch(invalid.stderr, /Missing .*rdx.config/)
+  }
   for (const args of [[], ['-1'], ['1.5'], ['9007199254740992']]) {
     const invalid = run(rootDir, 'check', '--max-warnings', ...args)
     assert.equal(invalid.status, 1)

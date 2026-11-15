@@ -727,7 +727,8 @@ export function checkDocumentation(
 
 export function formatDocumentationCheck(
   report: DocumentationCheck,
-  exceededWarningLimit?: number
+  exceededWarningLimit?: number,
+  knownWarningCount?: number
 ): string {
   const lines = report.diagnostics.flatMap((entry) => [
     `${entry.file}:${entry.line}:${entry.column} [${entry.code}] ${entry.message}`,
@@ -739,11 +740,20 @@ export function formatDocumentationCheck(
     lines.push(
       `${warning.file}:${warning.line}:${warning.column} [warning: ${warning.code}] ${warning.message}`
     )
-  const warningCount = report.warnings?.length ?? 0
+  const displayedWarningCount = report.warnings?.length ?? 0
+  const warningCount = displayedWarningCount + (knownWarningCount ?? 0)
   if (exceededWarningLimit !== undefined)
     lines.push(`Warning limit exceeded (maximum ${exceededWarningLimit}).`)
+  const baselineExceeded =
+    knownWarningCount !== undefined && displayedWarningCount > 0
+  if (knownWarningCount !== undefined)
+    lines.push(
+      `Warning baseline: ${knownWarningCount} known, ${displayedWarningCount} new.`
+    )
   const failed =
-    report.diagnostics.length > 0 || exceededWarningLimit !== undefined
+    report.diagnostics.length > 0 ||
+    exceededWarningLimit !== undefined ||
+    baselineExceeded
   lines.push(
     `RDX check ${failed ? 'failed' : 'passed'}: ${report.checkedPages} ${report.checkedPages === 1 ? 'page' : 'pages'} checked, ${report.diagnostics.length} ${report.diagnostics.length === 1 ? 'problem' : 'problems'}${warningCount ? `, ${warningCount} ${warningCount === 1 ? 'warning' : 'warnings'}` : ''}.`
   )

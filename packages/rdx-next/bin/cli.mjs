@@ -14,7 +14,8 @@ import { preparePublicAssets } from './public-assets.mjs'
 import { prepareProjectStyles } from './project-styles.mjs'
 import { prepareLocaleRoutes } from './locale-routes.mjs'
 
-const checkUsage = 'Usage: rdx check [--json] [--max-warnings N]'
+const checkUsage =
+  'Usage: rdx check [--json] [--max-warnings N] [--baseline FILE | --write-baseline FILE]'
 
 function parseCheckArguments(args) {
   let values
@@ -24,6 +25,8 @@ function parseCheckArguments(args) {
       options: {
         json: { type: 'boolean' },
         'max-warnings': { type: 'string' },
+        baseline: { type: 'string' },
+        'write-baseline': { type: 'string' },
       },
     }).values
   } catch (error) {
@@ -38,7 +41,19 @@ function parseCheckArguments(args) {
     throw new Error(
       `--max-warnings requires a non-negative safe integer.\n${checkUsage}`
     )
-  return { json: values.json, maxWarnings }
+  const { baseline, 'write-baseline': writeBaseline } = values
+  for (const [flag, value] of [
+    ['--baseline', baseline],
+    ['--write-baseline', writeBaseline],
+  ]) {
+    if (value !== undefined && !value.trim())
+      throw new Error(`${flag} requires a file path.\n${checkUsage}`)
+  }
+  if (baseline && writeBaseline)
+    throw new Error(
+      `Choose either --baseline or --write-baseline.\n${checkUsage}`
+    )
+  return { json: values.json, maxWarnings, baseline, writeBaseline }
 }
 
 export async function runRdxCli({ templateDir } = {}) {
@@ -90,7 +105,7 @@ export async function runRdxCli({ templateDir } = {}) {
         'Usage: rdx <dev|build|start|prepare|check|add|plugin-command>'
       )
       console.log(
-        '  rdx check [--json] [--max-warnings N]: validate documentation links, sections and local assets'
+        '  rdx check [options]: validate documentation links, sections and local assets'
       )
       console.log('  rdx add versioning [--package-manager npm|pnpm|yarn]')
       console.log('  rdx add changelog [--package-manager npm|pnpm|yarn]')
@@ -112,7 +127,7 @@ export async function runRdxCli({ templateDir } = {}) {
         ['--help', '-h'].includes(commandArgs[0])
       ) {
         console.log(
-          `${checkUsage}\nValidate static Markdown and MDX links, section anchors and local public/ files without building the site.\n  --json  Write the documentation report as JSON to stdout.\n  --max-warnings N  Fail when the report contains more than N warnings.`
+          `${checkUsage}\nValidate static Markdown and MDX links, section anchors and local public/ files without building the site.\n  --json  Write the documentation report as JSON to stdout.\n  --max-warnings N  Fail when the report contains more than N warnings.\n  --baseline FILE  Fail on warnings that are new to the baseline.\n  --write-baseline FILE  Save current warnings to a new baseline file.`
         )
         return
       }
@@ -221,11 +236,31 @@ export async function runRdxCli({ templateDir } = {}) {
       const { checkDocumentation, formatDocumentationCheck } =
         await import('@lexibase/rdx-core/check')
       const report = checkDocumentation(project)
-      const { json, maxWarnings } = checkOptions
+      const { json, maxWarnings, baseline, writeBaseline } = checkOptions
       const warnings = report.warnings ?? []
       const warningLimitExceeded =
         maxWarnings !== undefined && warnings.length > maxWarnings
-      const failed = report.diagnostics.length > 0 || warningLimitExceeded
+      let baselineReport
+      if (baseline) {
+        const { findNewWarnings } = await import('./warning-baseline.mjs')
+        const newWarnings = await findNewWarnings(baseline, warnings)
+        baselineReport = {
+          file: baseline,
+          knownWarningCount: warnings.length - newWarnings.length,
+          newWarnings,
+        }
+      }
+      const failed =
+        report.diagnostics.length > 0 ||
+        warningLimitExceeded ||
+        (baselineReport?.newWarnings.length ?? 0) > 0
+      if (writeBaseline && !failed) {
+        const { writeWarningBaseline } = await import('./warning-baseline.mjs')
+        await writeWarningBaseline(writeBaseline, warnings)
+        const message = `Warning baseline written to "${writeBaseline}".`
+        if (json) console.error(message)
+        else console.log(message)
+      }
       if (json) {
         console.log(
           JSON.stringify({
@@ -234,14 +269,18 @@ export async function runRdxCli({ templateDir } = {}) {
             ...(maxWarnings === undefined
               ? {}
               : { maxWarnings, warningLimitExceeded }),
+            ...(baselineReport ? { baseline: baselineReport } : {}),
           })
         )
         if (failed) process.exitCode = 1
         return
       }
       const output = formatDocumentationCheck(
-        report,
-        warningLimitExceeded ? maxWarnings : undefined
+        baselineReport
+          ? { ...report, warnings: baselineReport.newWarnings }
+          : report,
+        warningLimitExceeded ? maxWarnings : undefined,
+        baselineReport?.knownWarningCount
       )
       if (failed) {
         console.error(output)
