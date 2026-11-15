@@ -54,6 +54,69 @@ docs/guides/setup.mdx:12:1 [page] "./installation.mdx": "guides/installation.mdx
 
 Review the suggested link, edit the source file, and run the check again.
 
+## Use the report in CI
+
+Add `--json` to write one JSON report to standard output. It contains
+`checkedPages`, `diagnostics` for errors, and `warnings`. Both arrays are present
+even when empty. Entries include `file`, `line`, `column`, `code`, and `message`.
+A `suggestion` is included when the checker finds a likely replacement. File
+paths are relative to the documentation project root.
+
+:::tabs
+
+### pnpm
+
+pnpm exec rdx check --json
+
+### npm
+
+npm exec -- rdx check --json
+
+### yarn
+
+yarn rdx check --json
+
+:::
+
+The check exits with `1` when the report contains errors and `0` when it only
+contains warnings or has no findings. If the check cannot start, for example
+because `rdx.config.ts` is missing, it exits with `1` and writes the error to
+standard error without a JSON report. Homepage translation notices also go to
+standard error.
+
+### Annotate a GitHub pull request
+
+Add this step to a Linux job after checkout and dependency installation. This
+example assumes your documentation project is at the repository root. It turns
+report entries into [GitHub Actions annotations](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#setting-an-error-message)
+and preserves the check's exit code.
+
+```yaml
+- name: Check documentation links
+  shell: bash
+  run: |
+    status=0
+    report="$RUNNER_TEMP/rdx-check.json"
+    pnpm exec rdx check --json > "$report" || status=$?
+    if [[ ! -s "$report" ]]; then exit "$status"; fi
+
+    node --input-type=module - "$report" <<'JS'
+    import { readFileSync } from 'node:fs'
+
+    const report = JSON.parse(readFileSync(process.argv[2], 'utf8'))
+    const escapeData = (text) => text.replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A')
+    const escapeProperty = (text) => escapeData(text).replaceAll(':', '%3A').replaceAll(',', '%2C')
+
+    for (const [level, entries] of [['error', report.diagnostics], ['warning', report.warnings]]) {
+      for (const { file, line, column, message, suggestion } of entries) {
+        const detail = suggestion ? `${message}\nDid you mean ${JSON.stringify(suggestion)}?` : message
+        console.log(`::${level} file=${escapeProperty(file)},line=${line},col=${column}::${escapeData(detail)}`)
+      }
+    }
+    JS
+    exit "$status"
+```
+
 ## What is checked?
 
 - Duplicate page routes, including a `.md` and `.mdx` file with the same path.

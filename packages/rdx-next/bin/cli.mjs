@@ -17,6 +17,10 @@ export async function runRdxCli({ templateDir } = {}) {
   const supportedCommands = new Set(['dev', 'build', 'start'])
   let command = process.argv[2]
   const commandArgs = process.argv.slice(3)
+  const jsonCheck =
+    command === 'check' &&
+    commandArgs.length === 1 &&
+    commandArgs[0] === '--json'
   const projectRoot = process.cwd()
   const packageRoot = path.resolve(
     path.dirname(fileURLToPath(import.meta.url)),
@@ -61,7 +65,7 @@ export async function runRdxCli({ templateDir } = {}) {
         'Usage: rdx <dev|build|start|prepare|check|add|plugin-command>'
       )
       console.log(
-        '  rdx check: validate documentation links, sections and local assets'
+        '  rdx check [--json]: validate documentation links, sections and local assets'
       )
       console.log('  rdx add versioning [--package-manager npm|pnpm|yarn]')
       console.log('  rdx add changelog [--package-manager npm|pnpm|yarn]')
@@ -83,11 +87,12 @@ export async function runRdxCli({ templateDir } = {}) {
         ['--help', '-h'].includes(commandArgs[0])
       ) {
         console.log(
-          'Usage: rdx check\nValidate static Markdown and MDX links, section anchors and local public/ files without building the site.'
+          'Usage: rdx check [--json]\nValidate static Markdown and MDX links, section anchors and local public/ files without building the site.\n  --json  Write the documentation report as JSON to stdout.'
         )
         return
       }
-      if (commandArgs.length) throw new Error('Usage: rdx check')
+      if (commandArgs.length && !jsonCheck)
+        throw new Error('Usage: rdx check [--json]')
     }
 
     const syncHomepage = command === 'i18n' && commandArgs[0] === 'sync'
@@ -192,6 +197,13 @@ export async function runRdxCli({ templateDir } = {}) {
       const { checkDocumentation, formatDocumentationCheck } =
         await import('@lexibase/rdx-core/check')
       const report = checkDocumentation(project)
+      if (jsonCheck) {
+        console.log(
+          JSON.stringify({ ...report, warnings: report.warnings ?? [] })
+        )
+        if (report.diagnostics.length) process.exitCode = 1
+        return
+      }
       const output = formatDocumentationCheck(report)
       if (report.diagnostics.length) {
         console.error(output)
