@@ -33,12 +33,10 @@ are advanced once, rather than once per terminal experiment.
 ## Automated preparation
 
 Accumulate compatible fixes and features for the next grouped release. Write one
-public release note in `apps/web/changelog/<version>.md` for each published RDX
-version. In that note, group changes by what readers can use or what they need to
-do. A patch release that addresses an urgent or user-visible problem can have a
-short note. Routine CI and repository maintenance can stay in the commit history.
-Include the release note with the version updates and documentation snapshot in
-the release PR.
+public release note in `apps/web/changelog/<version>.md` when there are changes to
+announce. Group them by what readers can use or what they need to do. Routine
+patches can share a later note. Include any public note with the version updates
+and documentation snapshot in the release PR.
 
 Use Changesets to record package changes and the RDX command to prepare a grouped
 release. Tooling is a workspace development dependency; generated projects do not
@@ -186,11 +184,14 @@ Set up the automation once for the official site:
    `main` branch and save its URL as the `VERCEL_CHANGELOG_DEPLOY_HOOK` Actions
    secret in `lexibase/rdx`.
 
-After npm publication is verified, the workflow requests a production redeploy
-in the `deploy-changelog` job. Check the deployment in Vercel. If the hook
-request fails, retry the failed job. If npm is unavailable during the site build,
-retry the Vercel deployment after the registry recovers. After a terminal
-publication, verify npm and redeploy the latest `main` from Vercel.
+When the release commit includes `apps/web/changelog/<version>.md` or
+`<version>.mdx`, the workflow requests a production redeploy in the
+`deploy-changelog` job after npm publication is verified. Patches without a
+public note use the regular deployment from the merge. For releases with a note,
+check the extra deployment in Vercel. If the hook request fails, retry the
+failed job. If npm is unavailable during the site build, retry the Vercel
+deployment after the registry recovers. After a terminal publication with a
+note, verify npm and redeploy the latest `main` from Vercel.
 
 ## Prepared grouped release: RDX 6.6.1
 
