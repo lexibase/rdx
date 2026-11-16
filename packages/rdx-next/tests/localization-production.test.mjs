@@ -551,7 +551,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         localizedDocs,
         /<a\b(?=[^>]*href="\/minha-tool\/pt-br\/docs\/2\.0\.0")(?=[^>]*aria-current="true")[^>]*>Docs<\/a>/
       )
-      assert.match(changes, /href="\/minha-tool\/changelog\/rss\.xml"/)
+      assert.match(changes, /<button\b[^>]*aria-label="Copy RSS feed link"/)
       const feed = await fetch(base + '/changelog/rss.xml')
       assert.equal(feed.status, 200)
       assert.match(feed.headers.get('content-type'), /^application\/rss\+xml/)
@@ -893,15 +893,28 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
 
               const changelog = `${router}/minha-tool/changelog`
               await page.goto(changelog)
-              const rssLink = page.getByRole('link', {
-                name: 'Changelog RSS feed',
+              const rssButton = page.getByRole('button', {
+                name: 'Copy RSS feed link',
               })
               await page.waitForLoadState('networkidle')
-              await rssLink.hover()
+              await rssButton.hover()
               await page
                 .getByRole('tooltip')
-                .filter({ hasText: 'Changelog RSS feed' })
+                .filter({ hasText: 'Copy RSS feed link' })
                 .waitFor()
+              await rssButton.click()
+              await page
+                .getByRole('tooltip')
+                .filter({ hasText: 'Copied!' })
+                .waitFor()
+              await page
+                .getByText('RSS feed link copied.', { exact: true })
+                .waitFor()
+              assert.equal(
+                await page.evaluate(() => navigator.clipboard.readText()),
+                `${changelog}/rss.xml`
+              )
+              assert.equal(page.url(), changelog)
               const latestNote = page.locator('[id="v2.0.0"]')
               const dateBox = await latestNote.locator('time').boundingBox()
               const badgeBox = await latestNote
@@ -1045,7 +1058,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
               await page.keyboard.press('Escape')
               const filter = page.getByRole('button', { name: /^Filter/ })
               const filterBox = await filter.boundingBox()
-              const rssBox = await rssLink.boundingBox()
+              const rssBox = await rssButton.boundingBox()
               assert.ok(
                 filterBox &&
                   rssBox &&
