@@ -13,7 +13,7 @@ import {
 import { cn } from '../lib/utils'
 import { useMessages } from '../providers/locale-provider'
 import { Badge } from './badge'
-import { Button, buttonVariants } from './button'
+import { Button } from './button'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -31,24 +31,41 @@ import {
 } from './tooltip'
 
 export function ChangelogFeedLink({ href }: { href: string }) {
-  const { changelogFeed } = useMessages()
+  const messages = useMessages()
+  const { copy, status } = useCopyChangelogLink(
+    () => new URL(href, window.location.href)
+  )
+  const Icon = status === 'copied' ? Check : Rss
+  const feedback =
+    status === 'copied'
+      ? messages.changelogFeedCopied
+      : status === 'error'
+        ? messages.changelogFeedCopyError
+        : ''
+
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <a
-              href={href}
-              className={buttonVariants({ variant: 'ghost', size: 'icon-sm' })}
-              aria-label={changelogFeed}
-            />
-          }
-        >
-          <Rss aria-hidden="true" />
-        </TooltipTrigger>
-        <TooltipContent role="tooltip">{changelogFeed}</TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger
+            render={<Button type="button" variant="ghost" size="icon-sm" />}
+            aria-label={messages.changelogFeed}
+            closeOnClick={false}
+            onClick={copy}
+          >
+            <Icon aria-hidden="true" />
+          </TooltipTrigger>
+          <TooltipContent role="tooltip">
+            {status === 'copied'
+              ? messages.copied
+              : feedback || messages.changelogFeed}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      <span role="status" className="sr-only">
+        {feedback}
+      </span>
+    </>
   )
 }
 
@@ -344,18 +361,14 @@ function ChangelogVersions({ versions }: { versions: string[] }) {
   )
 }
 
-export function CopyReleaseLink({ version }: { version: string }) {
-  const messages = useMessages()
+function useCopyChangelogLink(getUrl: () => URL) {
   const [status, setStatus] = useState<'copied' | 'error'>()
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useEffect(() => () => clearTimeout(timer.current), [])
 
   async function copy() {
     try {
-      const url = new URL(window.location.href)
-      url.search = ''
-      url.hash = `v${version}`
-      await navigator.clipboard.writeText(url.href)
+      await navigator.clipboard.writeText(getUrl().href)
       setStatus('copied')
     } catch {
       setStatus('error')
@@ -364,6 +377,17 @@ export function CopyReleaseLink({ version }: { version: string }) {
     timer.current = setTimeout(() => setStatus(undefined), 1800)
   }
 
+  return { copy, status }
+}
+
+export function CopyReleaseLink({ version }: { version: string }) {
+  const messages = useMessages()
+  const { copy, status } = useCopyChangelogLink(() => {
+    const url = new URL(window.location.href)
+    url.search = ''
+    url.hash = `v${version}`
+    return url
+  })
   const Icon = status === 'copied' ? Check : Link2
   return (
     <>
