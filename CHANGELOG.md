@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 6.6.1 — Prepared
+
+- Copy the changelog RSS feed URL and confirm when it has been copied.
+
 ## 6.6.0 — Prepared
 
 - Improve `rdx check` with link suggestions, JSON reports, warning limits, and baselines. Include a check script in new projects.
