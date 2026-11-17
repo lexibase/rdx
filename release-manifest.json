@@ -1,8 +1,7 @@
 {
-  "version": "6.6.1",
+  "version": "6.6.2",
   "packages": {
-    "@lexibase/rdx-ui": "3.7.1",
-    "@lexibase/rdx": "6.6.1",
-    "@lexibase/create-rdx": "6.6.1"
+    "@lexibase/rdx": "6.6.2",
+    "@lexibase/create-rdx": "6.6.2"
   }
 }
