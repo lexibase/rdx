@@ -959,6 +959,7 @@ for (const [name, release] of releases) {
     )
   }
   release.archive = archive
+  release.nextPeer = packed.peerDependencies?.next
   console.log(
     `OK ${name}@${manifest.version}: archive, exports and dependency versions`
   )
@@ -974,6 +975,14 @@ const template = JSON.parse(
 )
 for (const name of ['@lexibase/rdx'])
   assert.equal(template.dependencies[name], releases.get(name).manifest.version)
+
+assert.ok(template.dependencies.next, 'The starter must declare Next.js')
+for (const name of ['@lexibase/rdx', '@lexibase/rdx-next', '@lexibase/rdx-ui'])
+  assert.equal(
+    releases.get(name).nextPeer,
+    template.dependencies.next,
+    `${name} and the starter must declare the same Next.js range`
+  )
 
 const checkI18n = process.argv.includes('--i18n')
 const checkInstallation = process.argv.includes('--install')
