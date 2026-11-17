@@ -474,7 +474,7 @@ test('check help and invalid arguments are handled before reading configuration'
   assert.doesNotMatch(result.stderr, /Missing .*rdx.config/)
 })
 
-test('all creator documentation examples pass the public check command', async (t) => {
+test('all creator documentation examples pass the public check command without warnings', async (t) => {
   const rootDir = await fixture(
     t,
     `export default { metadata: { applicationName: 'Docs' } }`
@@ -488,7 +488,7 @@ test('all creator documentation examples pass the public check command', async (
       recursive: true,
     })
   }
-  const result = run(rootDir, 'check')
+  const result = run(rootDir, 'check', '--max-warnings', '0')
   assert.equal(result.status, 0, result.stderr)
   assert.match(result.stdout, /0 problems/)
   await assert.rejects(access(path.join(rootDir, '.rdx')))
