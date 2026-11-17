@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 6.6.2 — Prepared
+
+- Restore pnpm 12 installation progress and ship starter documentation that passes rdx check without warnings.
+
 ## 6.6.1 — Prepared
 
 - Copy the changelog RSS feed URL and confirm when it has been copied.

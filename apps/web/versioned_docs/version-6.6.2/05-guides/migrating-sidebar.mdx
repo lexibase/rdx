@@ -1,0 +1,48 @@
+---
+title: Migrating from RDX 4 to 5
+navTitle: Migrating to v5
+description: Review public URLs and migrate sidebar ordering when upgrading to RDX 5.
+order: 3
+---
+
+> [!WARNING] Check numbered URLs before upgrading
+> RDX 5 removes two-digit ordering prefixes from generated URLs. If you already
+> published `/docs/guides/02-installation`, the new URL is
+> `/docs/guides/installation`. Add a permanent redirect on your hosting platform
+> for any old public URL you want to keep working.
+
+If your project uses `link_position` or `_category.json`, use the steps below
+to adopt the shorter sidebar configuration. For a new project, see
+[Categories and URLs](../03-writing-documentation/docs.mdx#categories-and-urls).
+
+## Update page frontmatter
+
+Replace `link_position` with `order` and keep the same number. RDX still reads
+`link_position` when `order` is absent.
+
+```diff
+ ---
+ title: Install and configure your project
+ description: Set up your documentation project and start writing.
+-link_position: 2
++order: 2
+ ---
+```
+
+If the sidebar needs a shorter label, add `navTitle: Installation`.
+
+## Move the category order into the folder name
+
+Use the old `sidebar_position` as a two-digit folder prefix. For example, rename
+`docs/guides/` to `docs/02-guides/` to put it in position 2. A page inside that
+folder still uses `/docs/guides/` in its URL. Update relative Markdown links to
+use the actual path, including the prefix.
+
+Remove `_category.json` once the folder name gives you the label you want.
+Keep the file if you need a custom label while retaining the same URL path.
+If you keep it, remove `sidebar_position` to let the folder prefix set the order.
+
+## Check existing links
+
+Run `rdx check` after renaming files. Test any redirects from your old public
+URLs in a preview deployment before publishing.
