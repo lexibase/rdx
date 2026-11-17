@@ -219,6 +219,11 @@ and preserves the check's exit code.
 Line numbers refer to the original file, including its frontmatter. Examples
 inside code blocks are treated as code, not as links to validate.
 
+Public asset paths must match the capitalization of each folder and filename.
+For example, use `/images/Logo.svg` when the file is named `Logo.svg`. The check
+reports a mismatch on any operating system and suggests the exact path when it
+finds a unique match.
+
 ### Find pages without incoming links
 
 An `[warning: unlinked]` entry means the checker found no link to the page

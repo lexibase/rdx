@@ -343,6 +343,50 @@ test('all broken references are reported with original frontmatter-aware locatio
   )
 })
 
+test('public asset paths require the exact casing on disk and suggest URL-safe corrections', async (t) => {
+  const project = await fixture(t, {
+    'docs/intro.md': [
+      '![Mismatched](/images/brand%20mark.svg?theme=light#mark)',
+      '[Download](https://docs.example.com/manual/downloads/guide.pdf?dl=1#page=2)',
+      '![Exact match](/Images/Brand%20Mark.svg)',
+    ].join('\n\n'),
+    'public/Images/Brand Mark.svg': '<svg />',
+    'public/Downloads/Guide.pdf': 'Download',
+  })
+  project.config.basePath = '/manual'
+  const report = checkDocumentation(project)
+  assert.deepEqual(
+    report.diagnostics.map(({ file, line, code, suggestion }) => ({
+      file,
+      line,
+      code,
+      suggestion,
+    })),
+    [
+      {
+        file: 'docs/intro.md',
+        line: 1,
+        code: 'asset',
+        suggestion: '/Images/Brand%20Mark.svg?theme=light#mark',
+      },
+      {
+        file: 'docs/intro.md',
+        line: 3,
+        code: 'asset',
+        suggestion:
+          'https://docs.example.com/manual/Downloads/Guide.pdf?dl=1#page=2',
+      },
+    ]
+  )
+  assert.ok(
+    report.diagnostics.every(({ message }) => /capitalization/.test(message))
+  )
+  assert.match(
+    formatDocumentationCheck(report),
+    /Did you mean "\/Images\/Brand%20Mark\.svg/
+  )
+})
+
 test('each edition has its own headings and relative targets; historical redirects are resolved without rechecking snapshots', async (t) => {
   const project = await fixture(
     t,
@@ -552,6 +596,12 @@ test('configured logo assets are checked without executing React components', as
   })
   project.config.navbar = { logo: '/images/brand%20mark.svg?v=2' }
   assert.deepEqual(checkDocumentation(project).diagnostics, [])
+  project.config.navbar.logo = '/Images/Brand%20Mark.svg?v=2#symbol'
+  const [wrongCase] = checkDocumentation(project).diagnostics
+  assert.equal(wrongCase.code, 'asset')
+  assert.equal(wrongCase.file, 'rdx.config.ts')
+  assert.equal(wrongCase.suggestion, '/images/brand%20mark.svg?v=2#symbol')
+  assert.match(wrongCase.message, /navbar.logo.*capitalization/)
   project.config.navbar.logo = '/images/missing.png'
   const report = checkDocumentation(project)
   assert.equal(report.diagnostics.length, 1)

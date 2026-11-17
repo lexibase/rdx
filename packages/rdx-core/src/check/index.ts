@@ -216,10 +216,11 @@ export function checkDocumentation(
       message: value.message ?? String(error),
     })
   }
-  function publicFileExists(pathname: string) {
+  const publicRoot = path.resolve(project.rootDir, 'public')
+  const publicDirectories = new Map<string, Set<string>>()
+  function findPublicFile(pathname: string) {
     if (pathname.includes('\\') || pathname.includes('\0'))
       throw new Error('Use a valid URL with forward slashes.')
-    const publicRoot = path.resolve(project.rootDir, 'public')
     const asset = path.resolve(publicRoot, `.${pathname}`)
     const relative = path.relative(publicRoot, asset)
     if (
@@ -228,20 +229,53 @@ export function checkDocumentation(
       path.isAbsolute(relative)
     )
       throw new Error('The destination escapes public/.')
-    let exists = false
     try {
-      exists = fs.statSync(asset).isFile()
+      const segments = []
+      let directory = publicRoot
+      for (const segment of relative.split(path.sep)) {
+        let entries = publicDirectories.get(directory)
+        if (!entries) {
+          entries = new Set(fs.readdirSync(directory))
+          publicDirectories.set(directory, entries)
+        }
+        let name = segment
+        if (!entries.has(segment)) {
+          const folded = segment.toLowerCase()
+          const matches = [...entries].filter(
+            (entry) => entry.toLowerCase() === folded
+          )
+          if (matches.length !== 1) return
+          name = matches[0]!
+        }
+        segments.push(name)
+        directory = path.join(directory, name)
+      }
+      if (fs.statSync(directory).isFile())
+        return {
+          correctedPath:
+            segments.join(path.sep) === relative
+              ? undefined
+              : `/${segments.map(encodeURIComponent).join('/')}`,
+        }
     } catch {
       /* Missing assets are reported below. */
     }
-    return exists
   }
+  const caseMismatch =
+    'The path must match the capitalization on disk in public/.'
   const logo = project.config.navbar?.logo
   if (typeof logo === 'string') {
+    let suggestion: string | undefined
     try {
-      const pathname = decodeURIComponent(new URL(logo, origin).pathname)
-      if (!publicFileExists(pathname))
+      const url = new URL(logo, origin)
+      const pathname = decodeURIComponent(url.pathname)
+      const asset = findPublicFile(pathname)
+      if (!asset)
         throw new Error(`Local file "${pathname}" does not exist in public/.`)
+      if (asset.correctedPath) {
+        suggestion = `${asset.correctedPath}${url.search}${url.hash}`
+        throw new Error(caseMismatch)
+      }
     } catch (error) {
       diagnostics.push({
         file: 'rdx.config.ts',
@@ -249,6 +283,7 @@ export function checkDocumentation(
         column: 1,
         code: 'asset',
         message: `navbar.logo "${logo}": ${error instanceof Error ? error.message : String(error)}`,
+        ...(suggestion ? { suggestion } : {}),
       })
     }
   }
@@ -571,7 +606,19 @@ export function checkDocumentation(
           reference.image || !/^\/(?:[^/]+\/)?docs(?:\/|$)/.test(pathname)
             ? 'asset'
             : 'page'
-        if (!publicFileExists(pathname)) {
+        const asset = findPublicFile(pathname)
+        if (asset?.correctedPath) {
+          code = 'asset'
+          const absolute = /^(?:https?:|\/\/)/i.test(reference.href)
+          const basePath = project.config.basePath
+          const prefix =
+            absolute && basePath && url.pathname.startsWith(`${basePath}/`)
+              ? basePath
+              : ''
+          suggestion = `${absolute ? url.origin : ''}${prefix}${asset.correctedPath}${url.search}${url.hash}`
+          throw new Error(caseMismatch)
+        }
+        if (!asset) {
           if (code === 'page') {
             const edition = redirectSources
               .filter(({ root }) => pathname.startsWith(`${key(root)}/`))
