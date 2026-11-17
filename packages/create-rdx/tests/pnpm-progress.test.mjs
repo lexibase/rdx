@@ -71,6 +71,29 @@ test('workspace totals and cache/download counts accumulate without duplicate pr
   assert.match(stdout.at(-1), /3 linked, 3 cached, 1 downloaded/)
 })
 
+test('pnpm 12 progress and diagnostics on stderr share counters with stdout without mixing partial records', () => {
+  const { progress, stdout, stderr, event } = fixture()
+  progress.stderr('{"name":"pnpm:stats","added":2}\r\n')
+  progress.stderr('{"name":"pnpm:progress","status":"found_')
+  progress.stdout('{"name":"pnpm:progress","status":"fetched",')
+  progress.stderr('in_store","packageId":"cached"}\n')
+  progress.stdout('"packageId":"downloaded"}\n')
+  progress.stderr(
+    '{"name":"pnpm:progress","status":"imported","to":"cached"}\n'
+  )
+  event({ name: 'pnpm:progress', status: 'imported', to: 'cached' })
+  progress.stderr(
+    '{"name":"pnpm:progress","status":"imported","to":"downloaded"}\n'
+  )
+  progress.stderr('Native stderr\n')
+  progress.stderr('{"name":"pnpm","level":"warn","message":"Registry retry"}')
+  progress.finish(true)
+  assert.match(stdout.join(''), /2\/2/)
+  assert.match(stdout.at(-1), /2 linked, 1 cached, 1 downloaded/)
+  assert.match(stderr.join(''), /Native stderr\n\[pnpm\] Registry retry\n/)
+  assert.doesNotMatch(stdout.join('') + stderr.join(''), /"name":"pnpm/)
+})
+
 test('warnings, fatal errors, lifecycle scripts, downloads and unknown plain output remain visible', () => {
   const { progress, stdout, stderr, event } = fixture(false)
   event({

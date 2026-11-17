@@ -21,7 +21,6 @@ export function createPnpmProgress({
   const totals = new Map()
   const seen = new Set()
   let phase = 'Resolving dependencies'
-  let buffer = ''
   let frame = 0
   let finished = false
   let promptOpen = false
@@ -108,16 +107,16 @@ export function createPnpmProgress({
     platformWarning = undefined
     diagnostic(event)
   }
-  function record(line) {
+  function record(line, stream) {
     if (!line.trim()) {
-      if (promptOpen) message('\n')
+      if (promptOpen) message('\n', stream)
       return
     }
     let event
     try {
       event = JSON.parse(line)
     } catch {
-      message(line + '\n')
+      message(line + '\n', stream)
       return
     }
     if (
@@ -126,7 +125,7 @@ export function createPnpmProgress({
       typeof event.name !== 'string' ||
       !(event.name === 'pnpm' || event.name.startsWith('pnpm:'))
     ) {
-      message(line + '\n')
+      message(line + '\n', stream)
       return
     }
     if (promptOpen) {
@@ -196,6 +195,32 @@ export function createPnpmProgress({
     }
     draw()
   }
+  // pnpm can emit NDJSON on either stream. Each pipe can split a record
+  // independently, so keep a separate buffer and preserve plain output.
+  function readStream(stream) {
+    let buffer = ''
+    return {
+      write(chunk) {
+        buffer += chunk
+        let end
+        while ((end = buffer.indexOf('\n')) !== -1) {
+          const line = buffer.slice(0, end).replace(/\r$/, '')
+          buffer = buffer.slice(end + 1)
+          record(line, stream)
+        }
+        if (buffer && !buffer.trimStart().startsWith('{')) {
+          message(buffer, stream)
+          buffer = ''
+        }
+      },
+      flush() {
+        if (buffer) record(buffer, stream)
+        buffer = ''
+      },
+    }
+  }
+  const stdout = readStream(output)
+  const stderr = readStream(errors)
   draw(true)
   const timer =
     intervalMs > 0
@@ -203,29 +228,13 @@ export function createPnpmProgress({
       : undefined
   timer?.unref()
   return {
-    stdout(chunk) {
-      buffer += chunk
-      let end
-      while ((end = buffer.indexOf('\n')) !== -1) {
-        const line = buffer.slice(0, end).replace(/\r$/, '')
-        buffer = buffer.slice(end + 1)
-        record(line)
-      }
-      if (buffer && !buffer.trimStart().startsWith('{')) {
-        message(buffer)
-        buffer = ''
-      }
-    },
-    stderr(chunk) {
-      message(chunk, errors)
-    },
+    stdout: stdout.write,
+    stderr: stderr.write,
     finish(success) {
       if (finished) return
       clearInterval(timer)
-      if (buffer) {
-        record(buffer)
-        buffer = ''
-      }
+      stdout.flush()
+      stderr.flush()
       flushPlatformWarning()
       finished = true
       if (promptOpen) {
