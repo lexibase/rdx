@@ -1,0 +1,134 @@
+---
+title: Homepage
+description: Enable the built-in landing page, start from a template, or compose your own.
+order: 1
+prerequisites:
+  - ../02-getting-started/config.mdx
+---
+
+## Enable the homepage
+
+By default, `/` redirects to `/docs`. Enable the built-in landing page:
+
+```ts
+homepage: {
+  enabled: true,
+}
+```
+
+The landing page uses the same hero layout as the RDX site. Its preview shows
+the first documentation page, and the section below links to your documentation
+categories. The hero uses `metadata.applicationName`, the site description, and
+`navbar.logo`. See [Custom logo](./custom-logo.mdx) to supply your own branding.
+
+## Add a description and links
+
+```ts
+homepage: {
+  enabled: true,
+  title: 'Build with our tools',
+  description: 'Guides, examples, and reference in one place.',
+  buttons: [
+    { label: 'Get started', href: '/docs' },
+    { label: 'GitHub', href: 'https://github.com/example/project' },
+  ],
+}
+```
+
+The first button is primary. By default, the hero links to your documentation.
+Use `buttons: []` to omit the hero buttons.
+URLs must be root-relative or HTTP(S). Adjust the documentation link to match
+your own page paths.
+
+## Start from a template
+
+Open **Templates** in the RDX site navbar. The **Video first** template pairs a
+wide video with a feature grid, a three-step setup guide, requirements, and a
+closing call to action.
+
+1. Select **Preview** and scroll through the landing page.
+2. Select **Copy code** and paste the full component into `components/home.tsx`
+   at the root of your project.
+3. Edit the content and links, then set
+   `homepage: { enabled: true, translations: true }` in `rdx.config.ts`.
+
+For **Video first**, put your video in `public/videos/` and update the video path
+in the component. If you use a poster image, add it to `public/` and update the
+poster path as well.
+
+Template accents follow the project's [highlight color](./appearance.mdx).
+The template already marks its text for translation and uses the documentation
+link for the active language. When you add languages, run `rdx i18n sync` to
+generate their `home.json` catalogs. See [Localize your homepage](./languages.mdx#localize-your-homepage).
+
+## Build your own homepage
+
+Create `components/home.tsx` inside your project-root `components/` folder. Use
+`<Home>` for the standard hero and add your own content in `<HomeSection>` tags.
+Each section fills at least the visible area below the navbar and grows to fit
+longer content.
+
+```tsx
+// components/home.tsx
+import { Button } from '@lexibase/rdx/ui/components/button'
+import { Home, HomeSection } from '@lexibase/rdx/ui/components/home'
+
+export default function MyHome() {
+  return (
+    <Home
+      title="My project"
+      description="Everything you need to get started."
+      buttons={[{ label: 'Read the docs', href: '/docs' }]}
+      previewTitle="Get started"
+      previewDescription="Set up your project and build your first example."
+    >
+      <HomeSection
+        aria-labelledby="quickstart"
+        className="border-t bg-muted/20"
+      >
+        <div className="mx-auto max-w-xl space-y-4">
+          <h2 id="quickstart" className="text-3xl font-semibold">
+            Try it yourself
+          </h2>
+          <p>Follow the setup guide and build your first example.</p>
+          <Button href="/docs" variant="outline">
+            Open the guide
+          </Button>
+        </div>
+      </HomeSection>
+    </Home>
+  )
+}
+```
+
+Add, remove, or reorder `<HomeSection>` tags to shape your landing page. Each
+section can contain headings, images, buttons, or other React components.
+Pass `preview` to `<Home>` to replace the decorative hero preview. To compose
+every section yourself, use `<HomeSections>` as the outer wrapper.
+
+## Activate your homepage
+
+Import the default export of `components/home.tsx` in `rdx.config.ts`. Set
+`homepage.enabled` to `true` and assign the imported component to
+`homepage.component`:
+
+```ts
+import { defineConfig } from '@lexibase/rdx'
+import MyHome from './components/home'
+
+export default defineConfig({
+  metadata: { applicationName: 'My project' },
+  homepage: {
+    enabled: true,
+    component: MyHome,
+  },
+})
+```
+
+Keep the rest of your existing configuration. The site navbar stays shared and
+`components/home.tsx` defines the content shown at `/`.
+
+To translate a custom homepage, keep the existing layout
+in `components/home.tsx`. Update that component to receive `t` and wrap the text
+you want to translate, then configure translations and add a catalog for each
+language. Follow [Localize your homepage](./languages.mdx#localize-your-homepage).

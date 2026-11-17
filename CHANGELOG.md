@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 6.6.3 — Prepared
+
+- Align the starter and framework with the Next.js 16.4.6 minimum already required by the runtime and UI.
+
 ## 6.6.2 — Prepared
 
 - Restore pnpm 12 installation progress and ship starter documentation that passes rdx check without warnings.
