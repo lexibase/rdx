@@ -211,6 +211,8 @@ and preserves the check's exit code.
 - Section fragments such as `#installation`, using the same heading IDs as the
   Markdown renderer, including repeated headings.
 - Literal IDs in MDX, such as `<span id="details" />`.
+- Duplicate section IDs within a document, including collisions between heading
+  IDs and literal MDX IDs. The report points to the later occurrence.
 - Markdown images and download links that point to files in `public/`.
 - The public image file configured in `navbar.logo`.
 - Reference-style links and images, and literal HTML `href` and image `src` values.
@@ -218,6 +220,10 @@ and preserves the check's exit code.
 
 Line numbers refer to the original file, including its frontmatter. Examples
 inside code blocks are treated as code, not as links to validate.
+
+Repeated Markdown headings remain valid. RDX generates distinct IDs such as
+`setup` and `setup-1`. If you add a literal MDX ID, choose a value that is unique
+within that page.
 
 Public asset paths must match the capitalization of each folder and filename.
 For example, use `/images/Logo.svg` when the file is named `Logo.svg`. The check

@@ -109,7 +109,11 @@ function walk(node: Node, visit: (node: Node) => void) {
   for (const child of node.children ?? []) walk(child, visit)
 }
 
-function parse(content: string, markdown: boolean): Parsed {
+function parse(
+  content: string,
+  markdown: boolean,
+  duplicateAnchor: (id: string, position?: Position) => void
+): Parsed {
   const processor = markdown ? markdownParser : parser
   const tree = processor.runSync(processor.parse(content), {
     value: content,
@@ -129,7 +133,21 @@ function parse(content: string, markdown: boolean): Parsed {
       definitions.set(identifier(node.identifier), node.url)
   })
   walk(tree, (node) => {
-    if (node.type === 'heading') anchors.add(slugger.slug(headingText(node)))
+    const nodeAnchors = new Set<string>()
+    if (node.type === 'heading')
+      nodeAnchors.add(slugger.slug(headingText(node)))
+    for (const attribute of node.attributes ?? []) {
+      if (
+        typeof attribute.value === 'string' &&
+        (attribute.name === 'id' ||
+          (node.name === 'a' && attribute.name === 'name'))
+      )
+        nodeAnchors.add(attribute.value)
+    }
+    for (const id of nodeAnchors) {
+      if (anchors.has(id)) duplicateAnchor(id, node.position)
+      anchors.add(id)
+    }
     if (node.type === 'link' || node.type === 'image') {
       if (typeof node.url === 'string')
         references.push({
@@ -156,8 +174,8 @@ function parse(content: string, markdown: boolean): Parsed {
         attribute.name === 'id' ||
         (node.name === 'a' && attribute.name === 'name')
       ) {
-        if (typeof attribute.value === 'string') anchors.add(attribute.value)
-        else if (attribute.value) dynamicIds = true
+        if (attribute.value && typeof attribute.value !== 'string')
+          dynamicIds = true
       }
       if (
         ((node.name === 'a' && attribute.name === 'href') ||
@@ -214,6 +232,17 @@ export function checkDocumentation(
       column: value.column ?? (value.mark ? value.mark.column + 1 : 1),
       code: 'syntax',
       message: value.message ?? String(error),
+    })
+  }
+  function parseDocument(content: string, file: string, offset: number) {
+    return parse(content, file.endsWith('.md'), (id, position) => {
+      diagnostics.push({
+        file: relativeFile(file),
+        line: (position?.start.line ?? 1) + offset,
+        column: position?.start.column ?? 1,
+        code: 'anchor',
+        message: `Duplicate section ID "${id}". Use a unique ID for each destination on this page.`,
+      })
     })
   }
   const publicRoot = path.resolve(project.rootDir, 'public')
@@ -386,7 +415,11 @@ export function checkDocumentation(
   const releaseChecks = releases.flatMap((release) => {
     changelogAnchors.add(`v${release.version}`)
     try {
-      const parsed = parse(release.content, release.sourcePath.endsWith('.md'))
+      const parsed = parseDocument(
+        release.content,
+        release.sourcePath,
+        release.lineOffset
+      )
       for (const anchor of parsed.anchors) changelogAnchors.add(anchor)
       changelogHasUnknownAnchors ||= parsed.dynamicIds
       return [{ release, parsed }]
@@ -415,7 +448,11 @@ export function checkDocumentation(
       document.lineOffset = (
         raw.slice(0, raw.length - content.length).match(/\n/g) ?? []
       ).length
-      document.parsed = parse(content, document.page.sourcePath.endsWith('.md'))
+      document.parsed = parseDocument(
+        content,
+        document.page.sourcePath,
+        document.lineOffset
+      )
       for (const field of ['related', 'prerequisites'] as const) {
         try {
           document.parsed.references.push(
