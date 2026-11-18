@@ -1,6 +1,6 @@
 {
   "name": "@lexibase/rdx-versioning",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "description": "Optional documentation snapshots and version navigation for RDX.",
   "license": "MIT",
   "type": "module",

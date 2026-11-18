@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 6.6.4 — Prepared
+
+- Detect capitalization mismatches in public asset paths on every operating system and suggest the exact URL.
+
 ## 6.6.3 — Prepared
 
 - Align the starter and framework with the Next.js 16.4.6 minimum already required by the runtime and UI.
