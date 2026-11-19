@@ -459,6 +459,94 @@ test('Markdown component labels are not headings; nested headings and literal HT
   )
 })
 
+test('duplicate literal and generated IDs report the later occurrence with frontmatter-aware locations', async (t) => {
+  const project = await fixture(t, {
+    'docs/intro.mdx': [
+      '---',
+      'title: Intro',
+      '---',
+      '## Setup',
+      '',
+      '<span id="setup">Other destination</span>',
+      '',
+      '<a id="manual" name="manual">Manual</a>',
+      '',
+      '<div id="manual">Another manual</div>',
+      '',
+      '<span id="later">Before the heading</span>',
+      '',
+      '## Later',
+      '',
+      '[Setup](#setup) [Manual](#manual) [Later](#later)',
+    ].join('\n'),
+    'docs/other.md': '## Setup\n\n## Setup\n\n[Second](#setup-1)',
+  })
+  const report = checkDocumentation(project)
+  assert.deepEqual(
+    report.diagnostics.map(({ file, line, column, code }) => ({
+      file,
+      line,
+      column,
+      code,
+    })),
+    [6, 10, 14].map((line) => ({
+      file: 'docs/intro.mdx',
+      line,
+      column: 1,
+      code: 'anchor',
+    }))
+  )
+  assert.deepEqual(
+    report.diagnostics.map(
+      ({ message }) => /Duplicate section ID "([^"]+)"/.exec(message)?.[1]
+    ),
+    ['setup', 'manual', 'later']
+  )
+  assert.match(formatDocumentationCheck(report), /intro\.mdx:6:1 \[anchor\]/)
+  assert.match(formatDocumentationCheck(report), /3 problems/)
+})
+
+test('repeated headings, distinct case, examples and dynamic IDs do not create false duplicates', async (t) => {
+  const project = await fixture(t, {
+    'docs/intro.mdx': [
+      '## Setup',
+      '',
+      '## Setup',
+      '',
+      '<a id="manual" name="manual">Manual</a>',
+      '',
+      '<span id="Manual">Different capitalization</span>',
+      '',
+      '<span id={unknownId} />',
+      '',
+      '```mdx',
+      '<span id="setup" />',
+      '```',
+      '',
+      '[First](#setup) [Second](#setup-1) [Manual](#manual)',
+    ].join('\n'),
+  })
+  assert.deepEqual(checkDocumentation(project).diagnostics, [])
+})
+
+test('duplicate IDs inside a changelog note retain the release frontmatter offset', async (t) => {
+  const project = await fixture(
+    t,
+    {
+      'docs/intro.md': '# Intro',
+      'changelog/1.0.0.mdx':
+        '---\nversion: "1.0.0"\ndate: "2026-11-18"\ntitle: Release\n---\n## Changes\n\n<span id="changes" />',
+    },
+    [],
+    [{ name: '@lexibase/rdx-changelog', apiVersion: 1 }]
+  )
+  const report = checkDocumentation(project)
+  assert.equal(report.diagnostics.length, 1)
+  assert.equal(report.diagnostics[0].file, 'changelog/1.0.0.mdx')
+  assert.equal(report.diagnostics[0].line, 8)
+  assert.equal(report.diagnostics[0].code, 'anchor')
+})
+
 test('the check command name is reserved for the framework', async (t) => {
   const project = await fixture(t, {})
   await assert.rejects(
