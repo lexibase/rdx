@@ -148,18 +148,21 @@ test('later Steps panels are searchable without linking to hidden headings', () 
 })
 
 test('disabled tab metadata and unreachable panels do not enter search or shift heading IDs', () => {
-  const index = buildSearchIndex([
-    {
-      title: 'Guide',
-      href: '/docs/guide',
-      category: 'Docs',
-      content:
-        '## Commands\n\n:::tabs\n\n### npm {disabled}\n\n#### Hidden\n\nUnavailable command\n\n### pnpm\n\npnpm dev\n\n:::\n\n## Hidden\n\nVisible text',
-    },
-  ])
-  assert.match(index.entries[1].text, /npm pnpm pnpm dev/)
-  assert.doesNotMatch(JSON.stringify(index), /disabled|Unavailable command/)
-  assert.equal(index.entries[2].href, '/docs/guide#hidden')
+  for (const sourcePath of ['docs/guide.md', 'docs/guide.mdx']) {
+    const index = buildSearchIndex([
+      {
+        sourcePath,
+        title: 'Guide',
+        href: '/docs/guide',
+        category: 'Docs',
+        content:
+          '## Commands\n\n:::tabs\n\n### npm {disabled}\n\n#### Hidden\n\nUnavailable command\n\n### pnpm\n\npnpm dev\n\n:::\n\n## Hidden\n\nVisible text',
+      },
+    ])
+    assert.match(index.entries[1].text, /npm pnpm pnpm dev/)
+    assert.doesNotMatch(JSON.stringify(index), /disabled|Unavailable command/)
+    assert.equal(index.entries[2].href, '/docs/guide#hidden')
+  }
 })
 
 test('Markdown pages retain literal braces and index directive content and section IDs', () => {
