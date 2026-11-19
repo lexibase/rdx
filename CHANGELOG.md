@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 6.6.5 — Prepared
+
+- Report duplicate section anchors with their source locations while preserving distinct IDs for repeated headings.
+
 ## 6.6.4 — Prepared
 
 - Detect capitalization mismatches in public asset paths on every operating system and suggest the exact URL.
