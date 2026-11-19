@@ -7,6 +7,7 @@ import remarkMdx from 'remark-mdx'
 import {
   remarkDocumentationComponents,
   remarkDocumentLinks,
+  exportMarkdownBody,
 } from '../dist/mdx/index.js'
 
 function parse(source, links, { mdx = true } = {}) {
@@ -45,6 +46,65 @@ test('Steps keep their order and nested tabs in Markdown and MDX', () => {
       /Start :::steps items with ### Title/
     )
   }
+})
+
+test('disabled tab markers work identically in Markdown and MDX', () => {
+  for (const mdx of [false, true]) {
+    const tree = parse(
+      ':::tabs\n### npm {disabled}\nHidden\n### pnpm\nVisible\n:::',
+      undefined,
+      { mdx }
+    )
+    const [tabs] = nodes(tree, 'Tabs')
+    assert.equal(tabs.attributes[0].value, 'item-2')
+    const triggers = nodes(tree, 'TabsTrigger')
+    assert.equal(triggers[0].children[0].value, 'npm')
+    assert.ok(triggers[0].attributes.some(({ name }) => name === 'disabled'))
+    assert.equal(nodes(tree, 'TabsContent').length, 1)
+    assert.equal(JSON.stringify(tree).includes('Hidden'), false)
+    assert.throws(
+      () =>
+        parse(':::tabs\n### npm {disabled}\nHidden\n:::', undefined, { mdx }),
+      /at least one enabled tab/
+    )
+    for (const title of [
+      'npm \\{disabled}',
+      'npm `{disabled}`',
+      'npm{disabled}',
+      'npm &#123;disabled}',
+    ]) {
+      if (mdx && title === 'npm{disabled}') continue
+      const literal = parse(`:::tabs\n### ${title}\nVisible\n:::`, undefined, {
+        mdx,
+      })
+      assert.equal(
+        nodes(literal, 'TabsTrigger')[0].attributes.some(
+          ({ name }) => name === 'disabled'
+        ),
+        false
+      )
+    }
+  }
+})
+
+test('Markdown exports preserve disabled tab flags without exposing MDX expressions', () => {
+  const source =
+    ':::tabs\n### npm {disabled}\nUnavailable\n### pnpm\nAvailable\n\n{privateValue}\n:::\n\n{disabled}'
+  const output = exportMarkdownBody(source, {
+    sourceRoot: path.resolve('fixtures'),
+    sourcePath: path.resolve('fixtures/intro.mdx'),
+    documents: [],
+  })
+  assert.match(output, /### npm \{disabled\}/)
+  assert.equal(output.match(/\{disabled\}/g)?.length, 1)
+  assert.doesNotMatch(output, /privateValue/)
+  const tree = parse(output, undefined, { mdx: false })
+  assert.equal(nodes(tree, 'TabsContent').length, 1)
+  assert.ok(
+    nodes(tree, 'TabsTrigger')[0].attributes.some(
+      ({ name }) => name === 'disabled'
+    )
+  )
 })
 
 test('nested groups keep all panels, literal labels, and independent values', () => {

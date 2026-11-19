@@ -179,6 +179,30 @@ test('literal disabled markers produce boolean disabled tabs and select the firs
   )
 })
 
+test('plain Markdown disables unavailable tabs and shows the first enabled panel', async () => {
+  const links = {
+    sourceRoot: '/docs',
+    sourcePath: '/docs/plain.md',
+    documents: [],
+  }
+  const html = await render(
+    ':::tabs\n### npm {disabled}\nUnavailable\n### pnpm\nAvailable\n:::',
+    links
+  )
+  const buttons = [...html.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)]
+  assert.match(buttons.find((match) => match[2] === 'npm')[1], /disabled=""/)
+  assert.match(
+    buttons.find((match) => match[2] === 'pnpm')[1],
+    /aria-selected="true"/
+  )
+  assert.match(html, /Available/)
+  assert.doesNotMatch(html, /Unavailable|\{disabled\}/)
+  await assert.rejects(
+    render(':::tabs\n### npm {disabled}\nHidden\n:::', links),
+    /at least one enabled tab/
+  )
+})
+
 test('invalid component syntax gives useful errors, and JavaScript stays blocked', async () => {
   for (const [source, message] of [
     [':::tabs\nText before a title\n:::', /Start :::tabs items with ###/],

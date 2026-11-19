@@ -1,4 +1,5 @@
 import remarkDirective from 'remark-directive'
+import { hasDisabledTabMarker } from './tab-marker'
 
 type Node = {
   type: string
@@ -119,21 +120,18 @@ function container(node: Node, source: string): Node {
     if (child.type === 'heading' && child.depth === 3) {
       const children = [...(child.children ?? [])]
       const marker = children.at(-1)
-      const beforeMarker = children.at(-2)
       // Recognize only the exact literal flag in a tab heading, never arbitrary
       // MDX expressions, inline code, or escaped braces.
       const disabled =
-        node.name === 'tabs' &&
-        marker?.type === 'mdxTextExpression' &&
-        marker.value === 'disabled' &&
-        source.slice(
-          marker.position?.start.offset,
-          marker.position?.end.offset
-        ) === '{disabled}' &&
-        (!beforeMarker ||
-          (beforeMarker.type === 'text' &&
-            /\s$/.test(beforeMarker.value ?? '')))
-      if (disabled) children.pop()
+        node.name === 'tabs' && hasDisabledTabMarker(children, source)
+      if (disabled) {
+        if (marker!.type === 'text')
+          children[children.length - 1] = {
+            ...marker!,
+            value: marker!.value!.replace(/\{disabled\}[ \t]*$/, ''),
+          }
+        else children.pop()
+      }
       const title = label(children)
       if (!title)
         throw new Error(
