@@ -40,6 +40,85 @@ async function fixture(t, files, sources = [], plugins = []) {
   )
 }
 
+test('generated text endpoints are valid links without accepting nonexistent exports', async (t) => {
+  const project = await fixture(
+    t,
+    {
+      'docs/intro.md': [
+        '[Index](/docs/llms.txt)',
+        '[Markdown](/rdx-markdown/docs/intro.md)',
+        '[Release Markdown](/rdx-markdown/changelog/1.0.0.md)',
+        '[Missing](/rdx-markdown/docs/missing.md)',
+        '[Missing release](/rdx-markdown/changelog/2.0.0.md)',
+        '[Version index](/docs/1.0.0/llms.txt)',
+      ].join('\n\n'),
+      'changelog/1.0.0.md':
+        '---\nversion: "1.0.0"\ndate: "2026-11-19"\ntitle: Release\n---\nFixes.',
+    },
+    [],
+    [{ name: '@lexibase/rdx-changelog', apiVersion: 1 }]
+  )
+  const { diagnostics } = checkDocumentation(project)
+  assert.deepEqual(
+    diagnostics.map(({ line }) => line),
+    [7, 9, 11]
+  )
+})
+
+test('localized homepages and text endpoints respect configured languages, fallback and basePath', async (t) => {
+  const project = await fixture(
+    t,
+    {
+      'docs/intro.md': [
+        '[English home](/en)',
+        '[Portuguese home](https://docs.example.com/tool/pt-br)',
+        '[English index](/en/docs/llms.txt)',
+        '[Portuguese index](/pt-br/docs/llms.txt)',
+        '[English export](/rdx-markdown/en/docs/intro.md)',
+        '[Portuguese export](/rdx-markdown/pt-br/docs/intro.md)',
+        '[Fallback export](/rdx-markdown/pt-br/docs/only-en.md)',
+        '[Unknown home](/fr)',
+        '[Unknown index](/fr/docs/llms.txt)',
+        '[Unknown export](/rdx-markdown/fr/docs/intro.md)',
+        '[English search](/en/rdx-search/_)',
+        '[Portuguese search](/pt-br/rdx-search/_)',
+        '[Unknown search](/fr/rdx-search/_)',
+      ].join('\n\n'),
+      'docs/only-en.md': 'English only.',
+      'locale/ptbr/docs/intro.md': 'Introdução.',
+    },
+    [],
+    [
+      {
+        name: 'locale-fixture',
+        apiVersion: 1,
+        setup: () => ({
+          localization: {
+            locales: [
+              { code: 'en', label: 'English' },
+              { code: 'pt-BR', label: 'Português', folder: 'ptbr' },
+            ],
+          },
+        }),
+      },
+    ]
+  )
+  project.config.basePath = '/tool'
+  const { diagnostics } = checkDocumentation(project)
+  assert.deepEqual(
+    diagnostics.map(({ line }) => line),
+    [13, 15, 17, 19, 25]
+  )
+  project.config.search = false
+  assert.ok(
+    checkDocumentation(project).diagnostics.some(({ line }) => line === 21)
+  )
+  project.config.homepage.enabled = false
+  assert.ok(
+    checkDocumentation(project).diagnostics.some(({ line }) => line === 1)
+  )
+})
+
 test('page redirects resolve links and reject duplicate, occupied, and invalid aliases', async (t) => {
   const project = await fixture(t, {
     'docs/install.md':

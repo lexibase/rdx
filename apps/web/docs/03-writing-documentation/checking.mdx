@@ -215,6 +215,10 @@ and preserves the check's exit code.
   IDs and literal MDX IDs. The report points to the later occurrence.
 - Markdown images and download links that point to files in `public/`.
 - The public image file configured in `navbar.logo`.
+- Links to enabled localized homepages, search indexes, `llms.txt`, and existing
+  Markdown exports of documentation pages and changelog notes. Unknown languages
+  and missing exports are still reported. A missing translation has no Markdown
+  export; link to the primary-language export instead.
 - Reference-style links and images, and literal HTML `href` and image `src` values.
 - Frontmatter, Markdown component syntax, and MDX parsing errors.
 

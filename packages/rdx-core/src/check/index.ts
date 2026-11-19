@@ -205,7 +205,15 @@ export function checkDocumentation(
   const referencedPages = new Set<Document>()
   const routes = new Map<string, RouteTarget>()
   const coreRoutes = new Map<string, RouteTarget>()
-  const roots = new Set<string>(['/robots.txt', '/sitemap.xml'])
+  const roots = new Set<string>([
+    '/robots.txt',
+    '/sitemap.xml',
+    '/docs/llms.txt',
+  ])
+  for (const locale of project.localization?.locales ?? []) {
+    roots.add(`/${locale.path}/docs/llms.txt`)
+    if (project.config.homepage?.enabled) roots.add(`/${locale.path}`)
+  }
   const prefixes: [string, string][] = []
   const redirects = new Map(Object.entries(options.redirects ?? {}))
   const pageRedirects = new Set<string>()
@@ -375,8 +383,12 @@ export function checkDocumentation(
       pages: [],
     }
     redirectSources.push(redirectSource)
-    if (project.config.search)
+    if (project.config.search) {
       roots.add(`/rdx-search/${source.routePrefix || '_'}`)
+      for (const locale of project.localization?.locales ?? [])
+        if (source.basePath === `/${locale.path}/docs`)
+          roots.add(`/${locale.path}/rdx-search/${source.routePrefix || '_'}`)
+    }
     for (const page of pages) {
       const hrefs = options.documentRoutes?.(source, page, pages) ?? [
         documentRoute(source, page),
@@ -390,6 +402,8 @@ export function checkDocumentation(
         lineOffset: 0,
       }
       documents.push(document)
+      if (!isFallbackPage(project, source, page.sourcePath))
+        roots.add(key(`/rdx-markdown${document.href}.md`))
       for (const href of hrefs) routes.set(key(href), document)
       coreRoutes.set(key(documentRoute(source, page)), document)
       if (page === pages[0]) {
@@ -413,6 +427,7 @@ export function checkDocumentation(
   const changelogAnchors = new Set<string>()
   let changelogHasUnknownAnchors = false
   const releaseChecks = releases.flatMap((release) => {
+    roots.add(`/rdx-markdown/changelog/${release.version}.md`)
     changelogAnchors.add(`v${release.version}`)
     try {
       const parsed = parseDocument(
