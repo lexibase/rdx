@@ -245,6 +245,42 @@ test('check aggregates content errors and never prepares runtime, assets or a Ne
     await assert.rejects(access(path.join(rootDir, filename)))
 })
 
+test('check accepts generated endpoints and localized homes in normal and JSON reports', async (t) => {
+  const rootDir = await fixture(
+    t,
+    `export default {
+    metadata: { applicationName: 'Docs', metadataBase: 'https://docs.example.com' },
+    basePath: '/tool',
+    homepage: { enabled: true },
+    search: true,
+    plugins: [{ name: 'locale-fixture', apiVersion: 1, setup: () => ({
+      localization: { locales: [
+        { code: 'en', label: 'English' },
+        { code: 'pt-BR', label: 'Português', folder: 'ptbr' }
+      ] }
+    }) }]
+  }`
+  )
+  await mkdir(path.join(rootDir, 'docs'))
+  await writeFile(
+    path.join(rootDir, 'docs/intro.md'),
+    [
+      '[Home](https://docs.example.com/tool/pt-br)',
+      '[Index](/en/docs/llms.txt)',
+      '[Markdown](/rdx-markdown/en/docs/intro.md)',
+      '[Search](/pt-br/rdx-search/_)',
+    ].join('\n\n')
+  )
+  await mkdir(path.join(rootDir, 'locale/ptbr/docs'), { recursive: true })
+  const normal = run(rootDir, 'check')
+  assert.equal(normal.status, 0, normal.stderr)
+  assert.match(normal.stdout, /RDX check passed/)
+  const json = run(rootDir, 'check', '--json')
+  assert.equal(json.status, 0, json.stderr)
+  assert.deepEqual(JSON.parse(json.stdout).diagnostics, [])
+  await assert.rejects(access(path.join(rootDir, '.rdx')))
+})
+
 test('check --json writes errors, suggestions and warnings to stdout', async (t) => {
   const rootDir = await fixture(
     t,
