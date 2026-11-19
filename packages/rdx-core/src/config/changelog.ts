@@ -47,11 +47,50 @@ function readBadges(value: unknown) {
 }
 
 export function isChangelogVersion(version: unknown): version is string {
+  if (typeof version !== 'string' || version !== version.trim()) return false
+  const match =
+    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([\da-z-]+(?:\.[\da-z-]+)*))?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?$/i.exec(
+      version
+    )
   return (
-    typeof version === 'string' &&
-    /^\d+\.\d+\.\d+(?:-[\da-z.-]+)?(?:\+[\da-z.-]+)?$/i.test(version) &&
-    version === version.trim()
+    !!match &&
+    (match[4]
+      ?.split('.')
+      .every(
+        (part) => !/^\d+$/.test(part) || part === '0' || !part.startsWith('0')
+      ) ??
+      true)
   )
+}
+
+function compareIdentifier(a: string, b: string) {
+  const numericA = /^\d+$/.test(a)
+  const numericB = /^\d+$/.test(b)
+  if (numericA !== numericB) return numericA ? -1 : 1
+  // Compare numeric identifiers as strings to preserve arbitrarily long values.
+  if (numericA && a.length !== b.length) return a.length - b.length
+  return a < b ? -1 : a > b ? 1 : 0
+}
+
+/** Compare validated release versions; dates remain the primary sort key. */
+function compareVersions(a: string, b: string) {
+  const [coreA, prereleaseA] = a.split('+', 1)[0]!.split(/-(.*)/, 2)
+  const [coreB, prereleaseB] = b.split('+', 1)[0]!.split(/-(.*)/, 2)
+  const partsA = coreA!.split('.')
+  const partsB = coreB!.split('.')
+  for (let i = 0; i < 3; i++) {
+    const difference = compareIdentifier(partsA[i]!, partsB[i]!)
+    if (difference) return difference
+  }
+  if (prereleaseA === undefined || prereleaseB === undefined)
+    return prereleaseA === prereleaseB ? 0 : prereleaseA === undefined ? 1 : -1
+  const identifiersA = prereleaseA.split('.')
+  const identifiersB = prereleaseB.split('.')
+  for (let i = 0; i < Math.min(identifiersA.length, identifiersB.length); i++) {
+    const difference = compareIdentifier(identifiersA[i]!, identifiersB[i]!)
+    if (difference) return difference
+  }
+  return identifiersA.length - identifiersB.length
 }
 
 export function getChangelogDirectory(rootDir: string) {
@@ -137,7 +176,6 @@ export function readChangelog(
     })
     .sort(
       (a, b) =>
-        b.date.localeCompare(a.date) ||
-        b.version.localeCompare(a.version, 'en', { numeric: true })
+        b.date.localeCompare(a.date) || compareVersions(b.version, a.version)
     )
 }

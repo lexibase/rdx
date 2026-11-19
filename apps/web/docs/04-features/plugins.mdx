@@ -86,6 +86,12 @@ version, today's date, and a default title. Edit the title and add your release
 notes before building the site. If that version already has an entry, edit the
 existing file. You can also add `.md` or `.mdx` entries by hand.
 
+Use a semantic version such as `1.2.0` or `1.2.0-beta.1`. Numeric version
+components and numeric prerelease identifiers cannot have leading zeros.
+RDX lists release notes by date, newest first. On the same date, higher semantic
+versions come first: `1.2.0` precedes `1.2.0-rc.1`, which precedes
+`1.2.0-beta.2`. Build metadata such as `+build.42` does not change this order.
+
 ```md title="changelog/1.2.0.md"
 ---
 version: '1.2.0'
