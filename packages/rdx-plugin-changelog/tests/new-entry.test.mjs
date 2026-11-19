@@ -21,6 +21,9 @@ test('the changelog command creates a valid draft and preserves existing entries
   const run = (...args) => command.run({ rootDir, args })
 
   await assert.rejects(run('new', '../1.2.0'), /Usage: rdx changelog new/)
+  for (const version of ['01.2.0', '1.2.0-beta..1', '1.2.0-01', '1.2.0+.'])
+    await assert.rejects(run('new', version), /Provide a release version/)
+  assert.deepEqual(await readdir(rootDir), [])
   await run('new', '--help')
   assert.deepEqual(await readdir(rootDir), [])
 
