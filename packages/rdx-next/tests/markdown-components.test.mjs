@@ -3,6 +3,7 @@ import test from 'node:test'
 import { createJiti } from 'jiti'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
+import { buildSearchIndex } from '@lexibase/rdx-core/search'
 
 const jiti = createJiti(import.meta.url, {
   moduleCache: true,
@@ -20,6 +21,36 @@ async function render(source, links) {
   const { content } = await compileDocumentation(source, mdxComponents, links)
   return renderToStaticMarkup(content)
 }
+
+test('search fragments for headings with footnotes exist in the rendered page', async () => {
+  const source =
+    'Intro[^first].\n\n## Setup[^second]\n\n## Setup2\n\n## Again[^first]\n\n[^second]: Second.\n[^first]: First.'
+  for (const extension of ['md', 'mdx']) {
+    const sourcePath = `/docs/guide.${extension}`
+    const html = await render(source, {
+      sourceRoot: '/docs',
+      sourcePath,
+      documents: [],
+    })
+    const index = buildSearchIndex([
+      {
+        title: 'Guide',
+        category: 'Docs',
+        href: '/docs/guide',
+        sourcePath,
+        content: source,
+      },
+    ])
+    for (const { href } of index.entries.slice(1))
+      assert.ok(
+        html.includes(`id="${decodeURIComponent(href.split('#')[1])}"`),
+        href
+      )
+    assert.match(html, /id="setup2"/)
+    assert.match(html, /id="setup2-1"/)
+    assert.match(html, /id="again1"/)
+  }
+})
 
 test('five Markdown callouts preserve rich bodies and optional titles', async () => {
   for (const variant of ['NOTE', 'TIP', 'SUCCESS', 'WARNING', 'DANGER']) {

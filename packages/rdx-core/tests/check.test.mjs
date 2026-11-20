@@ -40,6 +40,24 @@ async function fixture(t, files, sources = [], plugins = []) {
   )
 }
 
+test('heading fragments include footnote numbers and ignore unused footnote headings', async (t) => {
+  const content =
+    '[^unused]:\n    ## Setup2\n\nIntro[^first].\n\n## Setup[^second]\n\n## Setup2\n\n## Again[^first]\n\n[^second]: Second.\n[^first]: First.\n\n[First](#setup2) [Second](#setup2-1) [Again](#again1)'
+  const project = await fixture(t, {
+    'docs/intro.md': content,
+    'docs/other.mdx': content,
+  })
+  assert.deepEqual(checkDocumentation(project).diagnostics, [])
+  fs.appendFileSync(
+    path.join(project.rootDir, 'docs/intro.md'),
+    '\n\n[Missing](#again2)'
+  )
+  const { diagnostics } = checkDocumentation(project)
+  assert.equal(diagnostics.length, 1)
+  assert.equal(diagnostics[0].code, 'anchor')
+  assert.match(diagnostics[0].message, /#again2/)
+})
+
 test('generated text endpoints are valid links without accepting nonexistent exports', async (t) => {
   const project = await fixture(
     t,

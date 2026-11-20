@@ -1,11 +1,10 @@
-import GithubSlugger from 'github-slugger'
 import remarkGfm from 'remark-gfm'
 import remarkMdx from 'remark-mdx'
 import remarkParse from 'remark-parse'
 import { unified } from 'unified'
 import type { RdxSearchIndex } from '@lexibase/rdx-types'
 import { remarkDocumentationComponents } from '../mdx/markdown-components'
-import { headingText } from '../mdx/heading-text'
+import { getHeadingIds } from '../mdx/heading-text'
 
 type Node = {
   type: string
@@ -77,13 +76,13 @@ export function buildSearchIndex(documents: SearchDocument[]): RdxSearchIndex {
   const entries: RdxSearchIndex['entries'] = []
   for (const document of documents) {
     const firstEntry = entries.length
-    const slugger = new GithubSlugger()
     const processor = document.sourcePath?.endsWith('.md')
       ? markdownParser
       : parser
     const tree = processor.runSync(processor.parse(document.content), {
       value: document.content,
     }) as Node
+    const headingIds = getHeadingIds(tree)
     let current = {
       href: document.href,
       title: document.title,
@@ -95,8 +94,8 @@ export function buildSearchIndex(documents: SearchDocument[]): RdxSearchIndex {
     function visit(node: Node, interactive = false) {
       if (node.type === 'heading') {
         const title = plain(text(node))
-        const id = slugger.slug(headingText(node))
-        if (!title) return
+        const id = headingIds.get(node)
+        if (!title || id === undefined) return
         // Hidden component panels may not be mounted in the page. Index
         // their text under the enclosing section, not an unreachable anchor.
         if (interactive) {

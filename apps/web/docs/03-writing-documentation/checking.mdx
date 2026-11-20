@@ -229,6 +229,11 @@ Repeated Markdown headings remain valid. RDX generates distinct IDs such as
 `setup` and `setup-1`. If you add a literal MDX ID, choose a value that is unique
 within that page.
 
+Footnote references in a heading contribute their displayed numbers to its ID.
+For example, `## Setup[^note]` produces `#setup1` when it contains the page's
+first footnote reference. Earlier references can change that number; use the
+heading permalink to copy the section's URL.
+
 Public asset paths must match the capitalization of each folder and filename.
 For example, use `/images/Logo.svg` when the file is named `Logo.svg`. The check
 reports a mismatch on any operating system and suggests the exact path when it

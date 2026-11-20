@@ -2,6 +2,30 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { buildSearchIndex } from '../dist/search/index.js'
 
+test('footnote numbers in headings match rendered IDs and repeated references retain their number', () => {
+  for (const sourcePath of ['docs/guide.md', 'docs/guide.mdx']) {
+    const index = buildSearchIndex([
+      {
+        title: 'Guide',
+        category: 'Docs',
+        href: '/docs/guide',
+        sourcePath,
+        content:
+          'Intro[^first].\n\n## Setup[^second]\n\n## Setup2\n\n## Again[^first]\n\n[^second]: Second.\n[^first]: First.',
+      },
+    ])
+    assert.deepEqual(
+      index.entries.map(({ href }) => href),
+      [
+        '/docs/guide',
+        '/docs/guide#setup2',
+        '/docs/guide#setup2-1',
+        '/docs/guide#again1',
+      ]
+    )
+  }
+})
+
 test('search extracts readable MDX sections and stable duplicate/Unicode heading IDs without executing JavaScript', () => {
   globalThis.__rdxSearchExecuted = false
   const content = `import something from 'private-module'
