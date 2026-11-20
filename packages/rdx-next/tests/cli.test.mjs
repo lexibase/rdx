@@ -55,7 +55,7 @@ test('i18n sync adds missing homepage phrases, preserves catalogs and validates 
     Old: 'Antigo',
     $metadata: { title: 'Atlas' },
   }
-  const before = JSON.stringify(existing)
+  const before = '\uFEFF' + JSON.stringify(existing)
   await writeFile(portuguese, before)
   await writeFile(french, '[]')
   const rejected = run(rootDir, 'i18n', 'sync')

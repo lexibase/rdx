@@ -116,7 +116,7 @@ async function sourcePhrases(rootDir, report) {
 }
 
 function parseCatalog(raw) {
-  const parsed = JSON.parse(raw)
+  const parsed = JSON.parse(raw.replace(/^\uFEFF/, ''))
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
     throw new Error('Expected a JSON object.')
   return parsed

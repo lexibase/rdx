@@ -208,6 +208,9 @@ Portuguese file looks like this after translating the first phrase:
 }
 ```
 
+Save catalogs as UTF-8. Files saved as UTF-8 with BOM are also supported when
+loading translations and running `rdx i18n sync`.
+
 The empty `Read the docs` entry falls back to the original phrase, and
 `docsHref` still points to `/pt-br/docs`.
 `rdx check` and `rdx build` warn about missing translations and keys that no

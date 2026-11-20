@@ -3,10 +3,14 @@ import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
+import { createJiti } from 'jiti'
 
-import { readHomepageTranslations } from '../bin/homepage-translations.mjs'
+import {
+  readHomepageTranslations,
+  prepareHomepageTranslations,
+} from '../bin/homepage-translations.mjs'
 
-async function analyze(testContext, source, catalog) {
+async function analyze(testContext, source, catalog, { bom = false } = {}) {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), 'rdx-homepage-'))
   testContext.after(() => rm(rootDir, { recursive: true, force: true }))
   await mkdir(path.join(rootDir, 'components'))
@@ -14,7 +18,7 @@ async function analyze(testContext, source, catalog) {
   await writeFile(path.join(rootDir, 'components/home.tsx'), source)
   await writeFile(
     path.join(rootDir, 'locale/pt-br/home.json'),
-    JSON.stringify(catalog)
+    `${bom ? '\uFEFF' : ''}${JSON.stringify(catalog)}`
   )
   const warnings = testContext.mock.method(console, 'warn', () => {})
   const result = await readHomepageTranslations(
@@ -25,6 +29,8 @@ async function analyze(testContext, source, catalog) {
     { report: true }
   )
   return {
+    rootDir,
+    catalogs: result.catalogs,
     phrases: [...result.phrases],
     warnings: warnings.mock.calls.map(({ arguments: [message] }) => message),
   }
@@ -103,4 +109,34 @@ test('extracts all supported literal quotes and ignores a shadowed t', async (t)
   )
   assert.deepEqual(result.phrases, ['Single', 'Double', 'Template'])
   assert.deepEqual(result.warnings, [])
+})
+
+test('UTF-8 BOM catalogs retain translations and metadata without false warnings', async (t) => {
+  const result = await analyze(
+    t,
+    `export default function Home({ t }) { return t('Welcome') }`,
+    { Welcome: 'Bem-vindo', $metadata: { title: 'Atlas' } },
+    { bom: true }
+  )
+  assert.deepEqual(result.phrases, ['Welcome'])
+  assert.deepEqual(result.warnings, [])
+  assert.deepEqual(result.catalogs, [
+    { file: 'locale/pt-br/home.json', locale: 'pt-br' },
+  ])
+  const runtime = path.join(result.rootDir, '.rdx')
+  await mkdir(runtime)
+  await prepareHomepageTranslations(runtime, {
+    catalogs: result.catalogs,
+    phrases: new Set(result.phrases),
+  })
+  const jiti = createJiti(import.meta.url, {
+    moduleCache: false,
+    fsCache: false,
+  })
+  const { getHomepageTranslation, getHomepageSeo } = await jiti.import(
+    path.join(runtime, 'rdx-home.ts')
+  )
+  const { messages } = getHomepageTranslation('pt-br')
+  assert.equal(messages.Welcome, 'Bem-vindo')
+  assert.deepEqual(getHomepageSeo('pt-br').metadata, { title: 'Atlas' })
 })
