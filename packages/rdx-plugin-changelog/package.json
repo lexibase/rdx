@@ -27,7 +27,7 @@
     "@lexibase/rdx-types": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^22.15.3"
+    "@types/node": "^26.6.6"
   },
   "publishConfig": {
     "access": "public"
