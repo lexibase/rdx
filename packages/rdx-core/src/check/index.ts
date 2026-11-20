@@ -1,6 +1,5 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import GithubSlugger from 'github-slugger'
 import remarkGfm from 'remark-gfm'
 import remarkMdx from 'remark-mdx'
 import remarkParse from 'remark-parse'
@@ -24,7 +23,7 @@ import {
 } from '../content/document-links'
 import { getSourceOptions } from '../project/index'
 import { getContentSources, isFallbackPage } from '../project/localization'
-import { headingText } from '../mdx/heading-text'
+import { getHeadingIds } from '../mdx/heading-text'
 import { remarkDocumentationComponents } from '../mdx/markdown-components'
 import { closestMatch } from './suggestions'
 
@@ -121,7 +120,7 @@ function parse(
   const anchors = new Set<string>()
   const references: Reference[] = []
   const definitions = new Map<string, string>()
-  const slugger = new GithubSlugger()
+  const headingIds = getHeadingIds(tree)
   let dynamicIds = false
   walk(tree, (node) => {
     if (
@@ -134,8 +133,8 @@ function parse(
   })
   walk(tree, (node) => {
     const nodeAnchors = new Set<string>()
-    if (node.type === 'heading')
-      nodeAnchors.add(slugger.slug(headingText(node)))
+    const headingId = headingIds.get(node)
+    if (headingId !== undefined) nodeAnchors.add(headingId)
     for (const attribute of node.attributes ?? []) {
       if (
         typeof attribute.value === 'string' &&
