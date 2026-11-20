@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 6.6.6 — Prepared
+
+- Fix validation of generated and localized links, semantic ordering of changelog releases, disabled tabs in Markdown and exports, UTF-8 BOM homepage catalogs, and footnote heading links in search and documentation checks.
+
 ## 6.6.5 — Prepared
 
 - Report duplicate section anchors with their source locations while preserving distinct IDs for repeated headings.
