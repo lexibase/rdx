@@ -37,14 +37,14 @@ framework selects the tested runtime and UI packages. Current package versions:
 | Package                  | Version |
 | ------------------------ | ------- |
 | @lexibase/rdx-types      | 2.8.0   |
-| @lexibase/rdx-core       | 3.6.2   |
+| @lexibase/rdx-core       | 3.6.3   |
 | @lexibase/rdx-ui         | 3.7.1   |
-| @lexibase/rdx-versioning | 1.4.7   |
-| @lexibase/rdx-i18n       | 1.0.13  |
-| @lexibase/rdx-changelog  | 0.1.5   |
-| @lexibase/rdx-next       | 6.5.2   |
-| @lexibase/rdx            | 6.6.5   |
-| @lexibase/create-rdx     | 6.6.5   |
+| @lexibase/rdx-versioning | 1.4.8   |
+| @lexibase/rdx-i18n       | 1.0.14  |
+| @lexibase/rdx-changelog  | 0.1.6   |
+| @lexibase/rdx-next       | 6.5.3   |
+| @lexibase/rdx            | 6.6.6   |
+| @lexibase/create-rdx     | 6.6.6   |
 
 <!-- rdx:packages:end -->
 

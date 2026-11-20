@@ -1,6 +1,6 @@
 {
   "name": "@lexibase/rdx-next",
-  "version": "6.5.2",
+  "version": "6.5.3",
   "description": "The Next.js runtime for RDX documentation projects.",
   "license": "MIT",
   "type": "module",
