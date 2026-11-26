@@ -1,6 +1,7 @@
 'use client'
 
 import { ExternalLink, Languages } from 'lucide-react'
+import { useMemo } from 'react'
 import { Button } from './button'
 import {
   DropdownMenu,
@@ -11,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from './dropdown-menu'
 import { getMessages } from '../lib/i18n'
+import { useRegisterMobileNavigation } from '../lib/mobile-navigation'
 
 /** Locale navigation composes the shared shadcn/ui Base UI menu. */
 export function LanguageDropdown({
@@ -24,6 +26,11 @@ export function LanguageDropdown({
   lang?: string
   contributionUrl?: string
 }) {
+  const mobile = useMemo(
+    () => ({ options, current, contributionUrl }),
+    [options, current, contributionUrl]
+  )
+  useRegisterMobileNavigation('languages', mobile)
   const selected = options.find((option) => option.code === current)
   if (!selected) return null
   const messages = getMessages(lang)

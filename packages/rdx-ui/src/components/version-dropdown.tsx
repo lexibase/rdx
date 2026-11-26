@@ -4,9 +4,10 @@ import { useMessages } from '../providers/locale-provider'
 
 import { Archive, Bird, PackageOpen } from 'lucide-react'
 import Link from 'next/link'
-import type { ReactNode } from 'react'
+import { useMemo, type ReactNode } from 'react'
 
 import { formatMessage } from '../lib/i18n'
+import { useRegisterMobileNavigation } from '../lib/mobile-navigation'
 
 import { Button } from './button'
 import {
@@ -26,12 +27,23 @@ export type VersionOption = {
   label: string
   href: string
   kind: 'live' | 'version' | 'archived'
+  /** Compact trigger text, such as "6.6.6"; defaults to `label`. */
+  shortLabel?: string
 }
 
-function VersionIcon({ kind }: { kind: VersionOption['kind'] }) {
+/** Canary is a bird, an active edition an open package, an archive a box. */
+export function VersionIcon({ kind }: { kind: VersionOption['kind'] }) {
   const Icon =
     kind === 'live' ? Bird : kind === 'archived' ? Archive : PackageOpen
-  return <Icon className="size-4" />
+  return <Icon className="size-4" aria-hidden="true" />
+}
+
+export function versionIconColor(kind: VersionOption['kind']) {
+  return kind === 'live'
+    ? 'text-blue-500'
+    : kind === 'archived'
+      ? 'text-red-500'
+      : 'text-primary'
 }
 
 /** Shared version menu for the runtime and development showcase. */
@@ -47,6 +59,11 @@ export function VersionDropdown({
   footer?: ReactNode
 }) {
   const messages = useMessages()
+  const mobile = useMemo(
+    () => ({ options, currentId, onSelect }),
+    [options, currentId, onSelect]
+  )
+  useRegisterMobileNavigation('versions', mobile)
   const current =
     options.find((option) => option.id === currentId) ?? options[0]
   if (!current) return null
@@ -91,22 +108,16 @@ export function VersionDropdown({
             data-rdx-version-trigger
             variant="outline"
             size="sm"
-            className="min-w-0 capitalize sm:min-w-[134px]"
+            className="min-w-0 capitalize"
             aria-label={formatMessage(messages.documentationVersion, {
               version: current.label,
             })}
           />
         }
       >
-        {current.label}
+        {current.shortLabel ?? current.label}
         <DropdownMenuShortcut
-          className={`ml-0 sm:ml-auto ${
-            current.kind === 'live'
-              ? 'text-blue-500'
-              : current.kind === 'archived'
-                ? 'text-red-500'
-                : 'text-primary'
-          }`}
+          className={`ml-0 ${versionIconColor(current.kind)}`}
         >
           <VersionIcon kind={current.kind} />
         </DropdownMenuShortcut>

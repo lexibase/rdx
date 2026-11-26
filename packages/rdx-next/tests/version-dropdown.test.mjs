@@ -66,14 +66,29 @@ test('an empty version list renders no dropdown', () => {
   assert.equal(composition({ options: [], currentId: 'current' }), null)
 })
 
-test('version trigger uses content width on mobile and preserves desktop spacing', () => {
+test('version trigger stays compact and keeps the edition icon', () => {
   const tree = composition({ options: [option('live')], currentId: 'live' })
   const trigger = Children.toArray(tree.props.children)[0]
   const button = trigger.props.render
   assert.match(button.props.className, /(?:^| )min-w-0(?: |$)/)
-  assert.match(button.props.className, /sm:min-w-\[134px\]/)
+  assert.doesNotMatch(button.props.className, /min-w-\[/)
   const icon = Children.toArray(trigger.props.children)[1]
   assert.match(icon.props.className, /(?:^| )ml-0(?: |$)/)
-  assert.match(icon.props.className, /sm:ml-auto/)
+  assert.match(icon.props.className, /text-blue-500/)
   assert.equal(button.props['aria-label'], 'Documentation version: live')
+})
+
+test('version trigger shows the short label while the name stays complete', () => {
+  const edition = {
+    ...option('version'),
+    label: 'Version 6.6.6',
+    shortLabel: '6.6.6',
+  }
+  const tree = composition({ options: [edition], currentId: 'version' })
+  const trigger = Children.toArray(tree.props.children)[0]
+  assert.equal(Children.toArray(trigger.props.children)[0], '6.6.6')
+  assert.equal(
+    trigger.props.render.props['aria-label'],
+    'Documentation version: Version 6.6.6'
+  )
 })

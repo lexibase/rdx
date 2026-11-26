@@ -158,6 +158,7 @@ function RdxHeader({
           edition.id === 'current'
             ? messages.current
             : formatMessage(messages.version, { version: edition.label }),
+        ...(edition.id === 'current' ? {} : { shortLabel: edition.label }),
         kind:
           edition.id === 'current'
             ? 'live'
@@ -613,7 +614,7 @@ export async function DocsPage({
         />
         <div
           data-rdx-docs-scroll
-          className="relative flex-1 min-w-0 h-full overflow-y-auto pt-12 md:pt-0 outline-none"
+          className="relative flex-1 min-w-0 h-full overflow-y-auto outline-none"
         >
           {project.config.TOC && <DocsToc key={hrefFor(currentSlug)} />}
           <DocsPageTransition
@@ -621,13 +622,13 @@ export async function DocsPage({
             nextHref={next ? hrefFor(next.slug) : undefined}
           >
             <section
-              className={`w-full min-h-full bg-background px-7 flex flex-col gap-5 pb-8 md:py-8 ${project.config.TOC ? 'xl:pr-20' : ''}`}
+              className={`w-full min-h-full bg-background px-7 flex flex-col gap-5 pt-6 pb-8 md:py-8 ${project.config.TOC ? 'xl:pr-20' : ''}`}
             >
               <main
                 id="rdx-main"
                 lang={contentLanguage}
                 tabIndex={-1}
-                className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1 outline-none"
+                className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] flex-1 outline-none"
               >
                 {fallback && (
                   <Callout

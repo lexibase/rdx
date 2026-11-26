@@ -17,6 +17,17 @@ const options = [
   { code: 'pt-BR', label: 'Português', href: '/pt-br/docs/intro' },
 ]
 
+// Run the registration hooks through React, then inspect the composition.
+function composition(props) {
+  let tree
+  function Inspect() {
+    tree = LanguageDropdown(props)
+    return null
+  }
+  renderToStaticMarkup(createElement(Inspect))
+  return tree
+}
+
 function nodes(tree, predicate) {
   const result = []
   Children.forEach(tree, (child) => {
@@ -28,7 +39,7 @@ function nodes(tree, predicate) {
 }
 
 test('language menu keeps all configured languages and omits contribution controls without a URL', () => {
-  const tree = LanguageDropdown({ options, current: 'en' })
+  const tree = composition({ options, current: 'en' })
   assert.equal(
     nodes(tree, (node) => node.type.name === 'DropdownMenuLinkItem').length,
     2
@@ -45,7 +56,7 @@ test('language menu keeps all configured languages and omits contribution contro
 })
 
 test('switching languages uses native links to load the new locale document', () => {
-  const tree = LanguageDropdown({ options, current: 'en' })
+  const tree = composition({ options, current: 'en' })
   const items = nodes(tree, (node) => node.type.name === 'DropdownMenuLinkItem')
   assert.deepEqual(
     items.map(({ props }) => ({
@@ -63,7 +74,7 @@ test('language menu adds a separated, localized external contribution link', () 
     ['en', 'Help translate', 'opens in a new tab'],
     ['pt-BR', 'Ajude a traduzir', 'abre em uma nova aba'],
   ]) {
-    const tree = LanguageDropdown({
+    const tree = composition({
       options,
       current: lang,
       lang,

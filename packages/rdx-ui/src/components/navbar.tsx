@@ -4,6 +4,7 @@ import { GitHubIcon } from './github-icon'
 
 import { Button } from './button'
 import { Logo } from './logo'
+import { MobileNavigation } from './mobile-navigation'
 import { Separator } from './separator'
 import { ModeToggle } from './mode-toggle'
 import { NavbarLink } from './navbar-link'
@@ -43,13 +44,36 @@ export function Navbar({
   showToggleMode?: boolean
 }) {
   const messages = getMessages(lang)
+  const docs = docsLink ?? (
+    <NavbarLink href={docsHref} section={docsSection}>
+      {messages.docs}
+    </NavbarLink>
+  )
+  const changelog = changelogHref && (
+    <NavbarLink href={changelogHref}>{messages.changelog}</NavbarLink>
+  )
+  const githubLink = github?.visible && github.url && (
+    <Button
+      variant="ghost"
+      size="icon"
+      title="GitHub"
+      aria-label="GitHub"
+      href={github.url}
+      target={github.url === '#' ? undefined : '_blank'}
+      rel={github.url === '#' ? undefined : 'noopener noreferrer'}
+      className="cursor-default"
+    >
+      <GitHubIcon className="h-[1.2rem] w-[1.2rem]" />
+      <span className="sr-only">GitHub</span>
+    </Button>
+  )
   return (
     <nav
       data-rdx-navbar
       aria-label={messages.mainNavigation}
-      className="w-full flex flex-wrap shrink-0 items-center justify-between px-6 py-2 border-b border-border gap-y-2"
+      className="w-full flex flex-wrap shrink-0 items-center justify-between px-4 md:px-6 py-2 border-b border-border gap-y-2"
     >
-      <div className="flex items-center gap-3 sm:gap-5">
+      <div className="flex min-w-0 items-center gap-3 md:gap-5">
         <Button
           variant="ghost"
           size={title === '' ? 'icon' : 'default'}
@@ -61,44 +85,53 @@ export function Navbar({
           {logo}
           {title !== '' && <span>{title}</span>}
         </Button>
-        {leadingLinks}
+        {leadingLinks && (
+          <div className="hidden md:flex items-center">{leadingLinks}</div>
+        )}
       </div>
       <div className="flex items-center gap-x-1 md:gap-x-2 h-4">
         {search}
-        {versionMenu}
-        {languageMenu}
-        {docsLink ?? (
-          <NavbarLink href={docsHref} section={docsSection}>
-            {messages.docs}
-          </NavbarLink>
-        )}
-        {changelogHref && (
-          <NavbarLink href={changelogHref}>{messages.changelog}</NavbarLink>
-        )}
-        {github?.visible && github.url && (
-          <>
-            <Separator orientation="vertical" />
-            <Button
-              variant="ghost"
-              size="icon"
-              title="GitHub"
-              aria-label="GitHub"
-              href={github.url}
-              target={github.url === '#' ? undefined : '_blank'}
-              rel={github.url === '#' ? undefined : 'noopener noreferrer'}
-              className="cursor-default"
-            >
-              <GitHubIcon className="h-[1.2rem] w-[1.2rem]" />
-              <span className="sr-only">GitHub</span>
-            </Button>
-          </>
-        )}
-        {showToggleMode && (
-          <>
-            <Separator orientation="vertical" />
-            <ModeToggle />
-          </>
-        )}
+        {/* Still mounted when hidden: the menus register for the drawer. */}
+        <div className="hidden md:flex items-center gap-x-2 h-4">
+          {versionMenu}
+          {languageMenu}
+          {docs}
+          {changelog}
+          {githubLink && (
+            <>
+              <Separator orientation="vertical" />
+              {githubLink}
+            </>
+          )}
+          {showToggleMode && (
+            <>
+              <Separator orientation="vertical" />
+              <ModeToggle />
+            </>
+          )}
+        </div>
+        {/* Narrow screens move menus, links and actions into one drawer. */}
+        <div className="md:hidden">
+          <MobileNavigation
+            links={
+              (leadingLinks || docs || changelog) && (
+                <>
+                  {leadingLinks}
+                  {docs}
+                  {changelog}
+                </>
+              )
+            }
+            actions={
+              (githubLink || showToggleMode) && (
+                <>
+                  {githubLink}
+                  {showToggleMode && <ModeToggle />}
+                </>
+              )
+            }
+          />
+        </div>
       </div>
     </nav>
   )

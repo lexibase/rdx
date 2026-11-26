@@ -81,12 +81,12 @@ export default async function DocPage({
         nextHref={pages[pageIndex + 1]?.href}
       >
         <section
-          className={`w-full min-h-full bg-background px-7 flex flex-col gap-5 pb-8 md:py-8 ${config.TOC ? 'xl:pr-20' : ''}`}
+          className={`w-full min-h-full bg-background px-7 flex flex-col gap-5 pt-6 pb-8 md:py-8 ${config.TOC ? 'xl:pr-20' : ''}`}
         >
           <main
             id="rdx-main"
             tabIndex={-1}
-            className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] pt-14 md:pt-0 flex-1 outline-none"
+            className="w-full flex flex-col gap-5 md:mx-auto md:max-w-[860px] flex-1 outline-none"
           >
             <header className="mb-6">
               <VersionBanner
