@@ -53,7 +53,8 @@ export function Navbar({
         <Button
           variant="ghost"
           size={title === '' ? 'icon' : 'default'}
-          aria-label={siteTitle}
+          // The visible title names the link; only a logo-only link needs a label.
+          aria-label={title === '' ? siteTitle : undefined}
           href={homeHref}
           className="cursor-default flex items-center gap-2"
         >
