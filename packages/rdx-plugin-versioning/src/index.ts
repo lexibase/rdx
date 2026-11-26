@@ -165,7 +165,8 @@ function lockedCommands(
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
         throw new Error(
-          `Another version command owns ${lock}. If it was interrupted, verify that it stopped before removing the lock.`
+          `Another version command owns ${lock}. If it was interrupted, verify that it stopped before removing the lock.`,
+          { cause: error }
         )
       }
       try {

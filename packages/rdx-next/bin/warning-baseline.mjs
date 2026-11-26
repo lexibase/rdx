@@ -10,7 +10,8 @@ export async function findNewWarnings(file, warnings) {
     baseline = JSON.parse(await readFile(file, 'utf8'))
   } catch (error) {
     throw new Error(
-      `Could not read warning baseline "${file}": ${error.message}`
+      `Could not read warning baseline "${file}": ${error.message}`,
+      { cause: error }
     )
   }
   if (
@@ -55,10 +56,12 @@ export async function writeWarningBaseline(file, warnings) {
   } catch (error) {
     if (error.code === 'EEXIST')
       throw new Error(
-        `Warning baseline "${file}" already exists. Choose a new path.`
+        `Warning baseline "${file}" already exists. Choose a new path.`,
+        { cause: error }
       )
     throw new Error(
-      `Could not write warning baseline "${file}": ${error.message}`
+      `Could not write warning baseline "${file}": ${error.message}`,
+      { cause: error }
     )
   }
 }

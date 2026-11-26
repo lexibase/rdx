@@ -50,7 +50,8 @@ async function newEntry(rootDir: string, args: string[]) {
   } catch (error) {
     if ((error as { code?: string }).code === 'EEXIST')
       throw new Error(
-        `${filename} already exists. Edit it to update the release note.`
+        `${filename} already exists. Edit it to update the release note.`,
+        { cause: error }
       )
     throw error
   }

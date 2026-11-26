@@ -127,7 +127,8 @@ export function deleteSnapshots(
     if (failures.length)
       throw new AggregateError(
         [error, ...failures],
-        failures.map((entry) => entry.message).join(' ')
+        failures.map((entry) => entry.message).join(' '),
+        { cause: error }
       )
     throw error
   }
