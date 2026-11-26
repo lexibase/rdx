@@ -142,6 +142,12 @@ test('shared server UI translates credits and version notices without changing b
     )
     assert.ok(navbar.includes(`aria-label="${messages.mainNavigation}"`))
     assert.match(navbar, /Custom navbar/)
+    // A visible title names the home link, so the label cannot contradict it.
+    assert.doesNotMatch(navbar, /aria-label="Author brand"/)
+    const logoOnlyNavbar = renderToStaticMarkup(
+      createElement(Navbar, { lang, siteTitle: 'Author brand' })
+    )
+    assert.match(logoOnlyNavbar, /aria-label="Author brand"/)
   }
 })
 
