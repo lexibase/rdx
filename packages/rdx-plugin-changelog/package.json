@@ -20,6 +20,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean --external @lexibase/rdx-core --external @lexibase/rdx-types",
     "check-types": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
     "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
@@ -27,7 +28,9 @@
     "@lexibase/rdx-types": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^22.15.3"
+    "@rdx/eslint-config": "workspace:*",
+    "@types/node": "^22.15.3",
+    "eslint": "^9.39.5"
   },
   "publishConfig": {
     "access": "public"

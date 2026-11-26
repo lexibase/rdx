@@ -52,7 +52,8 @@ export async function preparePublicAssets(projectRoot, runtimeDirectory) {
     )
   } catch (error) {
     throw new Error(
-      `Could not link .rdx/public to public/: ${error.message}. Use a filesystem that supports directory links (junctions on Windows); your public files have not been removed.`
+      `Could not link .rdx/public to public/: ${error.message}. Use a filesystem that supports directory links (junctions on Windows); your public files have not been removed.`,
+      { cause: error }
     )
   }
 }

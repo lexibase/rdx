@@ -30,7 +30,7 @@ function parseCheckArguments(args) {
       },
     }).values
   } catch (error) {
-    throw new Error(`${error.message}\n${checkUsage}`)
+    throw new Error(`${error.message}\n${checkUsage}`, { cause: error })
   }
   const limit = values['max-warnings']
   const maxWarnings = limit === undefined ? undefined : Number(limit)
@@ -201,7 +201,9 @@ export async function runRdxCli({ templateDir } = {}) {
         error.code === 'ERR_MODULE_NOT_FOUND'
           ? ' If a configured plugin cannot be resolved, install its package in this project.'
           : ''
-      throw new Error(`Could not load rdx.config.ts: ${error.message}${hint}`)
+      throw new Error(`Could not load rdx.config.ts: ${error.message}${hint}`, {
+        cause: error,
+      })
     }
 
     const project = await createRdxProject(input, {

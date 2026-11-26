@@ -277,7 +277,8 @@ async function addPlugin(rootDir, options, definition) {
   } catch (error) {
     if (error.code === 'ENOENT')
       throw new Error(
-        'Missing rdx.config.ts. Run rdx add from the documentation project root.'
+        'Missing rdx.config.ts. Run rdx add from the documentation project root.',
+        { cause: error }
       )
     throw error
   }
@@ -336,7 +337,8 @@ async function addPlugin(rootDir, options, definition) {
         )
     } catch (error) {
       throw new Error(
-        `Plugin configuration validation failed: ${error.message}. rdx.config.ts was not changed. Installed dependencies were kept; fix the error and retry.`
+        `Plugin configuration validation failed: ${error.message}. rdx.config.ts was not changed. Installed dependencies were kept; fix the error and retry.`,
+        { cause: error }
       )
     }
     if ((await readFile(filename, 'utf8')) !== original)

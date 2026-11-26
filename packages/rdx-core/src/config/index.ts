@@ -445,7 +445,8 @@ export async function createRdxProject(
       result = await plugin.setup?.({ rootDir, command, config })
     } catch (error) {
       throw new Error(
-        `[${plugin.name}] ${error instanceof Error ? error.message : String(error)}`
+        `[${plugin.name}] ${error instanceof Error ? error.message : String(error)}`,
+        { cause: error }
       )
     }
     if (result === undefined) continue

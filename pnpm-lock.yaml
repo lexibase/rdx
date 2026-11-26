@@ -318,9 +318,15 @@ importers:
         specifier: workspace:*
         version: link:../rdx-types
     devDependencies:
+      '@rdx/eslint-config':
+        specifier: workspace:*
+        version: link:../../config/eslint-config
       '@types/node':
         specifier: ^22.15.3
         version: 22.15.3
+      eslint:
+        specifier: ^9.39.5
+        version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
 
   packages/rdx-plugin-i18n:
     dependencies:
@@ -334,9 +340,15 @@ importers:
       '@lexibase/rdx-versioning':
         specifier: workspace:*
         version: link:../rdx-plugin-versioning
+      '@rdx/eslint-config':
+        specifier: workspace:*
+        version: link:../../config/eslint-config
       '@types/node':
         specifier: ^22.15.3
         version: 22.15.3
+      eslint:
+        specifier: ^9.39.5
+        version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
 
   packages/rdx-plugin-versioning:
     dependencies:
@@ -347,9 +359,15 @@ importers:
         specifier: workspace:*
         version: link:../rdx-types
     devDependencies:
+      '@rdx/eslint-config':
+        specifier: workspace:*
+        version: link:../../config/eslint-config
       '@types/node':
         specifier: ^22.15.3
         version: 22.15.3
+      eslint:
+        specifier: ^9.39.5
+        version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
 
   packages/rdx-types:
     dependencies:
