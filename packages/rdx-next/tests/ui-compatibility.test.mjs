@@ -6,7 +6,11 @@ import { createJiti } from 'jiti'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
-const jiti = createJiti(import.meta.url, { moduleCache: false, fsCache: false })
+const jiti = createJiti(import.meta.url, {
+  moduleCache: false,
+  fsCache: false,
+  jsx: { runtime: 'automatic' },
+})
 const uiRequire = createRequire(
   new URL('../../rdx-ui/package.json', import.meta.url)
 )
@@ -39,7 +43,6 @@ test('Base UI state class callbacks preserve the shared theme and consumer overr
 test('icons used by the RDX navbar, versions, theme and sidebar remain renderable', () => {
   const icons = uiRequire('lucide-react')
   for (const name of [
-    'Github',
     'Archive',
     'Bird',
     'PackageOpen',
@@ -55,4 +58,23 @@ test('icons used by the RDX navbar, versions, theme and sidebar remain renderabl
     assert.match(html, /size-5/)
     assert.match(html, /<(path|circle|rect|line|polyline|polygon|ellipse)\b/)
   }
+})
+
+test('the GitHub mark is decorative, follows the text color and accepts SVG props', async () => {
+  const { GitHubIcon } = await jiti.import(
+    '../../rdx-ui/src/components/github-icon.tsx'
+  )
+  const html = renderToStaticMarkup(
+    createElement(GitHubIcon, { className: 'size-5' })
+  )
+  assert.match(html, /^<svg\b/)
+  assert.match(html, /fill="currentColor"/)
+  assert.match(html, /aria-hidden="true"/)
+  assert.match(html, /size-5/)
+  assert.match(html, /<path\b/)
+  const labelled = renderToStaticMarkup(
+    createElement(GitHubIcon, { 'aria-hidden': false, role: 'img' })
+  )
+  assert.match(labelled, /aria-hidden="false"/)
+  assert.match(labelled, /role="img"/)
 })
