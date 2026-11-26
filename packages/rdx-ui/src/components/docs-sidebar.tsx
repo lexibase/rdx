@@ -2,64 +2,38 @@
 
 import { useMessages } from '../providers/locale-provider'
 
-import { useEffect, useRef, useState } from 'react'
-import { SidebarClose, SidebarOpen } from 'lucide-react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { useMemo } from 'react'
 import type { RdxPageHighlight } from '@lexibase/rdx-types'
+
+import { useRegisterMobileNavigation } from '../lib/mobile-navigation'
 
 import { Button } from './button'
 import { HighlightDot } from './highlight-dot'
 import { Separator } from './separator'
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from './sheet'
 
 export type SidebarCategory = {
   title: string
   links: { href: string; label: string; highlighting?: RdxPageHighlight }[]
 }
 
-export function DocsSidebar({
+/** The documentation tree shared by the wide sidebar and the mobile menu. */
+export function DocsSidebarNavigation({
   categories,
   pathname,
+  onNavigate,
 }: {
   categories: SidebarCategory[]
   pathname: string
+  onNavigate?: () => void
 }) {
   const messages = useMessages()
-  const [isOpen, setOpen] = useState(false)
-  const open = useRef(false)
-  const actions = useRef<{ close: () => void; unmount: () => void } | null>(
-    null
-  )
-  const previousPath = useRef(pathname)
-  const reducedMotion = useReducedMotion()
   const pageOrder = new Map(
     categories
       .flatMap((category) => category.links)
       .map((page, index) => [page.href, index])
   )
   const currentIndex = pageOrder.get(pathname) ?? -1
-
-  // Route changes (including browser history) must use the same closing phase
-  // as Escape and the close button, keeping the content mounted until exit ends.
-  useEffect(() => {
-    if (previousPath.current !== pathname) actions.current?.close()
-    previousPath.current = pathname
-  }, [pathname])
-  useEffect(() => {
-    const desktop = window.matchMedia('(min-width: 768px)')
-    const closeOnDesktop = () => {
-      if (desktop.matches) actions.current?.close()
-    }
-    desktop.addEventListener('change', closeOnDesktop)
-    return () => desktop.removeEventListener('change', closeOnDesktop)
-  }, [])
-  const content = (
+  return (
     <nav aria-label={messages.documentationPages}>
       {categories.map((category, index) => (
         <div
@@ -90,7 +64,7 @@ export function DocsSidebar({
                         : 'rdx-doc-forward',
                     ]
               }
-              onClick={() => actions.current?.close()}
+              onClick={onNavigate}
               aria-current={pathname === link.href ? 'page' : undefined}
               className={`h-auto min-h-8 w-full min-w-0 justify-start whitespace-normal py-1.5 text-left text-sm [overflow-wrap:anywhere] ${pathname === link.href ? 'text-accent-foreground' : 'text-primary'}`}
             >
@@ -109,75 +83,27 @@ export function DocsSidebar({
       ))}
     </nav>
   )
+}
+
+/**
+ * Wide screens show the tree beside the page. Narrow screens open the same tree
+ * from the navbar menu, which reads it from the mobile navigation registry.
+ */
+export function DocsSidebar({
+  categories,
+  pathname,
+}: {
+  categories: SidebarCategory[]
+  pathname: string
+}) {
+  const docs = useMemo(() => ({ categories, pathname }), [categories, pathname])
+  useRegisterMobileNavigation('docs', docs)
   return (
-    <Sheet
-      open={isOpen}
-      actionsRef={actions}
-      onOpenChange={(nextOpen, details) => {
-        if (!nextOpen) details.preventUnmountOnClose()
-        open.current = nextOpen
-        setOpen(nextOpen)
-      }}
+    <aside
+      data-rdx-sidebar
+      className="hidden md:block h-full w-40 lg:w-56 shrink-0 border-r border-border overflow-y-auto scrollbar-none p-4"
     >
-      <div className="md:hidden absolute top-2 left-4 z-30">
-        <SheetTrigger
-          render={<Button variant="ghost" />}
-          aria-label={messages.openSidebar}
-        >
-          <SidebarOpen className="size-4" />
-        </SheetTrigger>
-      </div>
-      <aside
-        data-rdx-sidebar
-        className="hidden md:block h-full w-40 lg:w-56 shrink-0 border-r border-border overflow-y-auto scrollbar-none p-4"
-      >
-        {content}
-      </aside>
-      <AnimatePresence>
-        {isOpen && (
-          <SheetContent
-            key="mobile-sidebar"
-            side="left"
-            showCloseButton={false}
-            portalProps={{ keepMounted: true }}
-            data-rdx-mobile-sidebar
-            className="md:hidden w-full! max-w-none! h-dvh border-0 bg-background text-foreground gap-0 p-4 overflow-y-auto scrollbar-none translate-none! opacity-100! transition-none!"
-            render={
-              <motion.div
-                initial="closed"
-                animate="open"
-                exit="closed"
-                variants={{
-                  closed: { x: reducedMotion ? 0 : '-100%' },
-                  open: { x: 0 },
-                }}
-                transition={
-                  reducedMotion
-                    ? { duration: 0 }
-                    : { type: 'spring', stiffness: 300, damping: 30 }
-                }
-                onAnimationComplete={(phase) => {
-                  if (phase === 'closed' && !open.current)
-                    actions.current?.unmount()
-                }}
-              />
-            }
-          >
-            <SheetTitle className="sr-only">
-              {messages.documentationNavigation}
-            </SheetTitle>
-            <div className="flex justify-end mb-4">
-              <SheetClose
-                render={<Button variant="ghost" />}
-                aria-label={messages.closeSidebar}
-              >
-                <SidebarClose className="size-4" />
-              </SheetClose>
-            </div>
-            {content}
-          </SheetContent>
-        )}
-      </AnimatePresence>
-    </Sheet>
+      <DocsSidebarNavigation categories={categories} pathname={pathname} />
+    </aside>
   )
 }

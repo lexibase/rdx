@@ -17,7 +17,7 @@ export default async function DocsLayout({
       <Sidebar categories={categories} />
       <div
         data-rdx-docs-scroll
-        className="relative flex-1 min-w-0 h-full overflow-y-auto pt-12 md:pt-0 outline-none"
+        className="relative flex-1 min-w-0 h-full overflow-y-auto outline-none"
       >
         {children}
       </div>

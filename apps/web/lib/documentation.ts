@@ -52,6 +52,7 @@ export function createDocumentation(
         source.id === 'current'
           ? 'Canary'
           : formatMessage(messages.version, { version: source.label }),
+      ...(source.id === 'current' ? {} : { shortLabel: source.label }),
       kind:
         source.id === 'current'
           ? ('live' as const)
