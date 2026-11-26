@@ -12,7 +12,6 @@ import {
 import type {
   RdxDocCategory,
   RdxDocFrontmatter,
-  RdxDocPage,
   RdxDocsOptions,
   RdxDocument,
 } from '@lexibase/rdx-types'
