@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { launchBrowser } from './helpers/browser.mjs'
 import { Buffer } from 'node:buffer'
 import { spawnSync } from 'node:child_process'
 import { createRequire } from 'node:module'
@@ -812,12 +813,8 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
               /RouterHomepageMarker/
             )
             await verifyVersions(router)
-            if (!process.env.RDX_PLAYWRIGHT_MODULE) return
-
-            const { chromium } = require(process.env.RDX_PLAYWRIGHT_MODULE)
-            const browser = await chromium.launch({
-              executablePath: process.env.RDX_BROWSER_EXECUTABLE,
-            })
+            const browser = await launchBrowser()
+            if (!browser) return
             try {
               const page = await browser.newPage({
                 permissions: ['clipboard-read', 'clipboard-write'],

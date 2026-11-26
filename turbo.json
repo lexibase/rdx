@@ -40,6 +40,11 @@
       "inputs": [
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/apps/web/components/Page/version-banner.tsx"
+      ],
+      "env": [
+        "RDX_PLAYWRIGHT_MODULE",
+        "RDX_BROWSER_EXECUTABLE",
+        "RDX_REQUIRE_BROWSER"
       ]
     },
     "test:runtime": {
@@ -48,6 +53,7 @@
       "env": [
         "RDX_PLAYWRIGHT_MODULE",
         "RDX_BROWSER_EXECUTABLE",
+        "RDX_REQUIRE_BROWSER",
         "RDX_EXISTING_DEV_URL",
         "RDX_THEME_SCREENSHOTS"
       ]

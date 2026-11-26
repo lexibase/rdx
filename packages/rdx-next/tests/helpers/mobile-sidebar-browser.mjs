@@ -61,10 +61,15 @@ export async function verifyMobileSidebarMotion(page, base) {
   await settled()
   const entrance = await stopTrace()
   assert.ok(
-    entrance.some((frame) => frame.x < -1 && frame.x > -frame.width),
-    'The menu must slide in from the left.'
+    entrance.some((frame) => frame.x > 1 && frame.x < frame.width),
+    'The menu must slide in from the right, beside its trigger.'
   )
   assert.ok(Math.abs((await panel.boundingBox()).width - 390) < 1)
+  // The entrance decelerates into place without overshooting the edge.
+  assert.ok(
+    entrance.every((frame) => frame.x >= -0.5),
+    'The menu must not bounce past its resting position.'
+  )
   await page.keyboard.press('Tab')
   assert.ok(
     await panel.evaluate((element) => element.contains(document.activeElement)),
@@ -75,11 +80,11 @@ export async function verifyMobileSidebarMotion(page, base) {
   await removed()
   const exit = await stopTrace()
   assert.ok(
-    exit.some((frame) => frame.x < -1 && frame.x > -frame.width),
-    'Closing must animate toward the left.'
+    exit.some((frame) => frame.x > 1 && frame.x < frame.width),
+    'Closing must animate toward the right.'
   )
   assert.ok(
-    exit.filter((frame) => frame.x < -1).every((frame) => frame.links > 0),
+    exit.filter((frame) => frame.x > 1).every((frame) => frame.links > 0),
     'Navigation must remain rendered throughout exit.'
   )
   assert.ok(
@@ -93,7 +98,7 @@ export async function verifyMobileSidebarMotion(page, base) {
   assert.ok(
     await trigger.evaluate((element) => document.activeElement === element)
   )
-  // Closing before the entry spring settles must still complete cleanup.
+  // Closing before the entrance settles must still complete cleanup.
   for (let attempt = 0; attempt < 2; attempt++) {
     await trigger.click()
     await close.evaluate((element) => element.click())
@@ -104,10 +109,8 @@ export async function verifyMobileSidebarMotion(page, base) {
   }
   await trigger.click()
   await settled()
-  await panel
-    .getByRole('link', { name: 'Getting started', exact: true })
-    .click()
-  await page.waitForURL('**/docs/init/getting-started')
+  await panel.getByRole('link', { name: 'Plain Markdown', exact: true }).click()
+  await page.waitForURL('**/docs/init/plain')
   await removed()
   await trigger.click()
   await settled()
