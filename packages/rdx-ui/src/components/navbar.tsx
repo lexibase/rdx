@@ -1,6 +1,6 @@
 import { getMessages } from '../lib/i18n'
 import type { ReactNode } from 'react'
-import { Github } from 'lucide-react'
+import { GitHubIcon } from './github-icon'
 
 import { Button } from './button'
 import { Logo } from './logo'
@@ -88,7 +88,7 @@ export function Navbar({
               rel={github.url === '#' ? undefined : 'noopener noreferrer'}
               className="cursor-default"
             >
-              <Github className="h-[1.2rem] w-[1.2rem]" />
+              <GitHubIcon className="h-[1.2rem] w-[1.2rem]" />
               <span className="sr-only">GitHub</span>
             </Button>
           </>
