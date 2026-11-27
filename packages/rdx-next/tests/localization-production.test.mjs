@@ -1081,6 +1081,20 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
                 '/minha-tool/rdx-markdown/changelog/1.0.0.md'
               )
               assert.equal(await viewMarkdown.getAttribute('target'), '_blank')
+              const origin = new URL(page.url()).origin
+              for (const [name, assistant] of [
+                ['Open in Claude', 'https://claude.ai/new'],
+                ['Open in ChatGPT', 'https://chatgpt.com/'],
+              ]) {
+                const link = page.getByRole('menuitem', { name })
+                const url = new URL(await link.getAttribute('href'))
+                assert.equal(`${url.origin}${url.pathname}`, assistant)
+                assert.equal(await link.getAttribute('target'), '_blank')
+                assert.equal(
+                  url.searchParams.get('q'),
+                  `Read ${origin}/minha-tool/rdx-markdown/changelog/1.0.0.md from the Locale Docs documentation. Every page is listed at ${origin}/minha-tool/llms.txt. Use them to answer my questions about Locale Docs.`
+                )
+              }
               await page.keyboard.press('Escape')
               const filter = page.getByRole('button', { name: /^Filter/ })
               const filterBox = await filter.boundingBox()

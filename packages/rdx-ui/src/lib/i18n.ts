@@ -88,6 +88,10 @@ const en = {
   copyThisPage: 'Copy this page',
   copyPageOptions: 'Page copy options',
   viewMarkdown: 'View Markdown',
+  openInClaude: 'Open in Claude',
+  openInChatGpt: 'Open in ChatGPT',
+  openInAssistantPrompt:
+    'Read {page} from the {project} documentation. Every page is listed at {index}. Use them to answer my questions about {project}.',
   pageCopied: 'Page Markdown copied to clipboard.',
   copyPageError:
     'Could not copy the page. Open View Markdown to copy it manually.',

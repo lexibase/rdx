@@ -1,8 +1,16 @@
 'use client'
 
-import { Check, ChevronDown, CircleAlert, Copy, FileText } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import {
+  Check,
+  ChevronDown,
+  CircleAlert,
+  Copy,
+  FileText,
+  MessageSquare,
+} from 'lucide-react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
+import { formatMessage } from '../lib/i18n'
 import { useMessages } from '../providers/locale-provider'
 import { Button } from './button'
 import { ButtonGroup } from './button-group'
@@ -13,8 +21,36 @@ import {
   DropdownMenuTrigger,
 } from './dropdown-menu'
 
-export function CopyPage({ href }: { href: string }) {
+const assistants = [
+  { label: 'openInClaude', url: 'https://claude.ai/new' },
+  { label: 'openInChatGpt', url: 'https://chatgpt.com/' },
+] as const
+
+const subscribeToNothing = () => () => {}
+
+export function CopyPage({
+  href,
+  indexHref = '/llms.txt',
+  project,
+}: {
+  href: string
+  /** The llms.txt index offered to assistants together with the page. */
+  indexHref?: string
+  /** The name assistants read in the prompt; defaults to the site's host. */
+  project?: string
+}) {
   const messages = useMessages()
+  // Assistants need absolute URLs; the origin is known only in the browser.
+  const origin = useSyncExternalStore(
+    subscribeToNothing,
+    () => window.location.origin,
+    () => ''
+  )
+  const prompt = formatMessage(messages.openInAssistantPrompt, {
+    page: `${origin}${href}`,
+    index: `${origin}${indexHref}`,
+    project: project || origin.replace(/^https?:\/\//, ''),
+  })
   const [status, setStatus] = useState<'idle' | 'copying' | 'copied' | 'error'>(
     'idle'
   )
@@ -110,6 +146,23 @@ export function CopyPage({ href }: { href: string }) {
             {messages.viewMarkdown}
             <span className="sr-only"> ({messages.opensInNewTab})</span>
           </DropdownMenuLinkItem>
+          {assistants.map(({ label, url }) => (
+            <DropdownMenuLinkItem
+              key={label}
+              render={
+                <a
+                  href={`${url}?q=${encodeURIComponent(prompt)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />
+              }
+              closeOnClick
+            >
+              <MessageSquare aria-hidden="true" />
+              {messages[label]}
+              <span className="sr-only"> ({messages.opensInNewTab})</span>
+            </DropdownMenuLinkItem>
+          ))}
         </DropdownMenuContent>
       </DropdownMenu>
       <span role="status" className="sr-only">
