@@ -146,17 +146,26 @@ test('locale views match normalized routes, preserve primary order and use trans
   assert.throws(() => getLocalizedProject(project, 'ptbr'), /Unknown/)
 })
 
-test('an existing translated category label still applies', async (t) => {
+test('a category translated in _labels.json applies to that language only', async (t) => {
   const { rootDir, config, write } = fixture(t)
+  // _category.json is no longer read, even inside a translation.
   write(
     'locale/ptbr/docs/09-guides/_category.json',
-    JSON.stringify({ title: 'Guias' })
+    JSON.stringify({ title: 'Ignored' })
+  )
+  write(
+    'locale/ptbr/_labels.json',
+    JSON.stringify({ categories: { Guides: 'Guias' } })
   )
   const project = await createRdxProject(config, { rootDir })
   const pt = getLocalizedProject(project, 'pt-br')
   assert.equal(
     resolveDocsRoute(pt, ['guides', 'intro']).categories[0].title,
     'Guias'
+  )
+  assert.equal(
+    resolveDocsRoute(project, ['guides', 'intro']).categories[0].title,
+    'Guides'
   )
 })
 

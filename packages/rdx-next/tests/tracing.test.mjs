@@ -22,7 +22,7 @@ async function file(root, name, text = '') {
   await writeFile(filename, text)
 }
 
-test('tracing includes only configured Markdown, MDX, category metadata and declared plugin runtime files', async (t) => {
+test('tracing includes only configured Markdown, MDX and declared runtime files, not retired category files', async (t) => {
   const rootDir = await fixture(t)
   await file(
     rootDir,
@@ -37,11 +37,11 @@ test('tracing includes only configured Markdown, MDX, category metadata and decl
   )
   const expected = [
     'docs/guides [live]/intro.mdx',
-    'docs/guides [live]/_category.json',
     'snapshots/v1/guide.mdx',
     'snapshots/v1/plain.md',
     'docs/guides [live]/plain.md',
     'metadata/releases.data',
+    '_labels.json',
   ]
   for (const name of expected)
     await file(rootDir, name, name.endsWith('.json') ? '{}' : '')
@@ -51,6 +51,7 @@ test('tracing includes only configured Markdown, MDX, category metadata and decl
     'home.tsx',
     'content/ignored.mdx',
     'docs/guides [live]/private.txt',
+    'docs/guides [live]/_category.json',
     'public/images/logo.svg',
     'versions.json',
   ])
@@ -65,6 +66,7 @@ test('tracing includes only configured Markdown, MDX, category metadata and decl
   for (const name of expected) assert.ok(matches(`../${name}`), name)
   assert.equal(matches('../docs/guides l/intro.mdx'), false)
   assert.equal(matches('../docs/guides [live]/private.txt'), false)
+  assert.equal(matches('../docs/guides [live]/_category.json'), false)
   assert.equal(matches('../content/ignored.mdx'), false)
   assert.equal(matches('../versions.json'), false)
   assert.equal(matches('../.env.local'), false)

@@ -71,8 +71,8 @@ production. No asset copies are cached and original files are never removed.
 Restart/redeploy production after adding/removing assets. Documentation versions
 share this directory; snapshots do not copy its contents.
 
-Production builds trace only configured documentation (`.mdx` and
-`_category.json`) and runtime files declared by configured plugins. The versioning
+Production builds trace only configured documentation (`.md` and `.mdx`),
+language catalogs (`_labels.json`) and runtime files declared by configured plugins. The versioning
 plugin declares its manifest, including a custom `versionsFile`; current, active
 and archived content sources are included. Live documentation always uses `docs/`;
 custom plugin snapshot paths remain supported without copying the whole project
