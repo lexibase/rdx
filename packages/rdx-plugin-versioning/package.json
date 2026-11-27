@@ -39,6 +39,6 @@
   "devDependencies": {
     "@rdx/eslint-config": "workspace:*",
     "@types/node": "^22.15.3",
-    "eslint": "^9.39.5"
+    "eslint": "^10.15.0"
   }
 }
