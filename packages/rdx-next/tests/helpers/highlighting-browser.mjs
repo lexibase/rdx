@@ -19,7 +19,7 @@ export async function verifyHighlighting(page, base, setStyles) {
       const color = (selector, property = 'color') =>
         getComputedStyle(document.querySelector(selector))[property]
       return {
-        link: color('#rdx-main a'),
+        link: color('#rdx-main p a'),
         selected: color('[data-rdx-sidebar] [aria-current="page"]'),
         tab: color('[role="tab"][aria-selected="true"]'),
         ring: getComputedStyle(document.documentElement)
@@ -64,7 +64,7 @@ export async function verifyHighlighting(page, base, setStyles) {
     await page.waitForFunction(
       (expected) =>
         [
-          '#rdx-main a',
+          '#rdx-main p a',
           '[data-rdx-sidebar] [aria-current="page"]',
           '[role="tab"][aria-selected="true"]',
         ].every(
@@ -87,7 +87,7 @@ export async function verifyHighlighting(page, base, setStyles) {
     await theme(dark)
     await page.waitForFunction(
       () =>
-        getComputedStyle(document.querySelector('#rdx-main a')).color ===
+        getComputedStyle(document.querySelector('#rdx-main p a')).color ===
         'rgb(8, 145, 178)'
     )
   }

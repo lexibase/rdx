@@ -1,0 +1,62 @@
+---
+title: Tabs
+---
+
+## Choose your package manager
+
+<Tabs defaultValue="pnpm">
+<TabsList aria-label="Package manager">
+<TabsTrigger value="npm">npm</TabsTrigger>
+<TabsTrigger value="pnpm">pnpm</TabsTrigger>
+<TabsTrigger value="yarn">yarn</TabsTrigger>
+</TabsList>
+<TabsContent value="npm">
+
+Install dependencies with npm:
+
+```bash
+npm install
+```
+
+</TabsContent>
+<TabsContent value="pnpm">
+
+Install dependencies with pnpm:
+
+```bash
+pnpm install
+```
+
+</TabsContent>
+<TabsContent value="yarn">
+
+Install dependencies with yarn:
+
+```bash
+yarn install
+```
+
+</TabsContent>
+</Tabs>
+
+## Choose an environment
+
+<Tabs defaultValue="development">
+<TabsList aria-label="Environment">
+<TabsTrigger value="development">Development</TabsTrigger>
+<TabsTrigger value="production">Production</TabsTrigger>
+<TabsTrigger value="preview" disabled>Preview (soon)</TabsTrigger>
+</TabsList>
+<TabsContent value="development">
+
+> [!TIP] Live updates
+> Keep the development server running while editing.
+
+</TabsContent>
+<TabsContent value="production">
+
+1. Run pnpm build.
+2. Run pnpm start.
+
+</TabsContent>
+</Tabs>

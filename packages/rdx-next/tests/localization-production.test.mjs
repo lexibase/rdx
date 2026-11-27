@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { launchBrowser } from './helpers/browser.mjs'
 import { Buffer } from 'node:buffer'
 import { spawnSync } from 'node:child_process'
 import { createRequire } from 'node:module'
@@ -812,12 +813,8 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
               /RouterHomepageMarker/
             )
             await verifyVersions(router)
-            if (!process.env.RDX_PLAYWRIGHT_MODULE) return
-
-            const { chromium } = require(process.env.RDX_PLAYWRIGHT_MODULE)
-            const browser = await chromium.launch({
-              executablePath: process.env.RDX_BROWSER_EXECUTABLE,
-            })
+            const browser = await launchBrowser()
+            if (!browser) return
             try {
               const page = await browser.newPage({
                 permissions: ['clipboard-read', 'clipboard-write'],
@@ -990,7 +987,9 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
                 await page.evaluate(() => navigator.clipboard.readText()),
                 `${changelog}#v1.0.0`
               )
-              const animatedScroll = changelogScroll.evaluate((main) => {
+              // RDX requests a smooth scroll; whether the browser animates it
+              // depends on the environment, so check the request and arrival.
+              const requestedScroll = changelogScroll.evaluate((main) => {
                 const start = main.scrollTop
                 const target = document.getElementById('v2.0.0')
                 const margin = Number.parseFloat(
@@ -1001,32 +1000,31 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
                   target.getBoundingClientRect().top -
                   main.getBoundingClientRect().top -
                   margin
+                const scrollTo = main.scrollTo.bind(main)
                 return new Promise((resolve) => {
-                  let intermediate = false
-                  function track() {
-                    if (
-                      main.scrollTop < start - 2 &&
-                      main.scrollTop > destination + 2
-                    )
-                      intermediate = true
-                    if (main.scrollTop <= destination + 1) {
-                      clearTimeout(timer)
-                      main.removeEventListener('scroll', track)
-                      resolve(intermediate)
-                    }
+                  let behavior
+                  main.scrollTo = (options) => {
+                    behavior = options?.behavior
+                    scrollTo(options)
                   }
-                  const timer = setTimeout(() => {
+                  function finish(arrived) {
+                    clearTimeout(timer)
                     main.removeEventListener('scroll', track)
-                    resolve(false)
-                  }, 4000)
+                    delete main.scrollTo
+                    resolve({ behavior, arrived })
+                  }
+                  function track() {
+                    if (main.scrollTop <= destination + 1) finish(true)
+                  }
+                  const timer = setTimeout(() => finish(false), 4000)
                   main.addEventListener('scroll', track)
                 })
               })
               await versions.getByRole('link', { name: 'v2.0.0' }).click()
-              assert.equal(
-                await animatedScroll,
-                true,
-                'release navigation crosses intermediate scroll positions'
+              assert.deepEqual(
+                await requestedScroll,
+                { behavior: 'smooth', arrived: true },
+                'release navigation requests a smooth scroll to the release'
               )
               await page.waitForURL(`${changelog}#v2.0.0`)
               await activeVersion.filter({ hasText: 'v2.0.0' }).waitFor()

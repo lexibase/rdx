@@ -25,6 +25,8 @@ import { verifyHighlighting } from './helpers/highlighting-browser.mjs'
 import { verifyKeyboardShortcuts } from './helpers/keyboard-browser.mjs'
 import { verifySkipLink } from './helpers/skip-link-browser.mjs'
 import { verifySidebarReflow } from './helpers/sidebar-reflow-browser.mjs'
+import { verifyPageWidth } from './helpers/page-width-browser.mjs'
+import { launchBrowser } from './helpers/browser.mjs'
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url))
 const require = createRequire(path.join(packageRoot, 'package.json'))
@@ -119,7 +121,13 @@ test(
       running?.close()
       // Unlink junctions before removing the disposable fixture.
       for (const destination of links) await rm(destination, { force: true })
-      await rm(rootDir, { recursive: true, force: true })
+      // Windows may hold files briefly after the server process exits.
+      await rm(rootDir, {
+        recursive: true,
+        force: true,
+        maxRetries: 10,
+        retryDelay: 300,
+      })
     })
     const links = []
     async function link(name, target) {
@@ -233,36 +241,41 @@ test(
       '---\ntitle: Target\n---\n## Configuration\n\nA linked page.\n\n## Configuration\n\nDuplicate heading.\n'
     )
     await writeFile(
-      path.join(rootDir, 'docs/init/quotes.mdx'),
+      path.join(rootDir, 'docs/init/quotes.md'),
       (
         await readFile(
           new URL(
-            '../../create-rdx/templates/default/docs/examples/markdown.mdx',
+            '../../create-rdx/templates/default/docs/02-examples/markdown.md',
             import.meta.url
           ),
           'utf8'
         )
-      ).replace('link_position: 1', 'link_position: 10')
+      )
+        .replace('order: 1', 'order: 10')
+        // The template links to its own first category; this fixture uses init.
+        .replace('/docs/getting-started/intro', '/docs/init/intro')
     )
     await writeFile(
       path.join(rootDir, 'docs/init/tabs.mdx'),
-      await readFile(
-        new URL(
-          '../../create-rdx/templates/default/docs/examples/tabs.mdx',
-          import.meta.url
-        ),
-        'utf8'
-      )
+      await readFile(new URL('./fixtures/tabs.mdx', import.meta.url), 'utf8')
     )
     await writeFile(
       path.join(rootDir, 'docs/init/accordion.mdx'),
-      await readFile(
-        new URL(
-          '../../create-rdx/templates/default/docs/examples/accordion.mdx',
-          import.meta.url
-        ),
-        'utf8'
-      )
+      (
+        await readFile(
+          new URL(
+            '../../create-rdx/templates/default/docs/02-examples/accordion.mdx',
+            import.meta.url
+          ),
+          'utf8'
+        )
+      ).replace(
+        // A link inside an open answer exercises keyboard focus order.
+        'and each file becomes a page.',
+        'and each file becomes a page. Read the [introduction](./intro.mdx).'
+      ) +
+        // A second group checks that opening one item closes the previous one.
+        '\n\n:::accordion\n\n### Build for production\n\nRun the production build.\n\n### Check the production site\n\nOpen the built site.\n\n:::\n'
     )
     const copySample =
       '  const message = \'<tag> & "RDX"\';\n\tconsole.log(message)\n'
@@ -276,7 +289,7 @@ test(
       path.join(rootDir, 'docs/init/components.mdx'),
       (await readFile(
         new URL(
-          '../../create-rdx/templates/default/docs/examples/callouts.mdx',
+          '../../create-rdx/templates/default/docs/02-examples/callouts.mdx',
           import.meta.url
         ),
         'utf8'
@@ -568,14 +581,9 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
       '1.0.0'
     )
 
-    // Optional browser QA uses an existing Playwright installation and browser,
-    // without downloading browsers or adding a runtime dependency.
-    if (process.env.RDX_PLAYWRIGHT_MODULE) {
-      const { chromium } = require(process.env.RDX_PLAYWRIGHT_MODULE)
-      const browser = await chromium.launch({
-        headless: true,
-        executablePath: process.env.RDX_BROWSER_EXECUTABLE,
-      })
+    // Browser QA runs on Playwright's Chromium; see helpers/browser.mjs.
+    const browser = await launchBrowser()
+    if (browser) {
       try {
         const page = await browser.newPage({
           viewport: { width: 1872, height: 955 },
@@ -767,6 +775,8 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         await page.mouse.move(700, 100)
         await tocTrigger.hover()
         await tocNav.waitFor()
+        // RDX enables smooth scrolling and must land on the section; whether
+        // Chromium animates it varies by platform, so frames are not sampled.
         const tocScroller = page.locator('[data-rdx-docs-scroll]').first()
         assert.equal(
           await tocScroller.evaluate(
@@ -774,16 +784,6 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
           ),
           'smooth'
         )
-        await tocScroller.evaluate((element) => {
-          window.__rdxTocScrollSamples = [element.scrollTop]
-          window.__rdxTocSampling = true
-          function sample() {
-            if (!window.__rdxTocSampling) return
-            window.__rdxTocScrollSamples.push(element.scrollTop)
-            requestAnimationFrame(sample)
-          }
-          requestAnimationFrame(sample)
-        })
         await tocNav
           .getByRole('link', { name: 'Last section', exact: true })
           .click()
@@ -811,21 +811,6 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         assert.equal(
           await tocNav.locator('[aria-current="location"]').textContent(),
           'Last section'
-        )
-        const scrollSamples = await page.evaluate(() => {
-          window.__rdxTocSampling = false
-          return window.__rdxTocScrollSamples
-        })
-        const scrollStart = scrollSamples[0]
-        const scrollEnd = scrollSamples.at(-1)
-        assert.ok(
-          new Set(
-            scrollSamples.filter(
-              (position) =>
-                position > scrollStart + 2 && position < scrollEnd - 2
-            )
-          ).size > 3,
-          'TOC navigation must animate through intermediate scroll positions'
         )
         await page.emulateMedia({ reducedMotion: 'reduce' })
         assert.equal(
@@ -1093,7 +1078,7 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
           await question.evaluate((element) => element.parentElement.tagName),
           'H3'
         )
-        assert.match(await answer.innerText(), /Each folder becomes a category/)
+        assert.match(await answer.innerText(), /folder becomes a category/)
         await page.keyboard.press('Tab')
         assert.equal(
           await answer
@@ -1129,22 +1114,16 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         assert.equal(opening.heights[0], '0px')
         assert.ok(Number.parseFloat(opening.heights.at(-1)) > 0)
         assert.equal(await question.getAttribute('aria-expanded'), 'false')
-        assert.equal(
-          await accordion
-            .getByRole('button', { name: 'More examples (soon)' })
-            .isDisabled(),
-          true
-        )
-        await previewPanel.getByRole('button', { name: 'Copy code' }).click()
+        // Package manager commands are plain tab text, copied by the tab action.
+        await previewPanel
+          .getByRole('button', { name: 'Copy active tab' })
+          .click()
         await page.waitForFunction(async () =>
           (await navigator.clipboard.readText()).includes('pnpm dev')
         )
         assert.equal(
-          (await page.evaluate(() => navigator.clipboard.readText())).replace(
-            /\r\n/g,
-            '\n'
-          ),
-          'pnpm dev\n'
+          (await page.evaluate(() => navigator.clipboard.readText())).trim(),
+          'pnpm dev'
         )
         assert.equal(
           await previewPanel
@@ -1667,7 +1646,22 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         await rejected.close()
         await page.goto(`${running.base}/docs/init/components`)
         await page.getByRole('note', { name: 'Before updating' }).waitFor()
-        assert.equal(await page.locator('[data-rdx-callout]').count(), 6)
+        // Every authored callout renders; examples inside code fences do not.
+        const authoredCallouts = (
+          await readFile(
+            new URL(
+              '../../create-rdx/templates/default/docs/02-examples/callouts.mdx',
+              import.meta.url
+            ),
+            'utf8'
+          )
+        )
+          .replace(/^```[^\n]*\n[\s\S]*?^```/gm, '')
+          .match(/^> \[!/gm).length
+        assert.equal(
+          await page.locator('[data-rdx-callout]').count(),
+          authoredCallouts
+        )
         if (process.env.RDX_THEME_SCREENSHOTS) {
           await mkdir(process.env.RDX_THEME_SCREENSHOTS, { recursive: true })
           for (const theme of ['dark', 'light']) {
@@ -1821,12 +1815,32 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         await imageDialog
           .getByAltText('Public asset')
           .evaluate((img) => img.decode())
+        // Readers press Tab after the dialog has opened, not mid-animation.
+        await imageDialog.evaluate((node) =>
+          Promise.all(
+            node.getAnimations({ subtree: true }).map((item) => item.finished)
+          )
+        )
         await imageDialog.getByRole('button', { name: 'Close image' }).focus()
         await page.keyboard.press('Tab')
+        // Base UI focus guards receive Tab at the edges and move focus back
+        // inside the dialog; wait for that hand-off rather than the guard.
+        const trapped = await imageDialog.evaluate(
+          (node) =>
+            new Promise((resolve) => {
+              const deadline = performance.now() + 2000
+              ;(function check() {
+                if (node.contains(document.activeElement)) resolve(true)
+                else if (performance.now() > deadline) resolve(false)
+                else requestAnimationFrame(check)
+              })()
+            })
+        )
         assert.ok(
-          await imageDialog.evaluate((node) =>
-            node.contains(document.activeElement)
-          )
+          trapped,
+          `Focus left the image dialog: ${await page.evaluate(
+            () => document.activeElement?.outerHTML.slice(0, 160) ?? 'none'
+          )}`
         )
         await page.keyboard.press('Escape')
         await imageDialog.waitFor({ state: 'hidden' })
@@ -1879,6 +1893,12 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         await verifyKeyboardShortcuts(page, running.base)
         await verifySkipLink(page, running.base)
         await verifySidebarReflow(page, running.base)
+        await verifyPageWidth(page, running.base, [
+          '/',
+          '/docs/init/intro',
+          '/docs/init/components',
+          '/docs/init/code',
+        ])
         assert.deepEqual(errors, [])
       } finally {
         await browser.close()
@@ -1903,14 +1923,10 @@ export default { metadata: { applicationName: 'Custom site' }, homepage: { enabl
     running = await server(rootDir, 'dev')
     const custom = await (await fetch(running.base)).text()
     assert.match(custom, /Project owned homepage/)
-    if (process.env.RDX_PLAYWRIGHT_MODULE) {
-      const { chromium } = require(process.env.RDX_PLAYWRIGHT_MODULE)
-      const browser = await chromium.launch({
-        headless: true,
-        executablePath: process.env.RDX_BROWSER_EXECUTABLE,
-      })
+    const homepageBrowser = await launchBrowser()
+    if (homepageBrowser) {
       try {
-        const page = await browser.newPage()
+        const page = await homepageBrowser.newPage()
         await page.goto(`${running.base}/docs/init/toc`)
         await page
           .getByRole('heading', { name: 'Last section', exact: true })
@@ -2005,7 +2021,7 @@ export default { metadata: { applicationName: 'Custom site' }, homepage: { enabl
           .waitFor({ state: 'hidden' })
         assert.deepEqual(errors, [])
       } finally {
-        await browser.close()
+        await homepageBrowser.close()
       }
     }
   }

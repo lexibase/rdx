@@ -17,6 +17,8 @@ env:
   NEXT_TELEMETRY_DISABLED: '1'
   TURBO_TELEMETRY_DISABLED: '1'
   HUSKY: '0'
+  # Browser checks must run in CI; a missing browser fails instead of skipping.
+  RDX_REQUIRE_BROWSER: '1'
 
 jobs:
   validate:
@@ -54,6 +56,15 @@ jobs:
       - name: Install locked workspace dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install Chromium for browser checks
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            pnpm --filter @lexibase/rdx-next exec playwright install --with-deps chromium
+          else
+            pnpm --filter @lexibase/rdx-next exec playwright install chromium
+          fi
+
       # pnpm's cache stores dependencies; these caches reuse validated task
       # outputs and Next compiler work. Turbo still checks each task's inputs.
       - name: Restore workspace build cache
@@ -69,6 +80,9 @@ jobs:
 
       - name: Lint, typecheck, build and unit tests
         run: pnpm check
+
+      - name: Browser checks for a generated site
+        run: pnpm --filter @lexibase/rdx-next test:runtime
 
       - name: Pack and validate standalone, monorepo and multilingual installations
         run: pnpm test:release --install --i18n
