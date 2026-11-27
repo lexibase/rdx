@@ -6,12 +6,13 @@ import {
   CircleAlert,
   Copy,
   FileText,
-  MessageSquare,
+  Sparkles,
 } from 'lucide-react'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { formatMessage } from '../lib/i18n'
 import { useMessages } from '../providers/locale-provider'
+import { OpenAIIcon } from './openai-icon'
 import { Button } from './button'
 import { ButtonGroup } from './button-group'
 import {
@@ -22,8 +23,9 @@ import {
 } from './dropdown-menu'
 
 const assistants = [
-  { label: 'openInClaude', url: 'https://claude.ai/new' },
-  { label: 'openInChatGpt', url: 'https://chatgpt.com/' },
+  // Anthropic requires prior approval to use the Claude logo, so Claude gets a generic icon.
+  { label: 'openInClaude', url: 'https://claude.ai/new', Icon: Sparkles },
+  { label: 'openInChatGpt', url: 'https://chatgpt.com/', Icon: OpenAIIcon },
 ] as const
 
 const subscribeToNothing = () => () => {}
@@ -146,7 +148,7 @@ export function CopyPage({
             {messages.viewMarkdown}
             <span className="sr-only"> ({messages.opensInNewTab})</span>
           </DropdownMenuLinkItem>
-          {assistants.map(({ label, url }) => (
+          {assistants.map(({ label, url, Icon: AssistantIcon }) => (
             <DropdownMenuLinkItem
               key={label}
               render={
@@ -158,7 +160,7 @@ export function CopyPage({
               }
               closeOnClick
             >
-              <MessageSquare aria-hidden="true" />
+              <AssistantIcon aria-hidden="true" />
               {messages[label]}
               <span className="sr-only"> ({messages.opensInNewTab})</span>
             </DropdownMenuLinkItem>
