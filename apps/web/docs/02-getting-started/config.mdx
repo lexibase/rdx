@@ -91,20 +91,22 @@ export default defineConfig({
 
 Replace the GitHub action's `#` placeholder with your own repository URL.
 
-`lang` sets the HTML language and translates built-in interface labels:
+`lang` sets the documentation's primary language, used for the HTML language
+and the interface:
 
 ```ts
-lang: 'pt-BR',
+lang: 'es-ES',
 ```
 
-Use `en` for English or `pt-BR` for Brazilian Portuguese. Portuguese locale
-variants, including `pt`, use Brazilian Portuguese labels. Other languages keep
-their configured HTML language and use English interface labels.
+RDX ships its interface text in English only. For any other language, run
+`rdx i18n sync` to create `_labels.json` at the project root, then translate the
+interface text there: search, the table of contents, copy buttons, navigation,
+version notices, and footer credits. The same file can rename sidebar
+categories. Empty entries keep the English text. See
+[Translate the interface and categories](../04-features/languages.mdx#translate-the-interface-and-categories).
 
-This includes search, the table of contents, copy buttons, navigation, version
-notices, and footer credits. Your MDX content, page titles, category names, and
-custom component text remain as written. Rebuild and redeploy after changing
-`lang` in production.
+Your MDX content, page titles, and custom component text remain as written.
+Rebuild and redeploy after changing `lang` or `_labels.json` in production.
 
 ## SEO and social previews
 

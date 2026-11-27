@@ -1,6 +1,7 @@
 import type { ComponentType, ReactNode } from 'react'
 
 import {
+  createRdxProject as createCoreProject,
   getDocument,
   getDocsIndex,
   getDocsPaths,
@@ -48,7 +49,12 @@ import {
 import { CopyPage } from '@lexibase/rdx-ui/components/copy-page'
 import { BrandLogo } from '@lexibase/rdx-ui/components/brand-logo'
 import { getMdxComponents } from '@lexibase/rdx-ui/components/mdx-components'
-import { getMessages, formatMessage } from '@lexibase/rdx-ui/lib/i18n'
+import {
+  formatMessage,
+  getInterfaceLabels,
+  getMessages,
+  registerInterfaceLabels,
+} from '@lexibase/rdx-ui/lib/i18n'
 import { LocaleProvider } from '@lexibase/rdx-ui/providers/locale-provider'
 import { Navbar } from '@lexibase/rdx-ui/components/navbar'
 import { NotFound } from '@lexibase/rdx-ui/components/not-found'
@@ -66,11 +72,26 @@ import { getDocumentLastUpdated } from './document-date'
 
 export { getDocumentLastUpdated } from './document-date'
 
-export {
-  createRdxProject,
-  getProjectDocsPaths,
-  getLocalizedProject,
-} from '@lexibase/rdx-core'
+export { getProjectDocsPaths, getLocalizedProject } from '@lexibase/rdx-core'
+
+/**
+ * Load the project and make each language's `_labels.json` interface text
+ * available to server components before any page renders.
+ */
+export async function createRdxProject(
+  ...args: Parameters<typeof createCoreProject>
+) {
+  const project = await createCoreProject(...args)
+  registerInterfaceLabels(project.config.lang, project.labels?.interface)
+  for (const locale of project.localization?.locales ?? []) {
+    if (locale.code === project.localization!.defaultLocale) continue
+    registerInterfaceLabels(
+      locale.code,
+      getLocalizedProject(project, locale.path).labels?.interface
+    )
+  }
+  return project
+}
 export { getSearchResponse, getSearchSources } from './search'
 export { getChangelogFeedResponse } from './changelog-feed'
 export { getSourceRobots, getRdxRobots, getRdxSitemap } from './indexing'
@@ -109,7 +130,10 @@ export function RdxLayout({
           attribute="class"
           defaultTheme={config.theme?.defaultTheme ?? 'system'}
         >
-          <LocaleProvider lang={config.lang}>
+          <LocaleProvider
+            lang={config.lang}
+            labels={getInterfaceLabels(config.lang)}
+          >
             <SkipLink lang={config.lang} />
             <div className="flex flex-col h-dvh">{children}</div>
           </LocaleProvider>

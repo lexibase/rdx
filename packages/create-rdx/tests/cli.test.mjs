@@ -36,10 +36,16 @@ function run(root, args, env = {}) {
 test('argument parsing rejects unknown options and multiple names', () => {
   assert.deepEqual(parseArguments(['--skip-install', 'my-docs']), {
     projectName: 'my-docs',
+    lang: undefined,
     skipInstall: true,
     help: false,
     version: false,
   })
+  // Language tags are canonicalized; invalid tags fail before creating files.
+  assert.equal(parseArguments(['docs', '--lang', 'pt-br']).lang, 'pt-BR')
+  assert.equal(parseArguments(['--lang=ES-es', 'docs']).lang, 'es-ES')
+  assert.throws(() => parseArguments(['--lang']), /language tag/)
+  assert.throws(() => parseArguments(['--lang', 'not a tag']), /not a valid/)
   assert.equal(parseArguments(['-h']).help, true)
   assert.equal(parseArguments(['-v']).version, true)
   assert.throws(() => parseArguments(['--skip-instal']), /Unknown option/)

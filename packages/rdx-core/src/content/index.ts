@@ -3,6 +3,7 @@ import path from 'node:path'
 
 import { parseStaticDocument } from './static-source'
 import { readRedirectFrom } from './page-redirects'
+import { translateLabel } from '../config/labels'
 import {
   DEFAULT_POSITION,
   documentExtension,
@@ -37,33 +38,6 @@ function stringValue(value: unknown, fallback: string) {
 
 function numberValue(value: unknown, fallback = DEFAULT_POSITION) {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback
-}
-
-function readCategoryMeta(
-  categoryPath: string,
-  fallbackTitle: string,
-  position = DEFAULT_POSITION
-) {
-  const metaPath = path.join(categoryPath, '_category.json')
-  if (!fs.existsSync(/* turbopackIgnore: true */ metaPath)) {
-    return { title: fallbackTitle, position }
-  }
-
-  try {
-    const parsed: unknown = JSON.parse(
-      fs.readFileSync(/* turbopackIgnore: true */ metaPath, 'utf8')
-    )
-    if (!isRecord(parsed)) {
-      return { title: fallbackTitle, position }
-    }
-
-    return {
-      title: stringValue(parsed.title, fallbackTitle),
-      position: numberValue(parsed.sidebar_position, position),
-    }
-  } catch {
-    return { title: fallbackTitle, position }
-  }
 }
 
 function findDocumentFiles(directory: string): string[] {
@@ -117,11 +91,26 @@ function isSafeSlug(slug: string) {
  * route metadata. Default callers keep the existing fail-fast behavior.
  */
 export function getDocsIndex(
-  { docsDir, fallbackDocsDir, fallbackOnly }: RdxDocsOptions = {},
+  {
+    docsDir,
+    fallbackDocsDir,
+    fallbackOnly,
+    categoryLabels,
+  }: RdxDocsOptions = {},
   onError?: (error: unknown, sourcePath: string) => void
 ): RdxDocCategory[] {
+  // Names are translated after ordering, so every language keeps the primary order.
+  const translate = (categories: RdxDocCategory[]) =>
+    categoryLabels
+      ? categories.map((category) => ({
+          ...category,
+          title: translateLabel(categoryLabels, category.title),
+        }))
+      : categories
   if (fallbackOnly)
-    return getDocsIndex({ docsDir: fallbackDocsDir ?? docsDir }, onError)
+    return translate(
+      getDocsIndex({ docsDir: fallbackDocsDir ?? docsDir }, onError)
+    )
   if (fallbackDocsDir) {
     const primary = getDocsIndex({ docsDir: fallbackDocsDir }, onError)
     const translated = getDocsIndex({ docsDir }, onError)
@@ -130,29 +119,20 @@ export function getDocsIndex(
         category.pages.map((page) => [page.slug, page] as const)
       )
     )
-    const translatedRoot = getDocsRoot(docsDir)
-    return primary.map((category) => ({
-      ...category,
-      title: readCategoryMeta(
-        category.id === '_root'
-          ? translatedRoot
-          : (matchingEntries(translatedRoot, category.id, true)[0] ??
-              path.join(translatedRoot, category.id)),
-        category.title
-      ).title,
-      pages: category.pages.map((page) => ({
-        ...(pages.get(page.slug) ?? page),
-        position: page.position,
-      })),
-    }))
+    return translate(
+      primary.map((category) => ({
+        ...category,
+        pages: category.pages.map((page) => ({
+          ...(pages.get(page.slug) ?? page),
+          position: page.position,
+        })),
+      }))
+    )
   }
   const docsRoot = getDocsRoot(docsDir)
   if (!fs.existsSync(/* turbopackIgnore: true */ docsRoot)) return []
 
-  const categories = new Map<
-    string,
-    RdxDocCategory & { categoryPath: string }
-  >()
+  const categories = new Map<string, RdxDocCategory>()
 
   const slugs = new Map<string, string>()
   for (const filePath of findDocumentFiles(docsRoot)) {
@@ -173,26 +153,17 @@ export function getDocsIndex(
       pathParts.length > 1 ? (pathParts[0] ?? '_root') : '_root'
     const { name: categoryId, position: categoryPosition } =
       orderedName(categoryFolder)
-    const categoryPath =
-      categoryFolder === '_root'
-        ? docsRoot
-        : path.join(docsRoot, categoryFolder)
     const fallbackCategoryTitle =
       categoryId === '_root' ? 'Overview' : toTitle(categoryId)
 
     let category = categories.get(categoryId)
     if (!category) {
-      const meta = readCategoryMeta(
-        categoryPath,
-        fallbackCategoryTitle,
-        categoryPosition
-      )
-      const createdCategory = {
+      // Folder names title categories; _labels.json translates or refines them.
+      const createdCategory: RdxDocCategory = {
         id: categoryId,
-        title: meta.title,
-        position: meta.position,
+        title: fallbackCategoryTitle,
+        position: categoryPosition,
         pages: [],
-        categoryPath,
       }
       categories.set(categoryId, createdCategory)
       category = createdCategory
@@ -233,20 +204,22 @@ export function getDocsIndex(
     })
   }
 
-  return [...categories.values()]
-    .map(({ categoryPath: _categoryPath, ...category }) => ({
-      ...category,
-      pages: category.pages.sort(
+  return translate(
+    [...categories.values()]
+      .map((category) => ({
+        ...category,
+        pages: category.pages.sort(
+          (first, second) =>
+            first.position - second.position ||
+            first.slug.localeCompare(second.slug)
+        ),
+      }))
+      .sort(
         (first, second) =>
           first.position - second.position ||
-          first.slug.localeCompare(second.slug)
-      ),
-    }))
-    .sort(
-      (first, second) =>
-        first.position - second.position ||
-        first.title.localeCompare(second.title)
-    )
+          first.title.localeCompare(second.title)
+      )
+  )
 }
 
 export function getDocsPaths(options?: RdxDocsOptions) {

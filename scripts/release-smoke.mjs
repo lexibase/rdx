@@ -198,6 +198,33 @@ function pnpm(cwd, args, capture = false) {
   }
 }
 
+// RDX ships English interface text only. The installed CLI creates the primary
+// catalog, and a generated translation prefixes each text with PT-BR.
+const pt = (text) => `PT-BR ${text}`
+
+async function translateInterface(project) {
+  const output = execFileSync(
+    process.execPath,
+    [
+      path.join(project, 'node_modules/@lexibase/rdx/bin/rdx.mjs'),
+      'i18n',
+      'sync',
+    ],
+    { cwd: project, encoding: 'utf8' }
+  )
+  assert.match(output, /_labels\.json: added \d+ entries/)
+  const file = path.join(project, '_labels.json')
+  const catalog = JSON.parse(await readFile(file, 'utf8'))
+  assert.ok(catalog.interface['Powered by'] === '', 'sync adds empty entries')
+  for (const text of Object.keys(catalog.interface))
+    catalog.interface[text] = pt(text)
+  await writeFile(file, JSON.stringify(catalog, null, 2) + '\n')
+}
+
+function translated(locale, text) {
+  return locale === 'pt-BR' ? pt(text) : text
+}
+
 function buildProject(project) {
   const output = pnpm(project, ['build'], true)
   process.stdout.write(output)
@@ -590,7 +617,7 @@ async function verifySite(
       )
       assert.match(html, /aria-label="My documentation"/)
       assert.match(html, /<strong>My documentation<\/strong>/)
-      assert.ok(html.includes(locale === 'pt-BR' ? 'Feito com' : 'Powered by'))
+      assert.ok(html.includes(translated(locale, 'Powered by')))
       assert.ok(html.includes(`lang="${locale}"`))
       const markdown = await (
         await request(base, '/docs/examples/markdown')
@@ -600,27 +627,19 @@ async function verifySite(
       ).text()
       assert.ok(
         keyboard.includes(
-          locale === 'pt-BR' ? 'Control mais K' : 'Control plus K'
+          `${translated(locale, 'Control')} ${translated(locale, 'plus')} K`
         )
       )
       assert.match(
         html,
         /<main[^>]*id="rdx-main"[^>]*tabindex="-1"[^>]*>[\s\S]*?<h1\b/
       )
-      assert.ok(
-        markdown.includes(locale === 'pt-BR' ? 'Copiar código' : 'Copy code')
-      )
-      assert.ok(
-        html.includes(
-          locale === 'pt-BR' ? 'Ir para o conteúdo' : 'Skip to content'
-        )
-      )
+      assert.ok(markdown.includes(translated(locale, 'Copy code')))
+      assert.ok(html.includes(translated(locale, 'Skip to content')))
       if (versioned) {
         assert.ok(
           html.includes(
-            locale === 'pt-BR'
-              ? 'Versão da documentação: Atual'
-              : 'Documentation version: Current'
+            `${translated(locale, 'Documentation version: ')}${translated(locale, 'Current')}`
           )
         )
       }
@@ -698,11 +717,7 @@ async function verifySite(
       assert.match(missing, /<meta name="robots" content="noindex"/)
       assert.match(missing, /data-rdx-navbar/)
       assert.match(missing, /text-9xl/)
-      assert.ok(
-        missing.includes(
-          locale === 'pt-BR' ? 'Página não encontrada' : 'Page not found'
-        )
-      )
+      assert.ok(missing.includes(translated(locale, 'Page not found')))
       await (
         await request(base, '/rdx-search/rdx-missing-source', 404)
       ).arrayBuffer()
@@ -1182,6 +1197,7 @@ if (checkInstallation) {
       .replace("lang: 'en'", "lang: 'pt-BR'")
       .replace('search: true', 'search: false')
   )
+  await translateInterface(project)
   buildProject(project)
   await verifyDeploymentTrace(project, true)
   await verifySite(project, {
@@ -1224,6 +1240,7 @@ if (checkInstallation) {
     'rdx.config.ts',
     'home.tsx',
     'package.json',
+    '_labels.json',
   ]) {
     await cp(path.join(project, name), path.join(legacyProject, name), {
       recursive: true,

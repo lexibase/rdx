@@ -3,12 +3,14 @@ import test from 'node:test'
 import { createJiti } from 'jiti'
 import { Children, createElement, isValidElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
+import { pt, registerPortuguese } from './helpers/portuguese.mjs'
 
 const jiti = createJiti(import.meta.url, {
   moduleCache: true,
   fsCache: false,
   jsx: { runtime: 'automatic' },
 })
+await registerPortuguese(jiti)
 const { LanguageDropdown } = await jiti.import(
   '../../rdx-ui/src/components/language-dropdown.tsx'
 )
@@ -72,7 +74,7 @@ test('language menu adds a separated, localized external contribution link', () 
   const url = 'https://github.com/example/project/tree/main/locale'
   for (const [lang, label, newTab] of [
     ['en', 'Help translate', 'opens in a new tab'],
-    ['pt-BR', 'Ajude a traduzir', 'abre em uma nova aba'],
+    ['pt-BR', pt('Help translate'), pt('opens in a new tab')],
   ]) {
     const tree = composition({
       options,

@@ -22,6 +22,7 @@ export {
   RdxPluginCommand,
   RdxPluginContext,
   RdxProject,
+  RdxLabels,
 } from './plugins'
 export {
   RdxDocCategory,

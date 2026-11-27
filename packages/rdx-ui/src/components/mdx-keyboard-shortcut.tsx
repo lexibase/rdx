@@ -57,7 +57,7 @@ export function MdxKeyboardShortcut({
         : undefined
       return name ? messages[name] : key
     })
-    .join(messages.keyboardJoiner)
+    .join(` ${messages.keyboardJoiner} `)
   return (
     <span data-rdx-kbd-value={children} className="inline-flex align-baseline">
       <span className="sr-only select-none">{description}</span>

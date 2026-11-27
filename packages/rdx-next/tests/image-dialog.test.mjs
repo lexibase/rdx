@@ -3,12 +3,14 @@ import test from 'node:test'
 import { createJiti } from 'jiti'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
+import { pt, registerPortuguese } from './helpers/portuguese.mjs'
 
 const jiti = createJiti(import.meta.url, {
   moduleCache: true,
   fsCache: false,
   jsx: { runtime: 'automatic' },
 })
+await registerPortuguese(jiti)
 const { compileDocumentation } = await jiti.import('../src/runtime/mdx.ts')
 const { mdxComponents } = await jiti.import(
   '../../rdx-ui/src/components/mdx-components.tsx'
@@ -64,7 +66,7 @@ test('image triggers are localized while author text and responsive image attrib
       })
     )
   )
-  assert.match(html, /Ampliar imagem: Author diagram &lt;safe&gt;/)
+  assert.ok(html.includes(pt('Enlarge image: Author diagram &lt;safe&gt;')))
   assert.match(html, /alt="Author diagram &lt;safe&gt;"/)
   assert.match(
     html,

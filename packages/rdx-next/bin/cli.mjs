@@ -113,7 +113,7 @@ export async function runRdxCli({ templateDir } = {}) {
         '  rdx add i18n [--locales en,es-ES] [--package-manager npm|pnpm|yarn]'
       )
       console.log(
-        '  rdx i18n sync: add missing phrases to homepage translation catalogs'
+        '  rdx i18n sync [--prune]: add missing interface texts, categories and homepage phrases to language catalogs'
       )
       console.log(
         'Plugin commands are registered through plugins in rdx.config.ts.'
@@ -141,7 +141,7 @@ export async function runRdxCli({ templateDir } = {}) {
       ['--help', '-h'].includes(commandArgs[1])
     ) {
       console.log(
-        'Usage: rdx i18n sync\nAdd missing homepage phrases to the configured languages’ home.json files.'
+        'Usage: rdx i18n sync [--prune]\nAdd missing interface texts and category names to each language’s _labels.json, and homepage phrases to home.json.\n  --prune  Remove _labels.json entries that no edition or interface text uses.'
       )
       return
     }
@@ -214,10 +214,23 @@ export async function runRdxCli({ templateDir } = {}) {
       syncHomepage &&
       !project.commands.some((entry) => entry.name === 'i18n')
     ) {
-      if (commandArgs.length !== 1) throw new Error('Usage: rdx i18n sync')
-      const { syncHomepageTranslations } =
-        await import('./homepage-translations.mjs')
-      await syncHomepageTranslations(project)
+      const options = commandArgs.slice(1)
+      if (options.length > 1 || options.some((option) => option !== '--prune'))
+        throw new Error('Usage: rdx i18n sync [--prune]')
+      const { interfaceTexts } = await jiti.import('@lexibase/rdx-ui/lib/i18n')
+      const { syncLabelCatalogs } = await import('./labels-catalog.mjs')
+      await syncLabelCatalogs(project, interfaceTexts, {
+        prune: options.includes('--prune'),
+      })
+      if (
+        project.localization &&
+        project.config.homepage?.enabled &&
+        project.config.homepage.translations
+      ) {
+        const { syncHomepageTranslations } =
+          await import('./homepage-translations.mjs')
+        await syncHomepageTranslations(project)
+      }
       return
     }
     let homepageTranslations
@@ -237,7 +250,8 @@ export async function runRdxCli({ templateDir } = {}) {
     if (command === 'check' || command === 'build') {
       const { checkDocumentation, formatDocumentationCheck } =
         await import('@lexibase/rdx-core/check')
-      const report = checkDocumentation(project)
+      const { interfaceTexts } = await jiti.import('@lexibase/rdx-ui/lib/i18n')
+      const report = checkDocumentation(project, { interfaceTexts })
       const { json, maxWarnings, baseline, writeBaseline } = checkOptions
       const warnings = report.warnings ?? []
       const warningLimitExceeded =

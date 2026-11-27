@@ -11,13 +11,38 @@ export function validateProjectName(name) {
   return true
 }
 
+/** Canonical BCP 47 tag, e.g. pt-br → pt-BR, or a message for invalid input. */
+export function validateLanguage(tag) {
+  if (!tag?.trim()) return 'Enter a language tag such as en, pt-BR or es-ES.'
+  try {
+    const [canonical] = Intl.getCanonicalLocales(tag.trim())
+    if (canonical) return { canonical }
+  } catch {
+    // Reported below with the expected format.
+  }
+  return `"${tag}" is not a valid language tag. Use a tag such as en, pt-BR or es-ES.`
+}
+
+/** English interface text is built in; other languages need _labels.json. */
+export function isEnglish(tag) {
+  return /^en(?:-|$)/i.test(tag)
+}
+
 export function parseArguments(args) {
   let projectName
+  let lang
   let skipInstall = false
   let help = false
   let version = false
-  for (const argument of args) {
-    if (argument === '--skip-install') skipInstall = true
+  for (let index = 0; index < args.length; index++) {
+    const argument = args[index]
+    if (argument === '--lang' || argument.startsWith('--lang=')) {
+      const value =
+        argument === '--lang' ? args[++index] : argument.slice('--lang='.length)
+      const result = validateLanguage(value)
+      if (typeof result === 'string') throw new Error(result)
+      lang = result.canonical
+    } else if (argument === '--skip-install') skipInstall = true
     else if (argument === '--help' || argument === '-h') help = true
     else if (argument === '--version' || argument === '-v') version = true
     else if (argument.startsWith('-'))
@@ -26,5 +51,5 @@ export function parseArguments(args) {
       throw new Error('Provide only one project name. Use --help for usage.')
     else projectName = argument
   }
-  return { projectName, skipInstall, help, version }
+  return { projectName, lang, skipInstall, help, version }
 }

@@ -19,6 +19,9 @@ export function getSourceOptions(
           ),
         }
       : {}),
+    ...(project.labels && Object.keys(project.labels.categories).length
+      ? { categoryLabels: project.labels.categories }
+      : {}),
   }
 }
 

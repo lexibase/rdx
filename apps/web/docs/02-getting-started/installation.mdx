@@ -36,7 +36,11 @@ yarn dlx @lexibase/create-rdx@latest
 The Yarn creator examples use `yarn dlx` (Yarn 2+).
 
 The prompt asks **What is your project named?** Enter a name such as `my-docs`.
-RDX creates that directory and installs its dependencies.
+It then asks for the **primary language** of your documentation; press Enter to
+keep English, or type a tag such as `pt-BR` or `es-ES`. RDX creates that
+directory and installs its dependencies. For a language other than English, it
+also creates `_labels.json` with the interface text to translate; see
+[Translate the interface and categories](../04-features/languages.mdx#translate-the-interface-and-categories).
 
 The terminal reports three stages: creating project files, installing dependencies,
 and preparing the runtime. Each completed stage shows its elapsed time. With pnpm,
@@ -114,6 +118,24 @@ npm create @lexibase/rdx@latest -- my-docs
 ### yarn
 
 yarn dlx @lexibase/create-rdx@latest my-docs
+
+:::
+
+Add `--lang` to set the primary language without the language prompt:
+
+:::tabs
+
+### pnpm
+
+pnpm create @lexibase/rdx@latest my-docs --lang pt-BR
+
+### npm
+
+npm create @lexibase/rdx@latest -- my-docs --lang pt-BR
+
+### yarn
+
+yarn dlx @lexibase/create-rdx@latest my-docs --lang pt-BR
 
 :::
 

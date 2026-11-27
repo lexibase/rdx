@@ -1,6 +1,8 @@
 import path from 'node:path'
 import type { RdxContentSource, RdxProject } from '@lexibase/rdx-types'
 
+import { emptyLabels, readLabels } from '../config/labels'
+
 /** Select a language without mutating the shared project or rerunning plugin hooks. */
 export function getLocalizedProject(
   project: RdxProject,
@@ -10,10 +12,17 @@ export function getLocalizedProject(
     (entry) => entry.path === locale
   )
   if (!selected) throw new Error(`Unknown documentation language: ${locale}`)
+  const primaryLanguage = selected.code === project.localization!.defaultLocale
   return {
     ...project,
     locale: selected,
     config: { ...project.config, lang: selected.code },
+    // The primary language's catalog sits at the root, like its docs/ folder.
+    labels: primaryLanguage
+      ? (project.labels ?? emptyLabels())
+      : selected.folder
+        ? readLabels(project.rootDir, selected.folder)
+        : emptyLabels(),
     sources: project.sources.map((source) => {
       const primary =
         source.localization?.docs[project.localization!.defaultLocale] ??

@@ -38,9 +38,10 @@ Use the old `sidebar_position` as a two-digit folder prefix. For example, rename
 folder still uses `/docs/guides/` in its URL. Update relative Markdown links to
 use the actual path, including the prefix.
 
-Remove `_category.json` once the folder name gives you the label you want.
-Keep the file if you need a custom label while retaining the same URL path.
-If you keep it, remove `sidebar_position` to let the folder prefix set the order.
+Remove `_category.json`: RDX no longer reads it. The folder name sets the
+label. For a custom label that keeps the same URL path, rename the category in
+`_labels.json` at the project root, as described in
+[Translate the interface and categories](../04-features/languages.mdx#translate-the-interface-and-categories).
 
 ## Check existing links
 

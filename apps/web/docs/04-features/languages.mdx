@@ -115,12 +115,97 @@ RDX's Markdown components.
 
 RDX matches translations by route. The numeric prefixes and file extension
 are omitted from the URL, so both files above map to `guides/installation`.
-Category labels come from the primary folder names by default. Category and page
-order follow the primary tree, including any `order` values in its frontmatter.
+Category labels come from the primary folder names; translate them in
+`_labels.json`, described below. Category and page order follow the primary tree,
+including any `order` values in its frontmatter.
 Store shared images and downloads in root `public/`.
 
 The examples above have English as the primary language. When English is a
 secondary language, its content belongs in `locale/en/docs/` instead.
+
+## Translate the interface and categories
+
+Each language has a `_labels.json` catalog for the text that is not part of your
+documents: interface text such as **On this page** or **Copy code**, and the
+category names in the sidebar. The primary language keeps its catalog at the
+project root, beside `docs/`; each translation keeps one in its locale folder:
+
+```text
+my-docs/
+  docs/
+  _labels.json
+  locale/
+    ptbr/
+      docs/
+      _labels.json
+```
+
+You do not write the keys. Run `rdx i18n sync` to create or update every
+catalog:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx i18n sync
+
+### npm
+
+npm exec -- rdx i18n sync
+
+### yarn
+
+yarn rdx i18n sync
+
+:::
+
+Keys are the English interface text and the primary category names. Fill in the
+values you want to translate:
+
+```json title="locale/ptbr/_labels.json"
+{
+  "interface": {
+    "On this page": "Nesta página",
+    "Version {version}": "Versão {version}",
+    "Copy code": ""
+  },
+  "categories": {
+    "Getting Started": "Primeiros passos",
+    "Guides": ""
+  }
+}
+```
+
+An empty value keeps the original text, so a partial translation never breaks
+the site. Keep placeholders such as `{version}` in your translation; RDX shows
+the original text until they match. RDX ships its interface text in English
+only, so an English catalog only needs the categories or the phrases you want to
+change.
+
+The catalog covers every edition: run `rdx i18n sync` after adding a category or
+publishing an edition, and after updating RDX, which may add interface text. A
+category that left the live documentation keeps its translation while an older
+edition still shows it.
+
+`rdx i18n sync` never removes a translation. `rdx check` reports entries that no
+edition or interface text uses, such as a renamed category. Remove them by hand,
+or let RDX remove them:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx i18n sync --prune
+
+### npm
+
+npm exec -- rdx i18n sync --prune
+
+### yarn
+
+yarn rdx i18n sync --prune
+
+:::
 
 ## Navigate between languages
 
@@ -303,9 +388,9 @@ original page. Actual translations have their own metadata and language alternat
 including links, sections and local assets. A translated page without a primary
 counterpart is reported as an error. Missing translations are allowed.
 
-The `lang` setting also selects built-in interface messages. English and Brazilian
-Portuguese have interface catalogs; other content languages use English interface
-messages. Your translated documents and language labels remain as written.
+Interface text comes from each language's `_labels.json`. A language without a
+catalog, or an entry left empty, uses the English interface text. Your translated
+documents and language labels remain as written.
 
 ## With versioning
 

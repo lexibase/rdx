@@ -8,7 +8,7 @@ const en = {
   helpTranslate: 'Help translate',
   translateThisPage: 'Translate this page',
   opensInNewTab: 'opens in a new tab',
-  keyboardJoiner: ' plus ',
+  keyboardJoiner: 'plus',
   keyboardControl: 'Control',
   keyboardShift: 'Shift',
   keyboardAlt: 'Alt',
@@ -111,7 +111,7 @@ const en = {
   version: 'Version {version}',
   documentationVersion: 'Documentation version: {version}',
   archived: 'Archived',
-  archivedVersion: 'Archived',
+  archivedVersion: 'Archived edition',
   loadingVersions: 'Loading versions',
   preReleaseTitle: 'Pre-release documentation',
   outdatedTitle: 'Outdated documentation',
@@ -131,151 +131,55 @@ const en = {
 } satisfies Record<string, string>
 
 export type InterfaceMessages = { [Key in keyof typeof en]: string }
-export type InterfaceLocale = 'en' | 'pt-BR'
 
-const ptBR = {
-  documentationLanguage: 'Idioma da documentação',
-  translationUnavailable: 'Tradução indisponível',
-  translationFallback:
-    'Esta página não está disponível em {requested}. Você está lendo a versão em {original}.',
-  viewOriginal: 'Ver a página original',
-  helpTranslate: 'Ajude a traduzir',
-  translateThisPage: 'Traduza esta página',
-  opensInNewTab: 'abre em uma nova aba',
-  keyboardJoiner: ' mais ',
-  keyboardControl: 'Control',
-  keyboardShift: 'Shift',
-  keyboardAlt: 'Alt',
-  keyboardCommand: 'Command',
-  keyboardOption: 'Option',
-  keyboardEscape: 'Escape',
-  keyboardEnter: 'Enter',
-  keyboardSpace: 'Espaço',
-  keyboardPlus: 'Sinal de mais',
-  keyboardArrowUp: 'Seta para cima',
-  keyboardArrowDown: 'Seta para baixo',
-  keyboardArrowLeft: 'Seta para a esquerda',
-  keyboardArrowRight: 'Seta para a direita',
-  skipContent: 'Ir para o conteúdo',
-  mainNavigation: 'Navegação principal',
-  docs: 'Docs',
-  changelog: 'Changelog',
-  changelogFeed: 'Copiar link do feed RSS',
-  changelogFeedCopied: 'Link do feed RSS copiado.',
-  changelogFeedCopyError: 'Não foi possível copiar o link do feed RSS.',
-  changelogEmpty: 'Nenhum lançamento ainda.',
-  changelogVersions: 'Versões',
-  changelogFilter: 'Filtrar',
-  changelogClearFilters: 'Limpar filtros',
-  changelogBreakingBadge: 'Mudanças incompatíveis',
-  changelogSecurityBadge: 'Segurança',
-  changelogDeprecatedBadge: 'Descontinuado',
-  changelogCopyLink: 'Copiar link da versão',
-  changelogLinkCopied: 'Link da versão copiado.',
-  changelogCopyError: 'Não foi possível copiar o link da versão.',
-  documentationPages: 'Páginas da documentação',
-  documentationNavigation: 'Navegação da documentação',
-  openSidebar: 'Abrir menu lateral',
-  closeSidebar: 'Fechar menu lateral',
-  openMenu: 'Abrir menu',
-  closeMenu: 'Fechar menu',
-  mainMenu: 'Menu principal',
-  back: 'Voltar',
-  previous: 'Anterior',
-  next: 'Próxima',
-  stepProgress: 'Etapa {current} de {total}',
-  previousPage: 'Página anterior',
-  nextPage: 'Próxima página',
-  sidebarImportant: 'Importante',
-  sidebarNew: 'Novo',
-  editThisPage: 'Editar esta página',
-  lastUpdated: 'Última atualização em {date}',
-  related: 'Relacionados',
-  beforeYouBegin: 'Antes de começar',
-  onThisPage: 'Nesta página',
-  search: 'Buscar…',
-  searchDocumentation: 'Buscar na documentação',
-  searchPlaceholder: 'Buscar na documentação…',
-  searchDescription:
-    'Busque páginas e seções em {version}. Use as setas para escolher um resultado e Enter para abri-lo.',
-  loadingSearch: 'Carregando busca…',
-  searchUnavailable: 'A busca está indisponível.',
-  tryAgain: 'Tentar novamente',
-  typeToSearch: 'Digite para buscar nesta documentação.',
-  noResults: 'Nenhum resultado encontrado.',
-  navigate: 'Navegar',
-  open: 'Abrir',
-  close: 'Fechar',
-  closeSearch: 'Fechar busca',
-  enlargeImage: 'Ampliar imagem: {alt}',
-  closeImage: 'Fechar imagem',
-  imagePreviewDescription:
-    'Pressione Escape ou use o botão de fechar para voltar ao documento.',
-  copyCode: 'Copiar código',
-  wrapCode: 'Quebrar linhas',
-  showMore: 'Mostrar mais',
-  showLess: 'Mostrar menos',
-  codeCopied: 'Código copiado para a área de transferência.',
-  copyCodeError:
-    'Não foi possível copiar. Selecione o código e copie manualmente.',
-  copyRetry: 'Não foi possível copiar. Tente novamente ou copie manualmente.',
-  copied: 'Copiado!',
-  copyThisPage: 'Copiar esta página',
-  copyPageOptions: 'Opções de cópia da página',
-  viewMarkdown: 'Ver Markdown',
-  pageCopied: 'Markdown da página copiado para a área de transferência.',
-  copyPageError:
-    'Não foi possível copiar a página. Abra Ver Markdown para copiar manualmente.',
-  sectionPermalink: 'Copiar link para esta seção',
-  sectionLinkCopied: 'Link da seção copiado para a área de transferência.',
-  copyTab: 'Copiar aba ativa',
-  documentationTabs: 'Abas da documentação',
-  tabCopied: 'Conteúdo da aba copiado para a área de transferência.',
-  copyTabError:
-    'Não foi possível copiar. Selecione o conteúdo da aba e copie manualmente.',
-  code: 'Código',
-  folderTree: 'Pastas',
-  diagram: 'Diagrama',
-  showDiagram: 'Mostrar diagrama',
-  showDiagramSource: 'Mostrar código do diagrama',
-  enlargeDiagram: 'Ampliar diagrama',
-  diagramLoading: 'Renderizando diagrama…',
-  diagramError:
-    'Não foi possível renderizar o diagrama. Confira o código Mermaid abaixo.',
-  table: 'Tabela',
-  current: 'Atual',
-  version: 'Versão {version}',
-  documentationVersion: 'Versão da documentação: {version}',
-  archived: 'Arquivadas',
-  archivedVersion: 'Arquivada',
-  loadingVersions: 'Carregando versões',
-  preReleaseTitle: 'Documentação de pré-lançamento',
-  outdatedTitle: 'Documentação desatualizada',
-  preReleaseMessage: 'Esta é uma versão de pré-lançamento da documentação.',
-  outdatedMessage: 'Esta é uma versão desatualizada da documentação.',
-  backToCurrent: 'Voltar para a versão atual',
-  poweredBy: 'Feito com',
-  developedBy: 'Desenvolvido por',
-  modeToggle: 'Alternar tema',
-  documentationReady: 'Sua documentação está pronta.',
-  addDocument: 'Adicione um arquivo .mdx dentro de docs/.',
-  notFound: 'Página não encontrada',
-  notFoundDescription: 'Não encontramos o que você estava procurando.',
-  brokenLink:
-    'Entre em contato com o responsável pelo site que indicou este link e informe que ele não está funcionando.',
-  backToDocs: 'Voltar para a documentação',
-} satisfies InterfaceMessages
+/** Every English interface text: the keys of a project's `_labels.json`. */
+export const interfaceTexts: readonly string[] = Object.values(en)
 
-/** Match the locale, then its base language; unsupported languages use English. */
-export function resolveInterfaceLocale(lang = 'en'): InterfaceLocale {
-  const normalized = lang.trim().replaceAll('_', '-').toLowerCase()
-  if (normalized === 'pt-br' || normalized.split('-')[0] === 'pt')
-    return 'pt-BR'
-  return 'en'
+function languageKey(lang = 'en') {
+  return lang.trim().replaceAll('_', '-').toLowerCase()
+}
+
+function placeholders(text: string) {
+  return (text.match(/\{\w+\}/g) ?? []).sort().join()
+}
+
+// Static per build: catalogs register once per language, on the server when
+// the project loads and in the browser through LocaleProvider.
+const registered = new Map<string, Record<string, string>>()
+const localized = new Map<string, InterfaceMessages>()
+
+/** Use a project's `_labels.json` interface translations for a language. */
+export function registerInterfaceLabels(
+  lang: string | undefined,
+  labels: Record<string, string> | undefined
+) {
+  const key = languageKey(lang)
+  localized.delete(key)
+  if (labels && Object.keys(labels).length) registered.set(key, labels)
+  else registered.delete(key)
+}
+
+export function getInterfaceLabels(lang?: string) {
+  return registered.get(languageKey(lang))
 }
 
 export function getMessages(lang?: string): InterfaceMessages {
-  return resolveInterfaceLocale(lang) === 'pt-BR' ? ptBR : en
+  // RDX ships English only; other languages come from the project's catalog.
+  const key = languageKey(lang)
+  const labels = registered.get(key)
+  if (!labels) return en
+  let messages = localized.get(key)
+  if (!messages) {
+    messages = { ...en }
+    for (const name of Object.keys(en) as (keyof InterfaceMessages)[]) {
+      const translated = labels[en[name]]?.trim()
+      // A translation that drops {version} or similar would show a broken text.
+      if (translated && placeholders(translated) === placeholders(en[name]))
+        messages[name] = translated
+    }
+    localized.set(key, messages)
+  }
+  return messages
 }
 
 export function formatMessage(message: string, values: Record<string, string>) {
