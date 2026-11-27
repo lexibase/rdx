@@ -12,8 +12,12 @@ const { getSourceRobots, getRdxRobots, getRdxSitemap } = await jiti.import(
 )
 const { getDocumentMetadata } = await jiti.import('../src/runtime/metadata.ts')
 const { getSearchResponse } = await jiti.import('../src/runtime/search.ts')
-const { getLlmIndexResponse, getMarkdownPaths, getMarkdownResponse } =
-  await jiti.import('../src/runtime/markdown.ts')
+const {
+  getLlmIndexResponse,
+  getRootLlmIndexResponse,
+  getMarkdownPaths,
+  getMarkdownResponse,
+} = await jiti.import('../src/runtime/markdown.ts')
 
 function fixture(t, metadata = { metadataBase: 'https://docs.example.com' }) {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rdx-indexing-'))
@@ -94,6 +98,86 @@ test('LLM index links to the latest published Markdown and export resolves editi
     getMarkdownResponse(project, ['docs', '2.1.0', 'missing.md']).status,
     404
   )
+})
+
+test('the root llms.txt and each served edition have their own index', async (t) => {
+  const project = fixture(t)
+  project.sources.push(
+    { id: 'v2', label: '2.1.0', docsDir: 'v2', routePrefix: '2.1.0' },
+    { id: 'v1', label: '1.2.0', docsDir: 'v1', routePrefix: '1.2.0' },
+    {
+      id: 'archived',
+      label: '0.9.0',
+      docsDir: 'missing',
+      routePrefix: '0.9.0',
+      badge: 'Archived',
+    },
+    {
+      id: 'alias',
+      label: '2.0.0',
+      docsDir: 'missing',
+      routePrefix: '2.0.0',
+      redirectTo: '2.1.0',
+    }
+  )
+  fs.writeFileSync(
+    path.join(project.rootDir, 'v1/guides/legacy.mdx'),
+    '---\ntitle: Legacy\n---\nOld'
+  )
+  project.config.description = 'Guides for Docs.'
+
+  const root = getRootLlmIndexResponse(project)
+  assert.equal(root.headers.get('content-type'), 'text/plain; charset=utf-8')
+  assert.equal(
+    await root.text(),
+    [
+      '# Docs',
+      '',
+      '> Guides for Docs.',
+      '',
+      '## Documentation',
+      '',
+      '- [Documentation](<https://docs.example.com/docs/llms.txt>): Pages of the current documentation, edition 2.1.0',
+      '',
+      '## Editions',
+      '',
+      '- [2.1.0](<https://docs.example.com/docs/2.1.0/llms.txt>)',
+      '- [1.2.0](<https://docs.example.com/docs/1.2.0/llms.txt>)',
+      '',
+    ].join('\n')
+  )
+  assert.match(
+    await getLlmIndexResponse(project).text(),
+    /^# Docs Documentation\n\n> Guides for Docs\.\n\nDocumentation edition: 2\.1\.0\n/
+  )
+
+  const editions = getMarkdownPaths(project)
+    .map(({ path }) => path.join('/'))
+    .filter((entry) => entry.endsWith('llms.txt'))
+  assert.deepEqual(editions, ['docs/2.1.0/llms.txt', 'docs/1.2.0/llms.txt'])
+  const previous = getMarkdownResponse(project, ['docs', '1.2.0', 'llms.txt'])
+  assert.equal(
+    previous.headers.get('content-type'),
+    'text/plain; charset=utf-8'
+  )
+  const text = await previous.text()
+  assert.match(text, /Documentation edition: 1\.2\.0/)
+  assert.match(
+    text,
+    /\[Legacy\]\(<https:\/\/docs\.example\.com\/rdx-markdown\/docs\/1\.2\.0\/guides\/legacy\.md>\)/
+  )
+  for (const missing of [
+    ['docs', '0.9.0', 'llms.txt'],
+    ['docs', '2.0.0', 'llms.txt'],
+    ['docs', '3.0.0', 'llms.txt'],
+    ['docs', 'guides', 'intro', 'llms.txt'],
+    ['llms.txt'],
+  ])
+    assert.equal(
+      getMarkdownResponse(project, missing).status,
+      404,
+      missing.join('/')
+    )
 })
 
 test('plain sites index their documents, encode path segments and include only enabled homepages', (t) => {

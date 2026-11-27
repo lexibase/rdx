@@ -108,6 +108,10 @@ file there. Have it reference a sitemap index served by the router, and list
 each zone's sitemap in that index, such as `/scs-intellisense/sitemap.xml` and
 `/sightline/sitemap.xml`.
 
+The same applies to `/llms.txt`. Each zone publishes its own index under its
+base path, such as `/scs-intellisense/llms.txt`. To offer one at the domain
+root, serve it from the router and link to each zone's index.
+
 ## Keep the source
 
 Your build environment needs `docs/`, `public/`, `rdx.config.ts`, the package

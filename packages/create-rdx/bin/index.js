@@ -70,12 +70,13 @@ async function main() {
     projectName: nameFromCli,
     lang: langFromCli,
     skipInstall,
+    agentsMd,
     help,
     version,
   } = parseArguments(process.argv.slice(2))
   if (help) {
     console.log(
-      'Usage: create-rdx [project-name] [--lang <tag>] [--skip-install]'
+      'Usage: create-rdx [project-name] [--lang <tag>] [--skip-install] [--no-agents-md]'
     )
     console.log('  Without a project name, RDX asks for one interactively.')
     console.log(
@@ -83,6 +84,9 @@ async function main() {
     )
     console.log(
       '  --skip-install  Create files without installing dependencies.'
+    )
+    console.log(
+      '  --no-agents-md  Do not create AGENTS.md for AI coding agents.'
     )
     console.log('  --help, -h      Show this help.')
     console.log('  --version, -v   Show the generator version.')
@@ -183,6 +187,12 @@ async function main() {
       })
       await fs.remove(path.join(targetDir, 'gitignore'))
       await fs.remove(path.join(targetDir, '.npmignore'))
+
+      // Stored under another name so agents editing this template ignore it.
+      const agentsTemplatePath = path.join(targetDir, 'AGENTS.md.template')
+      if (agentsMd)
+        await fs.move(agentsTemplatePath, path.join(targetDir, 'AGENTS.md'))
+      else await fs.remove(agentsTemplatePath)
 
       const pkgPath = path.join(targetDir, 'package.json')
       const pkg = await fs.readJson(pkgPath)

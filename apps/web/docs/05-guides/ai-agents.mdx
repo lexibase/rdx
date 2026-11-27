@@ -1,0 +1,110 @@
+---
+title: AI coding agents
+description: Point coding agents to the documentation of the RDX version your project uses.
+order: 8
+highlighting: new
+related:
+  - ./llms.mdx
+---
+
+Coding agents such as Claude Code, Codex and Cursor learned RDX from whatever
+version existed when they were trained. Configuration options, Markdown
+components and commands change between versions, so an agent can write code
+that a newer or older RDX does not accept.
+
+RDX solves this the same way Next.js does: the installed package ships the
+documentation of its exact version, and an `AGENTS.md` file at the project root
+tells agents to read it first.
+
+## Documentation inside the package
+
+`@lexibase/rdx` includes its documentation as plain Markdown files in
+`node_modules/@lexibase/rdx/dist/docs/`. The folder follows the sidebar of this
+site: `index.md` lists every page with its description, and links between
+pages point to the local files. Updating RDX updates the files, so they always
+match the installed version.
+
+The files work offline and need no configuration. You can also read them
+yourself in your editor.
+
+## `AGENTS.md`
+
+New projects start with an `AGENTS.md` that contains a section managed by RDX:
+
+```md title="AGENTS.md"
+<!-- BEGIN:rdx-agent-rules -->
+
+# This project uses RDX
+
+This documentation project uses RDX 7.1.0. Its configuration, Markdown components and commands may differ from what you know. Before changing `rdx.config.ts`, pages or customizations, read the relevant guide in `node_modules/@lexibase/rdx/dist/docs/`; `node_modules/@lexibase/rdx/dist/docs/index.md` lists every page.
+
+Run the `check` script (`rdx check`) after editing documentation.
+<!-- END:rdx-agent-rules -->
+```
+
+`rdx dev`, `rdx build`, `rdx start` and `rdx prepare` rewrite the text between
+the two markers, so the version and the instructions follow the RDX you have
+installed. Everything outside the markers belongs to you: add your project's own
+rules above or below the section and RDX keeps them.
+
+Most agents read `AGENTS.md` directly. Claude Code reads it when the project has
+no `CLAUDE.md`. If you have a `CLAUDE.md`, add a line with `@AGENTS.md` to it so
+Claude Code imports the same instructions.
+
+## Add the section to an existing project
+
+Projects created before RDX 7.1 have no `AGENTS.md`. Create the file at the
+project root, or open the one you already have, and add the two markers:
+
+```md title="AGENTS.md"
+<!-- BEGIN:rdx-agent-rules -->
+<!-- END:rdx-agent-rules -->
+```
+
+Then prepare the project, and RDX fills in the section:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx prepare
+
+### npm
+
+npm exec -- rdx prepare
+
+### yarn
+
+yarn rdx prepare
+
+:::
+
+## Opt out
+
+RDX only writes between the markers and never creates `AGENTS.md` in an
+existing project. To stop the updates, delete the markers and the text between
+them, or delete the file.
+
+To create a project without `AGENTS.md`, pass `--no-agents-md` to the creator:
+
+:::tabs
+
+### pnpm
+
+pnpm create @lexibase/rdx@latest my-docs --no-agents-md
+
+### npm
+
+npm create @lexibase/rdx@latest -- my-docs --no-agents-md
+
+### yarn
+
+yarn dlx @lexibase/create-rdx@latest my-docs --no-agents-md
+
+:::
+
+## Your published documentation
+
+`AGENTS.md` helps agents that edit your project. Agents that read your published
+site use its `llms.txt` indexes instead. See
+[Markdown exports and llms.txt](./llms.mdx).

@@ -210,6 +210,7 @@ export function checkDocumentation(
   const roots = new Set<string>([
     '/robots.txt',
     '/sitemap.xml',
+    '/llms.txt',
     '/docs/llms.txt',
   ])
   for (const locale of project.localization?.locales ?? []) {
@@ -379,6 +380,7 @@ export function checkDocumentation(
       continue
     }
     roots.add(key(rootFor(source)))
+    if (source.routePrefix) roots.add(key(`${rootFor(source)}/llms.txt`))
     const redirectSource: PageRedirectSource = {
       source,
       root: rootFor(source),

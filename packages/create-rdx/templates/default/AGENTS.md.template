@@ -1,0 +1,8 @@
+<!-- BEGIN:rdx-agent-rules -->
+
+# This project uses RDX
+
+This documentation project uses RDX. Its configuration, Markdown components and commands may differ from what you know. Before changing `rdx.config.ts`, pages or customizations, read the relevant guide at https://rdx-tool.vercel.app/docs/llms.txt.
+
+Run the `check` script (`rdx check`) after editing documentation.
+<!-- END:rdx-agent-rules -->

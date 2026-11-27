@@ -56,7 +56,7 @@ function parseCheckArguments(args) {
   return { json: values.json, maxWarnings, baseline, writeBaseline }
 }
 
-export async function runRdxCli({ templateDir } = {}) {
+export async function runRdxCli({ templateDir, agentRules } = {}) {
   const supportedCommands = new Set(['dev', 'build', 'start'])
   let command = process.argv[2]
   const commandArgs = process.argv.slice(3)
@@ -78,6 +78,12 @@ export async function runRdxCli({ templateDir } = {}) {
     })
     await prepareProjectStyles(projectRoot, runtimeDirectory)
     await prepareLocaleRoutes(project, runtimeDirectory, runtimeTemplate)
+    // Only the main package ships documentation for AGENTS.md to point to.
+    if (agentRules) {
+      const { refreshAgentRules } = await import('./agent-rules.mjs')
+      if (await refreshAgentRules(projectRoot, agentRules))
+        console.log('[RDX] Updated the RDX section of AGENTS.md.')
+    }
     if (homepageTranslations) {
       const { prepareHomepageTranslations } =
         await import('./homepage-translations.mjs')

@@ -47,6 +47,8 @@ const directories = [
 const required = {
   rdx: [
     'bin/rdx.mjs',
+    'dist/docs/index.md',
+    'dist/docs/getting-started/config.md',
     'dist/index.js',
     'dist/index.d.ts',
     'dist/runtime.js',
@@ -75,6 +77,7 @@ const required = {
     'dist/styles.d.css.ts',
     'dist/templates/app/docs/[[...slug]]/page.tsx',
     'dist/templates/app/docs/llms.txt/route.ts',
+    'dist/templates/app/llms.txt/route.ts',
     'dist/templates/app/rdx-markdown/[...path]/route.ts',
     'dist/templates/app/sitemap.ts',
     'dist/templates/app/changelog/page.tsx',
@@ -142,6 +145,7 @@ const required = {
     'templates/runtime/app/rdx-search/[source]/route.ts',
     'templates/runtime/app/docs/[[...slug]]/page.tsx',
     'templates/runtime/app/docs/llms.txt/route.ts',
+    'templates/runtime/app/llms.txt/route.ts',
     'templates/runtime/app/rdx-markdown/[...path]/route.ts',
     'templates/runtime/app/not-found.tsx',
     'templates/runtime/app/sitemap.ts',
@@ -168,6 +172,7 @@ const required = {
     'templates/default/docs/02-examples/steps.mdx',
     'templates/default/docs/02-examples/markdown-exports.mdx',
     'templates/default/gitignore.template',
+    'templates/default/AGENTS.md.template',
     'templates/default/public/images/rdx.svg',
   ],
 }
@@ -666,6 +671,18 @@ async function verifySite(
       const introExport = `/rdx-markdown/docs/${versioned ? '1.0.0/' : ''}getting-started/intro.md`
       const llmIndex = await (await request(base, '/docs/llms.txt')).text()
       assert.ok(llmIndex.includes(`https://docs.example.test${introExport}`))
+      const rootIndex = await (await request(base, '/llms.txt')).text()
+      assert.ok(rootIndex.includes('https://docs.example.test/docs/llms.txt'))
+      if (versioned) {
+        assert.ok(
+          rootIndex.includes('https://docs.example.test/docs/1.0.0/llms.txt')
+        )
+        assert.ok(
+          (await (await request(base, '/docs/1.0.0/llms.txt')).text()).includes(
+            `https://docs.example.test${introExport}`
+          )
+        )
+      }
       const exported = await request(base, introExport)
       assert.match(exported.headers.get('content-type'), /^text\/markdown/)
       if (!versioned) {
@@ -1120,6 +1137,21 @@ if (checkInstallation) {
   await writeFile(stylesPath, projectStyles)
   pnpm(project, ['run', 'check'])
   buildProject(project)
+  // The build fills AGENTS.md with the installed version and its bundled docs.
+  const agents = await readFile(path.join(project, 'AGENTS.md'), 'utf8')
+  assert.match(
+    agents,
+    new RegExp(
+      `uses RDX ${releases.get('@lexibase/rdx').manifest.version.replaceAll('.', '\\.')}\\.`
+    )
+  )
+  assert.match(agents, /`node_modules\/@lexibase\/rdx\/dist\/docs\/index\.md`/)
+  assert.ok(
+    await readFile(
+      path.join(project, 'node_modules/@lexibase/rdx/dist/docs/index.md'),
+      'utf8'
+    )
+  )
   assert.match(
     await readFile(path.join(project, '.rdx/app/globals.css'), 'utf8'),
     /@import "\.\.\/\.\.\/rdx\.css";/

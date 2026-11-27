@@ -38,9 +38,11 @@ test('argument parsing rejects unknown options and multiple names', () => {
     projectName: 'my-docs',
     lang: undefined,
     skipInstall: true,
+    agentsMd: true,
     help: false,
     version: false,
   })
+  assert.equal(parseArguments(['docs', '--no-agents-md']).agentsMd, false)
   // Language tags are canonicalized; invalid tags fail before creating files.
   assert.equal(parseArguments(['docs', '--lang', 'pt-br']).lang, 'pt-BR')
   assert.equal(parseArguments(['--lang=ES-es', 'docs']).lang, 'es-ES')
@@ -82,6 +84,7 @@ test('help and version exit without prompting, installing or creating files', as
   assert.equal(help.status, 0, help.stderr)
   assert.match(help.stdout, /Usage: create-rdx/)
   assert.match(help.stdout, /--skip-install/)
+  assert.match(help.stdout, /--no-agents-md/)
   const version = run(root, ['--version'])
   const pkg = JSON.parse(
     await readFile(new URL('../package.json', import.meta.url), 'utf8')
@@ -153,6 +156,34 @@ test('folder case is preserved while the package name is lowercase and skip-inst
       new RegExp(`${manager === 'npm' ? 'npm run' : manager} dev`)
     )
   }
+})
+
+test('projects start with the managed AGENTS.md block unless --no-agents-md is passed', async (t) => {
+  const root = await fixture(t)
+  const created = run(root, ['with-agents', '--skip-install'])
+  assert.equal(created.status, 0, created.stderr)
+  const agents = await readFile(
+    path.join(root, 'with-agents/AGENTS.md'),
+    'utf8'
+  )
+  assert.match(
+    agents,
+    /^<!-- BEGIN:rdx-agent-rules -->\n[\s\S]+\n<!-- END:rdx-agent-rules -->\n$/
+  )
+  assert.match(agents, /rdx check/)
+  const files = await readdir(path.join(root, 'with-agents'))
+  assert.equal(files.includes('AGENTS.md.template'), false)
+  assert.equal(files.includes('CLAUDE.md'), false)
+
+  const skipped = run(root, [
+    'without-agents',
+    '--skip-install',
+    '--no-agents-md',
+  ])
+  assert.equal(skipped.status, 0, skipped.stderr)
+  const remaining = await readdir(path.join(root, 'without-agents'))
+  assert.equal(remaining.includes('AGENTS.md'), false)
+  assert.equal(remaining.includes('AGENTS.md.template'), false)
 })
 
 test('install and prepare failures preserve generated files and explain how to retry', async (t) => {

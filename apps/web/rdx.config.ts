@@ -53,7 +53,7 @@ const config = {
       images: ['/icons/favicon-96x96.png'],
     },
   },
-  // HTML and interface language: 'en' or 'pt-BR'. Your documents stay as written.
+  // HTML language tag, such as 'en' or 'pt-BR'. Other languages translate the interface in _labels.json.
   lang: 'en',
   // When disabled, '/' redirects to '/docs'. A custom component can be provided.
   homepage: { enabled: true, component: Home },

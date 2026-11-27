@@ -34,11 +34,13 @@ Omit the name to get an interactive prompt. The directory name is preserved;
 the generated package name is normalized to lowercase. Existing directories
 are not overwritten.
 
-| Creator option   | Effect                                     |
-| :--------------- | :----------------------------------------- |
-| `--help`         | Show usage without creating a project      |
-| `--version`      | Print the creator's version                |
-| `--skip-install` | Create files and leave installation to you |
+| Creator option   | Effect                                                                                    |
+| :--------------- | :---------------------------------------------------------------------------------------- |
+| `--help`         | Show usage without creating a project                                                     |
+| `--version`      | Print the creator's version                                                               |
+| `--lang <tag>`   | Set the primary documentation language, such as `en` or `pt-BR`                           |
+| `--skip-install` | Create files and leave installation to you                                                |
+| `--no-agents-md` | Skip `AGENTS.md`. See [AI coding agents](../05-guides/ai-agents.mdx) for what it contains |
 
 ## Development and production
 
@@ -142,6 +144,10 @@ yarn rdx prepare
 
 This validates configuration and prepares `.rdx/`, including public assets and
 configured plugin preparation. It does not create a documentation snapshot.
+
+`rdx dev`, `rdx build`, `rdx start` and `rdx prepare` also refresh the RDX
+section of `AGENTS.md` when the file has one. See
+[AI coding agents](../05-guides/ai-agents.mdx).
 
 ## Plugins and snapshots
 

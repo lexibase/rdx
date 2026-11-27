@@ -39,17 +39,20 @@ export async function prepareLocaleRoutes(project, runtime, template) {
     }
     return current
   }
-  // An existing public index owns this URL. Keep it when upgrading a project.
-  const publicIndex = path.join(project.rootDir, 'public', 'docs', 'llms.txt')
-  const hasPublicIndex = await stat(publicIndex).then(
-    (entry) => entry.isFile(),
-    (error) => {
-      if (error.code === 'ENOENT' || error.code === 'ENOTDIR') return false
-      throw error
-    }
-  )
-  if (hasPublicIndex)
-    await rm(await safe('app/docs/llms.txt/route.ts'), { force: true })
+  // An existing public index owns its URL. Keep it when upgrading a project.
+  for (const index of ['llms.txt', 'docs/llms.txt']) {
+    const hasPublicIndex = await stat(
+      path.join(project.rootDir, 'public', ...index.split('/'))
+    ).then(
+      (entry) => entry.isFile(),
+      (error) => {
+        if (error.code === 'ENOENT' || error.code === 'ENOTDIR') return false
+        throw error
+      }
+    )
+    if (hasPublicIndex)
+      await rm(await safe(`app/${index}/route.ts`), { force: true })
+  }
 
   const marker = await safe('.rdx-localization.json')
   let owned = false

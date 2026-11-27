@@ -12,6 +12,8 @@ import {
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { bundleDocs, findDocsSource } from './bundle-docs.mjs'
+
 const root = fileURLToPath(new URL('.', import.meta.url))
 const out = path.join(root, 'dist')
 const require = createRequire(import.meta.url)
@@ -89,6 +91,20 @@ async function rewrite(directory) {
   }
 }
 await rewrite(path.join(out, 'templates'))
+
+// Ship the documentation of this exact version for coding agents (AGENTS.md).
+const { version } = JSON.parse(
+  await readFile(path.join(root, 'package.json'), 'utf8')
+)
+const docsDir = await findDocsSource(
+  path.resolve(root, '../../apps/web'),
+  version
+)
+const pages = await bundleDocs({
+  docsDir,
+  version,
+  emit: (filename, content) => emit(path.join('docs', filename), content),
+})
 console.log(
-  'RDX entry package prepared with shared runtime, UI exports and templates.'
+  `RDX entry package prepared with shared runtime, UI exports, templates and ${pages} documentation pages from ${path.relative(root, docsDir)}.`
 )
