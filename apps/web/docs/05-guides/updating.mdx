@@ -89,6 +89,30 @@ yarn add @lexibase/rdx-i18n@latest
 
 :::
 
+## Update label catalogs
+
+A new release may add interface text. If your project has a language other than
+English, or a `_labels.json` file, add the new entries after updating:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx i18n sync
+
+### npm
+
+npm exec -- rdx i18n sync
+
+### yarn
+
+yarn rdx i18n sync
+
+:::
+
+New entries start empty and show the English text until you translate them. See
+[Translate the interface and categories](../04-features/languages.mdx#translate-the-interface-and-categories).
+
 ## Validate and deploy
 
 Restart the development server to check your documentation. For production:
@@ -118,5 +142,8 @@ runtime files.
 
 ## Previous migrations
 
+- [RDX 6 to 7](./migrating-6-to-7.mdx) covers interface translations and
+  category names in `_labels.json`, which replace built-in Portuguese text and
+  `_category.json`.
 - [RDX 4 to 5](./migrating-sidebar.mdx) covers sidebar ordering and public URLs
   for projects that used numbered files or folders.

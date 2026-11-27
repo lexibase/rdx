@@ -62,6 +62,21 @@ configuration, content, assets, and any components you own.
 Each top-level folder becomes a sidebar category. RDX derives the category
 label from its name. For example, `01-getting-started` becomes **Getting Started**.
 
+To show a different name, or to translate it, map the derived label in
+`_labels.json` at the project root. The folder, its order and its URL stay the
+same, and the i18n plugin is not required:
+
+```json title="_labels.json"
+{
+  "categories": {
+    "Getting Started": "First steps"
+  }
+}
+```
+
+Run `rdx i18n sync` to list every category name across your editions. See
+[Translate the interface and categories](../04-features/languages.mdx#translate-the-interface-and-categories).
+
 Start folder or file names with two digits and a dash (`00-` through `99-`)
 to control sidebar order. Lower numbers come first and unnumbered entries
 follow in alphabetical order. Set `order` in a page's frontmatter to override
