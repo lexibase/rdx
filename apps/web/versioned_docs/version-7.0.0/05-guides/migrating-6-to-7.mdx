@@ -1,0 +1,135 @@
+---
+title: Migrating from RDX 6 to 7
+navTitle: Migrating to v7
+description: Move interface translations and category names to _labels.json when upgrading to RDX 7.
+order: 93 # 100 minus the major: newer migrations list first
+highlighting: important
+---
+
+> [!WARNING] Interface text is English only
+> RDX 7 no longer ships built-in translations of its interface. A site with
+> `lang: 'pt-BR'`, or any language other than English, shows interface text such
+> as **On this page** and **Copy code** in English until you translate it in
+> `_labels.json`. Your documents are not affected.
+
+RDX 7 moves every text that is not part of your documents into one catalog per
+language, `_labels.json`: the interface text and the sidebar category names.
+Follow the steps below in order. A project that is entirely in English and has
+no `_category.json` files only needs the first step.
+
+## What changed
+
+| RDX 6                                                                  | RDX 7                                                        |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Interface text built in for English and Brazilian Portuguese           | Interface text built in for English only                     |
+| Category label and position from `_category.json`                      | Label from the folder name, position from its numeric prefix |
+| Translated category labels in `locale/<folder>/docs/**/_category.json` | Category names in `locale/<folder>/_labels.json`             |
+| Archived badge reads **Archived**                                      | Archived badge reads **Archived edition**                    |
+| `useInterfaceLocale()` from `@lexibase/rdx-ui`                         | `useLanguage()`, which returns the configured language tag   |
+
+## Update RDX
+
+Update the framework and any optional plugins as described in
+[Updating RDX](./updating.mdx). Framework and generator versions are released
+together.
+
+## Create the label catalogs
+
+Run `rdx i18n sync` from the project root. It creates `_labels.json` for the
+primary language when it is not English, and one in each translation folder,
+such as `locale/ptbr/_labels.json`:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx i18n sync
+
+### npm
+
+npm exec -- rdx i18n sync
+
+### yarn
+
+yarn rdx i18n sync
+
+:::
+
+The command lists every interface text and every category name across your
+editions, with empty values. An empty value keeps the original text, so the
+site keeps working while you translate. The i18n plugin is not required: a
+project with a single non-English language gets a root catalog too.
+
+## Translate the interface
+
+Fill in the `interface` entries for each language. Keys are the English text;
+keep placeholders such as `{version}` unchanged:
+
+```json title="locale/ptbr/_labels.json"
+{
+  "interface": {
+    "On this page": "Nesta página",
+    "Version {version}": "Versão {version}",
+    "Copy code": "Copiar código"
+  }
+}
+```
+
+A translation that drops or renames a placeholder is ignored, and `rdx check`
+reports it. See
+[Translate the interface and categories](../04-features/languages.mdx#translate-the-interface-and-categories)
+for the complete format.
+
+## Replace `_category.json`
+
+RDX 7 ignores `_category.json`. Each file needs one of these changes:
+
+- **`sidebar_position`**: rename the folder with a two-digit prefix. For example,
+  rename `docs/guides/` to `docs/02-guides/` to keep it in position 2. The URL
+  stays `/docs/guides/`. Update relative Markdown links to the new path.
+- **`title`**: if the label differs from the folder name, map the derived label
+  in the root `_labels.json`. For example, a folder `docs/02-api/` with the title
+  `Reference`:
+
+```json title="_labels.json"
+{
+  "categories": {
+    "Api": "Reference"
+  }
+}
+```
+
+- **Translated `_category.json`** inside `locale/<folder>/docs/`: move its title
+  to the `categories` section of that language's `_labels.json`, using the
+  primary category name as the key.
+
+Delete the `_category.json` files afterwards. Snapshots of older editions keep
+theirs untouched; `rdx i18n sync` already lists their category names, so map
+them in `_labels.json` when they differ from the label you want.
+
+## Review custom components
+
+If a component imports `useInterfaceLocale` from
+`@lexibase/rdx-ui/providers/locale-provider`, use `useLanguage` instead. It
+returns the configured language tag, such as `pt-BR`, rather than one of the two
+built-in locales.
+
+To keep the previous archived badge text in English, map it in the root
+`_labels.json`:
+
+```json title="_labels.json"
+{
+  "interface": {
+    "Archived edition": "Archived"
+  }
+}
+```
+
+## Check and deploy
+
+Run `rdx check`. Besides the usual content checks, it reports `_labels.json`
+entries that no edition or interface text uses, and translations with changed
+placeholders. Remove unused entries by hand or with `rdx i18n sync --prune`.
+
+Then build, review the sidebar and a translated page, and redeploy as described
+in [Validate and deploy](./updating.mdx#validate-and-deploy).
