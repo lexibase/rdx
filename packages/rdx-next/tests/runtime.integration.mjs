@@ -121,7 +121,13 @@ test(
       running?.close()
       // Unlink junctions before removing the disposable fixture.
       for (const destination of links) await rm(destination, { force: true })
-      await rm(rootDir, { recursive: true, force: true })
+      // Windows may hold files briefly after the server process exits.
+      await rm(rootDir, {
+        recursive: true,
+        force: true,
+        maxRetries: 10,
+        retryDelay: 300,
+      })
     })
     const links = []
     async function link(name, target) {
@@ -1840,10 +1846,21 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         )
         await imageDialog.getByRole('button', { name: 'Close image' }).focus()
         await page.keyboard.press('Tab')
+        // Base UI focus guards receive Tab at the edges and move focus back
+        // inside the dialog; wait for that hand-off rather than the guard.
+        const trapped = await imageDialog.evaluate(
+          (node) =>
+            new Promise((resolve) => {
+              const deadline = performance.now() + 2000
+              ;(function check() {
+                if (node.contains(document.activeElement)) resolve(true)
+                else if (performance.now() > deadline) resolve(false)
+                else requestAnimationFrame(check)
+              })()
+            })
+        )
         assert.ok(
-          await imageDialog.evaluate((node) =>
-            node.contains(document.activeElement)
-          ),
+          trapped,
           `Focus left the image dialog: ${await page.evaluate(
             () => document.activeElement?.outerHTML.slice(0, 160) ?? 'none'
           )}`
