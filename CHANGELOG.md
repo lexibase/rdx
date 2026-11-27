@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 7.0.0 — Prepared
+
+- Translate interface text and sidebar category names with one `_labels.json` catalog per language, managed by `rdx i18n sync`. Interface text is built in for English only, and `_category.json` is no longer read. Add a mobile navigation drawer, and let `create-rdx` set the primary language.
+
 ## 6.6.6 — Prepared
 
 - Fix validation of generated and localized links, semantic ordering of changelog releases, disabled tabs in Markdown and exports, UTF-8 BOM homepage catalogs, and footnote heading links in search and documentation checks.

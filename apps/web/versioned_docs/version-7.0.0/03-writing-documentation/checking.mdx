@@ -1,0 +1,293 @@
+---
+title: Checking documentation
+description: Find broken pages, section links and local assets before deployment.
+order: 12
+prerequisites:
+  - ./create-docs.mdx
+---
+
+## Run the check
+
+Run this from the project directory containing `rdx.config.ts`:
+
+:::tabs
+
+### pnpm
+
+pnpm rdx check
+
+### npm
+
+npm exec -- rdx check
+
+### yarn
+
+yarn rdx check
+
+:::
+
+RDX reads the documentation and reports all detected problems with the source
+file, line and column. It checks content without building the site or preparing
+`.rdx/`.
+
+`rdx build` runs this check automatically before preparing the runtime or starting
+Next.js. Detected problems stop the build. Use `rdx check` on its own for an
+earlier review, in a Git hook or in CI.
+
+```text
+docs/guides/setup.mdx:12:1 [anchor] "./install.mdx#requirements": Section "#requirements" does not exist in docs/guides/install.mdx.
+RDX check failed: 8 pages checked, 1 problem.
+```
+
+Fix the reported references and rerun the command. A successful check exits with
+code `0`; detected problems or invalid configuration exit with code `1`. You can
+run the same command in your CI before building or deploying.
+
+When the checker finds one close match for a broken page link or heading ID,
+it prints a suggestion below the error. File links can match a page that moved
+to another folder in the same edition and language.
+
+```text
+docs/guides/setup.mdx:12:1 [page] "./installation.mdx": "guides/installation.mdx" does not exist in this documentation source.
+  Did you mean "../getting-started/installation.mdx"?
+```
+
+Review the suggested link, edit the source file, and run the check again.
+
+## Use the report in CI
+
+Add `--json` to write one JSON report to standard output. It contains
+`checkedPages`, `diagnostics` for errors, and `warnings`. Both arrays are present
+even when empty. Entries include `file`, `line`, `column`, `code`, and `message`.
+A `suggestion` is included when the checker finds a likely replacement. File
+paths are relative to the documentation project root.
+
+:::tabs
+
+### pnpm
+
+pnpm exec rdx check --json
+
+### npm
+
+npm exec -- rdx check --json
+
+### yarn
+
+yarn rdx check --json
+
+:::
+
+By default, the check exits with `1` when the report contains errors and `0`
+when it only contains warnings or has no findings. If the check cannot start, for example
+because `rdx.config.ts` is missing, it exits with `1` and writes the error to
+standard error without a JSON report. Homepage translation notices also go to
+standard error.
+
+### Limit warnings
+
+Use `--max-warnings N` to fail the check when the documentation report contains
+more than `N` warnings. A report with exactly `N` warnings still passes if it
+has no errors. For example, set a limit of 14 and lower it as you fix existing
+warnings. Set the limit to `0` to require a warning-free report.
+
+:::tabs
+
+### pnpm
+
+pnpm exec rdx check --max-warnings 14
+
+### npm
+
+npm exec -- rdx check --max-warnings 14
+
+### yarn
+
+yarn rdx check --max-warnings 14
+
+:::
+
+Combine the limit with `--json` to include `maxWarnings` and
+`warningLimitExceeded` in the report. The limit applies to the warnings in the
+document report. Homepage translation notices are separate.
+
+### Fail only on new warnings
+
+Use a warning baseline when you want to prevent new warnings while fixing the
+existing ones over time. For example, a pull request can fix one unlinked page
+and introduce another. The warning total stays the same, but the baseline check
+reports the new page and fails.
+
+First, save the current warnings and commit the JSON file to your repository.
+The command creates a new file. It leaves existing files intact and exits
+without writing if the check fails.
+
+:::tabs
+
+### pnpm
+
+pnpm exec rdx check --write-baseline rdx-check-baseline.json
+
+### npm
+
+npm exec -- rdx check --write-baseline rdx-check-baseline.json
+
+### yarn
+
+yarn rdx check --write-baseline rdx-check-baseline.json
+
+:::
+
+Use the committed file for local checks or in CI.
+
+:::tabs
+
+### pnpm
+
+pnpm exec rdx check --baseline rdx-check-baseline.json
+
+### npm
+
+npm exec -- rdx check --baseline rdx-check-baseline.json
+
+### yarn
+
+yarn rdx check --baseline rdx-check-baseline.json
+
+:::
+
+The baseline matches warnings by file path, warning code, and message. Moving
+an existing warning to another line in the same file preserves the match.
+Repeated warnings count separately. Warnings that have disappeared are ignored.
+To remove them from the baseline, generate a fresh file at a different path and
+review the diff before replacing the committed file.
+
+Errors still fail the check. You can also use `--max-warnings` with a baseline
+to limit the total number of warnings, including known ones. These flags apply
+to `rdx check`. The automatic check in `rdx build` uses its default behavior.
+
+With `--json`, the report keeps all warnings in `warnings` and adds a
+`baseline` object with `file`, `knownWarningCount`, and `newWarnings`.
+Homepage translation notices are separate from the baseline.
+
+### Annotate a GitHub pull request
+
+Add this step to a Linux job after checkout and dependency installation. This
+example assumes your documentation project is at the repository root. It turns
+report entries into [GitHub Actions annotations](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#setting-an-error-message)
+and preserves the check's exit code.
+
+```yaml
+- name: Check documentation links
+  shell: bash
+  run: |
+    status=0
+    report="$RUNNER_TEMP/rdx-check.json"
+    pnpm exec rdx check --json > "$report" || status=$?
+    if [[ ! -s "$report" ]]; then exit "$status"; fi
+
+    node --input-type=module - "$report" <<'JS'
+    import { readFileSync } from 'node:fs'
+
+    const report = JSON.parse(readFileSync(process.argv[2], 'utf8'))
+    const escapeData = (text) => text.replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A')
+    const escapeProperty = (text) => escapeData(text).replaceAll(':', '%3A').replaceAll(',', '%2C')
+
+    const warnings = report.baseline?.newWarnings ?? report.warnings
+    for (const [level, entries] of [['error', report.diagnostics], ['warning', warnings]]) {
+      for (const { file, line, column, message, suggestion } of entries) {
+        const detail = suggestion ? `${message}\nDid you mean ${JSON.stringify(suggestion)}?` : message
+        console.log(`::${level} file=${escapeProperty(file)},line=${line},col=${column}::${escapeData(detail)}`)
+      }
+    }
+    JS
+    exit "$status"
+```
+
+## What is checked?
+
+- Duplicate page routes, including a `.md` and `.mdx` file with the same path.
+- Relative `.md` and `.mdx` links and local documentation URLs.
+- Section fragments such as `#installation`, using the same heading IDs as the
+  Markdown renderer, including repeated headings.
+- Literal IDs in MDX, such as `<span id="details" />`.
+- Duplicate section IDs within a document, including collisions between heading
+  IDs and literal MDX IDs. The report points to the later occurrence.
+- Markdown images and download links that point to files in `public/`.
+- The public image file configured in `navbar.logo`.
+- Links to enabled localized homepages, search indexes, `llms.txt`, and existing
+  Markdown exports of documentation pages and changelog notes. Unknown languages
+  and missing exports are still reported. A missing translation has no Markdown
+  export; link to the primary-language export instead.
+- Reference-style links and images, and literal HTML `href` and image `src` values.
+- Frontmatter, Markdown component syntax, and MDX parsing errors.
+
+Line numbers refer to the original file, including its frontmatter. Examples
+inside code blocks are treated as code, not as links to validate.
+
+Repeated Markdown headings remain valid. RDX generates distinct IDs such as
+`setup` and `setup-1`. If you add a literal MDX ID, choose a value that is unique
+within that page.
+
+Footnote references in a heading contribute their displayed numbers to its ID.
+For example, `## Setup[^note]` produces `#setup1` when it contains the page's
+first footnote reference. Earlier references can change that number; use the
+heading permalink to copy the section's URL.
+
+Public asset paths must match the capitalization of each folder and filename.
+For example, use `/images/Logo.svg` when the file is named `Logo.svg`. The check
+reports a mismatch on any operating system and suggests the exact path when it
+finds a unique match.
+
+### Find pages without incoming links
+
+An `[warning: unlinked]` entry means the checker found no link to the page
+from another document or release note. Add a link where readers would benefit
+from it, such as in the body of a guide or in its `related` or `prerequisites`
+frontmatter. The checker resolves redirects before counting a link.
+
+The check skips documentation entry pages, archived editions, and untranslated
+pages displayed through language fallback. It reads static content, so links
+generated by custom React components, the sidebar, search, and page navigation
+do not count. These warnings allow `rdx build` to continue. In `rdx check`, they
+only affect the exit code when they exceed a configured `--max-warnings` limit.
+
+### Find links that still use former URLs
+
+When a link points to a former page URL listed in `redirectFrom`, the check
+validates the destination and reports a `[warning: redirected-link]` with the
+current URL. Copy the suggested URL into your link. Query parameters and section
+fragments are preserved.
+
+```text
+docs/guides/setup.mdx:12:1 [warning: redirected-link] "/docs/install#requirements" redirects to "/docs/getting-started/installation#requirements".
+```
+
+The warning appears in the JSON report and counts toward `--max-warnings`.
+Historical edition redirects continue to resolve links during validation.
+
+## Versions
+
+With the versioning plugin enabled, RDX checks live documentation and every
+published or archived edition. Relative links and section fragments are resolved
+within the edition containing the link. Historical URLs that redirect to another
+edition use the destination edition; retained copies behind those redirects are
+not checked again.
+
+## Static content
+
+With the [changelog plugin](../04-features/plugins.mdx#publish-release-notes),
+RDX checks links in each note's `links` frontmatter and Markdown body. This
+includes documentation pages, section anchors, links to other releases, and
+local images and downloads. Use paths from the site root, such as
+`/docs/installation` or `/downloads/example.zip`. Frontmatter diagnostics identify
+the field, such as `links[0].href`.
+
+Frontmatter is read as YAML or JSON data. RDX does not request external URLs or execute document imports, expressions or
+React components. Absolute links to the configured `metadata.metadataBase`
+origin are checked as local URLs.
+
+Homepage components and dynamically generated IDs require checking in the running
+site. When a document declares a dynamic ID, the checker cannot prove that an
+anchor is missing from that document. Literal links and local files are still
+checked. A content check complements the production build and browser review.
