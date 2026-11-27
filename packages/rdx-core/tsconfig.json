@@ -10,7 +10,7 @@
     "paths": {
       "@/*": ["./*"],
       "@lexibase/rdx-core/*": ["./src/*"],
-      "@lexibase/rdx-types": ["../rdx-types/src/index.d.ts"],
+      "@lexibase/rdx-types": ["../rdx-types/src/index.d.ts"]
     }
   },
   "include": ["."],

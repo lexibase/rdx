@@ -29,6 +29,8 @@
 
 - Prepare releases com `pnpm release:note`, `pnpm release:plan` e `pnpm release:prepare`. Revise a severidade semântica e as notas; deixe a atualização mecânica de versões, template, changelog e snapshot para o script. Execute localmente os testes focados nas mudanças. A CI executa `pnpm check` e os testes completos de instalação; não repita essa bateria localmente durante a preparação rotineira de releases, salvo para investigar uma falha específica ou por pedido explícito do usuário.
 
+- `pnpm check` começa conferindo a formatação do repositório inteiro com o Prettier (`pnpm format:repo`); `pnpm format` corrige os arquivos. Snapshots em `versioned_docs` e arquivos gerados ficam fora, pelo `.prettierignore`.
+
 - Mudanças visuais ou interativas passam pelos testes de navegador do `rdx-next`, que usam o Playwright: `pnpm --filter @lexibase/rdx-next test:runtime`. Instale o Chromium uma vez com `pnpm --filter @lexibase/rdx-next exec playwright install chromium`, ou aponte `RDX_BROWSER_EXECUTABLE` para um Chrome ou Edge instalado. Sem navegador, as verificações são puladas com um aviso; com `RDX_REQUIRE_BROWSER=1`, como na CI, elas falham.
 
 - Valide as mudanças e forneça ao final a mensagem de conventional commit e os comandos para atualizar ou criar a PR.
