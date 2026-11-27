@@ -9,16 +9,25 @@ RDX automatically publishes a Markdown index at `/docs/llms.txt`. The index
 groups pages by category and links to their Markdown exports. Open the file in
 a browser or give its URL to a tool that reads documentation.
 
-If you already maintain `public/docs/llms.txt`, RDX serves that file at the
-same address.
+Tools that only know your domain look for `/llms.txt` first. RDX publishes that
+file too: a short index that links to the documentation index of each language
+and to every edition's own index.
+
+If you already maintain `public/llms.txt` or `public/docs/llms.txt`, RDX serves
+your file at that address instead.
 
 ## Find the right edition and language
 
-With versioning enabled, the index lists the latest active published edition.
-Before the first publication, it lists the live documentation. The index at
-`/docs/llms.txt` uses the default language. Translated documentation also has
-an index under its language path, such as `/pt-br/docs/llms.txt`, which lists
-pages with an authored translation.
+With versioning enabled, the index lists the latest active published edition
+and names it in a `Documentation edition` line. Before the first publication,
+it lists the live documentation. The index at `/docs/llms.txt` uses the default
+language. Translated documentation also has an index under its language path,
+such as `/pt-br/docs/llms.txt`, which lists pages with an authored translation.
+
+Each published edition also has its own index below its path, such as
+`/docs/1.2.0/llms.txt` or `/pt-br/docs/1.2.0/llms.txt`. Give that address to a
+tool that should follow an older version. Archived editions and versions that
+redirect to another edition have no index.
 
 Set `metadata.metadataBase` in `rdx.config.ts` to your public site URL if you
 want absolute links in the index and exports.

@@ -53,8 +53,11 @@ export function collectPageRedirects(
             key.startsWith(`${routeKey(other.root)}/`) &&
             routeKey(other.root).startsWith(`${routeKey(root)}/`)
         )
+        // RDX serves these indexes; an edition has its own below its root.
         const builtIn =
-          key === '/docs/llms.txt' || key === `${source.basePath}/llms.txt`
+          key === '/docs/llms.txt' ||
+          key === `${source.basePath}/llms.txt` ||
+          key === `${routeKey(root)}/llms.txt`
         if (occupied.has(key) || reserved || builtIn || aliases.has(key)) {
           onError(
             new Error(

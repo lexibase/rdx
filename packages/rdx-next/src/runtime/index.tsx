@@ -97,6 +97,7 @@ export { getChangelogFeedResponse } from './changelog-feed'
 export { getSourceRobots, getRdxRobots, getRdxSitemap } from './indexing'
 export {
   getLlmIndexResponse,
+  getRootLlmIndexResponse,
   getMarkdownHref,
   getMarkdownPaths,
   getChangelogMarkdownResponse,

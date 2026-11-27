@@ -13,7 +13,12 @@
     },
     "@lexibase/rdx#build": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/rdx-ui/src/**"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/packages/rdx-ui/src/**",
+        "$TURBO_ROOT$/apps/web/docs/**",
+        "$TURBO_ROOT$/apps/web/versioned_docs/**"
+      ],
       "outputs": ["dist/**"]
     },
     "web#lint": {

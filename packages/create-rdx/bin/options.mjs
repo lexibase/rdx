@@ -32,6 +32,7 @@ export function parseArguments(args) {
   let projectName
   let lang
   let skipInstall = false
+  let agentsMd = true
   let help = false
   let version = false
   for (let index = 0; index < args.length; index++) {
@@ -43,6 +44,7 @@ export function parseArguments(args) {
       if (typeof result === 'string') throw new Error(result)
       lang = result.canonical
     } else if (argument === '--skip-install') skipInstall = true
+    else if (argument === '--no-agents-md') agentsMd = false
     else if (argument === '--help' || argument === '-h') help = true
     else if (argument === '--version' || argument === '-v') version = true
     else if (argument.startsWith('-'))
@@ -51,5 +53,5 @@ export function parseArguments(args) {
       throw new Error('Provide only one project name. Use --help for usage.')
     else projectName = argument
   }
-  return { projectName, lang, skipInstall, help, version }
+  return { projectName, lang, skipInstall, agentsMd, help, version }
 }

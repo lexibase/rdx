@@ -14,6 +14,7 @@ import {
   getSourceRobots,
   getRdxSitemap,
   getLlmIndexResponse,
+  getRootLlmIndexResponse,
   getMarkdownPaths,
   getChangelogMarkdownResponse,
   getDocumentMarkdownResponse,
@@ -146,6 +147,18 @@ export function createDocumentation(
     }
   }
 
+  /** Published editions with their own `/docs/<version>/llms.txt`. */
+  function llmEditions() {
+    return project.sources
+      .filter(
+        (entry) =>
+          entry.id !== 'current' &&
+          entry.redirectTo === undefined &&
+          entry.badge !== 'Archived'
+      )
+      .map((entry) => entry.routePrefix)
+  }
+
   return {
     syntaxGrammars: project.syntaxGrammars,
     syntaxThemes: project.config.syntaxHighlighting?.themes,
@@ -187,6 +200,16 @@ export function createDocumentation(
     },
     llmIndex() {
       return getLlmIndexResponse(project, documentPaths())
+    },
+    rootLlmIndex() {
+      return getRootLlmIndexResponse(project)
+    },
+    llmEditions,
+    editionLlmIndex(version: string) {
+      const entry = contentSource(version)
+      return entry && llmEditions().includes(version)
+        ? getLlmIndexResponse(project, documentPaths(), entry)
+        : new Response(null, { status: 404 })
     },
     markdownPaths() {
       return getMarkdownPaths(project, documentPaths()).filter(({ path }) =>

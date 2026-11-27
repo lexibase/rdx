@@ -68,21 +68,48 @@ function response(body: string | null, type: string, status = 200) {
   })
 }
 
-export function getLlmIndexResponse(
-  project: RdxProject,
-  documentPath?: DocumentPath
-) {
-  project = defaultLocale(project)
-  const source =
+/** The edition `/docs/llms.txt` lists: the latest active publication, else the live docs. */
+function indexedSource(project: RdxProject) {
+  return (
     project.sources.find(
       (entry) =>
         entry.id !== 'current' &&
         entry.redirectTo === undefined &&
         entry.badge !== 'Archived'
     ) ?? project.sources[0]
+  )
+}
+
+/** Editions served at `/docs/<edition>/llms.txt`; archived ones stay out, as in the sitemap. */
+function editionSources(project: RdxProject) {
+  return project.sources.filter(
+    (source) =>
+      source.routePrefix &&
+      source.redirectTo === undefined &&
+      source.badge !== 'Archived'
+  )
+}
+
+function editionLabel(source: RdxContentSource) {
+  return `${source.label}${source.badge ? ` (${source.badge})` : ''}`
+}
+
+/**
+ * Index the pages of one edition as llms.txt. Without `edition`, the index
+ * lists the edition readers see first at `/docs/llms.txt`.
+ */
+export function getLlmIndexResponse(
+  project: RdxProject,
+  documentPath?: DocumentPath,
+  edition?: RdxContentSource
+) {
+  project = defaultLocale(project)
+  const source = edition ?? indexedSource(project)
   const { metadata, description } = project.config
   const lines = [`# ${text(metadata.applicationName)} Documentation`, '']
   if (description) lines.push(`> ${text(description)}`, '')
+  if (source?.routePrefix)
+    lines.push(`Documentation edition: ${text(editionLabel(source))}`, '')
   if (source) {
     for (const category of getDocsIndex(getSourceOptions(project, source))) {
       const pages = category.pages.filter(
@@ -104,6 +131,44 @@ export function getLlmIndexResponse(
   return response(lines.join('\n'), 'text/plain')
 }
 
+/**
+ * The site-wide `/llms.txt`: where tools look first. It points to the
+ * documentation index of each language and to every edition's own index.
+ */
+export function getRootLlmIndexResponse(
+  project: RdxProject,
+  editionIndexPath: (source: RdxContentSource) => string = (source) =>
+    `${getDocsHref(project, source)}/llms.txt`
+) {
+  project = defaultLocale(project)
+  const { metadata, description } = project.config
+  const lines = [`# ${text(metadata.applicationName)}`, '']
+  if (description) lines.push(`> ${text(description)}`, '')
+  const current = indexedSource(project)
+  lines.push('## Documentation', '')
+  const languages = project.localization?.locales ?? []
+  if (languages.length)
+    for (const locale of languages)
+      lines.push(
+        `- [${text(locale.label)}](<${publicUrl(project, `/${locale.path}/docs/llms.txt`)}>): Documentation index in ${text(locale.label)}`
+      )
+  else
+    lines.push(
+      `- [Documentation](<${publicUrl(project, '/docs/llms.txt')}>): Pages of the current documentation${current?.routePrefix ? `, edition ${text(editionLabel(current))}` : ''}`
+    )
+  lines.push('')
+  const editions = editionSources(project)
+  if (editions.length) {
+    lines.push('## Editions', '')
+    for (const source of editions)
+      lines.push(
+        `- [${text(editionLabel(source))}](<${publicUrl(project, editionIndexPath(source))}>)`
+      )
+    lines.push('')
+  }
+  return response(lines.join('\n'), 'text/plain')
+}
+
 export function getMarkdownPaths(
   project: RdxProject,
   documentPath?: DocumentPath
@@ -114,6 +179,10 @@ export function getMarkdownPaths(
   }
   for (const source of getContentSources(project)) {
     if (source.redirectTo !== undefined) continue
+    // Edition indexes; next.config rewrites /docs/<edition>/llms.txt here.
+    // Projects with their own document routes serve their own indexes.
+    if (source.routePrefix && source.badge !== 'Archived' && !documentPath)
+      paths.add(`${getDocsHref(project, source).slice(1)}/llms.txt`)
     for (const category of getDocsIndex(getSourceOptions(project, source))) {
       for (const page of category.pages) {
         if (isFallbackPage(project, source, page.sourcePath)) continue
@@ -137,6 +206,7 @@ export function parseMarkdownPath(path: string[]) {
 }
 
 export function getMarkdownResponse(project: RdxProject, path: string[]) {
+  if (path.at(-1) === 'llms.txt') return getEditionLlmResponse(project, path)
   const segments = parseMarkdownPath(path)
   if (!segments) return markdownNotFound()
   if (segments[0] === 'changelog')
@@ -157,6 +227,26 @@ export function getMarkdownResponse(project: RdxProject, path: string[]) {
     edition ?? project.sources[0],
     segments.join('/')
   )
+}
+
+/** `[<locale>/]docs/<edition>/llms.txt`, for editions that are still served. */
+function getEditionLlmResponse(project: RdxProject, path: string[]) {
+  const segments = path.slice(0, -1)
+  if (project.localization) {
+    const locale = segments.shift()
+    if (!project.localization.locales.some((entry) => entry.path === locale))
+      return markdownNotFound()
+    project = getLocalizedProject(project, locale!)
+  }
+  const edition =
+    segments.length === 2 && segments[0] === 'docs'
+      ? editionSources(project).find(
+          (source) => source.routePrefix === segments[1]
+        )
+      : undefined
+  return edition
+    ? getLlmIndexResponse(project, undefined, edition)
+    : response(null, 'text/plain', 404)
 }
 
 export function markdownNotFound() {

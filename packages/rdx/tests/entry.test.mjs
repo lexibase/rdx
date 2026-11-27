@@ -63,6 +63,36 @@ test('public UI paths are typed per-module re-exports rather than bundled copies
   }
 })
 
+test('the package ships its documentation as local Markdown for coding agents', async () => {
+  const docs = path.join(root, 'dist/docs')
+  const index = await readFile(path.join(docs, 'index.md'), 'utf8')
+  const { version } = JSON.parse(
+    await readFile(path.join(root, 'package.json'), 'utf8')
+  )
+  assert.match(index, new RegExp(`^# RDX ${version.replaceAll('.', '\\.')} `))
+  const links = [...index.matchAll(/\]\(([^)]+\.md)\)/g)].map(
+    ([, href]) => href
+  )
+  assert.ok(links.includes('getting-started/config.md'), index)
+  for (const href of links) {
+    const page = await readFile(path.join(docs, href), 'utf8')
+    assert.match(
+      page,
+      new RegExp(`^---\\ntitle: .+\\n[\\s\\S]*version: "${version}"`)
+    )
+    // MDX code never reaches the export; local pages link to local files.
+    const prose = page.replace(/^(`{3,}|~{3,})[^\n]*\n[\s\S]*?^\1$/gm, '')
+    assert.doesNotMatch(
+      prose,
+      /^(?:import\s.+\sfrom\s|export\s+(?:default|const|function)\b)/m,
+      href
+    )
+    assert.doesNotMatch(prose, /\\:/, href)
+    for (const [, target] of prose.matchAll(/\]\((?!https?:|#)([^)#\s]+)/g))
+      assert.match(target, /\.md$|^\.\.?\//, `${href}: ${target}`)
+  }
+})
+
 test('main CLI prepares its own public-import templates without changing user sources or enabling plugins', async (t) => {
   const project = await mkdtemp(path.join(os.tmpdir(), 'rdx-entry-'))
   t.after(() => rm(project, { recursive: true, force: true }))
@@ -83,11 +113,22 @@ test('main CLI prepares its own public-import templates without changing user so
   await writeFile(path.join(project, 'rdx.config.ts'), config)
   await mkdir(path.join(project, 'docs'))
   await writeFile(path.join(project, 'docs/intro.mdx'), '# Preserve this')
+  await writeFile(
+    path.join(project, 'AGENTS.md'),
+    '<!-- BEGIN:rdx-agent-rules -->\n<!-- END:rdx-agent-rules -->\n'
+  )
   const result = spawnSync(process.execPath, [cli, 'prepare'], {
     cwd: project,
     encoding: 'utf8',
   })
   assert.equal(result.status, 0, result.stderr)
+  const { version } = JSON.parse(
+    await readFile(path.join(root, 'package.json'), 'utf8')
+  )
+  const agents = await readFile(path.join(project, 'AGENTS.md'), 'utf8')
+  assert.match(agents, new RegExp(`uses RDX ${version.replaceAll('.', '\\.')}`))
+  assert.match(agents, /`node_modules\/@lexibase\/rdx\/dist\/docs\/index\.md`/)
+  assert.match(result.stdout, /Updated the RDX section of AGENTS\.md/)
   assert.equal(
     await readFile(path.join(project, 'rdx.config.ts'), 'utf8'),
     config

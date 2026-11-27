@@ -17,6 +17,20 @@ function parse(source, links, { mdx = true } = {}) {
   if (links) parser.use(remarkDocumentLinks, links)
   return parser.runSync(parser.parse(source), { value: source })
 }
+test('Markdown exports keep colons readable in text and link destinations', () => {
+  const output = exportMarkdownBody(
+    'Edit the file at your root:\n\n```ts\nx\n```\n\nSee the [license](https://example.com/LICENSE) at 10:30.\n\n:::note\nKept.\n:::\n',
+    {
+      sourceRoot: path.resolve('fixtures'),
+      sourcePath: path.resolve('fixtures/intro.mdx'),
+      documents: [],
+    }
+  )
+  assert.doesNotMatch(output, /\\:/)
+  assert.match(output, /\[license\]\(https:\/\/example\.com\/LICENSE\)/)
+  assert.match(output, /^:::note\nKept\.\n:::$/m)
+})
+
 function nodes(tree, name) {
   return [
     ...(tree.name === name ? [tree] : []),

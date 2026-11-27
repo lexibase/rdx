@@ -775,6 +775,27 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
         await html('/pt-br/docs/llms.txt'),
         /\/minha-tool\/rdx-markdown\/pt-br\/docs\/2.0.0\/guides\/intro\.md/
       )
+      // The root index lists languages and editions under the base path;
+      // edition indexes are rewritten to their Markdown export.
+      const rootIndex = await html('/llms.txt')
+      assert.match(
+        rootIndex,
+        /\(<https:\/\/docs.example.test\/minha-tool\/pt-br\/docs\/llms.txt>\)/
+      )
+      assert.match(
+        rootIndex,
+        /\[2\.0\.0\]\(<https:\/\/docs.example.test\/minha-tool\/en\/docs\/2.0.0\/llms.txt>\)/
+      )
+      const editionIndex = await html('/pt-br/docs/2.0.0/llms.txt')
+      assert.match(editionIndex, /Documentation edition: 2\.0\.0/)
+      assert.match(
+        editionIndex,
+        /\/minha-tool\/rdx-markdown\/pt-br\/docs\/2.0.0\/guides\/intro\.md/
+      )
+      assert.equal(
+        (await fetch(`${base}/pt-br/docs/9.9.9/llms.txt`)).status,
+        404
+      )
       assert.match(
         await html('/robots.txt'),
         /Sitemap: https:\/\/docs.example.test\/minha-tool\/sitemap.xml/

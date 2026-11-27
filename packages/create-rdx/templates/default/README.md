@@ -22,6 +22,9 @@ its internal runtime in `.rdx/`.
 - Browse `docs/02-examples/` for working Markdown components, including Steps.
 - Use **Copy this page** on any document to copy its Markdown, or open
   `/docs/llms.txt` for an index of the published documentation.
+- `AGENTS.md` points AI coding agents to the documentation of the installed
+  RDX version. RDX updates the section between its markers; add your own rules
+  outside them.
 
 Run `pnpm check` (or `npm run check` / `yarn run check`) to find broken links,
 missing local assets, and invalid content before building the site.

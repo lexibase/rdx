@@ -71,6 +71,7 @@
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
+    "@lexibase/rdx-core": "workspace:*",
     "@rdx/eslint-config": "workspace:*",
     "eslint": "^9.39.5"
   },

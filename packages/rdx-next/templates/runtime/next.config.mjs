@@ -15,6 +15,20 @@ const nextConfig = async (phase) => ({
   })),
   outputFileTracingRoot: buildRoot,
   agentRules: false,
+  // Edition indexes are generated with the Markdown exports. Rewrites run
+  // after static routes, so /docs/llms.txt keeps its own route.
+  async rewrites() {
+    return [
+      {
+        source: '/docs/:edition/llms.txt',
+        destination: '/rdx-markdown/docs/:edition/llms.txt',
+      },
+      {
+        source: '/:locale/docs/:edition/llms.txt',
+        destination: '/rdx-markdown/:locale/docs/:edition/llms.txt',
+      },
+    ]
+  },
   turbopack: {
     root: buildRoot,
   },
