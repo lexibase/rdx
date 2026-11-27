@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { launchBrowser } from './helpers/browser.mjs'
+import { portugueseLabels } from './helpers/portuguese.mjs'
 import { Buffer } from 'node:buffer'
 import { spawnSync } from 'node:child_process'
 import { createRequire } from 'node:module'
@@ -109,6 +110,12 @@ test(
 export default function Home({ lang, docsHref, t }: RdxTranslatedHomepageProps) {
   return <><h1 data-home-lang={lang}>{t('CustomHomepageMarker')}</h1><p>{t('PrimaryOnlyMarker')}</p><a data-home-docs href={docsHref}>{t('Docs')}</a></>
 }`
+    )
+    // RDX ships English only: the project translates its interface. The
+    // generated catalog prefixes each text with PT-BR.
+    await write(
+      'locale/ptbr/_labels.json',
+      JSON.stringify({ interface: portugueseLabels })
     )
     await write(
       'locale/ptbr/home.json',
@@ -223,15 +230,15 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       const translated = await html('/pt-br/docs/guides/intro')
       assert.match(
         translated,
-        /<nav aria-label="Antes de começar"[^>]*>.*?href="\/pt-br\/docs\/guides\/install".*?Installation.*?<\/nav>.*?TranslatedIntroMarker/s
+        /<nav aria-label="PT-BR Before you begin"[^>]*>.*?href="\/pt-br\/docs\/guides\/install".*?Installation.*?<\/nav>.*?TranslatedIntroMarker/s
       )
       assert.match(
         translated,
-        /<nav aria-label="Relacionados"[^>]*>.*?href="\/pt-br\/docs\/guides\/install".*?Installation.*?<\/nav>.*?<time/s
+        /<nav aria-label="PT-BR Related"[^>]*>.*?href="\/pt-br\/docs\/guides\/install".*?Installation.*?<\/nav>.*?<time/s
       )
       assert.match(
         translated,
-        /<time dateTime="2026-08-25">Última atualização em 25 de agosto de 2026<\/time>/i
+        /<time dateTime="2026-08-25">PT-BR Last updated 25 de agosto de 2026<\/time>/i
       )
       assert.match(
         await html('/en/docs/guides/intro'),
@@ -263,7 +270,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       assert.match(fallback, /OriginalInstallMarker/)
       assert.match(fallback, /data-rdx-translation-fallback/)
       assert.match(fallback, /data-rdx-translate-page/)
-      assert.match(fallback, /Traduza esta página/)
+      assert.match(fallback, /PT-BR Translate this page/)
       assert.match(
         fallback,
         /href="https:\/\/github.com\/example\/project\/tree\/main\/locale"/
@@ -550,7 +557,7 @@ export default defineConfig({ metadata: { applicationName: 'Locale Docs', metada
       const localizedDocs = await html('/pt-br/docs/2.0.0/guides/intro')
       assert.match(
         localizedDocs,
-        /<a\b(?=[^>]*href="\/minha-tool\/pt-br\/docs\/2\.0\.0")(?=[^>]*aria-current="true")[^>]*>Docs<\/a>/
+        /<a\b(?=[^>]*href="\/minha-tool\/pt-br\/docs\/2\.0\.0")(?=[^>]*aria-current="true")[^>]*>PT-BR Docs<\/a>/
       )
       assert.match(changes, /<button\b[^>]*aria-label="Copy RSS feed link"/)
       const feed = await fetch(base + '/changelog/rss.xml')

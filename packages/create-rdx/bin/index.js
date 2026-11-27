@@ -7,7 +7,12 @@ import spawn from 'cross-spawn'
 import fs from 'fs-extra'
 import prompts from 'prompts'
 
-import { parseArguments, validateProjectName } from './options.mjs'
+import {
+  isEnglish,
+  parseArguments,
+  validateLanguage,
+  validateProjectName,
+} from './options.mjs'
 import { normalizePnpmRdxApprovals } from './pnpm-policy.mjs'
 import { installedRuntime } from './installed-runtime.mjs'
 import { runStep } from './progress.mjs'
@@ -63,13 +68,19 @@ function run(command, args, cwd, label = `${command} ${args.join(' ')}`) {
 async function main() {
   const {
     projectName: nameFromCli,
+    lang: langFromCli,
     skipInstall,
     help,
     version,
   } = parseArguments(process.argv.slice(2))
   if (help) {
-    console.log('Usage: create-rdx [project-name] [--skip-install]')
+    console.log(
+      'Usage: create-rdx [project-name] [--lang <tag>] [--skip-install]'
+    )
     console.log('  Without a project name, RDX asks for one interactively.')
+    console.log(
+      '  --lang <tag>    Primary documentation language, e.g. en or pt-BR.'
+    )
     console.log(
       '  --skip-install  Create files without installing dependencies.'
     )
@@ -103,6 +114,26 @@ async function main() {
   }
   const validation = validateProjectName(projectName)
   if (validation !== true) throw new Error(validation)
+
+  // Ask only in an interactive terminal; scripts keep English unless --lang.
+  let lang = langFromCli ?? 'en'
+  if (!langFromCli && process.stdin.isTTY && process.stdout.isTTY) {
+    const answer = await prompts({
+      type: 'text',
+      name: 'lang',
+      message: 'What is the primary language of your documentation?',
+      initial: 'en',
+      validate: (value) =>
+        typeof validateLanguage(value) === 'string'
+          ? validateLanguage(value)
+          : true,
+    })
+    if (!answer.lang) {
+      console.log('Project creation cancelled.')
+      return
+    }
+    lang = validateLanguage(answer.lang).canonical
+  }
 
   const targetDir = path.resolve(process.cwd(), projectName)
   const relativeTarget = path.relative(process.cwd(), targetDir)
@@ -138,10 +169,12 @@ async function main() {
       const config = await fs.readFile(configPath, 'utf8')
       await fs.writeFile(
         configPath,
-        config.replace(
-          'since: new Date().getFullYear(),',
-          `since: ${new Date().getFullYear()},`
-        )
+        config
+          .replace(
+            'since: new Date().getFullYear(),',
+            `since: ${new Date().getFullYear()},`
+          )
+          .replace("lang: 'en',", `lang: '${lang}',`)
       )
 
       const gitignoreTemplatePath = path.join(targetDir, 'gitignore.template')
@@ -183,18 +216,25 @@ async function main() {
         { intervalMs: packageManager === 'pnpm' ? 0 : 15_000 }
       )
       await runStep('[3/3] Preparing RDX...', async () => {
-        if (packageManager === 'yarn') {
-          // Yarn provides the project's Plug'n'Play loader when needed.
-          await run(packageManager, ['exec', 'rdx', 'prepare'], targetDir)
-        } else {
-          // Avoid another package-manager startup and automatic install check.
-          const executable = await installedRuntime(targetDir)
-          await run(
-            process.execPath,
-            [executable, 'prepare'],
-            targetDir,
-            'rdx prepare'
-          )
+        // Non-English projects start with a _labels.json ready to translate.
+        const commands = [
+          ...(isEnglish(lang) ? [] : [['i18n', 'sync']]),
+          ['prepare'],
+        ]
+        for (const args of commands) {
+          if (packageManager === 'yarn') {
+            // Yarn provides the project's Plug'n'Play loader when needed.
+            await run(packageManager, ['exec', 'rdx', ...args], targetDir)
+          } else {
+            // Avoid another package-manager startup and automatic install check.
+            const executable = await installedRuntime(targetDir)
+            await run(
+              process.execPath,
+              [executable, ...args],
+              targetDir,
+              `rdx ${args.join(' ')}`
+            )
+          }
         }
       })
     } catch (error) {
@@ -206,6 +246,10 @@ async function main() {
   }
 
   console.log(`\nRDX project "${projectName}" created successfully.\n`)
+  if (skipInstall && !isEnglish(lang))
+    console.log(
+      `After installing, run "rdx i18n sync" to create _labels.json for ${lang}.\n`
+    )
   console.log(`  cd ${projectName}`)
   console.log(
     `  ${packageManager === 'npm' ? 'npm run' : packageManager} dev\n`

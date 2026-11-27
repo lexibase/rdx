@@ -48,4 +48,6 @@ export type RdxDocsOptions = {
   /** Internal overlay: missing translated pages use this primary tree. */
   fallbackDocsDir?: string
   fallbackOnly?: boolean
+  /** Category names from the selected language's `_labels.json`. */
+  categoryLabels?: Record<string, string>
 }

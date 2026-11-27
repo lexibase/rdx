@@ -4,12 +4,14 @@ import { createJiti } from 'jiti'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { buildSearchIndex } from '@lexibase/rdx-core/search'
+import { pt, registerPortuguese } from './helpers/portuguese.mjs'
 
 const jiti = createJiti(import.meta.url, {
   moduleCache: true,
   fsCache: false,
   jsx: { runtime: 'automatic' },
 })
+await registerPortuguese(jiti)
 const { compileDocumentation } = await jiti.import('../src/runtime/mdx.ts')
 const { mdxComponents, getMdxComponents } = await jiti.import(
   '../../rdx-ui/src/components/mdx-components.tsx'
@@ -113,7 +115,7 @@ test('keyboard directives work in prose and tables even beside link definitions'
 test('complete keyboard shortcuts expose one localized text alternative and preserve shadcn composition', async () => {
   for (const [lang, expected] of [
     ['en', 'Control plus K'],
-    ['pt-BR', 'Control mais K'],
+    ['pt-BR', `${pt('Control')} ${pt('plus')} K`],
     ['fr-FR', 'Control plus K'],
   ]) {
     const { content } = await compileDocumentation(
@@ -176,7 +178,7 @@ test('generated tab lists follow the configured interface language', async () =>
   const html = renderToStaticMarkup(
     createElement(LocaleProvider, { lang: 'pt-BR' }, content)
   )
-  assert.match(html, /aria-label="Abas da documentação"/)
+  assert.ok(html.includes(`aria-label="${pt('Documentation tabs')}"`))
 })
 
 test('literal disabled markers produce boolean disabled tabs and select the first enabled panel', async () => {

@@ -100,4 +100,15 @@ export type RdxProject = {
   localization?: RdxLocalization
   /** Selected locale on a request-scoped view, never a global mutable setting. */
   locale?: RdxLocale
+  /** The selected language's `_labels.json`: interface text and category names. */
+  labels?: RdxLabels
+}
+
+/**
+ * Project-owned translations keyed by the English interface text or the
+ * primary-language category name. Empty values keep the original text.
+ */
+export type RdxLabels = {
+  interface: Record<string, string>
+  categories: Record<string, string>
 }

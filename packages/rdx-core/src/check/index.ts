@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import remarkGfm from 'remark-gfm'
+import { checkLabels } from './labels'
 import remarkMdx from 'remark-mdx'
 import remarkParse from 'remark-parse'
 import { unified } from 'unified'
@@ -68,7 +69,7 @@ export type DocumentationDiagnostic = {
   suggestion?: string
 }
 type DocumentationWarning = Omit<DocumentationDiagnostic, 'code'> & {
-  code: 'unlinked' | 'redirected-link'
+  code: 'unlinked' | 'redirected-link' | 'labels'
 }
 export type DocumentationCheck = {
   checkedPages: number
@@ -78,6 +79,8 @@ export type DocumentationCheck = {
 
 /** Host adapters can describe aliases without changing the project's authoring API. */
 export type DocumentationCheckOptions = {
+  /** English interface texts, used to find stale keys in `_labels.json`. */
+  interfaceTexts?: readonly string[]
   documentRoutes?: (
     source: RdxContentSource,
     page: RdxDocPage,
@@ -802,10 +805,11 @@ export function checkDocumentation(
     }))
   const uniqueWarnings = [
     ...new Map(
-      [...warnings, ...unlinked].map((warning) => [
-        JSON.stringify(warning),
-        warning,
-      ])
+      [
+        ...warnings,
+        ...unlinked,
+        ...checkLabels(project, options.interfaceTexts),
+      ].map((warning) => [JSON.stringify(warning), warning])
     ).values(),
   ].sort(
     (a, b) =>
@@ -857,3 +861,5 @@ export function formatDocumentationCheck(
   )
   return lines.join('\n')
 }
+
+export { catalogFolders, checkLabels, collectCategoryNames } from './labels'

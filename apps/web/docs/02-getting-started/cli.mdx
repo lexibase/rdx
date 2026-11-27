@@ -167,8 +167,10 @@ It uses `lang` as the primary language, asks for additional languages and
 prepares their folders. Use `--locales en,es-ES` to supply additional languages
 without a prompt, and `--package-manager npm|pnpm|yarn` to choose the installer.
 Later language additions are made in `locales` and their translation directories.
-Use `rdx i18n sync` to add missing homepage phrases to the configured languages'
-`home.json` catalogs.
+Use `rdx i18n sync` to add missing interface text and category names to each
+language's `_labels.json`, and missing homepage phrases to `home.json`. It works
+without the plugin for a non-English primary language. Add `--prune` to remove
+`_labels.json` entries that no edition or interface text uses.
 See [Languages](../04-features/languages.mdx).
 
 :::tabs

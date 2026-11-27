@@ -192,8 +192,9 @@ test(
       '---\ntitle: Introduction\nlink_position: 1\n---\nOriginal snapshot body\n\n![Public asset](/images/public%20logo.svg)\n\n## Details\n\nSnapshot details.'
     )
     await writeFile(
-      path.join(rootDir, 'docs/init/_category.json'),
-      JSON.stringify({ title: 'Init', sidebar_position: 0 })
+      // The root catalog renames a folder-derived category in every edition.
+      path.join(rootDir, '_labels.json'),
+      JSON.stringify({ categories: { Init: 'Initial setup' } })
     )
     await writeFile(
       path.join(rootDir, 'docs/init/plain.md'),
@@ -233,11 +234,11 @@ test(
     )
     await writeFile(
       path.join(rootDir, 'docs/init/links.mdx'),
-      '---\ntitle: Links\nlink_position: 20\n---\n## Links\n\n[Original page](./intro.mdx?from=links#details)\n\n[Cross category](../api/target.mdx#configuration)\n\n[External](https://example.com/guide.mdx)\n\n[Download](/downloads/manual.txt)\n'
+      '---\ntitle: Links\nlink_position: 20\n---\n## Links\n\n[Original page](./intro.mdx?from=links#details)\n\n[Cross category](../reference/target.mdx#configuration)\n\n[External](https://example.com/guide.mdx)\n\n[Download](/downloads/manual.txt)\n'
     )
-    await mkdir(path.join(rootDir, 'docs/api'), { recursive: true })
+    await mkdir(path.join(rootDir, 'docs/reference'), { recursive: true })
     await writeFile(
-      path.join(rootDir, 'docs/api/target.mdx'),
+      path.join(rootDir, 'docs/reference/target.mdx'),
       '---\ntitle: Target\n---\n## Configuration\n\nA linked page.\n\n## Configuration\n\nDuplicate heading.\n'
     )
     await writeFile(
@@ -322,6 +323,9 @@ test(
     assert.match(plain, /data-rdx-navbar/)
     assert.match(plain, />Docs</)
     assert.match(plain, /data-rdx-sidebar/)
+    // _labels.json renames the "Init" folder category in the sidebar.
+    assert.match(plain, />Initial setup</)
+    assert.doesNotMatch(plain, />Init</)
     assert.match(plain, /Mode Toggle/)
     const components = await (
       await fetch(`${running.base}/docs/init/components`)
@@ -543,7 +547,7 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
     assert.match(archived, /Original snapshot body/)
     assert.doesNotMatch(archived, /Changed live body/)
     assert.match(archived, /Documentation version: Version 1.0.0/)
-    assert.match(archived, />Archived</)
+    assert.match(archived, />Archived edition</)
     const historical = await fetch(`${running.base}/docs/2.0.0/init/intro`, {
       redirect: 'manual',
     })
@@ -560,7 +564,7 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
       )
       assert.match(
         linked,
-        new RegExp(`href="/docs${prefix}/api/target#configuration"`)
+        new RegExp(`href="/docs${prefix}/reference/target#configuration"`)
       )
       assert.match(linked, /href="https:\/\/example.com\/guide.mdx"/)
       assert.match(linked, /href="\/downloads\/manual.txt"/)
@@ -637,7 +641,7 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         await page.keyboard.press('ArrowDown')
         await page.keyboard.press('Enter')
         await searchDialog.waitFor({ state: 'hidden' })
-        await page.waitForURL(/\/docs\/api\/target#configuration/)
+        await page.waitForURL(/\/docs\/reference\/target#configuration/)
         await page.goto(`${running.base}/docs/1.0.0/init/intro`)
         await searchTrigger.click()
         await searchInput.waitFor()
@@ -854,7 +858,7 @@ export default { metadata: { applicationName: 'RDX' }, TOC: true, search: true, 
         })
         await crossCategoryLink.click()
         await page.waitForURL(
-          `${running.base}/docs/1.0.0/api/target#configuration`
+          `${running.base}/docs/1.0.0/reference/target#configuration`
         )
         await page.locator('#configuration').waitFor()
         assert.equal(await page.locator('#configuration-1').count(), 1)

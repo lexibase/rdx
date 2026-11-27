@@ -3,13 +3,18 @@ import test from 'node:test'
 import { createJiti } from 'jiti'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
+import {
+  portugueseLabels,
+  pt,
+  registerPortuguese,
+} from './helpers/portuguese.mjs'
 
 const jiti = createJiti(import.meta.url, {
   moduleCache: true,
   fsCache: false,
   jsx: { runtime: 'automatic' },
 })
-const { getMessages, resolveInterfaceLocale, formatMessage } =
+const { getMessages, formatMessage, interfaceTexts, registerInterfaceLabels } =
   await jiti.import('../../rdx-ui/src/lib/i18n.ts')
 const { LocaleProvider } = await jiti.import(
   '../../rdx-ui/src/providers/locale-provider.tsx'
@@ -34,34 +39,32 @@ const { getMdxComponents } = await jiti.import(
   '../../rdx-ui/src/components/mdx-components.tsx'
 )
 const { compileDocumentation } = await jiti.import('../src/runtime/mdx.ts')
+await registerPortuguese(jiti)
 
-test('interface locales have complete catalogs and predictable base-language and English fallbacks', () => {
-  for (const lang of ['pt-BR', 'pt-br', 'PT_br', 'pt', 'pt-PT']) {
-    assert.equal(resolveInterfaceLocale(lang), 'pt-BR')
-    assert.equal(getMessages(lang).onThisPage, 'Nesta página')
-  }
-  for (const lang of [undefined, '', 'en', 'en-GB', 'fr-FR', 'x-unsupported']) {
-    assert.equal(resolveInterfaceLocale(lang), 'en')
+test('RDX ships English only: a language without a catalog uses English text', () => {
+  for (const lang of [undefined, '', 'en', 'en-GB', 'pt', 'pt-PT', 'fr-FR']) {
     assert.equal(getMessages(lang).onThisPage, 'On this page')
   }
+  // The test catalog is registered for pt-BR exactly, not for every pt tag.
+  assert.equal(getMessages('pt-BR').onThisPage, pt('On this page'))
+  assert.equal(getMessages('pt_br').onThisPage, pt('On this page'))
   const english = getMessages('en')
   const portuguese = getMessages('pt-BR')
-  assert.deepEqual(Object.keys(portuguese).sort(), Object.keys(english).sort())
-  for (const key of Object.keys(english)) {
-    assert.ok(portuguese[key].trim(), key)
-    assert.deepEqual(
-      portuguese[key].match(/\{\w+\}/g),
-      english[key].match(/\{\w+\}/g),
-      key
-    )
-  }
+  for (const key of Object.keys(english)) assert.ok(portuguese[key].trim(), key)
   assert.equal(
     formatMessage(portuguese.version, { version: '1.0.0' }),
-    'Versão 1.0.0'
+    pt('Version 1.0.0')
   )
   assert.equal(
     formatMessage(portuguese.documentationVersion, { version: '<Custom>' }),
-    'Versão da documentação: <Custom>'
+    pt('Documentation version: <Custom>')
+  )
+})
+
+test('the test catalog covers every interface text', () => {
+  assert.deepEqual(
+    Object.keys(portugueseLabels).sort(),
+    [...interfaceTexts].sort()
   )
 })
 
@@ -159,12 +162,46 @@ test('localized MDX keeps author text and code intact while translating generate
     getMdxComponents('pt-BR')
   )
   const html = localized('pt-BR', content)
-  assert.match(html, /aria-label="Tabela"/)
-  assert.match(html, / Código<\/div>/)
-  assert.match(html, /aria-label="Copiar código"/)
-  assert.match(html, /aria-label="Quebrar linhas"/)
+  assert.ok(html.includes(`aria-label="${pt('Table')}"`))
+  assert.ok(html.includes(`${pt('Code')}</div>`))
+  assert.ok(html.includes(`aria-label="${pt('Copy code')}"`))
+  assert.ok(html.includes(`aria-label="${pt('Wrap lines')}"`))
   assert.match(html, /Author heading/)
   assert.match(html, /Author paragraph/)
   assert.match(html, /Author row/)
   assert.match(html, /Author code/)
+})
+
+test('every English interface text is unique, so _labels.json keys are unambiguous', () => {
+  assert.equal(new Set(interfaceTexts).size, interfaceTexts.length)
+})
+
+test('project catalogs translate the interface, keep placeholders and fall back in order', (t) => {
+  t.after(() => {
+    registerInterfaceLabels('es-ES', undefined)
+    registerInterfaceLabels('pt-BR', portugueseLabels)
+  })
+  registerInterfaceLabels('es-ES', {
+    'On this page': 'En esta página',
+    'Version {version}': 'Versión',
+    'Copy code': '   ',
+  })
+  const spanish = getMessages('es-ES')
+  assert.equal(spanish.onThisPage, 'En esta página')
+  // A translation that drops {version} would hide the number: keep English.
+  assert.equal(spanish.version, 'Version {version}')
+  assert.equal(spanish.copyCode, 'Copy code')
+  assert.equal(getMessages('es').onThisPage, 'On this page')
+  registerInterfaceLabels('pt-BR', { 'On this page': 'Neste documento' })
+  assert.equal(getMessages('pt-BR').onThisPage, 'Neste documento')
+  // Entries the catalog leaves out use English: nothing else is built in.
+  assert.equal(getMessages('pt-BR').copyCode, 'Copy code')
+  const html = renderToStaticMarkup(
+    createElement(
+      LocaleProvider,
+      { lang: 'es-ES', labels: { 'Copy code': 'Copiar código (es)' } },
+      createElement(CopyCodeButton)
+    )
+  )
+  assert.ok(html.includes('aria-label="Copiar código (es)"'))
 })

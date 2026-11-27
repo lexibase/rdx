@@ -8,6 +8,7 @@ import { RdxConfigError } from './error.js'
 import { resolveLocalization } from './localization'
 import { boundedProjectPath, resolveProjectPath } from './paths'
 import { hydrateSourceLocalizations } from './source-localization'
+import { labelsFile, readLabels } from './labels'
 
 import type {
   RDXConfig,
@@ -28,6 +29,14 @@ export {
 } from './changelog'
 export { resolveProjectPath } from './paths'
 export { normalizeLocalization } from './localization'
+export {
+  labelsFile,
+  labelsFileName,
+  parseLabels,
+  readLabels,
+  readLabelsFile,
+  translateLabel,
+} from './labels'
 export { collectSnapshotContributions } from './snapshots'
 export { getContentSources } from '../project/localization'
 export { getEditPageHref } from './edit-page'
@@ -585,12 +594,25 @@ export async function createRdxProject(
       localization,
       runtimeFiles
     )
+  // Deployed servers read each language's catalog at request time.
+  for (const folder of [
+    undefined,
+    ...(localization?.locales.map((locale) => locale.folder) ?? []),
+  ]) {
+    const file = path.join(
+      /* turbopackIgnore: true */ rootDir,
+      labelsFile(folder)
+    )
+    if (existsSync(/* turbopackIgnore: true */ file))
+      runtimeFiles.add(labelsFile(folder))
+  }
   return {
     rootDir,
     config,
     sources,
     commands,
     runtimeFiles: [...runtimeFiles],
+    labels: readLabels(rootDir),
     ...(syntaxGrammars.length ? { syntaxGrammars } : {}),
     ...(localization ? { localization } : {}),
   }
