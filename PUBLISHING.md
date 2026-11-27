@@ -57,7 +57,12 @@ types, core and optional plugins keep independent versions. For plugin-only
 releases, include the framework in the note to select a documentation edition.
 
 `release:plan` previews the affected packages without applying versions or
-snapshots. `release:prepare` consumes the pending notes, updates package versions
+snapshots. When `@lexibase/rdx-ui` moves to a new major, the plan also shows the
+runtime's `@lexibase/rdx-ui` peer range moving to that version, and preparation
+writes it to `@lexibase/rdx-next`. Changesets does not update this range because
+it is not a workspace range. Include `@lexibase/rdx-next` in the same release:
+without it, preparation stops before consuming notes, since the published runtime
+would keep the old range. `release:prepare` consumes the pending notes, updates package versions
 and dependencies, pins the template's framework version, promotes the root
 changelog, refreshes the public package table and generates publication commands
 for only the changed packages. It updates the lockfile offline and builds the

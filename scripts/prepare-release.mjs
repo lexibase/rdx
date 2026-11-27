@@ -48,6 +48,18 @@ export function assertCompatibleUi(range, version) {
   )
 }
 
+/**
+ * The runtime's `@lexibase/rdx-ui` peer range for a planned UI version. A new UI
+ * major moves the range to that version; compatible versions keep it.
+ */
+export function uiPeerRange(range, version) {
+  assert.match(range, /^\^\d+\.\d+\.\d+$/)
+  if (Number(version.split('.')[0]) > Number(range.slice(1).split('.')[0]))
+    return `^${version}`
+  assertCompatibleUi(range, version)
+  return range
+}
+
 export function promoteChangelog(source, version, summaries) {
   assert.ok(
     !source
@@ -179,6 +191,21 @@ export async function prepareRelease(
     const planned = packages.filter((pkg) =>
       releases.some((release) => release.name === pkg.manifest.name)
     )
+    // Changesets only updates workspace ranges, so the runtime's UI peer range
+    // follows a new UI major here. Publishing that UI without the runtime would
+    // leave the old range on npm.
+    const runtime = packages.find((pkg) => pkg.directory === 'rdx-next')
+    const ui = packages.find((pkg) => pkg.directory === 'rdx-ui')
+    const uiVersion =
+      releases.find((release) => release.name === ui.manifest.name)
+        ?.newVersion ?? ui.manifest.version
+    const peerRange = runtime.manifest.peerDependencies?.[ui.manifest.name]
+    const nextPeerRange = peerRange && uiPeerRange(peerRange, uiVersion)
+    if (nextPeerRange !== peerRange)
+      assert.ok(
+        releases.some((release) => release.name === runtime.manifest.name),
+        `Include ${runtime.manifest.name} in the release note: its ${ui.manifest.name} peer range must move to ${nextPeerRange} for ${ui.manifest.name} ${uiVersion}.`
+      )
     log(`RDX ${version}:`)
     for (const pkg of planned) {
       const release = releases.find((item) => item.name === pkg.manifest.name)
@@ -186,6 +213,10 @@ export async function prepareRelease(
         `  ${release.name}: ${release.oldVersion} -> ${release.newVersion} (${release.type})`
       )
     }
+    if (nextPeerRange !== peerRange)
+      log(
+        `  ${runtime.manifest.name} peer ${ui.manifest.name}: ${peerRange} -> ${nextPeerRange}`
+      )
     if (dryRun) {
       log('Preview only; package versions and documentation were not changed.')
       return plan
@@ -222,6 +253,12 @@ export async function prepareRelease(
           .version,
         release.newVersion
       )
+    if (nextPeerRange !== peerRange) {
+      const runtimePath = path.join(root, 'packages/rdx-next/package.json')
+      const manifest = await json(runtimePath)
+      manifest.peerDependencies[ui.manifest.name] = nextPeerRange
+      await writeJson(runtimePath, manifest)
+    }
     const templatePath = path.join(
       root,
       'packages/create-rdx/templates/default/package.json'

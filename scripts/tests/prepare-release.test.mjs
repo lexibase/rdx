@@ -20,6 +20,7 @@ import {
   prepareRelease,
   promoteChangelog,
   releaseOrder,
+  uiPeerRange,
 } from '../prepare-release.mjs'
 
 const repo = fileURLToPath(new URL('../../', import.meta.url))
@@ -282,6 +283,60 @@ test('a compatible UI minor keeps independent packages and does not force a runt
   )
 })
 
+test('a UI major moves the runtime peer range in the plan and the prepared manifest', async (t) => {
+  const { root, run } = await fixture(t)
+  await put(
+    root,
+    '.changeset/feature.md',
+    '---\n"@lexibase/rdx": major\n"@lexibase/rdx-next": major\n"@lexibase/rdx-ui": major\n---\n\nShip a new interface.\n'
+  )
+  const output = []
+  await prepareRelease(root, {
+    dryRun: true,
+    run,
+    log: (line) => output.push(line),
+  })
+  assert.ok(
+    output.includes(
+      '  @lexibase/rdx-next peer @lexibase/rdx-ui: ^3.4.0 -> ^4.0.0'
+    )
+  )
+  const runtimePath = path.join(root, 'packages/rdx-next/package.json')
+  assert.equal(
+    (await json(runtimePath)).peerDependencies['@lexibase/rdx-ui'],
+    '^3.4.0'
+  )
+  await prepareRelease(root, { run, log: () => {} })
+  const runtime = await json(runtimePath)
+  assert.equal(runtime.version, '5.0.0')
+  assert.equal(runtime.peerDependencies['@lexibase/rdx-ui'], '^4.0.0')
+  assertCompatibleUi(
+    runtime.peerDependencies['@lexibase/rdx-ui'],
+    (await json(path.join(root, 'packages/rdx-ui/package.json'))).version
+  )
+})
+
+test('a UI major without the runtime stops before consuming notes', async (t) => {
+  const { root, run } = await fixture(t)
+  await put(
+    root,
+    '.changeset/feature.md',
+    '---\n"@lexibase/rdx": major\n"@lexibase/rdx-ui": major\n---\n\nShip a new interface.\n'
+  )
+  await assert.rejects(
+    prepareRelease(root, { dryRun: true, run, log: () => {} }),
+    /Include @lexibase\/rdx-next in the release note: its @lexibase\/rdx-ui peer range must move to \^4\.0\.0/
+  )
+  await assert.rejects(prepareRelease(root, { run, log: () => {} }))
+  assert.ok(
+    (await readdir(path.join(root, '.changeset'))).includes('feature.md')
+  )
+  assert.equal(
+    (await json(path.join(root, 'packages/rdx-ui/package.json'))).version,
+    '3.4.0'
+  )
+})
+
 test('opt-in commit runs after formatting and selects only the generated release paths', async (t) => {
   const { root, calls, run } = await fixture(t, 'patch')
   await prepareRelease(root, { commit: true, run, log: () => {} })
@@ -337,4 +392,10 @@ test('changelog promotion preserves history and authored notes, and UI compatibi
   assertCompatibleUi('^3.4.0', '3.5.0')
   assert.throws(() => assertCompatibleUi('^3.4.0', '3.3.0'))
   assert.throws(() => assertCompatibleUi('^3.4.0', '4.0.0'))
+  assert.equal(uiPeerRange('^3.4.0', '3.5.0'), '^3.4.0')
+  assert.equal(uiPeerRange('^3.4.0', '3.4.0'), '^3.4.0')
+  assert.equal(uiPeerRange('^3.4.0', '4.0.0'), '^4.0.0')
+  assert.equal(uiPeerRange('^3.4.0', '5.1.0'), '^5.1.0')
+  assert.throws(() => uiPeerRange('^3.4.0', '3.3.0'))
+  assert.throws(() => uiPeerRange('^3.4.0', '2.9.0'))
 })
