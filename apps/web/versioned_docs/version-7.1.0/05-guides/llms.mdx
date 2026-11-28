@@ -1,0 +1,61 @@
+---
+title: Markdown exports and llms.txt
+navTitle: Markdown exports
+description: Find the public documentation index and open pages as Markdown.
+order: 7
+---
+
+RDX automatically publishes a Markdown index at `/docs/llms.txt`. The index
+groups pages by category and links to their Markdown exports. Open the file in
+a browser or give its URL to a tool that reads documentation.
+
+Tools that only know your domain look for `/llms.txt` first. RDX publishes that
+file too: a short index that links to the documentation index of each language
+and to every edition's own index.
+
+If you already maintain `public/llms.txt` or `public/docs/llms.txt`, RDX serves
+your file at that address instead.
+
+## Find the right edition and language
+
+With versioning enabled, the index lists the latest active published edition
+and names it in a `Documentation edition` line. Before the first publication,
+it lists the live documentation. The index at `/docs/llms.txt` uses the default
+language. Translated documentation also has an index under its language path,
+such as `/pt-br/docs/llms.txt`, which lists pages with an authored translation.
+
+Each published edition also has its own index below its path, such as
+`/docs/1.2.0/llms.txt` or `/pt-br/docs/1.2.0/llms.txt`. Give that address to a
+tool that should follow an older version. Archived editions and versions that
+redirect to another edition have no index.
+
+Set `metadata.metadataBase` in `rdx.config.ts` to your public site URL if you
+want absolute links in the index and exports.
+
+## Read a page as Markdown
+
+Select **Copy this page** beside a document title to copy its Markdown. Open
+the adjacent menu and select **View Markdown** to read the same export in a
+new tab.
+
+The same menu has **Open in Claude** and **Open in ChatGPT**. Each opens a new
+chat with a ready prompt that links to the page export and to `/llms.txt`, so
+the reader can ask questions about your documentation. The reader sends the
+prompt; RDX shares nothing by itself. The assistant reads the links from your
+public site, so it cannot open pages that require a login or sit on a private
+network. To translate the prompt, use the `interface` section of
+[`_labels.json`](../04-features/languages.mdx#translate-the-interface-and-categories).
+
+Follow a link in the index. You can also derive the export URL by prepending
+`/rdx-markdown` to the public page path and appending `.md`. For example,
+`/docs/guides/intro` becomes `/rdx-markdown/docs/guides/intro.md`.
+
+The export includes the page title, description when supplied, `url` for the
+source page, and `docs_index` for the corresponding index. Relative document
+links resolve to public page URLs. RDX generates the export from your content
+without editing the Markdown file you authored.
+
+When Git can identify the last commit that changed a page, the export includes
+`lastUpdated` in `YYYY-MM-DD` format. Version snapshots preserve the source
+date they captured when created. The field is omitted when a date cannot be
+determined from the available history or snapshot metadata.

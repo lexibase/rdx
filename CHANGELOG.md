@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 7.1.0 — Prepared
+
+- Point AI coding agents to the documentation of the installed RDX version with bundled Markdown docs, a managed `AGENTS.md` and `llms.txt` indexes for the site and each edition. Add Open in Claude and Open in ChatGPT to the page menu, and start new projects as a Git repository.
+
 ## 7.0.0 — Prepared
 
 - Translate interface text and sidebar category names with one `_labels.json` catalog per language, managed by `rdx i18n sync`. Interface text is built in for English only, and `_category.json` is no longer read. Add a mobile navigation drawer, and let `create-rdx` set the primary language.

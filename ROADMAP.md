@@ -121,6 +121,12 @@ sendo `apps/web`, com componentes compartilhados em `packages/rdx-ui`.
       no frontmatter de uma página traduzida, uma vez por categoria e idioma.
       Preservar a ordem da árvore principal e as URLs existentes.
 
+- [ ] Exportar a documentação de uma biblioteca ou CLI documentada com RDX em
+      Markdown para dentro do pacote npm dela, como a própria RDX faz com
+      `dist/docs/`, para que agentes de IA de quem instala o pacote leiam a
+      versão instalada. Avaliar depois de observar o uso real de `AGENTS.md` e
+      `llms.txt` nos projetos que usam a 7.1.
+
 ## Final da lista
 
 - [x] Primeira camada de autoria Markdown sobre os componentes existentes:
