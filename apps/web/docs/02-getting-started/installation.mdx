@@ -166,6 +166,10 @@ yarn dlx @lexibase/create-rdx@latest --help
 Use `--skip-install` to generate files without installing dependencies, then
 install them yourself inside the new directory. An existing directory is not overwritten.
 
+The new project starts as a Git repository with an initial commit. Pass
+`--no-git` to skip it. Inside an existing repository, such as a monorepo, the
+project becomes part of that repository and no new one is created.
+
 ## pnpm workspaces
 
 Create the project inside a directory included by your workspace's `packages`

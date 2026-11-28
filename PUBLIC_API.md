@@ -99,7 +99,8 @@ estão em [Writing pages](./apps/web/docs/03-writing-documentation/create-docs.m
 
 ## Comandos
 
-- `create-rdx [nome] [--skip-install]`: cria uma nova pasta; sem nome, pergunta.
+- `create-rdx [nome] [--lang <tag>] [--skip-install] [--no-agents-md] [--no-git]`:
+  cria uma nova pasta, com repositório Git e commit inicial; sem nome, pergunta.
   `--help`/`-h` e `--version`/`-v` são flags do **gerador**.
 - `rdx dev`, `rdx build`, `rdx start`: preparam o runtime e executam o Next.js;
   argumentos adicionais são encaminhados ao respectivo comando Next.

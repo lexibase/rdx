@@ -41,6 +41,14 @@ are not overwritten.
 | `--lang <tag>`   | Set the primary documentation language, such as `en` or `pt-BR`                           |
 | `--skip-install` | Create files and leave installation to you                                                |
 | `--no-agents-md` | Skip `AGENTS.md`. See [AI coding agents](../05-guides/ai-agents.mdx) for what it contains |
+| `--no-git`       | Do not initialize a Git repository                                                        |
+
+After installing dependencies, the creator initializes a Git repository on the
+`main` branch, or on your `init.defaultBranch`, and records an initial commit.
+It skips this step when the new directory is already inside a Git or Mercurial
+repository, such as a monorepo, when Git is not installed, or when the commit
+fails, for example because Git has no user name and email configured. In that
+case, no `.git` directory is left behind.
 
 ## Development and production
 

@@ -39,6 +39,10 @@ npm create @lexibase/rdx@latest my-docs -- --skip-install
 `.rdx/`. Otherwise the creator uses the invoking package manager and prepares
 the runtime. Follow the commands printed by the generator.
 
+The creator then initializes a Git repository with an initial commit, unless the
+directory is already inside a Git or Mercurial repository, Git is unavailable or
+the commit fails. `--no-git` skips this step.
+
 The creator reports file creation, dependency installation, and runtime preparation
 as separate stages, with elapsed time and periodic activity messages during long
 operations. During pnpm installation, RDX shows a rotating activity indicator and
