@@ -13,6 +13,7 @@ import {
   validateLanguage,
   validateProjectName,
 } from './options.mjs'
+import { tryGitInit } from './git.mjs'
 import { normalizePnpmRdxApprovals } from './pnpm-policy.mjs'
 import { installedRuntime } from './installed-runtime.mjs'
 import { runStep } from './progress.mjs'
@@ -71,12 +72,13 @@ async function main() {
     lang: langFromCli,
     skipInstall,
     agentsMd,
+    git,
     help,
     version,
   } = parseArguments(process.argv.slice(2))
   if (help) {
     console.log(
-      'Usage: create-rdx [project-name] [--lang <tag>] [--skip-install] [--no-agents-md]'
+      'Usage: create-rdx [project-name] [--lang <tag>] [--skip-install] [--no-agents-md] [--no-git]'
     )
     console.log('  Without a project name, RDX asks for one interactively.')
     console.log(
@@ -88,6 +90,7 @@ async function main() {
     console.log(
       '  --no-agents-md  Do not create AGENTS.md for AI coding agents.'
     )
+    console.log('  --no-git        Do not initialize a Git repository.')
     console.log('  --help, -h      Show this help.')
     console.log('  --version, -v   Show the generator version.')
     return
@@ -254,6 +257,11 @@ async function main() {
       )
     }
   }
+
+  // After installation, so the first commit includes the lockfile and the
+  // AGENTS.md section that rdx prepare fills in.
+  if (git && tryGitInit(targetDir))
+    console.log('\nInitialized a Git repository with an initial commit.')
 
   console.log(`\nRDX project "${projectName}" created successfully.\n`)
   if (skipInstall && !isEnglish(lang))

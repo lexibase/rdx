@@ -7,6 +7,7 @@ import {
   mkdir,
   mkdtemp,
   readFile,
+  readdir,
   realpath,
   writeFile,
 } from 'node:fs/promises'
@@ -17,6 +18,59 @@ import { fileURLToPath } from 'node:url'
 import { pnpmInvocation } from './pnpm-invocation.mjs'
 import { assertCompatibleUi } from './prepare-release.mjs'
 import { withProductionServer } from './production-server.mjs'
+
+/**
+ * create-rdx commits new projects, so everything install and build generate
+ * must be ignored. The fixture sits inside this repository, where create-rdx
+ * skips Git, so a separate repository reads the project's .gitignore.
+ */
+async function verifyIgnoredBuildOutput(project, generatorPackage, temporary) {
+  await assert.rejects(readFile(path.join(project, '.git/HEAD')), /ENOENT/)
+  const template = path.join(generatorPackage, 'templates/default')
+  const renamed = {
+    'gitignore.template': '.gitignore',
+    'AGENTS.md.template': 'AGENTS.md',
+  }
+  const expected = new Set([
+    // Written by installation and by this smoke test.
+    'pnpm-lock.yaml',
+    'pnpm-workspace.yaml',
+    'rdx.css',
+    'docs/02-examples/plain.md',
+  ])
+  for (const entry of await readdir(template, {
+    recursive: true,
+    withFileTypes: true,
+  }))
+    if (entry.isFile()) {
+      const file = path
+        .relative(template, path.join(entry.parentPath, entry.name))
+        .replaceAll('\\', '/')
+      if (!['gitignore', '.npmignore'].includes(file))
+        expected.add(renamed[file] ?? file)
+    }
+  const probe = path.join(temporary, 'git-probe')
+  execFileSync('git', ['init', '--quiet', probe])
+  const listed = execFileSync(
+    'git',
+    [
+      `--git-dir=${path.join(probe, '.git')}`,
+      `--work-tree=${project}`,
+      'ls-files',
+      '--others',
+      '--exclude-standard',
+    ],
+    { encoding: 'utf8' }
+  )
+  const unexpected = listed
+    .split('\n')
+    .filter((file) => file && !expected.has(file))
+  assert.deepEqual(
+    unexpected,
+    [],
+    'Generated files must be listed in the template .gitignore'
+  )
+}
 
 // Test the publishable archives, not workspace source links. Nothing publishes.
 const root = fileURLToPath(new URL('../', import.meta.url))
@@ -1146,6 +1200,7 @@ if (checkInstallation) {
     )
   )
   assert.match(agents, /`node_modules\/@lexibase\/rdx\/dist\/docs\/index\.md`/)
+  await verifyIgnoredBuildOutput(project, generatorPackage, temporary)
   assert.ok(
     await readFile(
       path.join(project, 'node_modules/@lexibase/rdx/dist/docs/index.md'),
