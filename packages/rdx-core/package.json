@@ -70,7 +70,7 @@
     "@rdx/typescript-config": "workspace:*",
     "@types/node": "^22.15.3",
     "@types/react": "19.3.0",
-    "eslint": "^9.39.5"
+    "eslint": "^10.15.0"
   },
   "engines": {
     "node": "^22.18.0 || ^24.11.0"

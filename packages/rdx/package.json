@@ -73,7 +73,7 @@
   "devDependencies": {
     "@lexibase/rdx-core": "workspace:*",
     "@rdx/eslint-config": "workspace:*",
-    "eslint": "^9.39.5"
+    "eslint": "^10.15.0"
   },
   "publishConfig": {
     "access": "public"
