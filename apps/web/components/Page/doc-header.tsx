@@ -31,7 +31,7 @@ export async function DocHeader({
         <h1 className="min-w-0 max-w-full break-words text-4xl font-bold uppercase">
           {title}
         </h1>
-        <CopyPage key={markdownHref} href={markdownHref} />
+        <CopyPage key={markdownHref} href={markdownHref} project="RDX" />
       </div>
       <p className="text-sm text-muted-foreground max-w-[726px]">
         {currentLink?.description || 'Sem descrição disponível'}

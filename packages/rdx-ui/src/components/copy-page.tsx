@@ -1,9 +1,18 @@
 'use client'
 
-import { Check, ChevronDown, CircleAlert, Copy, FileText } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import {
+  Check,
+  ChevronDown,
+  CircleAlert,
+  Copy,
+  FileText,
+  Sparkles,
+} from 'lucide-react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
+import { formatMessage } from '../lib/i18n'
 import { useMessages } from '../providers/locale-provider'
+import { OpenAIIcon } from './openai-icon'
 import { Button } from './button'
 import { ButtonGroup } from './button-group'
 import {
@@ -13,8 +22,37 @@ import {
   DropdownMenuTrigger,
 } from './dropdown-menu'
 
-export function CopyPage({ href }: { href: string }) {
+const assistants = [
+  // Anthropic requires prior approval to use the Claude logo, so Claude gets a generic icon.
+  { label: 'openInClaude', url: 'https://claude.ai/new', Icon: Sparkles },
+  { label: 'openInChatGpt', url: 'https://chatgpt.com/', Icon: OpenAIIcon },
+] as const
+
+const subscribeToNothing = () => () => {}
+
+export function CopyPage({
+  href,
+  indexHref = '/llms.txt',
+  project,
+}: {
+  href: string
+  /** The llms.txt index offered to assistants together with the page. */
+  indexHref?: string
+  /** The name assistants read in the prompt; defaults to the site's host. */
+  project?: string
+}) {
   const messages = useMessages()
+  // Assistants need absolute URLs; the origin is known only in the browser.
+  const origin = useSyncExternalStore(
+    subscribeToNothing,
+    () => window.location.origin,
+    () => ''
+  )
+  const prompt = formatMessage(messages.openInAssistantPrompt, {
+    page: `${origin}${href}`,
+    index: `${origin}${indexHref}`,
+    project: project || origin.replace(/^https?:\/\//, ''),
+  })
   const [status, setStatus] = useState<'idle' | 'copying' | 'copied' | 'error'>(
     'idle'
   )
@@ -110,6 +148,23 @@ export function CopyPage({ href }: { href: string }) {
             {messages.viewMarkdown}
             <span className="sr-only"> ({messages.opensInNewTab})</span>
           </DropdownMenuLinkItem>
+          {assistants.map(({ label, url, Icon: AssistantIcon }) => (
+            <DropdownMenuLinkItem
+              key={label}
+              render={
+                <a
+                  href={`${url}?q=${encodeURIComponent(prompt)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />
+              }
+              closeOnClick
+            >
+              <AssistantIcon aria-hidden="true" />
+              {messages[label]}
+              <span className="sr-only"> ({messages.opensInNewTab})</span>
+            </DropdownMenuLinkItem>
+          ))}
         </DropdownMenuContent>
       </DropdownMenu>
       <span role="status" className="sr-only">

@@ -69,3 +69,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## OpenAI Blossom
+
+The **Open in ChatGPT** link shows the OpenAI Blossom, unmodified, from
+https://openai.com/brand/. The Blossom is a trademark of OpenAI and is used
+only to identify the link to ChatGPT, following OpenAI's brand guidelines. It
+does not imply endorsement by or partnership with OpenAI.

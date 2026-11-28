@@ -327,6 +327,8 @@ export async function ChangelogPage({
                     <div className="ms-auto flex flex-wrap items-center justify-end gap-2">
                       <ChangelogBadges badges={badges} />
                       <CopyPage
+                        project={config.metadata.applicationName}
+                        indexHref={withBasePath('/llms.txt', config.basePath)}
                         href={withBasePath(
                           getMarkdownHref(
                             `/changelog/${encodeURIComponent(version)}`
@@ -722,7 +724,15 @@ export async function DocsPage({
                       {title}
                     </h1>
                     {markdownHref && (
-                      <CopyPage key={markdownHref} href={markdownHref} />
+                      <CopyPage
+                        key={markdownHref}
+                        href={markdownHref}
+                        project={project.config.metadata.applicationName}
+                        indexHref={withBasePath(
+                          '/llms.txt',
+                          project.config.basePath
+                        )}
+                      />
                     )}
                   </div>
                   {description && (

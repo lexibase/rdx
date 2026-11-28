@@ -38,6 +38,14 @@ Select **Copy this page** beside a document title to copy its Markdown. Open
 the adjacent menu and select **View Markdown** to read the same export in a
 new tab.
 
+The same menu has **Open in Claude** and **Open in ChatGPT**. Each opens a new
+chat with a ready prompt that links to the page export and to `/llms.txt`, so
+the reader can ask questions about your documentation. The reader sends the
+prompt; RDX shares nothing by itself. The assistant reads the links from your
+public site, so it cannot open pages that require a login or sit on a private
+network. To translate the prompt, use the `interface` section of
+[`_labels.json`](../04-features/languages.mdx#translate-the-interface-and-categories).
+
 Follow a link in the index. You can also derive the export URL by prepending
 `/rdx-markdown` to the public page path and appending `.md`. For example,
 `/docs/guides/intro` becomes `/rdx-markdown/docs/guides/intro.md`.
